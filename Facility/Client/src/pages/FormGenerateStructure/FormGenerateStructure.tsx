@@ -15,6 +15,7 @@ import { v4 as uuidv4 } from "uuid";
 import FormTypeService from "../../services/formType";
 import FormBuilderService from "../../services/formBuilder";
 import StructureWinformDataService from "../../services/structureWinformData";
+import FacilityTypePropertiesService from "../../services/facilitystructure";
 import "./FormGenerate.css";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -27,10 +28,9 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 interface Params {
-  nodeKey: string;
-  formKey: any;
-  nodeName: any;
-  setFormDia: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedFacilityType: string;
+  realm: string;
+  // setFormDia: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Error: React.FC = ({ children }) => <p style={{ color: "red" }}>{children}</p>;
@@ -127,7 +127,8 @@ const Input = ({ value, onChange, type, ...rest }: InputProps) => {
   }
 };
 
-const FormGenerateStructure = ({ nodeKey, formKey, nodeName, setFormDia }: Params) => {
+
+const FormGenerateStructure = ({ selectedFacilityType, realm }: Params) => {
   const [items, setItems] = useState([]);
   const [passiveItems, setPassiveItems] = useState([]);
   const [hasForm, setHasForm] = useState(true);
@@ -140,54 +141,56 @@ const FormGenerateStructure = ({ nodeKey, formKey, nodeName, setFormDia }: Param
 
   // const typeKey = searchParameters.get("typeKey");
 
-  console.log(nodeKey, formKey);
+  // console.log(nodeKey, formKey);
 
   const history = useNavigate();
 
   useEffect(() => {
-    if (formKey === "undefined" || formKey === null || formKey === "") {
-      return setHasForm(false);
-    }
+    // if (formKey === "undefined" || formKey === null || formKey === "") {
+    //   return setHasForm(false);
+    // }
     // const responsegetData = StructureWinformDataService.getFormData(nodeKey);
     // console.log(responsegetData);
     (async () => {
-      FormBuilderService.getActivePropertiesWithKey(formKey)
+
+      FacilityTypePropertiesService.getFacilityTypeProperties(realm,selectedFacilityType)
         .then(async (responsegetProperties) => {
           console.log(responsegetProperties.data);
           let isFormData;
-          await StructureWinformDataService.getFormData(nodeKey)
-            .then((res) => {
-              console.log("testttttt");
-              console.log(res.data);
-              if (res.data.isActive) {
-                isFormData = true;
-                setHasFormData(true);
-              } else {
-                isFormData = false;
-                setHasFormData(false);
-              }
-            })
-            .catch((err) => {
-            });
+          // await StructureWinformDataService.getFormData(nodeKey)
+          //   .then((res) => {
+          //     console.log("testttttt");
+          //     console.log(res.data);
+          //     if (res.data.isActive) {
+          //       isFormData = true;
+          //       setHasFormData(true);
+          //     } else {
+          //       isFormData = false;
+          //       setHasFormData(false);
+          //     }
+          //   })
+          //   .catch((err) => {
+          //   });
 
           if (isFormData === true) {
             console.log("hasFormData");
 
-            const responsegetData = await StructureWinformDataService.getFormData(nodeKey);
-            console.log(responsegetData);
+           // const responsegetData = await StructureWinformDataService.getFormData(nodeKey); 
+           // console.log(responsegetData);
             const convertedData = responsegetProperties.data.map(function (item: any) {
               // console.log(formData[`'${item.label}'`]);
-              console.log(responsegetData.data[item.label.replaceAll(" ", "")]);
-              console.log([responsegetData.data].length);
+             // console.log(responsegetData.data[item.label.replaceAll(" ", "")]);
+             // console.log([responsegetData.data].length);
 
               return {
                 ...item,
-                defaultValue:
-                  [responsegetData.data].length > 0
-                    ? responsegetData.data[item.label.replaceAll(" ", "")]
-                      ? responsegetData.data[item.label.replaceAll(" ", "")]
-                      : item.defaultValue
-                    : item.defaultValue,
+                // defaultValue:
+                //   [responsegetData.data].length > 0
+                //     ? responsegetData.data[item.label.replaceAll(" ", "")]
+                //       ? responsegetData.data[item.label.replaceAll(" ", "")]
+                //       : item.defaultValue
+                //     : item.defaultValue,
+                label: item.label,
                 rules: { required: item.rules[0] },
                 options: item.options.map(function (option: any) {
                   return { optionsName: option };
@@ -202,6 +205,7 @@ const FormGenerateStructure = ({ nodeKey, formKey, nodeName, setFormDia }: Param
 
               return {
                 ...item,
+                label: item.label,
                 rules: { required: item.rules[0] },
                 options: item.options.map(function (option: any) {
                   return { optionsName: option };
@@ -217,7 +221,7 @@ const FormGenerateStructure = ({ nodeKey, formKey, nodeName, setFormDia }: Param
         .catch((err) => {
           console.log("ana catch");
 
-          return setHasForm(false);
+          // return setHasForm(false);
           toast.current.show({
             severity: "error",
             summary: "Error",
@@ -231,67 +235,67 @@ const FormGenerateStructure = ({ nodeKey, formKey, nodeName, setFormDia }: Param
 
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      FormBuilderService.getPassivePropertiesWithKey(formKey)
-        .then(async (responsegetPropertiesPassive) => {
-          let isFormData;
-          await StructureWinformDataService.getFormData(nodeKey)
-            .then((res) => {
-              if (res.data.isActive) {
-                isFormData = true;
-              } else {
-                isFormData = false;
-              }
-            })
-            .catch((err) => {
-            });
+  // useEffect(() => {
+  //   (async () => {
+  //     FormBuilderService.getPassivePropertiesWithKey(formKey)
+  //       .then(async (responsegetPropertiesPassive) => {
+  //         let isFormData;
+  //         await StructureWinformDataService.getFormData(nodeKey)
+  //           .then((res) => {
+  //             if (res.data.isActive) {
+  //               isFormData = true;
+  //             } else {
+  //               isFormData = false;
+  //             }
+  //           })
+  //           .catch((err) => {
+  //           });
 
-          if (isFormData === true) {
-            console.log("11");
+  //         if (isFormData === true) {
+  //           console.log("11");
 
 
-            const responsegetData = await StructureWinformDataService.getFormData(nodeKey);
-            console.log(responsegetData);
-            console.log(responsegetPropertiesPassive);
+  //           const responsegetData = await StructureWinformDataService.getFormData(nodeKey);
+  //           console.log(responsegetData);
+  //           console.log(responsegetPropertiesPassive);
 
-            const convertedData = responsegetPropertiesPassive.data?.map(function (item: any) {
+  //           const convertedData = responsegetPropertiesPassive.data?.map(function (item: any) {
 
-              console.log(responsegetData.data[item.label.replaceAll(" ", "")]);
-              console.log([responsegetData.data].length);
+  //             console.log(responsegetData.data[item.label.replaceAll(" ", "")]);
+  //             console.log([responsegetData.data].length);
 
-              return {
-                ...item,
-                defaultValue:
-                  [responsegetData.data].length > 0
-                    ? responsegetData.data[item.label.replaceAll(" ", "")]
-                      ? responsegetData.data[item.label.replaceAll(" ", "")]
-                      : item.defaultValue
-                    : item.defaultValue,
-                rules: { required: item.rules[0] },
-                options: item.options.map(function (option: any) {
-                  return { optionsName: option };
-                }),
-              };
-            });
-            setPassiveItems(convertedData);
-          }
+  //             return {
+  //               ...item,
+  //               defaultValue:
+  //                 [responsegetData.data].length > 0
+  //                   ? responsegetData.data[item.label.replaceAll(" ", "")]
+  //                     ? responsegetData.data[item.label.replaceAll(" ", "")]
+  //                     : item.defaultValue
+  //                   : item.defaultValue,
+  //               rules: { required: item.rules[0] },
+  //               options: item.options.map(function (option: any) {
+  //                 return { optionsName: option };
+  //               }),
+  //             };
+  //           });
+  //           setPassiveItems(convertedData);
+  //         }
 
-        })
-        .catch((err) => {
-          console.log(err);
-          return;
-          toast.current.show({
-            severity: "error",
-            summary: "Error",
-            detail: err.responsegetPropertiesPassive
-              ? err.responsegetPropertiesPassive.data.message
-              : err.message,
-            life: 2000,
-          });
-        });
-    })();
-  }, [])
+  //       })
+  //       .catch((err) => {
+  //         console.log(err);
+  //         return;
+  //         toast.current.show({
+  //           severity: "error",
+  //           summary: "Error",
+  //           detail: err.responsegetPropertiesPassive
+  //             ? err.responsegetPropertiesPassive.data.message
+  //             : err.message,
+  //           life: 2000,
+  //         });
+  //       });
+  //   })();
+  // }, [])
 
   const {
     handleSubmit,
@@ -314,49 +318,49 @@ const FormGenerateStructure = ({ nodeKey, formKey, nodeName, setFormDia }: Param
     // console.log(formData);
     // console.log(formData);
 
-    if (hasFormData === false) {
-      StructureWinformDataService.createFormData(nodeKey, data)
-        .then((res) => {
-          toast.current.show({
-            severity: "success",
-            summary: "Successful",
-            detail: "Form Data Created",
-            life: 3000,
-          });
-          setTimeout(() => {
-            setFormDia(false);
-          }, 1000);
-        })
-        .catch((err) => {
-          toast.current.show({
-            severity: "error",
-            summary: "Error",
-            detail: err.response ? err.response.data.message : err.message,
-            life: 2000,
-          });
-        });
-    } else {
-      StructureWinformDataService.updateFormData(nodeKey, data)
-        .then((res) => {
-          toast.current.show({
-            severity: "success",
-            summary: "Successful",
-            detail: "Form Data Updated",
-            life: 3000,
-          });
-          setTimeout(() => {
-            setFormDia(false);
-          }, 1000);
-        })
-        .catch((err) => {
-          toast.current.show({
-            severity: "error",
-            summary: "Error",
-            detail: err.response ? err.response.data.message : err.message,
-            life: 2000,
-          });
-        });
-    }
+    // if (hasFormData === false) {
+    //   StructureWinformDataService.createFormData(nodeKey, data)
+    //     .then((res) => {
+    //       toast.current.show({
+    //         severity: "success",
+    //         summary: "Successful",
+    //         detail: "Form Data Created",
+    //         life: 3000,
+    //       });
+    //       setTimeout(() => {
+    //         setFormDia(false);
+    //       }, 1000);
+    //     })
+    //     .catch((err) => {
+    //       toast.current.show({
+    //         severity: "error",
+    //         summary: "Error",
+    //         detail: err.response ? err.response.data.message : err.message,
+    //         life: 2000,
+    //       });
+    //     });
+    // } else {
+    //   StructureWinformDataService.updateFormData(nodeKey, data)
+    //     .then((res) => {
+    //       toast.current.show({
+    //         severity: "success",
+    //         summary: "Successful",
+    //         detail: "Form Data Updated",
+    //         life: 3000,
+    //       });
+    //       setTimeout(() => {
+    //         setFormDia(false);
+    //       }, 1000);
+    //     })
+    //     .catch((err) => {
+    //       toast.current.show({
+    //         severity: "error",
+    //         summary: "Error",
+    //         detail: err.response ? err.response.data.message : err.message,
+    //         life: 2000,
+    //       });
+    //     });
+    // }
   };
 
   return (
@@ -372,7 +376,7 @@ const FormGenerateStructure = ({ nodeKey, formKey, nodeName, setFormDia }: Param
 
             {hasForm ? (
               <form onSubmit={handleSubmit(onSubmit)} className="wrapper">
-                <h4 className="flex justify-content-center">{nodeName} Extra Form</h4>
+                <h4 className="flex justify-content-center"> Extra Form</h4>
                 {items &&
                   Object.keys(items).map((e: any) => {
                     console.log(items[e]);
@@ -413,7 +417,7 @@ const FormGenerateStructure = ({ nodeKey, formKey, nodeName, setFormDia }: Param
                           className="ml-4 p-button-danger"
                           onClick={(e) => {
                             e.preventDefault();
-                            setFormDia(false);
+                            // setFormDia(false);
                           }
                           }
                         >
@@ -437,7 +441,7 @@ const FormGenerateStructure = ({ nodeKey, formKey, nodeName, setFormDia }: Param
         <TabPanel header="Passive Data">
           {passiveItems.length > 0 ? (
             <form onSubmit={handleSubmit(onSubmit)} className="wrapper">
-              <h4 className="flex justify-content-center">{nodeName} Extra Form</h4>
+              <h4 className="flex justify-content-center"> Extra Form</h4>
               {passiveItems &&
                 Object.keys(passiveItems).map((e: any) => {
                   console.log(passiveItems[e]);

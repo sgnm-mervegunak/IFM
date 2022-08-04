@@ -195,4 +195,8 @@ export class ContactRepository implements GeciciInterface<Contact> {
   async findOneFirstLevelByRealm(label: string, realm: string) {
     return null;
   }
+
+  async findChildrenByFacilityTypeNode(language: string,realm: string, typename:string){
+      return null;
+    }
 }

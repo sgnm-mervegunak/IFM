@@ -13,6 +13,7 @@ import { has_children_error } from 'src/common/const/custom.error.object';
 import { CustomTreeError } from 'src/common/const/custom.error.enum';
 import { assignDtoPropToEntity, createDynamicCyperObject, Neo4jService } from 'sgnm-neo4j/dist';
 import { classificationInterface } from 'src/common/interface/classification.interface';
+import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 
 @Injectable()
 export class ClassificationRepository implements classificationInterface<Classification> {
@@ -218,4 +219,8 @@ for (let index = 0; index < returnData.length; index++) {
   }
 
 
+  async findChildrenByFacilityTypeNode(language: string,realm: string, typename:string) {
+      return null;
+    }
 }
+

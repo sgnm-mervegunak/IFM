@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 import { RepositoryEnums } from 'src/common/const/repository.enum';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
 
@@ -39,4 +40,8 @@ export class StructureService {
   findOneFirstLevel(label: string, realm: string) {
     return this.facilityStructureRepository.findOneFirstLevelByRealm(label, realm);
   }
+
+  findChildrenByFacilityTypeNode(language: string,realm: string, typename:string) {
+      return this.facilityStructureRepository.findChildrenByFacilityTypeNode(language,realm, typename);
+    }
 }
