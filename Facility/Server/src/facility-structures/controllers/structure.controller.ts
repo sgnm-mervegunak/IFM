@@ -61,14 +61,21 @@ export class StructureController {
     return this.facilityStructuresService.findOneFirstLevel(label, realm);
   }
 
-  @Get('/structuretypes/properties/:first_node_label/:first_node_realm/:second_child_node_label/:second_child_node_name/:children_nodes_label/:relationName/:relationDirection')
+  // @Get('/structuretypes/properties/:first_node_label/:first_node_realm/:second_child_node_label/:second_child_node_name/:children_nodes_label/:relationName/:relationDirection')
+  // @Unprotected()
+  // @NoCache()
+  // findChildrenByFacilityTypeNode(@Param('first_node_label') first_node_label: string, @Param('first_node_realm') first_node_realm: string,
+  //             @Param('second_child_node_label') second_child_node_label: string, @Param('second_child_node_name') second_child_node_name: string,
+  //             @Param('children_nodes_label') children_nodes_label: string, @Param('relationName') relationName: string , 
+  //             @Param('relationDirection') relationDirection: RelationDirection ) {
+  //         return this.facilityStructuresService.findChildrenByFacilityTypeNode(first_node_label, first_node_realm, second_child_node_label,
+  //           second_child_node_name, children_nodes_label,relationName, relationDirection);
+  // }
+
+  @Get('/structuretypes/properties/:language/:realm/:typename')
   @Unprotected()
   @NoCache()
-  findChildrenByFacilityTypeNode(@Param('first_node_label') first_node_label: string, @Param('first_node_realm') first_node_realm: string,
-              @Param('second_child_node_label') second_child_node_label: string, @Param('second_child_node_name') second_child_node_name: string,
-              @Param('children_nodes_label') children_nodes_label: string, @Param('relationName') relationName: string , 
-              @Param('relationDirection') relationDirection: RelationDirection ) {
-          return this.facilityStructuresService.findChildrenByFacilityTypeNode(first_node_label, first_node_realm, second_child_node_label,
-            second_child_node_name, children_nodes_label,relationName, relationDirection);
+  findChildrenByFacilityTypeNode(@Param('language') language: string, @Param('realm') realm: string, @Param('typename') typename: string) {
+          return this.facilityStructuresService.findChildrenByFacilityTypeNode(language,realm, typename);
   }
 }

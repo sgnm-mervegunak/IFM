@@ -41,9 +41,7 @@ export class StructureService {
     return this.facilityStructureRepository.findOneFirstLevelByRealm(label, realm);
   }
 
-  findChildrenByFacilityTypeNode(first_node_label: string, first_node_realm: string, second_child_node_label: string,
-    second_child_node_name: string, children_nodes_label: string,relationName: string, relationDirection: RelationDirection) {
-      return this.facilityStructureRepository.findChildrenByFacilityTypeNode(first_node_label, first_node_realm, second_child_node_label,
-        second_child_node_name, children_nodes_label,relationName, relationDirection);
+  findChildrenByFacilityTypeNode(language: string,realm: string, typename:string) {
+      return this.facilityStructureRepository.findChildrenByFacilityTypeNode(language,realm, typename);
     }
 }
