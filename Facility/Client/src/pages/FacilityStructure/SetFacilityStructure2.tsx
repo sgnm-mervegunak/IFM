@@ -602,7 +602,7 @@ const SetFacilityStructure2 = () => {
             style={{ width: '100%' }}
           />
         </div>
-        {selectedFacilityType && <FormGenerateStructure selectedFacilityType={selectedFacilityType} />}
+        {selectedFacilityType && <FormGenerateStructure selectedFacilityType={selectedFacilityType} realm={realm} />}
     
         {/* <div className="field">
           <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
