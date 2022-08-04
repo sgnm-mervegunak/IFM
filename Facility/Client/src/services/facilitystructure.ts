@@ -75,6 +75,10 @@ const nodeInfo = async (key: string) => {
     return axios.get(`${url}/${key}`);
 };
 
-const service = { findAll, findOne, findAssets, create, createAsset, createForm, update, remove, relation, nodeInfo };
+const getFacilityTypes = async (label: string, realm: string) => {
+    return axios.get(url + "/structuretypes/" + label + "/" + realm);
+};
+
+const service = { findAll, findOne, findAssets, create, createAsset, createForm, update, remove, relation, nodeInfo, getFacilityTypes };
 
 export default service;

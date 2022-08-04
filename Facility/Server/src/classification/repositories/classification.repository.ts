@@ -133,10 +133,10 @@ export class ClassificationRepository implements classificationInterface<Classif
     RETURN value;`
   
     let data =await this.neo4jService.read(cypher);
-    // let result ={root: data}
-    // let abc =await this.neo4jService.changeObjectChildOfPropToChildren(result)
-    // return abc
-    return data.records[0]["_fields"][0];
+     let result ={root: data.records[0]["_fields"][0]}
+     let aaa =await this.neo4jService.changeObjectChildOfPropToChildren(result)
+     return aaa
+    //return data.records[0]["_fields"][0];
   }
 
   async setIsActiveTrueOfClassificationAndItsChild(id:string){

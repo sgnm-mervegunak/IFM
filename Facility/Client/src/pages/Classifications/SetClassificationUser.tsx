@@ -98,7 +98,7 @@ const SetClassificationUser = () => {
   ];
 
   const getClassification = () => {
-    ClassificationsService.findOne(realm).then((res) => {
+    ClassificationsService.findAllActive({realm:realm,isActive:true,language:"en"}).then((res) => {
 
       if (!res.data.root.children) {
         setData([res.data.root.properties] || []);

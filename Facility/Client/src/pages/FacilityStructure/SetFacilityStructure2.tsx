@@ -8,6 +8,7 @@ import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Checkbox } from 'primereact/checkbox';
+import { Dropdown } from 'primereact/dropdown';
 import { TreeSelect } from "primereact/treeselect";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
@@ -19,6 +20,7 @@ import { useAppSelector } from "../../app/hook";
 
 import axios from "axios";
 import FormGenerate from "../FormGenerate/FormGenerate";
+import FormGenerateStructure from "../FormGenerateStructure/FormGenerateStructure";
 
 interface Node {
   cantDeleted: boolean;
@@ -90,8 +92,27 @@ const SetFacilityStructure2 = () => {
   const [generateNodeKey, setGenerateNodeKey] = useState("");
   const [generateFormTypeKey, setGenerateFormTypeKey] = useState<string | undefined>("");
   const [generateNodeName, setGenerateNodeName] = useState<string | undefined>("");
+  const [facilityType, setFacilityType] = useState<string[]>([]);
+  const [selectedFacilityType, setSelectedFacilityType] = useState("");
 
-  const facilityTypes = ["Facility", "Building", "Block", "Floor", "Room", "Open Area", "Park Area", "Garden", "Other"];
+
+
+  useEffect(() => {
+    FacilityStructureService.getFacilityTypes("FacilityTypes_EN", realm)
+      .then((res) => {
+        res.data.map((item: any) => {
+          facilityType.push(item.name);
+        })
+      })
+      .catch((err) => {
+        toast.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: err.response ? err.response.data.message : err.message,
+          life: 2000,
+        });
+      });
+  }, [])
 
   const getForms = async () => {
     await FormTypeService.findOne('111').then((res) => {
@@ -573,6 +594,16 @@ const SetFacilityStructure2 = () => {
         }}
       >
         <div className="field">
+          <h5 style={{ marginBottom: "0.5em" }}>Facility Type</h5>
+          <Dropdown
+            value={selectedFacilityType}
+            options={facilityType}
+            onChange={(event) => setSelectedFacilityType(event.value)}
+            style={{ width: '100%' }}
+          />
+        </div>
+        {/* <FormGenerateStructure /> */}
+        {/* <div className="field">
           <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
           <InputText
             value={name}
@@ -611,7 +642,7 @@ const SetFacilityStructure2 = () => {
         <div className="field structureChips">
           <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
           <Chips value={tag} onChange={(e) => setTag(e.value)} style={{ width: "100%" }} />
-        </div>
+        </div> */}
       </Dialog>
       <Dialog
         header="Edit Item"
