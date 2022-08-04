@@ -5,6 +5,7 @@ import { UpdateFacilityStructureDto } from '../dto/update-facility-structure.dto
 import { Unprotected } from 'nest-keycloak-connect';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { NoCache } from 'ifmcommon';
+import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 @ApiTags('structure')
 @ApiBearerAuth('JWT-auth')
 @Controller('structure')
@@ -58,5 +59,16 @@ export class StructureController {
   @NoCache()
   findOneFirstLevel(@Param('label') label: string, @Param('realm') realm: string) {
     return this.facilityStructuresService.findOneFirstLevel(label, realm);
+  }
+
+  @Get('/structuretypes/properties/:first_node_label/:first_node_realm/:second_child_node_label/:second_child_node_name/:children_nodes_label/:relationName/:relationDirection')
+  @Unprotected()
+  @NoCache()
+  findChildrenByFacilityTypeNode(@Param('first_node_label') first_node_label: string, @Param('first_node_realm') first_node_realm: string,
+              @Param('second_child_node_label') second_child_node_label: string, @Param('second_child_node_name') second_child_node_name: string,
+              @Param('children_nodes_label') children_nodes_label: string, @Param('relationName') relationName: string , 
+              @Param('relationDirection') relationDirection: RelationDirection ) {
+          return this.facilityStructuresService.findChildrenByFacilityTypeNode(first_node_label, first_node_realm, second_child_node_label,
+            second_child_node_name, children_nodes_label,relationName, relationDirection);
   }
 }

@@ -7,6 +7,7 @@ import { FacilityStructure } from '../entities/facility-structure.entity';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
 import { NestKafkaService, nodeHasChildException } from 'ifmcommon';
 import { Neo4jService, assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError } from 'sgnm-neo4j/dist';
+import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 
 @Injectable()
 export class FacilityStructureRepository implements GeciciInterface<FacilityStructure> {
@@ -147,4 +148,26 @@ export class FacilityStructureRepository implements GeciciInterface<FacilityStru
 
     return node['root']['children'];
   }
+
+  async findChildrenByFacilityTypeNode(first_node_label: string, first_node_realm: string, second_child_node_label: string,
+    second_child_node_name: string, children_nodes_label: string,relationName: string, relationDirection: RelationDirection) {
+
+      let node = await this.neo4jService.findChildNodesOfFirstParentNodeByLabelsRealmAndName(first_node_label, first_node_realm, second_child_node_label,
+        second_child_node_name, children_nodes_label,relationName, relationDirection);
+
+        if (!node) {
+          throw new FacilityStructureNotFountException(first_node_realm); //DEĞİŞECEK
+        }
+        if (node["records"] && node["records"][0]) {
+          let propertyList = [];
+           for (let i=0; i<node["records"].length; i++ ) {
+            let property = node["records"][i];
+           property["_fields"][0]["properties"]._id = property["_fields"][0]["identity"]["low"];
+           propertyList.push(property["_fields"][0]["properties"]); 
+          }
+          return propertyList;
+         } 
+        
+         return [];
+    }
 }
