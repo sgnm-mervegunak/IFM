@@ -72,6 +72,7 @@ interface FormNode {
 
 const SetFacilityStructure2 = () => {
   const [selectedNodeKey, setSelectedNodeKey] = useState<any>("");
+  const [submitted,setSubmitted] = useState(false)
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
   const [name, setName] = useState("");
@@ -101,7 +102,7 @@ const SetFacilityStructure2 = () => {
     FacilityStructureService.getFacilityTypes("FacilityTypes_EN", realm)
       .then((res) => {
         res.data.map((item: any) => {
-          facilityType.push(item.name);
+          setFacilityType(res.data.map((item:any)=>item.name))
         })
       })
       .catch((err) => {
@@ -260,7 +261,7 @@ const SetFacilityStructure2 = () => {
     }
   };
 
-  const addItem = (key: string) => {
+  const addItem = (key: string,data:any) => {
     let newNode: any = {};
     FacilityStructureService.nodeInfo(key)
       .then((res) => {
@@ -288,6 +289,7 @@ const SetFacilityStructure2 = () => {
           };
         }
 
+        console.log("data",data)
         FacilityStructureService.create(newNode)
           .then((res) => {
             toast.current.show({
@@ -521,7 +523,7 @@ const SetFacilityStructure2 = () => {
         <Button
           label="Add"
           icon="pi pi-check"
-          onClick={() => addItem(selectedNodeKey)}
+          onClick={() => setSubmitted(true)}
           autoFocus
         />
       </div>
@@ -602,7 +604,7 @@ const SetFacilityStructure2 = () => {
             style={{ width: '100%' }}
           />
         </div>
-        {selectedFacilityType && <FormGenerateStructure selectedFacilityType={selectedFacilityType} realm={realm} />}
+        {selectedFacilityType && <FormGenerateStructure selectedFacilityType={selectedFacilityType} realm={realm} addItem={(data:any)=>addItem(selectedNodeKey,data)} setSubmitted={setSubmitted} submitted={submitted} />}
     
         {/* <div className="field">
           <h5 style={{ marginBottom: "0.5em" }}>Name</h5>

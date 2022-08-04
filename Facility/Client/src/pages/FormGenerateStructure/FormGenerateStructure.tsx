@@ -29,6 +29,9 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 interface Params {
   selectedFacilityType: string;
+  submitted:boolean;
+  setSubmitted:any;
+  addItem:any;
   realm: string;
   // setFormDia: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -128,7 +131,7 @@ const Input = ({ value, onChange, type, ...rest }: InputProps) => {
 };
 
 
-const FormGenerateStructure = ({ selectedFacilityType, realm }: Params) => {
+const FormGenerateStructure = ({ selectedFacilityType, realm,submitted,setSubmitted,addItem }: Params) => {
   const [items, setItems] = useState([]);
   const [passiveItems, setPassiveItems] = useState([]);
   const [hasForm, setHasForm] = useState(true);
@@ -308,6 +311,14 @@ const FormGenerateStructure = ({ selectedFacilityType, realm }: Params) => {
     formState: { errors },
   } = useForm();
 
+  useEffect(() => {
+    if (submitted) {
+      handleSubmit(onSubmit)();
+    }
+    setSubmitted(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [submitted]);
+  
   const onSubmit = (data: any) => {
     // console.log(data);
     const key = uuidv4();
@@ -316,6 +327,7 @@ const FormGenerateStructure = ({ selectedFacilityType, realm }: Params) => {
     //   nodeKey: nodeKey,
     //   data: data,
     // };
+    addItem(data);
     console.log(data);
     // console.log(formData);
     // console.log(formData);
