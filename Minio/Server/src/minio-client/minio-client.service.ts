@@ -16,7 +16,7 @@ export class MinioClientService {
     this.logger = new Logger('MinioStorageService');
   }
 
-  public async upload(file: BufferedFile,folderName?: string, baseBucket: string = this.baseBucket) {
+  public async upload(baseBucket: string,file: BufferedFile,folderName?: string) {
     //check the file type is jpeg or png or pdf or excel file
     if (
       !(
@@ -48,23 +48,23 @@ export class MinioClientService {
     //   console.log(res, "RESPONSEEEE");
     // })
     return {
-      url: `http://${process.env.MINIO_ENDPOINT}:${process.env.MINIO_PORT}/${process.env.MINIO_BUCKET}/${fileName}`,
+      url: `http://${process.env.MINIO_ENDPOINT}:${process.env.MINIO_PORT}/${baseBucket}/${fileName}`,
     };
   }
 
-  public async delete(fileName:string,baseBucket: string = this.baseBucket){
-    await this.client.removeObject(baseBucket,fileName,function(err){
+  public async delete(fileName:string,realmName: string){
+    await this.client.removeObject(realmName,fileName,function(err){
       if(err) console.log(err);
       return `${fileName} successfully deleted`
      
     });
   }
 
-  public async getAObject(fileName:string,baseBucket: string = this.baseBucket){
+  public async getAObject(fileName:string,realmName: string){
     let data = [];
    
     const promise = new Promise((resolve, reject) =>{
-      this.client.getObject(baseBucket, fileName).then(function(dataStream){
+      this.client.getObject(realmName, fileName).then(function(dataStream){
       dataStream.on('data',async function(value){
       data.push(value)
       })
@@ -82,10 +82,10 @@ export class MinioClientService {
       
   }
 
-  public async getAllObjects(baseBucket: string){
+  public async getAllObjects(realmName: string){
     let data = [];
     const promise = new Promise((resolve, reject) =>{
-      let stream =this.client.listObjects(baseBucket)
+      let stream =this.client.listObjects(realmName)
       stream.on('data',async function(value){
       data.push(value)
       })
@@ -98,15 +98,15 @@ export class MinioClientService {
     })
     })
   
-   return promise
+   return promise;
       
   }
 
-  public async getAllObjectsWithPrefix(baseBucket: string,prefix: string){
+  public async getAllObjectsWithPrefix(realmName: string,prefix: string){
     let data = [];
     prefix = await prefix+"/";
     const promise = new Promise((resolve, reject) =>{
-      let stream =this.client.listObjects(baseBucket,prefix)
+      let stream =this.client.listObjects(realmName,prefix)
       stream.on('data',async function(value){
       data.push(value)
       })
@@ -123,10 +123,10 @@ export class MinioClientService {
       
   }
 
-  public async createBucket(bucketName:string){
-   await this.client.makeBucket(bucketName,'us-east-1',function(err){
+  public async createBucket(realmName:string){
+   await this.client.makeBucket(realmName,'us-east-1',function(err){
     if(err) console.log(err)
-    console.log(`named${bucketName} bucket created`)
+    console.log(`named${realmName} bucket created`)
    });
   }
  }

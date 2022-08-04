@@ -26,7 +26,8 @@ export class FileUploadController {
     schema: {
       type: 'object',
       properties: {
-        image: {
+        realmName:{type:'string',description:'realmName'},
+        file: {
           type: 'string',
           format: 'binary',
         },
@@ -34,49 +35,49 @@ export class FileUploadController {
       },
     },
   })
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({
-    summary: 'Upload a single file or image'
+    summary: 'Upload a single file or file'
   })
   @ApiConsumes('multipart/form-data')
-  async uploadSingle(@UploadedFile() image: BufferedFile,@Body("folderName") folderName?:string) {
-    //const x = await this.postKafka.producerSendMessage('test', 'test', 'user');
+  async uploadSingle(@Body("realmName") realmName:string,@UploadedFile() file: BufferedFile,@Body("folderName") folderName?:string) {
+    
 
-    return await this.fileUploadService.uploadSingle(image,folderName);
+    return await this.fileUploadService.uploadSingle(realmName,file,folderName);
   }
 
 
 
-  @Post('many')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        image1: {
-          type: 'string',
-          format: 'binary',
-        },
-        image2:{
-          type: 'string',
-          format: 'binary',
-        },
-        folderName:{ type: 'string'}
-      },
-    },
-  })
-  @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'image1', maxCount: 1 },
-      { name: 'image2', maxCount: 1 },
-    ]),
-  )
-  @ApiConsumes('multipart/form-data')
-  @ApiOperation({
-    summary: 'Upload multiple file or image'
-  })
-  async uploadMany(@UploadedFiles() files: BufferedFile,@Body("folderName") folderName: string) {
-    return this.fileUploadService.uploadMany(files,folderName);
-  }
+  // @Post('many')
+  // @ApiBody({
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       file1: {
+  //         type: 'string',
+  //         format: 'binary',
+  //       },
+  //       file2:{
+  //         type: 'string',
+  //         format: 'binary',
+  //       },
+  //       folderName:{ type: 'string'}
+  //     },
+  //   },
+  // })
+  // @UseInterceptors(
+  //   FileFieldsInterceptor([
+  //     { name: 'file1', maxCount: 1 },
+  //     { name: 'file2', maxCount: 1 },
+  //   ]),
+  // )
+  // @ApiConsumes('multipart/form-data')
+  // @ApiOperation({
+  //   summary: 'Upload multiple file or image'
+  // })
+  // async uploadMany(@UploadedFiles() files: BufferedFile,@Body("folderName") folderName: string) {
+  //   return this.fileUploadService.uploadMany(files,folderName);
+  // }
 
 
   @Delete('removeOne')
@@ -89,45 +90,48 @@ export class FileUploadController {
         fileName: {
           type: 'string'
         },
+        realmName: {
+          type: 'string'
+        }
       },
     },
   })
-  async remove(@Body("fileName") fileName: string) {
-    return this.fileUploadService.deleteOne(fileName);
+  async remove(@Body("fileName") fileName: string,@Body("realmName") realmName: string) {
+    return this.fileUploadService.deleteOne(fileName,realmName);
   }
 
 
-  @Get('getAllFiles/:bucketName')
+  @Get('getAllFiles/:realmName')
   @ApiOperation({
     summary: 'Get all files'
   })
-  async getAll(@Param('bucketName') bucketName: string) {
-    return this.fileUploadService.getAllFiles(bucketName);
+  async getAll(@Param('realmName') realmName: string) {
+    return this.fileUploadService.getAllFiles(realmName);
   }
 
-  @Get('getAllFilesWithPrefix/:bucketName/:prefix')
+  @Get('getAllFilesWithPrefix/:realmName/:prefix')
   @ApiOperation({
     summary: 'Get all files with prefix'
   })
-  async getAllWithPrefix(@Param('bucketName') bucketName: string,@Param("prefix") prefix: string) {
-    return this.fileUploadService.getAllFiles(bucketName,prefix);
+  async getAllWithPrefix(@Param('realmName') realmName: string,@Param("prefix") prefix: string) {
+    return this.fileUploadService.getAllFiles(realmName,prefix);
   }
 
-  @Get('getAFile/:fileName')
+  @Get('getAFile/:realmName/:fileName')
   @ApiOperation({
     summary: 'Get a file'
   })
-  async findbyFileName(@Param("fileName") fileName: string) {
-    return this.fileUploadService.getAFileByFileName(fileName);
+  async findbyFileName(@Param("fileName") fileName: string,@Param("realmName") realmName: string) {
+    return this.fileUploadService.getAFileByFileName(fileName,realmName);
   }
 
 
-  @Post("createBucket/:bucketName")
+  @Post("createBucket/:realmName")
   @ApiOperation({
-    summary: 'Enter a bucket name'
+    summary: 'Enter a realmName name'
   })
-  async createBucket(@Param("bucketName") bucketName: string) {
-
-    return this.fileUploadService.createBucket(bucketName);
+  async createBucket(@Param("realmName") realmName: string) {
+    realmName.toLowerCase()
+    return this.fileUploadService.createBucket(realmName);
   }
 }

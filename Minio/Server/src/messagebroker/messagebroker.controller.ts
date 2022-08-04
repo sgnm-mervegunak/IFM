@@ -21,9 +21,9 @@ export class MessagebrokerController {
     console.log('this is from user message broker exception listener' + message.value);
   }
 
-  @MessagePattern('test2')
-  async test2(@Payload() message) {
-    await this.minioClientService.upload(message.value);
-    console.log('this is from test2 topic' + message.value);
-  }
+  // @MessagePattern('test2')
+  // async test2(@Payload() message) {
+  //   await this.minioClientService.upload(message.value);
+  //   console.log('this is from test2 topic' + message.value);
+  // }
 }
