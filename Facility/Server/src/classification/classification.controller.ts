@@ -65,8 +65,14 @@ export class ClassificationController {
   }
 
   @Unprotected()
-  @Get("getClassificationByIsActiveStatus/:realm/:isActive/:language")
-  async getClassificationByIsActiveStatus(@Param('realm') realm:string, @Param('isActive') isActive:boolean,@Param('language') language:string){
-    return this.classificationService.getClassificationByIsActiveStatus(realm,isActive,language);
+  @Get("getClassificationByIsActiveStatus/:realm/:language")
+  async getClassificationByIsActiveStatus(@Param('realm') realm:string,@Param('language') language:string){
+    return this.classificationService.getClassificationByIsActiveStatus(realm,language);
+  }
+
+  @Unprotected()
+  @Get('getClassificationsByLanguage/:realm/:language')
+  async getClassificationsByLanguage(@Param('realm') realm:string,@Param('language') language:string){
+    return this.classificationService.getClassificationsByLanguage(realm, language);
   }
 }

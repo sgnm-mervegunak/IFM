@@ -66,12 +66,16 @@ export class ClassificationService {
     return await this.classificationRepository.setIsActiveFalseOfClassificationAndItsChild(id);
   }
 
-  @Span('get all classifications by realm, isActive and language')
+  @Span('get all classifications by realm, isActive ')
   @OtelMethodCounter()
-  async getClassificationByIsActiveStatus(realm: string,isActive:boolean,language: string){
-    return await this.classificationRepository.getClassificationByIsActiveStatus(realm,isActive,language);
+  async getClassificationByIsActiveStatus(realm: string,language: string){
+    return await this.classificationRepository.getClassificationByIsActiveStatus(realm,language);
   }
 
-
+  @Span('get all classifications by realm and language')
+  @OtelMethodCounter()
+  async getClassificationsByLanguage(realm:string, language:string){
+    return await this.classificationRepository.getClassificationsByLanguage(realm, language);
+  }
   
 }
