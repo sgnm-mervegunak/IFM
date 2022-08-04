@@ -8,6 +8,5 @@ export interface GeciciInterface<T> {
   changeNodeBranch(id: string, target_parent_id: string): any;
   findOneNodeByKey(key: string): any;
   findOneFirstLevelByRealm(label: string, realm: string): any;
-  findChildrenByFacilityTypeNode(first_node_label: string, first_node_realm: string, second_child_node_label: string,
-    second_child_node_name: string, children_nodes_label: string,relationName: string, relationDirection: RelationDirection) : any; 
+  findChildrenByFacilityTypeNode(language: string,realm: string, typename:string) : any; 
 }
