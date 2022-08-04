@@ -16,7 +16,7 @@ import FormTypeService from "../../services/formType";
 import FormBuilderService from "../../services/formBuilder";
 import StructureWinformDataService from "../../services/structureWinformData";
 import FacilityTypePropertiesService from "../../services/facilitystructure";
-import "./FormGenerate.css";
+// import "./FormGenerate.css";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   value: any;
@@ -134,6 +134,8 @@ const FormGenerateStructure = ({ selectedFacilityType, realm }: Params) => {
   const [hasForm, setHasForm] = useState(true);
   const [hasFormData, setHasFormData] = useState(false);
   const toast = React.useRef<any>(null);
+  console.log(selectedFacilityType);
+  
 
   // const location = useLocation();
   // const params = useParams();
@@ -153,7 +155,7 @@ const FormGenerateStructure = ({ selectedFacilityType, realm }: Params) => {
     // console.log(responsegetData);
     (async () => {
 
-      FacilityTypePropertiesService.getFacilityTypeProperties(realm,selectedFacilityType)
+      FacilityTypePropertiesService.getFacilityTypeProperties(realm, selectedFacilityType)
         .then(async (responsegetProperties) => {
           console.log(responsegetProperties.data);
           let isFormData;
@@ -175,12 +177,12 @@ const FormGenerateStructure = ({ selectedFacilityType, realm }: Params) => {
           if (isFormData === true) {
             console.log("hasFormData");
 
-           // const responsegetData = await StructureWinformDataService.getFormData(nodeKey); 
-           // console.log(responsegetData);
+            // const responsegetData = await StructureWinformDataService.getFormData(nodeKey); 
+            // console.log(responsegetData);
             const convertedData = responsegetProperties.data.map(function (item: any) {
               // console.log(formData[`'${item.label}'`]);
-             // console.log(responsegetData.data[item.label.replaceAll(" ", "")]);
-             // console.log([responsegetData.data].length);
+              // console.log(responsegetData.data[item.label.replaceAll(" ", "")]);
+              // console.log([responsegetData.data].length);
 
               return {
                 ...item,
@@ -233,7 +235,7 @@ const FormGenerateStructure = ({ selectedFacilityType, realm }: Params) => {
         });
     })();
 
-  }, []);
+  }, [selectedFacilityType]);
 
   // useEffect(() => {
   //   (async () => {
@@ -366,134 +368,74 @@ const FormGenerateStructure = ({ selectedFacilityType, realm }: Params) => {
   return (
     <div className="tabview-demo">
 
-      {/* <TabView>
-          <TabPanel header="Type Form"> */}
-      <TabView>
+      <div>
+        <Toast ref={toast} position="top-right" />
 
-        <TabPanel header="Active Data">
-          <div>
-            <Toast ref={toast} position="top-right" />
-
-            {hasForm ? (
-              <form onSubmit={handleSubmit(onSubmit)} className="wrapper">
-                <h4 className="flex justify-content-center"> Extra Form</h4>
-                {items &&
-                  Object.keys(items).map((e: any) => {
-                    console.log(items[e]);
-                    const { rules, defaultValue, label }: any = items[e];
-                    return (
-                      <section key={e}>
-                        <label className="mb-4">{label}</label>
-                        <Controller
-                          name={label.replaceAll(" ", "")}
-                          // name={label}
-                          control={control}
-                          rules={rules}
-                          defaultValue={defaultValue}
-                          render={({ field }) => (
-                            <div>
-                              <Input
-                                value={field.value || ""}
-                                onChange={field.onChange}
-                                {...items[e] as any}
-                              />
-                            </div>
-                          )}
-                        />
-                        {errors[label.replaceAll(" ", "")] && (
-                          <Error>This field is required</Error>
-                        )}
-                      </section>
-                    );
-                  })}
-                <div>
-                  {items.length > 0 && (
-                    <>
-                      <div className="mt-4 ml-3 flex">
-                        <Button className="p-button-success" type="submit">
-                          Save
-                        </Button>
-                        <Button
-                          className="ml-4 p-button-danger"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            // setFormDia(false);
-                          }
-                          }
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </form>
-            ) : (
-              <div>
-                <h4>There is no extra form for this structure.</h4>
-                {/* <Button className="" onClick={() => backPage()}>
-                  Back
-                </Button> */}
-              </div>
-            )}
-          </div>
-        </TabPanel>
-        <TabPanel header="Passive Data">
-          {passiveItems.length > 0 ? (
-            <form onSubmit={handleSubmit(onSubmit)} className="wrapper">
-              <h4 className="flex justify-content-center"> Extra Form</h4>
-              {passiveItems &&
-                Object.keys(passiveItems).map((e: any) => {
-                  console.log(passiveItems[e]);
-                  const { rules, defaultValue, label }: any = passiveItems[e];
-                  return (
-                    <section key={e}>
-                      <label className="mb-4">{label}</label>
-                      <Controller
-                        name={label.replaceAll(" ", "")}
-                        // name={label}
-                        control={control}
-                        rules={rules}
-                        defaultValue={defaultValue}
-                        render={({ field }) => (
-                          <div>
-                            <Input
-                              value={field.value || ""}
-                              // onChange={field.onChange}
-                              {...passiveItems[e] as any}
-                            />
-                          </div>
-                        )}
-                      />
-                      {errors[label.replaceAll(" ", "")] && (
-                        <Error>This field is required</Error>
+        {hasForm ? (
+          <form onSubmit={handleSubmit(onSubmit)}>
+            {/* <h4 className="flex justify-content-center"> Extra Form</h4> */}
+            {items &&
+              Object.keys(items).map((e: any) => {
+                console.log(items[e]);
+                const { rules, defaultValue, label }: any = items[e];
+                return (
+                  <section key={e}>
+                    {/* <label className="mb-4">{label}</label> */}
+                    <h5 style={{ marginBottom: "0.5em" }}>{label}</h5>
+                    <Controller
+                      name={label.replaceAll(" ", "")}
+                      // name={label}
+                      control={control}
+                      rules={rules}
+                      defaultValue={defaultValue}
+                      render={({ field }) => (
+                        <div>
+                          <Input
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            {...items[e] as any}
+                          />
+                        </div>
                       )}
-                    </section>
-                  );
-                })}
-
-            </form>
-          ) : (
+                    />
+                    {errors[label.replaceAll(" ", "")] && (
+                      <Error>This field is required</Error>
+                    )}
+                  </section>
+                );
+              })}
             <div>
-              <h4>There is no passive data</h4>
-              {/* <Button className="" onClick={() => backPage()}>
+              {items.length > 0 && (
+                <>
+                  <div className="mt-4 ml-3 flex">
+                    <Button className="p-button-success" type="submit">
+                      Save
+                    </Button>
+                    <Button
+                      className="ml-4 p-button-danger"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        // setFormDia(false);
+                      }
+                      }
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </form>
+        ) : (
+          <div>
+            <h4>There is no extra form for this structure.</h4>
+            {/* <Button className="" onClick={() => backPage()}>
                   Back
                 </Button> */}
-            </div>
-          )}
-        </TabPanel>
+          </div>
+        )}
+      </div>
 
-      </TabView>
-      {/* </TabPanel> */}
-
-      {/* <TabPanel header="Extra Form">
-            <TabView>
-              <TabPanel header="Active Data"></TabPanel>
-              <TabPanel header="Passive Data"></TabPanel>
-            </TabView>
-          </TabPanel> */}
-
-      {/* </TabView> */}
 
     </div>
   );
