@@ -127,6 +127,7 @@ const Input = ({ value, onChange, type, ...rest }: InputProps) => {
   }
 };
 
+
 const FormGenerateStructure = ({ nodeKey, formKey, nodeName, setFormDia }: Params) => {
   const [items, setItems] = useState([]);
   const [passiveItems, setPassiveItems] = useState([]);
