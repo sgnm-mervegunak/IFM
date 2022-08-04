@@ -83,8 +83,8 @@ const getFacilityTypeProperties = async (
     first_node_realm: string,
     second_child_node_name: string,
 ) => {
-    return axios.get(url + "/structuretypes/" + "properties/" + "FacilityTypes_EN" + "/" + first_node_realm + "/" + "FacilityType" + "/" +
-        second_child_node_name + "/" + "FacilityTypeProperty" + "/" + "PARENT_OF" + "/" + "R");
+    return axios.get(url + "/structuretypes/" + "properties/" + "EN" + "/" + first_node_realm + "/" +
+        second_child_node_name);
 };
 
 const service = { findAll, findOne, findAssets, create, createAsset, createForm, update, remove, relation, nodeInfo, getFacilityTypes, getFacilityTypeProperties };
