@@ -14,6 +14,7 @@ import { BaseFacilityObject } from 'src/common/baseobject/base.facility.object '
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
 import { AnyARecord } from 'dns';
 import { FacilityInterface } from 'src/common/interface/facility.interface';
+import * as moment from 'moment';
 
 @Injectable()
 export class FacilityStructureRepository implements FacilityInterface<any> {
@@ -47,31 +48,58 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
   //   }
   //   return result;
   // }
+  /////////////////////////// Static DTO ////////////////////////////////////////////////////////////////////
+  // async update(_id: string, updateFacilityStructureDto: UpdateFacilityStructureDto) {
+  //   const updateFacilityStructureDtoWithoutLabelsAndParentId = {};
+  //   Object.keys(updateFacilityStructureDto).forEach((element) => {
+  //     if (element != 'labels' && element != 'parentId') {
+  //       updateFacilityStructureDtoWithoutLabelsAndParentId[element] = updateFacilityStructureDto[element];
+  //     }
+  //   });
+  //   const dynamicObject = createDynamicCyperObject(updateFacilityStructureDtoWithoutLabelsAndParentId);
+  //   const updatedNode = await this.neo4jService.updateById(_id, dynamicObject);
 
-  async update(_id: string, updateFacilityStructureDto: UpdateFacilityStructureDto) {
-    const updateFacilityStructureDtoWithoutLabelsAndParentId = {};
-    Object.keys(updateFacilityStructureDto).forEach((element) => {
-      if (element != 'labels' && element != 'parentId') {
-        updateFacilityStructureDtoWithoutLabelsAndParentId[element] = updateFacilityStructureDto[element];
-      }
-    });
-    const dynamicObject = createDynamicCyperObject(updateFacilityStructureDtoWithoutLabelsAndParentId);
-    const updatedNode = await this.neo4jService.updateById(_id, dynamicObject);
+  //   if (!updatedNode) {
+  //     throw new FacilityStructureNotFountException(_id);
+  //   }
+  //   const result = {
+  //     id: updatedNode['identity'].low,
+  //     labels: updatedNode['labels'],
+  //     properties: updatedNode['properties'],
+  //   };
+  //   if (updateFacilityStructureDto['labels'] && updateFacilityStructureDto['labels'].length > 0) {
+  //     await this.neo4jService.removeLabel(_id, result['labels']);
+  //     await this.neo4jService.updateLabel(_id, updateFacilityStructureDto['labels']);
+  //   }
+  //   return result;
+  // }
 
-    if (!updatedNode) {
-      throw new FacilityStructureNotFountException(_id);
-    }
-    const result = {
-      id: updatedNode['identity'].low,
-      labels: updatedNode['labels'],
-      properties: updatedNode['properties'],
-    };
-    if (updateFacilityStructureDto['labels'] && updateFacilityStructureDto['labels'].length > 0) {
-      await this.neo4jService.removeLabel(_id, result['labels']);
-      await this.neo4jService.updateLabel(_id, updateFacilityStructureDto['labels']);
-    }
-    return result;
+  //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
+  async update(key: string, structureData: Object) {
+     //is there facility-structure node 
+     const node = await this.neo4jService.findOneNodeByKey(key);
+     if (!node) {
+       throw new FacilityStructureNotFountException(key);
+     }
+    
+     //update facility structure node
+     const updatedOn = moment().format('YYYY-MM-DD HH:mm:ss');
+     structureData['updatedOn'] = updatedOn;
+     const dynamicObject = createDynamicCyperObject(structureData);
+     const updatedNode = await this.neo4jService.updateById(node.id, dynamicObject);
+ 
+     if (!updatedNode) {
+       throw new FacilityStructureNotFountException(node.id);  //DEĞİŞECEK
+     }
+     const response = {
+       id: updatedNode['identity'].low,
+       labels: updatedNode['labels'],
+       properties: updatedNode['properties'],
+     };
+
+    return response;
   }
+
 
   async delete(_id: string) {
     try {
