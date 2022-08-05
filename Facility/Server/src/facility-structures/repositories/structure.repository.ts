@@ -9,9 +9,14 @@ import { NestKafkaService, nodeHasChildException } from 'ifmcommon';
 import { Neo4jService, assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError } from 'sgnm-neo4j/dist';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 import { RelationName } from 'src/common/const/relation.name.enum';
+import { BaseFormdataObject } from 'src/common/baseobject/base.formdata.object';
+import { BaseFacilityObject } from 'src/common/baseobject/base.facility.object ';
+import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
+import { AnyARecord } from 'dns';
+import { FacilityInterface } from 'src/common/interface/facility.interface';
 
 @Injectable()
-export class FacilityStructureRepository implements GeciciInterface<FacilityStructure> {
+export class FacilityStructureRepository implements FacilityInterface<any> {
   constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) {}
 
   async findOneByRealm(label: string, realm: string) {
@@ -23,24 +28,25 @@ export class FacilityStructureRepository implements GeciciInterface<FacilityStru
 
     return node;
   }
-  async create(createFacilityStructureDto: CreateFacilityStructureDto) {
-    const facilityStructure = new FacilityStructure();
-    const facilityStructureObject = assignDtoPropToEntity(facilityStructure, createFacilityStructureDto);
+  /////////////////////////// Static DTO ////////////////////////////////////////////////////////////////////
+  // async create(createFacilityStructureDto: CreateFacilityStructureDto) {
+  //   const facilityStructure = new FacilityStructure();
+  //   const facilityStructureObject = assignDtoPropToEntity(facilityStructure, createFacilityStructureDto);
 
-    let value;
-    if (createFacilityStructureDto['labels']) {
-      createFacilityStructureDto.labels.push('FacilityStructure');
-      value = await this.neo4jService.createNode(facilityStructureObject, createFacilityStructureDto.labels);
-    } else {
-      value = await this.neo4jService.createNode(facilityStructureObject, ['FacilityStructure']);
-    }
-    value['properties']['id'] = value['identity'].low;
-    const result = { id: value['identity'].low, labels: value['labels'], properties: value['properties'] };
-    if (createFacilityStructureDto['parentId']) {
-      await this.neo4jService.addRelations(result['id'], createFacilityStructureDto['parentId']);
-    }
-    return result;
-  }
+  //   let value;
+  //   if (createFacilityStructureDto['labels']) {
+  //     createFacilityStructureDto.labels.push('FacilityStructure');
+  //     value = await this.neo4jService.createNode(facilityStructureObject, createFacilityStructureDto.labels);
+  //   } else {
+  //     value = await this.neo4jService.createNode(facilityStructureObject, ['FacilityStructure']);
+  //   }
+  //   value['properties']['id'] = value['identity'].low;
+  //   const result = { id: value['identity'].low, labels: value['labels'], properties: value['properties'] };
+  //   if (createFacilityStructureDto['parentId']) {
+  //     await this.neo4jService.addRelations(result['id'], createFacilityStructureDto['parentId']);
+  //   }
+  //   return result;
+  // }
 
   async update(_id: string, updateFacilityStructureDto: UpdateFacilityStructureDto) {
     const updateFacilityStructureDtoWithoutLabelsAndParentId = {};
@@ -169,5 +175,22 @@ export class FacilityStructureRepository implements GeciciInterface<FacilityStru
          } 
         
          return [];
+    }
+    //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
+    async create(key: string, structureData: Object) {
+      //is there facility-structure parent node 
+      const node = await this.neo4jService.findOneNodeByKey(key);
+      if (!node) {
+        throw new FacilityStructureNotFountException(key);
+      }
+      
+      //create facility-structure node
+      let baseFacilityObject = new BaseFacilityObject();
+      baseFacilityObject = assignDtoPropToEntity(baseFacilityObject, structureData);
+      const createNode = await this.neo4jService.createNode(baseFacilityObject, [Neo4jLabelEnum.FACILITY_STRUCTURE]);
+      //create PARENT_OF relation between parent facility structure node and child facility structure node.
+      await this.neo4jService.addRelationWithRelationNameByKey(key, createNode.properties.key, RelationName.PARENT_OF);
+      const response = {id: createNode['identity'].low, labels: createNode['labels'], properties: createNode['properties'] };
+     return response;
     }
 }

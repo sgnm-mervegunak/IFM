@@ -19,8 +19,8 @@ export class StructureController {
     description: 'create  facility structure',
   })
   @Post()
-  create(@Body() createFacilityStructureDto: CreateFacilityStructureDto) {
-    return this.facilityStructuresService.create(createFacilityStructureDto);
+  create(@Param('id') id: string, @Body() createFacilityStructureDto: Object) {
+    return this.facilityStructuresService.create(id, createFacilityStructureDto);
   }
 
   @Get(':label/:realm')
