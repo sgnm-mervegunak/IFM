@@ -15,12 +15,12 @@ export class StructureController {
   @Unprotected()
   //@Roles({ roles: [UserRoles.ADMIN] })
   @ApiBody({
-    type: CreateFacilityStructureDto,
+    type: Object,
     description: 'create  facility structure',
   })
-  @Post()
-  create(@Param('id') id: string, @Body() createFacilityStructureDto: Object) {
-    return this.facilityStructuresService.create(id, createFacilityStructureDto);
+  @Post(':parent_key')
+  create(@Param('parent_key') key: string, @Body() createFacilityStructureDto: Object) {
+    return this.facilityStructuresService.create(key, createFacilityStructureDto);
   }
 
   @Get(':label/:realm')
