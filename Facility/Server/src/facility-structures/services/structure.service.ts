@@ -17,12 +17,13 @@ export class StructureService {
     return await this.facilityStructureRepository.create(key, createFacilityStructureDto);
   }
 
-  findOne(label: string, realm: string) {
-    return this.facilityStructureRepository.findOneByRealm(label, realm);
+  update(key: string, updateFacilityStructureDto: Object) {
+    return this.facilityStructureRepository.update(key, updateFacilityStructureDto);
   }
 
-  update(id: string, updateFacilityStructureDto: UpdateFacilityStructureDto) {
-    return this.facilityStructureRepository.update(id, updateFacilityStructureDto);
+  async findOneNode(key: string) {
+    //checkObjectIddİsValid(id);
+    return await this.facilityStructureRepository.findOneNodeByKey(key);
   }
 
   remove(id: string) {
@@ -33,11 +34,6 @@ export class StructureService {
     return await this.facilityStructureRepository.changeNodeBranch(id, target_parent_id);
   }
 
-  async findOneNode(key: string) {
-    //checkObjectIddİsValid(id);
-    return await this.facilityStructureRepository.findOneNodeByKey(key);
-  }
-
   findOneFirstLevel(label: string, realm: string) {
     return this.facilityStructureRepository.findOneFirstLevelByRealm(label, realm);
   }
@@ -45,4 +41,9 @@ export class StructureService {
   findChildrenByFacilityTypeNode(language: string,realm: string, typename:string) {
       return this.facilityStructureRepository.findChildrenByFacilityTypeNode(language,realm, typename);
     }
+
+  findOne(label: string, realm: string) {
+      return this.facilityStructureRepository.findOneByRealm(label, realm);
+    }
+  
 }
