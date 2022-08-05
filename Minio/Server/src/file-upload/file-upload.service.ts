@@ -13,6 +13,7 @@ export class FileUploadService {
         throw new HttpException("Error, Check the file type is jpeg or png or excel",HttpStatus.BAD_REQUEST)
       }
       return {
+        name: image.originalname.split(".")[0],
         image_url: uploaded_image.url,
         message: 'Successfully uploaded to MinIO S3',
       };

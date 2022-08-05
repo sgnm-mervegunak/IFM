@@ -101,9 +101,7 @@ const SetFacilityStructure2 = () => {
   useEffect(() => {
     FacilityStructureService.getFacilityTypes("FacilityTypes_EN", realm)
       .then((res) => {
-        res.data.map((item: any) => {
-          setFacilityType(res.data.map((item:any)=>item.name))
-        })
+        setFacilityType(res.data.map((item:any)=>item.name))
       })
       .catch((err) => {
         toast.current.show({
@@ -585,7 +583,8 @@ const SetFacilityStructure2 = () => {
       <Dialog
         header="Add New Item"
         visible={addDia}
-        style={{ width: "25vw" }}
+        maximizable
+        style={{ width: "40vw" }}
         footer={renderFooterAdd}
         onHide={() => {
           setName("");

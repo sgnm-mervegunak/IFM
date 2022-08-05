@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 import { RepositoryEnums } from 'src/common/const/repository.enum';
+import { FacilityInterface } from 'src/common/interface/facility.interface';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
 
 import { CreateFacilityStructureDto } from '../dto/create-facility-structure.dto';
@@ -10,10 +11,10 @@ import { UpdateFacilityStructureDto } from '../dto/update-facility-structure.dto
 export class StructureService {
   constructor(
     @Inject(RepositoryEnums.FACILITY_STRUCTURE)
-    private readonly facilityStructureRepository: GeciciInterface<any>,
+    private readonly facilityStructureRepository: FacilityInterface<any>,
   ) {}
-  async create(createFacilityStructureDto: CreateFacilityStructureDto) {
-    return await this.facilityStructureRepository.create(createFacilityStructureDto);
+  async create(id:string, createFacilityStructureDto: Object) {
+    return await this.facilityStructureRepository.create(id, createFacilityStructureDto);
   }
 
   findOne(label: string, realm: string) {

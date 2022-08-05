@@ -98,7 +98,7 @@ const SetClassificationUser = () => {
   ];
 
   const getClassification = () => {
-    ClassificationsService.findAllActive({realm:realm,isActive:true,language:"en"}).then((res) => {
+    ClassificationsService.findAllActive({realm:realm,language:"en"}).then((res) => {
 
       if (!res.data.root.children) {
         setData([res.data.root.properties] || []);
@@ -139,7 +139,7 @@ const SetClassificationUser = () => {
     }
     for (let i of nodes) {
       fixNodes(i.children)
-      i.label = i.name || i.name_TR || i.name_EN;
+      i.label = i.name;
     }
   };
 
