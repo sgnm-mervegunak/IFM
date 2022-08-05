@@ -18,7 +18,8 @@ import FormBuilderService from "../../services/formBuilder";
 import StructureWinformDataService from "../../services/structureWinformData";
 import FacilityTypePropertiesService from "../../services/facilitystructure";
 import FileUploadComponent from "./FileUpload/FileUpload";
-import ClassificationsService from "../../services/classifications";
+import TreeSelectComponent from "./TreeSelect/TreeSelect";
+
 // import "./FormGenerate.css";
 
 interface Node {
@@ -175,39 +176,8 @@ const Input = ({ value, onChange, type, ...rest }: InputProps) => {
       );
 
       case "treeselect":
-        console.log(rest);
-  
-        let temp: Node[] = [];
-        ClassificationsService.findAllActive({ realm: "IFM", language: "en" }).then((res) => {
-  
-  
-          temp = JSON.parse(JSON.stringify([res.data.root] || []));
-          console.log(temp);
-          fixNodes(temp)
-          
-    
-        })
-  
-        const fixNodes = (nodes: Node[]) => {
-          if (!nodes || nodes.length === 0) {
-            return;
-          }
-          for (let i of nodes) {
-            fixNodes(i.children)
-            i.label = i.name;
-          }
-        };
-   
         return (
-          <div>
-            <TreeSelect
-              className="mt-1"
-              options={temp}
-              onChange={onChange}
-              placeholder={rest?.placeholder}
-              style={{ width: "100%" }}
-            />
-          </div>
+          <TreeSelectComponent selectedNode={value} setSelectedNode={onChange} placeholder={rest?.placeholder}/>
         );
     default:
       return null;
