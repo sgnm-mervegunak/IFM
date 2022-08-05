@@ -7,6 +7,7 @@ import { Checkbox } from "primereact/checkbox";
 import { RadioButton } from "primereact/radiobutton";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
+import { TreeSelect } from "primereact/treeselect";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Toast } from "primereact/toast";
 import { TabView, TabPanel } from "primereact/tabview";
@@ -17,7 +18,31 @@ import FormBuilderService from "../../services/formBuilder";
 import StructureWinformDataService from "../../services/structureWinformData";
 import FacilityTypePropertiesService from "../../services/facilitystructure";
 import FileUploadComponent from "./FileUpload/FileUpload";
+import ClassificationsService from "../../services/classifications";
 // import "./FormGenerate.css";
+
+interface Node {
+  cantDeleted: boolean;
+  children: Node[];
+  description: string;
+  isActive: boolean;
+  isDeleted: boolean;
+  key: string;
+  name: string;
+  code: string;
+  realm: string;
+  tag: string[];
+  _id: {
+    low: string;
+    high: string;
+  },
+  formTypeId?: string;
+  icon?: string;
+  label?: string;
+  labels?: string[]; // for form type
+  parentId?: string;
+}
+
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   value: any;
@@ -148,6 +173,42 @@ const Input = ({ value, onChange, type, ...rest }: InputProps) => {
           />
         </div>
       );
+
+      case "treeselect":
+        console.log(rest);
+  
+        let temp: Node[] = [];
+        ClassificationsService.findAllActive({ realm: "IFM", language: "en" }).then((res) => {
+  
+  
+          temp = JSON.parse(JSON.stringify([res.data.root] || []));
+          console.log(temp);
+          fixNodes(temp)
+          
+    
+        })
+  
+        const fixNodes = (nodes: Node[]) => {
+          if (!nodes || nodes.length === 0) {
+            return;
+          }
+          for (let i of nodes) {
+            fixNodes(i.children)
+            i.label = i.name;
+          }
+        };
+   
+        return (
+          <div>
+            <TreeSelect
+              className="mt-1"
+              options={temp}
+              onChange={onChange}
+              placeholder={rest?.placeholder}
+              style={{ width: "100%" }}
+            />
+          </div>
+        );
     default:
       return null;
   }
