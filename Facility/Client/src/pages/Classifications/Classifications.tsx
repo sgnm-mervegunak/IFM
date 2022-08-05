@@ -80,27 +80,27 @@ const Classifications = () => {
   const loadLazyData = () => {
     let soertField2 = lazyParams.sortField.split('.')[1];
     setLoading(true);
-    ClassificationsService.findAll({
-      page: lazyParams.page,
-      limit: lazyParams.rows,
-      sortField: soertField2,
-      sortKind: lazyParams.sortOrder === 1 ? "ascending" : "descending",
-      class_name: "Classification",
-    })
-      .then((response) => {
-        setData(response.data[0]);
-        setCountClassifications(response.data[1].count);
-        setLoading(false);
-      })
-      .catch((err) => {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
-        });
-        setLoading(false);
-      });
+    // ClassificationsService.findAll({
+    //   page: lazyParams.page,
+    //   limit: lazyParams.rows,
+    //   sortField: soertField2,
+    //   sortKind: lazyParams.sortOrder === 1 ? "ascending" : "descending",
+    //   class_name: "Classification",
+    // })
+    //   .then((response) => {
+    //     setData(response.data[0]);
+    //     setCountClassifications(response.data[1].count);
+    //     setLoading(false);
+    //   })
+    //   .catch((err) => {
+    //     toast.current.show({
+    //       severity: "error",
+    //       summary: "Error",
+    //       detail: err.response ? err.response.data.message : err.message,
+    //       life: 2000,
+    //     });
+    //     setLoading(false);
+    //   });
   };
 
   // const addItem = () => {
