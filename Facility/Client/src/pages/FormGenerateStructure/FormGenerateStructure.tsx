@@ -16,6 +16,7 @@ import FormTypeService from "../../services/formType";
 import FormBuilderService from "../../services/formBuilder";
 import StructureWinformDataService from "../../services/structureWinformData";
 import FacilityTypePropertiesService from "../../services/facilitystructure";
+import FileUploadComponent from "./FileUpload/FileUpload";
 // import "./FormGenerate.css";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -29,14 +30,16 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 interface Params {
   selectedFacilityType: string;
-  submitted:boolean;
-  setSubmitted:any;
-  addItem:any;
+  submitted: boolean;
+  setSubmitted: any;
+  addItem: any;
   realm: string;
   // setFormDia: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Error: React.FC = ({ children }) => <p style={{ color: "red" }}>{children}</p>;
+const Error: React.FC = ({ children }) => (
+  <p style={{ color: "red" }}>{children}</p>
+);
 const Input = ({ value, onChange, type, ...rest }: InputProps) => {
   const options2 = rest?.options?.map((item: any | null) => {
     return Object.values(item);
@@ -109,7 +112,6 @@ const Input = ({ value, onChange, type, ...rest }: InputProps) => {
       );
 
     case "date":
-      console.log(value);
       const date1 = new Date(value);
       return (
         <div>
@@ -124,21 +126,46 @@ const Input = ({ value, onChange, type, ...rest }: InputProps) => {
           />
         </div>
       );
-
+    case "imageupload":
+      return (
+        <div>
+          <label>{rest?.label2}</label>
+          <FileUploadComponent 
+            isImage
+            uploadedFiles={value}
+            setUploadedFiles={onChange}
+          />
+        </div>
+      );
+    case "documentupload":
+      return (
+        <div>
+          <label>{rest?.label2}</label>
+          <FileUploadComponent 
+            isDocument
+            uploadedFiles={value}
+            setUploadedFiles={onChange}
+          />
+        </div>
+      );
     default:
       return null;
   }
 };
 
-
-const FormGenerateStructure = ({ selectedFacilityType, realm,submitted,setSubmitted,addItem }: Params) => {
-  const [items, setItems] = useState([]);
+const FormGenerateStructure = ({
+  selectedFacilityType,
+  realm,
+  submitted,
+  setSubmitted,
+  addItem,
+}: Params) => {
+  const [items, setItems] = useState<any[]>([]);
   const [passiveItems, setPassiveItems] = useState([]);
   const [hasForm, setHasForm] = useState(true);
   const [hasFormData, setHasFormData] = useState(false);
   const toast = React.useRef<any>(null);
   console.log(selectedFacilityType);
-  
 
   // const location = useLocation();
   // const params = useParams();
@@ -157,8 +184,10 @@ const FormGenerateStructure = ({ selectedFacilityType, realm,submitted,setSubmit
     // const responsegetData = StructureWinformDataService.getFormData(nodeKey);
     // console.log(responsegetData);
     (async () => {
-
-      FacilityTypePropertiesService.getFacilityTypeProperties(realm, selectedFacilityType)
+      FacilityTypePropertiesService.getFacilityTypeProperties(
+        realm,
+        selectedFacilityType
+      )
         .then(async (responsegetProperties) => {
           console.log(responsegetProperties.data);
           let isFormData;
@@ -180,9 +209,11 @@ const FormGenerateStructure = ({ selectedFacilityType, realm,submitted,setSubmit
           if (isFormData === true) {
             console.log("hasFormData");
 
-            // const responsegetData = await StructureWinformDataService.getFormData(nodeKey); 
+            // const responsegetData = await StructureWinformDataService.getFormData(nodeKey);
             // console.log(responsegetData);
-            const convertedData = responsegetProperties.data.map(function (item: any) {
+            const convertedData = responsegetProperties.data.map(function (
+              item: any
+            ) {
               // console.log(formData[`'${item.label}'`]);
               // console.log(responsegetData.data[item.label.replaceAll(" ", "")]);
               // console.log([responsegetData.data].length);
@@ -205,7 +236,9 @@ const FormGenerateStructure = ({ selectedFacilityType, realm,submitted,setSubmit
             setItems(convertedData);
           } else {
             console.log("noFormData");
-            const convertedData = responsegetProperties.data.map(function (item: any) {
+            const convertedData = responsegetProperties.data.map(function (
+              item: any
+            ) {
               // console.log(formData[`'${item.label}'`]);
 
               return {
@@ -219,9 +252,6 @@ const FormGenerateStructure = ({ selectedFacilityType, realm,submitted,setSubmit
             });
             setItems(convertedData);
           }
-
-
-
         })
         .catch((err) => {
           console.log("ana catch");
@@ -237,7 +267,6 @@ const FormGenerateStructure = ({ selectedFacilityType, realm,submitted,setSubmit
           });
         });
     })();
-
   }, [selectedFacilityType]);
 
   // useEffect(() => {
@@ -258,7 +287,6 @@ const FormGenerateStructure = ({ selectedFacilityType, realm,submitted,setSubmit
 
   //         if (isFormData === true) {
   //           console.log("11");
-
 
   //           const responsegetData = await StructureWinformDataService.getFormData(nodeKey);
   //           console.log(responsegetData);
@@ -318,7 +346,7 @@ const FormGenerateStructure = ({ selectedFacilityType, realm,submitted,setSubmit
     setSubmitted(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [submitted]);
-  
+
   const onSubmit = (data: any) => {
     // console.log(data);
     const key = uuidv4();
@@ -327,8 +355,8 @@ const FormGenerateStructure = ({ selectedFacilityType, realm,submitted,setSubmit
     //   nodeKey: nodeKey,
     //   data: data,
     // };
-    addItem(data);
     console.log(data);
+    addItem(data);
     // console.log(formData);
     // console.log(formData);
 
@@ -379,7 +407,6 @@ const FormGenerateStructure = ({ selectedFacilityType, realm,submitted,setSubmit
 
   return (
     <div className="tabview-demo">
-
       <div>
         <Toast ref={toast} position="top-right" />
 
@@ -388,7 +415,6 @@ const FormGenerateStructure = ({ selectedFacilityType, realm,submitted,setSubmit
             {/* <h4 className="flex justify-content-center"> Extra Form</h4> */}
             {items &&
               Object.keys(items).map((e: any) => {
-                console.log(items[e]);
                 const { rules, defaultValue, label }: any = items[e];
                 return (
                   <section key={e}>
@@ -405,7 +431,7 @@ const FormGenerateStructure = ({ selectedFacilityType, realm,submitted,setSubmit
                           <Input
                             value={field.value || ""}
                             onChange={field.onChange}
-                            {...items[e] as any}
+                            {...(items[e] as any)}
                           />
                         </div>
                       )}
@@ -416,27 +442,6 @@ const FormGenerateStructure = ({ selectedFacilityType, realm,submitted,setSubmit
                   </section>
                 );
               })}
-            <div>
-              {items.length > 0 && (
-                <>
-                  <div className="mt-4 ml-3 flex">
-                    <Button className="p-button-success" type="submit">
-                      Save
-                    </Button>
-                    <Button
-                      className="ml-4 p-button-danger"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        // setFormDia(false);
-                      }
-                      }
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </>
-              )}
-            </div>
           </form>
         ) : (
           <div>
@@ -447,8 +452,6 @@ const FormGenerateStructure = ({ selectedFacilityType, realm,submitted,setSubmit
           </div>
         )}
       </div>
-
-
     </div>
   );
 };

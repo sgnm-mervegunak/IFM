@@ -33,7 +33,9 @@ interface Params {
   setFormDia: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Error: React.FC = ({ children }) => <p style={{ color: "red" }}>{children}</p>;
+const Error: React.FC = ({ children }) => (
+  <p style={{ color: "red" }}>{children}</p>
+);
 const Input = ({ value, onChange, type, ...rest }: InputProps) => {
   const options2 = rest?.options?.map((item: any | null) => {
     return Object.values(item);
@@ -167,15 +169,17 @@ const FormGenerate = ({ nodeKey, formKey, nodeName, setFormDia }: Params) => {
                 setHasFormData(false);
               }
             })
-            .catch((err) => {
-            });
+            .catch((err) => {});
 
           if (isFormData === true) {
             console.log("hasFormData");
 
-            const responsegetData = await StructureWinformDataService.getFormData(nodeKey);
+            const responsegetData =
+              await StructureWinformDataService.getFormData(nodeKey);
             console.log(responsegetData);
-            const convertedData = responsegetProperties.data.map(function (item: any) {
+            const convertedData = responsegetProperties.data.map(function (
+              item: any
+            ) {
               // console.log(formData[`'${item.label}'`]);
               console.log(responsegetData.data[item.label.replaceAll(" ", "")]);
               console.log([responsegetData.data].length);
@@ -197,7 +201,9 @@ const FormGenerate = ({ nodeKey, formKey, nodeName, setFormDia }: Params) => {
             setItems(convertedData);
           } else {
             console.log("noFormData");
-            const convertedData = responsegetProperties.data.map(function (item: any) {
+            const convertedData = responsegetProperties.data.map(function (
+              item: any
+            ) {
               // console.log(formData[`'${item.label}'`]);
 
               return {
@@ -210,9 +216,6 @@ const FormGenerate = ({ nodeKey, formKey, nodeName, setFormDia }: Params) => {
             });
             setItems(convertedData);
           }
-
-
-
         })
         .catch((err) => {
           console.log("ana catch");
@@ -228,7 +231,6 @@ const FormGenerate = ({ nodeKey, formKey, nodeName, setFormDia }: Params) => {
           });
         });
     })();
-
   }, []);
 
   useEffect(() => {
@@ -244,39 +246,40 @@ const FormGenerate = ({ nodeKey, formKey, nodeName, setFormDia }: Params) => {
                 isFormData = false;
               }
             })
-            .catch((err) => {
-            });
+            .catch((err) => {});
 
           if (isFormData === true) {
             console.log("11");
 
-
-            const responsegetData = await StructureWinformDataService.getFormData(nodeKey);
+            const responsegetData =
+              await StructureWinformDataService.getFormData(nodeKey);
             console.log(responsegetData);
             console.log(responsegetPropertiesPassive);
 
-            const convertedData = responsegetPropertiesPassive.data?.map(function (item: any) {
+            const convertedData = responsegetPropertiesPassive.data?.map(
+              function (item: any) {
+                console.log(
+                  responsegetData.data[item.label.replaceAll(" ", "")]
+                );
+                console.log([responsegetData.data].length);
 
-              console.log(responsegetData.data[item.label.replaceAll(" ", "")]);
-              console.log([responsegetData.data].length);
-
-              return {
-                ...item,
-                defaultValue:
-                  [responsegetData.data].length > 0
-                    ? responsegetData.data[item.label.replaceAll(" ", "")]
+                return {
+                  ...item,
+                  defaultValue:
+                    [responsegetData.data].length > 0
                       ? responsegetData.data[item.label.replaceAll(" ", "")]
-                      : item.defaultValue
-                    : item.defaultValue,
-                rules: { required: item.rules[0] },
-                options: item.options.map(function (option: any) {
-                  return { optionsName: option };
-                }),
-              };
-            });
+                        ? responsegetData.data[item.label.replaceAll(" ", "")]
+                        : item.defaultValue
+                      : item.defaultValue,
+                  rules: { required: item.rules[0] },
+                  options: item.options.map(function (option: any) {
+                    return { optionsName: option };
+                  }),
+                };
+              }
+            );
             setPassiveItems(convertedData);
           }
-
         })
         .catch((err) => {
           console.log(err);
@@ -291,7 +294,7 @@ const FormGenerate = ({ nodeKey, formKey, nodeName, setFormDia }: Params) => {
           });
         });
     })();
-  }, [])
+  }, []);
 
   const {
     handleSubmit,
@@ -361,18 +364,18 @@ const FormGenerate = ({ nodeKey, formKey, nodeName, setFormDia }: Params) => {
 
   return (
     <div className="tabview-demo">
-
       {/* <TabView>
           <TabPanel header="Type Form"> */}
       <TabView>
-
         <TabPanel header="Active Data">
           <div>
             <Toast ref={toast} position="top-right" />
 
             {hasForm ? (
               <form onSubmit={handleSubmit(onSubmit)} className="wrapper">
-                <h4 className="flex justify-content-center">{nodeName} Extra Form</h4>
+                <h4 className="flex justify-content-center">
+                  {nodeName} Extra Form
+                </h4>
                 {items &&
                   Object.keys(items).map((e: any) => {
                     console.log(items[e]);
@@ -391,7 +394,7 @@ const FormGenerate = ({ nodeKey, formKey, nodeName, setFormDia }: Params) => {
                               <Input
                                 value={field.value || ""}
                                 onChange={field.onChange}
-                                {...items[e] as any}
+                                {...(items[e] as any)}
                               />
                             </div>
                           )}
@@ -414,8 +417,7 @@ const FormGenerate = ({ nodeKey, formKey, nodeName, setFormDia }: Params) => {
                           onClick={(e) => {
                             e.preventDefault();
                             setFormDia(false);
-                          }
-                          }
+                          }}
                         >
                           Cancel
                         </Button>
@@ -437,7 +439,9 @@ const FormGenerate = ({ nodeKey, formKey, nodeName, setFormDia }: Params) => {
         <TabPanel header="Passive Data">
           {passiveItems.length > 0 ? (
             <form onSubmit={handleSubmit(onSubmit)} className="wrapper">
-              <h4 className="flex justify-content-center">{nodeName} Extra Form</h4>
+              <h4 className="flex justify-content-center">
+                {nodeName} Extra Form
+              </h4>
               {passiveItems &&
                 Object.keys(passiveItems).map((e: any) => {
                   console.log(passiveItems[e]);
@@ -456,7 +460,7 @@ const FormGenerate = ({ nodeKey, formKey, nodeName, setFormDia }: Params) => {
                             <Input
                               value={field.value || ""}
                               // onChange={field.onChange}
-                              {...passiveItems[e] as any}
+                              {...(passiveItems[e] as any)}
                             />
                           </div>
                         )}
@@ -467,7 +471,6 @@ const FormGenerate = ({ nodeKey, formKey, nodeName, setFormDia }: Params) => {
                     </section>
                   );
                 })}
-
             </form>
           ) : (
             <div>
@@ -478,7 +481,6 @@ const FormGenerate = ({ nodeKey, formKey, nodeName, setFormDia }: Params) => {
             </div>
           )}
         </TabPanel>
-
       </TabView>
       {/* </TabPanel> */}
 
@@ -490,7 +492,6 @@ const FormGenerate = ({ nodeKey, formKey, nodeName, setFormDia }: Params) => {
           </TabPanel> */}
 
       {/* </TabView> */}
-
     </div>
   );
 };
