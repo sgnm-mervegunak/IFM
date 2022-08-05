@@ -39,7 +39,6 @@ export class MinioClientService {
     await this.client.putObject(baseBucket, fileName, fileBuffer, function (err, res) {
        if (err) throw new HttpException('Error uploading file 2', HttpStatus.BAD_REQUEST);
 
-      console.log(res, "RESPONSEEEE");
       console.log(err, "ERRORRR");
 
 

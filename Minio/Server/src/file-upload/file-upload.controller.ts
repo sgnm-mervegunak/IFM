@@ -48,36 +48,42 @@ export class FileUploadController {
 
 
 
-  // @Post('many')
-  // @ApiBody({
-  //   schema: {
-  //     type: 'object',
-  //     properties: {
-  //       file1: {
-  //         type: 'string',
-  //         format: 'binary',
-  //       },
-  //       file2:{
-  //         type: 'string',
-  //         format: 'binary',
-  //       },
-  //       folderName:{ type: 'string'}
-  //     },
-  //   },
-  // })
-  // @UseInterceptors(
-  //   FileFieldsInterceptor([
-  //     { name: 'file1', maxCount: 1 },
-  //     { name: 'file2', maxCount: 1 },
-  //   ]),
-  // )
-  // @ApiConsumes('multipart/form-data')
-  // @ApiOperation({
-  //   summary: 'Upload multiple file or image'
-  // })
-  // async uploadMany(@UploadedFiles() files: BufferedFile,@Body("folderName") folderName: string) {
-  //   return this.fileUploadService.uploadMany(files,folderName);
-  // }
+  @Post('many')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        realmName:{type:'string',description:'realmName'},
+        file1: {
+          type: 'string',
+          format: 'binary',
+        },
+        file2:{
+          type: 'string',
+          format: 'binary',
+        },
+        file3:{
+          type: 'string',
+          format: 'binary',
+        },
+        folderName:{ type: 'string'}
+      },
+    },
+  })
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'file1', maxCount: 1 },
+      { name: 'file2', maxCount: 1 },
+      { name: 'file3', maxCount: 1 }
+    ]),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Upload multiple file or image'
+  })
+  async uploadMany(@Body("realmName") realmName:string, @UploadedFiles() files: BufferedFile,@Body("folderName") folderName: string) {
+    return this.fileUploadService.uploadMany(realmName,files,folderName);
+  }
 
 
   @Delete('removeOne')

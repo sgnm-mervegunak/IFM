@@ -21,19 +21,23 @@ export class FileUploadService {
     }
   }
 
-  // async uploadMany(files: BufferedFile,folderName?: string) {
-  //   let image1 = files['image1'][0];
-  //   let uploaded_image1 = await this.minioClientService.upload(image1,folderName);
+  async uploadMany(realmName: string,files: BufferedFile,folderName?: string) {
+    let file1 = files['file1'][0];
+    let uploaded_file1 = await this.minioClientService.upload(realmName,file1,folderName);
 
-  //   let image2 = files['image2'][0];
-  //   let uploaded_image2 = await this.minioClientService.upload(image2,folderName);
+    let file2 = files['file2'][0];
+    let uploaded_file2 = await this.minioClientService.upload(realmName,file2,folderName);
+    
+    let file3 = files['file3'][0];
+    let uploaded_file3 = await this.minioClientService.upload(realmName,file3,folderName);
 
-  //   return {
-  //     image1_url: uploaded_image1.url,
-  //     image2_url: uploaded_image2.url,
-  //     message: 'Successfully uploaded mutiple image on MinioS3',
-  //   };
-  // }
+    return {
+      file1: uploaded_file1.url,
+      file2: uploaded_file2.url,
+      file3: uploaded_file3.url,
+      message: 'Successfully uploaded multiple image on MinioS3',
+    };
+  }
 
   async deleteOne(fileName: string,realmName: string){
     let res=await this.minioClientService.delete(fileName,realmName);
