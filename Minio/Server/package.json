@@ -31,6 +31,7 @@
     "@nestjs/microservices": "^8.4.4",
     "@nestjs/platform-express": "^8.0.0",
     "@nestjs/swagger": "^5.2.0",
+    "class-validator": "^0.13.2",
     "ifmcommon": "^0.0.26",
     "joi": "^17.6.0",
     "kafkajs": "^2.0.0",
