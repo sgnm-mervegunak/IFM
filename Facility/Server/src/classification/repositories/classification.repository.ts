@@ -248,7 +248,7 @@ for (let index = 0; index < returnData.length; index++) {
 }
 
   for (let index = 0; index < abc.length; index++) {
-    let cypher2=`MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${abc[index]} {realm:"${realm}"})  MATCH path = (b)-[:PARENT_OF*]->(m)  m.isDeleted=false  \
+    let cypher2=`MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${abc[index]} {realm:"${realm}"})  MATCH path = (b)-[:PARENT_OF*]->(m) where m.isDeleted=false  \
     WITH collect(path) AS paths\
     CALL apoc.convert.toTree(paths)\
     YIELD value\
