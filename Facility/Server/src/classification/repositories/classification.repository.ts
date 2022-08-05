@@ -168,7 +168,7 @@ export class ClassificationRepository implements classificationInterface<Classif
     }
     
       for (let index = 0; index < abc.length; index++) {
-        let cypher2=`MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${abc[index]} {realm:"${realm}"})  MATCH path = (b)-[:PARENT_OF*]->(m) where m.isActive=true \
+        let cypher2=`MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${abc[index]} {realm:"${realm}"})  MATCH path = (b)-[:PARENT_OF*]->(m) where m.isActive=true m.isDeleted=false \
         WITH collect(path) AS paths\
         CALL apoc.convert.toTree(paths)\
         YIELD value\
@@ -199,7 +199,7 @@ export class ClassificationRepository implements classificationInterface<Classif
     let cypher=`MATCH (n) where id(n)=${Number(id)} SET n.isActive=true`
     await this.neo4jService.write(cypher)
 
-  let cypher2=`MATCH (n) where id(n)=${Number(id)} MATCH (n)-[:PARENT_OF*]->(a) SET a.isActive=true`;
+  let cypher2=`MATCH (n) where id(n)=${Number(id)} MATCH (n)-[:PARENT_OF*]->(a) SET a.isActive=true `;
     await this.neo4jService.write(cypher2)
   }
 
@@ -248,7 +248,7 @@ for (let index = 0; index < returnData.length; index++) {
 }
 
   for (let index = 0; index < abc.length; index++) {
-    let cypher2=`MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${abc[index]} {realm:"${realm}"})  MATCH path = (b)-[:PARENT_OF*]->(m)  \
+    let cypher2=`MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${abc[index]} {realm:"${realm}"})  MATCH path = (b)-[:PARENT_OF*]->(m)  m.isDeleted=false  \
     WITH collect(path) AS paths\
     CALL apoc.convert.toTree(paths)\
     YIELD value\
