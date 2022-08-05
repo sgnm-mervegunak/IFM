@@ -148,13 +148,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     await this.neo4jService.addRelations(facilityTypesNode3.identity.low, facilityTypesNode.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode4.identity.low, facilityTypesNode.identity.low);
 
-    const allowedFacilityStructureRoot=await this.neo4jService.createNode({
-      canDelete: false,
-      isDeleted: false,
-      name: 'AllowedFacilityStructureRoot',
-      isActive: true,
-      canDisplay: false,
-    },['AllowedStructure']);
+   
 
     const allowedBuildingStructureRoot=await this.neo4jService.createNode({
       canDelete: false,
@@ -179,11 +173,20 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       canDisplay: false,
     },['AllowedStructure']);
+    
+    const allowedFacilityStructureRoot=await this.neo4jService.createNode({
+      canDelete: false,
+      isDeleted: false,
+      name: 'AllowedFacilityStructureRoot',
+      isActive: true,
+      canDisplay: false,
+    },['AllowedStructure']);
 
-    await this.neo4jService.addRelations(allowedFacilityStructureRoot.identity.low,facilityTypesNode4.identity.low);
+   
     await this.neo4jService.addRelations(allowedBuildingStructureRoot.identity.low,facilityTypesNode1.identity.low);
     await this.neo4jService.addRelations(allowedFloorStructureRoot.identity.low,facilityTypesNode2.identity.low);
     await this.neo4jService.addRelations(allowedBlockStructureRoot.identity.low,facilityTypesNode3.identity.low);
+    await this.neo4jService.addRelations(allowedFacilityStructureRoot.identity.low,facilityTypesNode4.identity.low);
   
     
     const facilityTypesNode1property1 = await this.neo4jService.createNode({
@@ -211,7 +214,6 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       rules: ['not null'],
       options: [],
       placeHolder: 'Category',
-      endpointurl: 'http://localhost:3010/classification/OmniClass11_EN/IFM',
       index: 1
     },['FacilityTypeProperty']);
 
@@ -264,7 +266,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       label: 'Status',
       type: "dropdown",
       dataType: "string",
-      defaultValue: "in use",
+      defaultValue: "",
       rules: ['not null'],
       options: ['in use','out of use','sold',''],
       placeHolder: 'Status',
@@ -321,7 +323,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       type: "date",
       dataType: "date",
       defaultValue: "",
-      rules: ['< today date'],
+      rules: [],
       options: [],
       placeHolder: 'Handover Date',
       index: 9
@@ -335,7 +337,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       type: "date",
       dataType: "date",
       defaultValue: "",
-      rules: ['< today date'],
+      rules: [],
       options: [],
       placeHolder: 'Operation Start Date',
       index: 10
@@ -349,7 +351,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       type: "date",
       dataType: "date",
       defaultValue: "",
-      rules: ['> today date'],
+      rules: [],
       options: [],
       placeHolder: 'Warranty Expire Date',
       index: 11
@@ -366,91 +368,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       rules: [],
       options: ['Vaziyet Planı','Mimari Çizim','Diğer'],
       placeHolder: 'Documents',
-      index: 12
-    },['FacilityTypeProperty']);
-
-    const facilityTypesNode1property14 = await this.neo4jService.createNode({
-      canDelete: true,
-      isDeleted: false,
-      isActive: true,
-      label: 'Tag',
-      type: "textarray",
-      dataType: "string",
-      defaultValue: [],
-      rules: [],
-      options: [],
-      placeHolder: 'Tag',
-      index: 13
-    },['FacilityTypeProperty']);
-
-    const facilityTypesNode1property15 = await this.neo4jService.createNode({
-      canDelete: true,
-      isDeleted: false,
-      isActive: true,
-      label: 'Description',
-      type: "text",
-      dataType: "string",
-      defaultValue: "",
-      rules: [],
-      options: [],
-      placeHolder: 'Description',
-      index: 14
-    },['FacilityTypeProperty']);
-
-    const facilityTypesNode1property16 = await this.neo4jService.createNode({
-      canDelete: true,
-      isDeleted: false,
-      isActive: true,
-      label: 'Created By',
-      type: "text",
-      dataType: "string",
-      defaultValue: "",
-      rules: ['system'],
-      options: [],
-      placeHolder: 'Created By',
-      index: 15
-    },['FacilityTypeProperty']);
-
-    const facilityTypesNode1property17 = await this.neo4jService.createNode({
-      canDelete: true,
-      isDeleted: false,
-      isActive: true,
-      label: 'Created On',
-      type: "date",
-      dataType: "date",
-      defaultValue: "",
-      rules: ['system'],
-      options: [],
-      placeHolder: 'Created On',
-      index: 16
-    },['FacilityTypeProperty']);
-
-    const facilityTypesNode1property18 = await this.neo4jService.createNode({
-      canDelete: true,
-      isDeleted: false,
-      isActive: true,
-      label: 'Site Name',
-      type: "text",
-      dataType: "string",
-      defaultValue: "",
-      rules: ['system'],
-      options: [],
-      placeHolder: 'Site Name',
-      index: 17
-    },['FacilityTypeProperty']);
-
-    const facilityTypesNode1property19 = await this.neo4jService.createNode({
-      canDelete: true,
-      isDeleted: false,
-      isActive: true,
-      label: 'Project Name',
-      type: "text",
-      dataType: "string",
-      defaultValue: "",
-      rules: [],
-      options: [],
-      placeHolder: 'Project Name',
-      index: 18
+      index: 11
     },['FacilityTypeProperty']);
 
 
@@ -467,12 +385,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     await this.neo4jService.addRelations(facilityTypesNode1property11.identity.low, facilityTypesNode1.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode1property12.identity.low, facilityTypesNode1.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode1property13.identity.low, facilityTypesNode1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property14.identity.low, facilityTypesNode1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property15.identity.low, facilityTypesNode1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property16.identity.low, facilityTypesNode1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property17.identity.low, facilityTypesNode1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property18.identity.low, facilityTypesNode1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property19.identity.low, facilityTypesNode1.identity.low);
+
 
     const facilityTypesNode2property1 = await this.neo4jService.createNode({
       canDelete: true,
@@ -488,98 +401,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       index: 0
     },['FacilityTypeProperty']);
 
-    const facilityTypesNode2property2 = await this.neo4jService.createNode({
-      canDelete: true,
-      isDeleted: false,
-      isActive: true,
-      label: 'Tag',
-      type: "textarray",
-      dataType: "string",
-      defaultValue: [],
-      rules: [],
-      options: [],
-      placeHolder: 'Tag',
-      index: 1
-    },['FacilityTypeProperty']);
-
-    const facilityTypesNode2property3 = await this.neo4jService.createNode({
-      canDelete: true,
-      isDeleted: false,
-      isActive: true,
-      label: 'Description',
-      type: "text",
-      dataType: "string",
-      defaultValue: "",
-      rules: [],
-      options: [],
-      placeHolder: 'Description',
-      index: 2
-    },['FacilityTypeProperty']);
-
-    const facilityTypesNode2property4 = await this.neo4jService.createNode({
-      canDelete: true,
-      isDeleted: false,
-      isActive: true,
-      label: 'Created By',
-      type: "text",
-      dataType: "string",
-      defaultValue: "",
-      rules: ['system'],
-      options: [],
-      placeHolder: 'Created By',
-      index: 3
-    },['FacilityTypeProperty']);
-
-    const facilityTypesNode2property5 = await this.neo4jService.createNode({
-      canDelete: true,
-      isDeleted: false,
-      isActive: true,
-      label: 'Created On',
-      type: "date",
-      dataType: "date",
-      defaultValue: "",
-      rules: ['system'],
-      options: [],
-      placeHolder: 'Created On',
-      index: 4
-    },['FacilityTypeProperty']);
-
-    const facilityTypesNode2property6 = await this.neo4jService.createNode({
-      canDelete: true,
-      isDeleted: false,
-      isActive: true,
-      label: 'Site Name',
-      type: "text",
-      dataType: "string",
-      defaultValue: "",
-      rules: ['system'],
-      options: [],
-      placeHolder: 'Site Name',
-      index: 5
-    },['FacilityTypeProperty']);
-
-    const facilityTypesNode2property7 = await this.neo4jService.createNode({
-      canDelete: true,
-      isDeleted: false,
-      isActive: true,
-      label: 'Project Name',
-      type: "text",
-      dataType: "string",
-      defaultValue: "",
-      rules: [],
-      options: [],
-      placeHolder: 'Project Name',
-      index: 6
-    },['FacilityTypeProperty']);
-
-
     await this.neo4jService.addRelations(facilityTypesNode2property1.identity.low, facilityTypesNode2.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode2property2.identity.low, facilityTypesNode2.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode2property3.identity.low, facilityTypesNode2.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode2property4.identity.low, facilityTypesNode2.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode2property5.identity.low, facilityTypesNode2.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode2property6.identity.low, facilityTypesNode2.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode2property7.identity.low, facilityTypesNode2.identity.low);
 
     
     const facilityTypesNode3property1 = await this.neo4jService.createNode({
@@ -595,99 +417,9 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       placeHolder: 'Name',
       index: 0
     },['FacilityTypeProperty']);
-   
-    const facilityTypesNode3property2 = await this.neo4jService.createNode({
-      canDelete: true,
-      isDeleted: false,
-      isActive: true,
-      label: 'Tag',
-      type: "textarray",
-      dataType: "string",
-      defaultValue: [],
-      rules: [],
-      options: [],
-      placeHolder: 'Tag',
-      index: 1
-    },['FacilityTypeProperty']);
 
-    const facilityTypesNode3property3 = await this.neo4jService.createNode({
-      canDelete: true,
-      isDeleted: false,
-      isActive: true,
-      label: 'Description',
-      type: "text",
-      dataType: "string",
-      defaultValue: "",
-      rules: [],
-      options: [],
-      placeHolder: 'Description',
-      index: 2
-    },['FacilityTypeProperty']);
 
-    const facilityTypesNode3property4 = await this.neo4jService.createNode({
-      canDelete: true,
-      isDeleted: false,
-      isActive: true,
-      label: 'Created By',
-      type: "text",
-      dataType: "string",
-      defaultValue: "",
-      rules: ['system'],
-      options: [],
-      placeHolder: 'Created By',
-      index: 3
-    },['FacilityTypeProperty']);
-
-    const facilityTypesNode3property5 = await this.neo4jService.createNode({
-      canDelete: true,
-      isDeleted: false,
-      isActive: true,
-      label: 'Created On',
-      type: "date",
-      dataType: "date",
-      defaultValue: "",
-      rules: ['system'],
-      options: [],
-      placeHolder: 'Created On',
-      index: 4
-    },['FacilityTypeProperty']);
-
-    const facilityTypesNode3property6 = await this.neo4jService.createNode({
-      canDelete: true,
-      isDeleted: false,
-      isActive: true,
-      label: 'Site Name',
-      type: "text",
-      dataType: "string",
-      defaultValue: "",
-      rules: ['system'],
-      options: [],
-      placeHolder: 'Site Name',
-      index: 5
-    },['FacilityTypeProperty']);
-
-    const facilityTypesNode3property7 = await this.neo4jService.createNode({
-      canDelete: true,
-      isDeleted: false,
-      isActive: true,
-      label: 'Project Name',
-      type: "text",
-      dataType: "string",
-      defaultValue: "",
-      rules: [],
-      options: [],
-      placeHolder: 'Project Name',
-      index: 6
-    },['FacilityTypeProperty']);
-
- 
     await this.neo4jService.addRelations(facilityTypesNode3property1.identity.low, facilityTypesNode3.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode3property2.identity.low, facilityTypesNode3.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode3property3.identity.low, facilityTypesNode3.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode3property4.identity.low, facilityTypesNode3.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode3property5.identity.low, facilityTypesNode3.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode3property6.identity.low, facilityTypesNode3.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode3property7.identity.low, facilityTypesNode3.identity.low);
     
     return facilityTypesNode;
   }
