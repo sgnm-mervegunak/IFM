@@ -2,13 +2,13 @@ import axios from "axios";
 
 const url = process.env.REACT_APP_API_URL + "classification";
 
-interface PaginationParams {
-  page?: number;
-  limit?: number;
-  sortField?: string;
-  sortKind?: string;
-  class_name?: string;
-}
+// interface PaginationParams {
+//   page?: number;
+//   limit?: number;
+//   sortField?: string;
+//   sortKind?: string;
+//   class_name?: string;
+// }
 
 interface ClassificationInterface {
   key: string;
@@ -44,10 +44,17 @@ interface ClassificationInterface2 {
 }
 
 
-const findAll = async (query: PaginationParams) => {
+// const findAll = async (query: PaginationParams) => {
+//   return axios.get(
+//     url +
+//     `?page=${query.page}&limit=${query.limit}&orderBy=${query.sortKind}&orderByColumn=${query.sortField}&class_name=${query.class_name}`
+//   );
+// };
+
+const findAll = async (params:ActiveInterface) => {
+  params.language=params.language.toUpperCase();
   return axios.get(
-    url +
-    `?page=${query.page}&limit=${query.limit}&orderBy=${query.sortKind}&orderByColumn=${query.sortField}&class_name=${query.class_name}`
+    url + "/getClassificationsByLanguage/" + params.realm + "/" + params.language
   );
 };
 
