@@ -13,8 +13,8 @@ export class StructureService {
     @Inject(RepositoryEnums.FACILITY_STRUCTURE)
     private readonly facilityStructureRepository: FacilityInterface<any>,
   ) {}
-  async create(id:string, createFacilityStructureDto: Object) {
-    return await this.facilityStructureRepository.create(id, createFacilityStructureDto);
+  async create(key:string, createFacilityStructureDto: Object) {
+    return await this.facilityStructureRepository.create(key, createFacilityStructureDto);
   }
 
   findOne(label: string, realm: string) {

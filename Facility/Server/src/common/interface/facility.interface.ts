@@ -2,7 +2,7 @@ import { RelationDirection } from "sgnm-neo4j/dist/constant/relation.direction.e
 
 export interface FacilityInterface<T> {
   update(id: string, data: T | any): any;
-  create(id: string,data: T | any): any;
+  create(key: string,data: T | any): any;
   findOneByRealm(label: string, realm: string): any;
   delete(id: string): any;
   changeNodeBranch(id: string, target_parent_id: string): any;
