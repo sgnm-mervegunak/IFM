@@ -23,7 +23,6 @@ interface ClassificationInterface {
 
 interface ActiveInterface {
   realm: string;
-  isActive: boolean;
   language: string;
 }
 
@@ -55,7 +54,7 @@ const findAll = async (query: PaginationParams) => {
 const findAllActive = async (params:ActiveInterface) => {
   params.language=params.language.toUpperCase();
   return axios.get(
-    url + "/getClassificationByIsActiveStatus/" + params.realm + "/" + params.isActive + "/" + params.language
+    url + "/getClassificationByIsActiveStatus/" + params.realm + "/" + params.language
   );
 };
 
