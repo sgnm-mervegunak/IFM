@@ -96,7 +96,7 @@ const SetClassificationAdmin = () => {
   ];
 
   const getClassification = () => {
-    ClassificationsService.findOne(realm).then((res) => {
+    ClassificationsService.findAll({realm,language:"en"}).then((res) => {
 
       if (!res.data.root.children) {
         setData([res.data.root.properties] || []);
@@ -222,15 +222,19 @@ const SetClassificationAdmin = () => {
             isActive: isActive,
           };
         }
-
+        console.log(res.data.id, updateNode);
+        
         ClassificationsService.update(res.data.id, updateNode)
           .then(async(res) => {
+            console.log("deneme2");
             toast.current.show({
               severity: "success",
               summary: "Successful",
               detail: "Classification Updated",
               life: 3000,
             });
+            console.log(res.data);
+            
             
             if (res.data.properties.isActive === true) {
               await ClassificationsService.setActive(res.data.id)
