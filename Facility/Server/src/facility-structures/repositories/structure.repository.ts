@@ -15,10 +15,11 @@ import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
 import { AnyARecord } from 'dns';
 import { FacilityInterface } from 'src/common/interface/facility.interface';
 import * as moment from 'moment';
+import { copyFile } from 'fs';
 
 @Injectable()
 export class FacilityStructureRepository implements FacilityInterface<any> {
-  constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) {}
+  constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) { }
 
   async findOneByRealm(label: string, realm: string) {
     let node = await this.neo4jService.findByRealmWithTreeStructure(label, realm);
@@ -76,26 +77,26 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
 
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
   async update(key: string, structureData: Object) {
-     //is there facility-structure node 
-     const node = await this.neo4jService.findOneNodeByKey(key);
-     if (!node) {
-       throw new FacilityStructureNotFountException(key);
-     }
-    
-     //update facility structure node
-     const updatedOn = moment().format('YYYY-MM-DD HH:mm:ss');
-     structureData['updatedOn'] = updatedOn;
-     const dynamicObject = createDynamicCyperObject(structureData);
-     const updatedNode = await this.neo4jService.updateById(node.id, dynamicObject);
- 
-     if (!updatedNode) {
-       throw new FacilityStructureNotFountException(node.id);  //DEĞİŞECEK
-     }
-     const response = {
-       id: updatedNode['identity'].low,
-       labels: updatedNode['labels'],
-       properties: updatedNode['properties'],
-     };
+    //is there facility-structure node 
+    const node = await this.neo4jService.findOneNodeByKey(key);
+    if (!node) {
+      throw new FacilityStructureNotFountException(key);
+    }
+
+    //update facility structure node
+    const updatedOn = moment().format('YYYY-MM-DD HH:mm:ss');
+    structureData['updatedOn'] = updatedOn;
+    const dynamicObject = createDynamicCyperObject(structureData);
+    const updatedNode = await this.neo4jService.updateById(node.id, dynamicObject);
+
+    if (!updatedNode) {
+      throw new FacilityStructureNotFountException(node.id);  //DEĞİŞECEK
+    }
+    const response = {
+      id: updatedNode['identity'].low,
+      labels: updatedNode['labels'],
+      properties: updatedNode['properties'],
+    };
 
     return response;
   }
@@ -184,41 +185,52 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     return node['root']['children'];
   }
 
-  async findChildrenByFacilityTypeNode(language: string,realm: string, typename:string) {
+  async findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) {
 
-      let node = await this.neo4jService.findChildNodesOfFirstParentNodeByLabelsRealmAndName('FacilityTypes_'+language, realm, 'FacilityType',
-        typename, 'FacilityTypeProperty',RelationName.PARENT_OF, RelationDirection.RIGHT);
+    let node = await this.neo4jService.findChildNodesOfFirstParentNodeByLabelsRealmAndName('FacilityTypes_' + language, realm, 'FacilityType',
+      typename, 'FacilityTypeProperty', RelationName.PARENT_OF, RelationDirection.RIGHT);
 
-        if (!node) {
-          throw new FacilityStructureNotFountException(realm); //DEĞİŞECEK
-        }
-        if (node["records"] && node["records"][0]) {
-          let propertyList = [];
-           for (let i=0; i<node["records"].length; i++ ) {
-            let property = node["records"][i];
-           property["_fields"][0]["properties"]._id = property["_fields"][0]["identity"]["low"];
-           propertyList.push(property["_fields"][0]["properties"]); 
-          }
-          return propertyList;
-         } 
-        
-         return [];
+    if (!node) {
+      throw new FacilityStructureNotFountException(realm); //DEĞİŞECEK
     }
-    //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
-    async create(key: string, structureData: Object) {
-      //is there facility-structure parent node 
-      const node = await this.neo4jService.findOneNodeByKey(key);
-      if (!node) {
-        throw new FacilityStructureNotFountException(key);
+    if (node["records"] && node["records"][0]) {
+      let propertyList = [];
+      for (let i = 0; i < node["records"].length; i++) {
+        let property = node["records"][i];
+        property["_fields"][0]["properties"]._id = property["_fields"][0]["identity"]["low"];
+        propertyList.push(property["_fields"][0]["properties"]);
       }
-      
-      //create facility-structure node
-      let baseFacilityObject = new BaseFacilityObject();
-      baseFacilityObject = assignDtoPropToEntity(baseFacilityObject, structureData);
-      const createNode = await this.neo4jService.createNode(baseFacilityObject, [Neo4jLabelEnum.FACILITY_STRUCTURE]);
-      //create PARENT_OF relation between parent facility structure node and child facility structure node.
-      await this.neo4jService.addRelationWithRelationNameByKey(key, createNode.properties.key, RelationName.PARENT_OF);
-      const response = {id: createNode['identity'].low, labels: createNode['labels'], properties: createNode['properties'] };
-     return response;
+      return propertyList;
     }
+
+    return [];
+  }
+  //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
+  async create(key: string, structureData: Object) {
+    //is there facility-structure parent node 
+    const node = await this.neo4jService.findOneNodeByKey(key);
+    if (!node) {
+      throw new FacilityStructureNotFountException(key);
+    }
+    const allowedStructureTypeNode = await this.neo4jService.read('match (n:FacilityTypes_EN {realm:$realm}) match(p {name:$name}) match(n)-[:PARENT_OF]->(p) return p', { realm: node.properties.realm, name: node.labels[0] })
+
+    const allowedStructures=await this.neo4jService.read('match(n {key:$key}) match(p) match (n)-[:PARENT_OF]->(p) return p',{key:allowedStructureTypeNode.records[0]['_fields'][0].properties.key})
+    //create facility-structure node
+
+    const isExist=allowedStructures.records.filter(allowedStructure=>{
+      if(allowedStructure['_fields'][0].properties.name===structureData['nodetype']){
+        return allowedStructure
+      }
+    })
+    if(!isExist.length){
+      throw new HttpException('Yapıyı Bu şekilde oluşturamazsınız',400)
+    }
+    let baseFacilityObject = new BaseFacilityObject();
+    baseFacilityObject = assignDtoPropToEntity(baseFacilityObject, structureData);
+    const createNode = await this.neo4jService.createNode(baseFacilityObject, [Neo4jLabelEnum.FACILITY_STRUCTURE]);
+    //create PARENT_OF relation between parent facility structure node and child facility structure node.
+    await this.neo4jService.addRelationWithRelationNameByKey(key, createNode.properties.key, RelationName.PARENT_OF);
+    const response = { id: createNode['identity'].low, labels: createNode['labels'], properties: createNode['properties'] };
+    return response;
+  }
 }
