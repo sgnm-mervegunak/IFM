@@ -59,7 +59,11 @@ const FileUploadComponent = ({
   };
 
   const Delete = (index) => {
-    setUploadedFiles(uploadedFiles.filter((_, i) => i !== index));
+    let temp = uploadedFiles.filter((_, i) => i !== index)
+    if(temp.length === 1 && isImage) {
+      temp[0].main = true
+    }
+    setUploadedFiles(temp);
   };
 
   const SetMain = (index) => {
