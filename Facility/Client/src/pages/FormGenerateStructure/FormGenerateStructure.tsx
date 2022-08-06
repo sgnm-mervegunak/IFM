@@ -139,14 +139,15 @@ const Input = ({ value, onChange, type, ...rest }: InputProps) => {
       );
 
     case "date":
-      const date1 = new Date(value);
       return (
         <div>
           <Calendar
             className="mt-1"
-            dateFormat="dd/mm/yy"
-            onChange={onChange}
-            value={date1}
+            dateFormat="dd.mm.yy"
+            onChange={(e)=>{
+              onChange(e.value?.toLocaleString().split(" ")[0])
+            }}
+            value={value}
             placeholder={rest?.placeholder}
             showIcon
             style={{ width: "100%" }}
