@@ -49,6 +49,10 @@ const create = async (structure: StructureInterface) => {
     return axios.post(url, structure);
 };
 
+const createStructure = async (key:string,structure:any) => {
+    return axios.post(url + "/" + key,structure);
+};
+
 const createAsset = async (key: string, asset: AssetInterface) => {
 
     return axios.post(url2 + key, asset);
@@ -87,6 +91,6 @@ const getFacilityTypeProperties = async (
         second_child_node_name);
 };
 
-const service = { findAll, findOne, findAssets, create, createAsset, createForm, update, remove, relation, nodeInfo, getFacilityTypes, getFacilityTypeProperties };
+const service = { findAll, findOne, findAssets, create, createAsset, createForm, update, remove, relation, nodeInfo, getFacilityTypes, getFacilityTypeProperties, createStructure };
 
 export default service;

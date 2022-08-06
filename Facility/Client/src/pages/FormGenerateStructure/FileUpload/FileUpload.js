@@ -26,6 +26,7 @@ const FileUploadComponent = ({
       .then((response) => {
         setTimeout(() => {
           let temp;
+          delete response.data.message;
 
           if (isImage) {
             temp = [

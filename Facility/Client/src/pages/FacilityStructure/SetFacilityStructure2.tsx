@@ -42,6 +42,7 @@ interface Node {
   labels?: string[]; // for form type
   parentId?: string;
   className?: string;
+  Name?: string;
 }
 
 interface FormNode {
@@ -72,7 +73,7 @@ interface FormNode {
 
 const SetFacilityStructure2 = () => {
   const [selectedNodeKey, setSelectedNodeKey] = useState<any>("");
-  const [submitted,setSubmitted] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
   const [name, setName] = useState("");
@@ -101,7 +102,7 @@ const SetFacilityStructure2 = () => {
   useEffect(() => {
     FacilityStructureService.getFacilityTypes("FacilityTypes_EN", realm)
       .then((res) => {
-        setFacilityType(res.data.map((item:any)=>item.name))
+        setFacilityType(res.data.map((item: any) => item.name))
       })
       .catch((err) => {
         toast.current.show({
@@ -254,12 +255,14 @@ const SetFacilityStructure2 = () => {
     }
     for (let i of nodes) {
       fixNodes(i.children)
+      console.log(i);
+
       i.icon = "pi pi-fw pi-building";
-      i.label = i.name;
+      i.label = i.Name || i.name;
     }
   };
 
-  const addItem = (key: string,data:any) => {
+  const addItem = (key: string, data: any) => {
     let newNode: any = {};
     FacilityStructureService.nodeInfo(key)
       .then((res) => {
@@ -287,8 +290,8 @@ const SetFacilityStructure2 = () => {
           };
         }
 
-        console.log("data",data)
-        FacilityStructureService.create(newNode)
+        console.log("data", data)
+        FacilityStructureService.createStructure(key, data)
           .then((res) => {
             toast.current.show({
               severity: "success",
@@ -326,7 +329,7 @@ const SetFacilityStructure2 = () => {
     setName("");
     setTag([]);
     setFormTypeId(undefined);
-    setAddDia(false);
+    // setAddDia(false);
     setLabels([]);
   };
 
@@ -603,48 +606,8 @@ const SetFacilityStructure2 = () => {
             style={{ width: '100%' }}
           />
         </div>
-        {selectedFacilityType && <FormGenerateStructure selectedFacilityType={selectedFacilityType} realm={realm} addItem={(data:any)=>addItem(selectedNodeKey,data)} setSubmitted={setSubmitted} submitted={submitted} />}
-    
-        {/* <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
-          <InputText
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Facility Type</h5>
-          <TreeSelect
-            value={formTypeId}
-            options={formData}
-            onChange={(e) => {
-              setFormTypeId(e.value);
-              console.log(e);
-              let nodeKey: any = e.value;
-              FormTypeService.nodeInfo(nodeKey)
-                .then((res) => {
-                  console.log(res.data);
-                  setLabels([res.data.properties.name])
-                })
-                .catch((err) => {
-                  toast.current.show({
-                    severity: "error",
-                    summary: "Error",
-                    detail: err.response ? err.response.data.message : err.message,
-                    life: 2000,
-                  });
-                });
-            }}
-            filter
-            placeholder="Select Type"
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field structureChips">
-          <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
-          <Chips value={tag} onChange={(e) => setTag(e.value)} style={{ width: "100%" }} />
-        </div> */}
+        {selectedFacilityType && <FormGenerateStructure selectedFacilityType={selectedFacilityType} realm={realm} addItem={(data: any) => addItem(selectedNodeKey, data)} setSubmitted={setSubmitted} submitted={submitted} />}
+
       </Dialog>
       <Dialog
         header="Edit Item"
@@ -659,49 +622,7 @@ const SetFacilityStructure2 = () => {
           setEditDia(false);
         }}
       >
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
-          <InputText
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Facility Type</h5>
-          <TreeSelect
-            value={formTypeId}
-            options={formData}
-            onChange={(e) => {
-              setFormTypeId(e.value);
-              let nodeKey: any = e.value;
-              FormTypeService.nodeInfo(nodeKey)
-                .then((res) => {
-                  console.log(res.data);
-                  setLabels([res.data.properties.name])
-                })
-                .catch((err) => {
-                  toast.current.show({
-                    severity: "error",
-                    summary: "Error",
-                    detail: err.response ? err.response.data.message : err.message,
-                    life: 2000,
-                  });
-                });
-            }}
-            filter
-            placeholder="Select Type"
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field structureChips">
-          <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
-          <Chips value={tag} onChange={(e) => setTag(e.value)} style={{ width: '100%' }} />
-        </div>
-        <div className="field flex">
-          <h5 style={{ marginBottom: "0.5em" }}>Is Active</h5>
-          <Checkbox className="ml-3" onChange={e => setIsActive(e.checked)} checked={isActive}></Checkbox>
-        </div>
+        <FormGenerateStructure selectedFacilityType={selectedFacilityType} realm={realm} addItem={(data: any) => addItem(selectedNodeKey, data)} setSubmitted={setSubmitted} submitted={submitted} />
       </Dialog>
 
       <Dialog
