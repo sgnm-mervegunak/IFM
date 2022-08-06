@@ -19,6 +19,7 @@ import StructureWinformDataService from "../../services/structureWinformData";
 import FacilityTypePropertiesService from "../../services/facilitystructure";
 import FileUploadComponent from "./FileUpload/FileUpload";
 import TreeSelectComponent from "./TreeSelect/TreeSelect";
+import { Chips } from "primereact/chips";
 
 // import "./FormGenerate.css";
 
@@ -174,11 +175,16 @@ const Input = ({ value, onChange, type, ...rest }: InputProps) => {
           />
         </div>
       );
-
       case "treeselect":
         return (
           <TreeSelectComponent selectedNode={value} setSelectedNode={onChange} placeholder={rest?.placeholder}/>
         );
+      case "textarray":
+        return(
+          <div>
+            <Chips value={value} onChange={(e) => onChange(e.value)} style={{width: '100%' }} className="structureChips" />
+          </div>
+        )
     default:
       return null;
   }
