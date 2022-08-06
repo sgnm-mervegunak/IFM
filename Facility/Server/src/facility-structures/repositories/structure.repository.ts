@@ -82,6 +82,32 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     if (!node) {
       throw new FacilityStructureNotFountException(key);
     }
+    const structureRootNode=await this.findStructureRootNode(key);
+    //const properties = this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['NodeType']);
+    const properties = await this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['NodeType']);
+    let proper = {};
+    Object.keys(properties).forEach((element) => { 
+      let prop = properties[element]['label'].split(' ');
+      let pro = "";
+      Object.keys(prop).forEach((element) => {
+          pro = pro+prop[element]; 
+      });
+      properties[element]['label']= pro;
+    });
+    Object.keys(structureData).forEach((property) => {
+      if (property != 'NodeType') {
+        let i = 0;
+        Object.keys(properties).forEach((element) => {
+          if (property == properties[element]['label']) {
+            i = 1;
+          }
+        });
+        if (i == 0) {
+          throw new HttpException('Yapıyı Bu şekilde oluşturamazsınız2',400)
+        }
+      }
+    });
+ 
 
     //update facility structure node
     const updatedOn = moment().format('YYYY-MM-DD HH:mm:ss');
@@ -212,6 +238,9 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     if (!node) {
       throw new FacilityStructureNotFountException(key);
     }
+
+  //////////////////////////// Control of childnode type which will be added to parent node. /////////////////////////////////////////
+
    let structureRootNode;
    if(node.labels[0]==='FacilityStructure'){
     structureRootNode=node
@@ -226,16 +255,45 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     
     const isExist=allowedStructures.records.filter(allowedStructure=>{
       console.log(allowedStructure['_fields'])
-      if(allowedStructure['_fields'][0].properties.name===structureData['nodetype']){
+      if(allowedStructure['_fields'][0].properties.name===structureData['NodeType']){
         return allowedStructure
       }
     })
     if(!isExist.length){
-      throw new HttpException('Yapıyı Bu şekilde oluşturamazsınız',400)
+      throw new HttpException('Yapıyı Bu şekilde oluşturamazsınız1',400)
     }
+
+  ////////////////////////////// Control of input properties with facility type properties //////////////////////////////////////////////////
+
+    //const properties = this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['NodeType']);
+    const properties = await this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['NodeType']);
+    let proper = {};
+    Object.keys(properties).forEach((element) => { 
+      let prop = properties[element]['label'].split(' ');
+      let pro = "";
+      Object.keys(prop).forEach((element) => {
+          pro = pro+prop[element]; 
+      });
+      properties[element]['label']= pro;
+    });
+    Object.keys(structureData).forEach((property) => {
+      if (property != 'NodeType') {
+        let i = 0;
+        Object.keys(properties).forEach((element) => {
+          if (property == properties[element]['label']) {
+            i = 1;
+          }
+        });
+        if (i == 0) {
+          throw new HttpException('Yapıyı Bu şekilde oluşturamazsınız2',400)
+        }
+      }
+    });
+    
+
     let baseFacilityObject = new BaseFacilityObject();
     baseFacilityObject = assignDtoPropToEntity(baseFacilityObject, structureData);
-    const createNode = await this.neo4jService.createNode(baseFacilityObject, [structureData['nodetype']]);
+    const createNode = await this.neo4jService.createNode(baseFacilityObject, [structureData['NodeType']]);
     //create PARENT_OF relation between parent facility structure node and child facility structure node.
     await this.neo4jService.addRelationWithRelationNameByKey(key, createNode.properties.key, RelationName.PARENT_OF);
     const response = { id: createNode['identity'].low, labels: createNode['labels'], properties: createNode['properties'] };
