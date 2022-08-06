@@ -12,6 +12,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Toast } from "primereact/toast";
 import { TabView, TabPanel } from "primereact/tabview";
 import { v4 as uuidv4 } from "uuid";
+import moment from "moment";
 
 import FormTypeService from "../../services/formType";
 import FormBuilderService from "../../services/formBuilder";
@@ -145,7 +146,8 @@ const Input = ({ value, onChange, type, ...rest }: InputProps) => {
             className="mt-1"
             dateFormat="dd.mm.yy"
             onChange={(e)=>{
-              onChange(e.value?.toLocaleString().split(" ")[0])
+              
+              onChange(moment(e.value?.toString()).format('DD.MM.YYYY'))
             }}
             value={value}
             placeholder={rest?.placeholder}
@@ -388,7 +390,7 @@ const FormGenerateStructure = ({
   const onSubmit = (data: any) => {
     // console.log(data);
     const key = uuidv4();
-    data.key = key;
+    data.nodetype = selectedFacilityType;
     // const formData = {
     //   nodeKey: nodeKey,
     //   data: data,
