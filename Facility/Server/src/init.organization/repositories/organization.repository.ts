@@ -1128,7 +1128,7 @@ RETURN input, output, error`;
   //      let dto ={}
   //     for (let index = 1; index < firstThree[i].length; index++) {
       
-  //       dto={name_EN:firstThree[i][index],key:key(),isDeleted:false,isActive:true,canDelete:true}
+  //       dto={name:firstThree[i][index],isDeleted:false,isActive:true,canDelete:true}
   //       deneme5.push(dto);
      
   //     }
@@ -1137,13 +1137,13 @@ RETURN input, output, error`;
   
 
   //     for(let i=0;i < deneme4.length;i++){
-  //       let cypher= `match (n:Classification {realm:"${realmName}"}) MERGE (b:${deneme4[i][0].name_EN} {name:"${deneme4[i][0].name_EN}",isDeleted:${deneme4[i][0].isDeleted},key:"${deneme4[i][0].key}",realm:"${realmName}",canDelete:false,isActive:true})  MERGE (n)-[:PARENT_OF]->(b)`;
+  //       let cypher= `match (n:Classification {realm:"${realmName}"}) MERGE (b:${deneme4[i][0].name} {name:"${deneme4[i][0].name}",isDeleted:${deneme4[i][0].isDeleted},key:"${deneme4[i][0].key}",realm:"${realmName}",canDelete:false,isActive:true})  MERGE (n)-[:PARENT_OF]->(b)`;
   //       await this.neo4jService.write(cypher);
 
   //       for (let index = 1; index < deneme4[i].length; index++) {
           
-  //      //console.log(deneme4[i][0].name_EN)
-  //     let cypher3= `Match (n:${deneme4[i][0].name_EN} {isDeleted:false}) MERGE (b {name_EN:"${deneme4[i][index].name_EN}",isDeleted:${deneme4[i][index].isDeleted},key:"${deneme4[i][index].key}",canDelete:${deneme4[i][index].canDelete},})  MERGE (n)-[:PARENT_OF]->(b)`;
+  //      //console.log(deneme4[i][0].name)
+  //     let cypher3= `Match (n:${deneme4[i][0].name} {isDeleted:false}) MERGE (b {name:"${deneme4[i][index].name}",isDeleted:${deneme4[i][index].isDeleted},key:"${deneme4[i][index].key}",canDelete:${deneme4[i][index].canDelete},})  MERGE (n)-[:PARENT_OF]->(b)`;
   //      let data =await this.neo4jService.write(cypher3)
   //      console.log(data);
   //       }
@@ -1162,7 +1162,7 @@ RETURN input, output, error`;
     //   let deneme3 = [];
     //     let dto ={}
     //   for (let index = 1; index < others[i].length; index++) {
-    //   dto={name_EN:others[i][index],key:key(),isDeleted:false,isActive:true,canDelete:true}
+    //   dto={name:others[i][index],isDeleted:false,isActive:true,canDelete:true}
     //     deneme3.push(dto);
     //   }
     //   deneme2.push(deneme3);
@@ -1170,13 +1170,13 @@ RETURN input, output, error`;
 
     //  for(let i=0;i<deneme2.length;i++){
 
-    //   let cypher= `match (n:Classification {realm:"${realmName}"}) MERGE  (b:${deneme2[i][0].name_EN}  {name:"${deneme2[i][0].name_EN}",isDeleted:${deneme2[i][0].isDeleted},key:"${deneme2[i][0].key}",isActive:true,canDelete:false}) MERGE (n)-[:PARENT_OF]->(b)`;
+    //   let cypher= `match (n:Classification {realm:"${realmName}"}) MERGE  (b:${deneme2[i][0].name}  {name:"${deneme2[i][0].name}",isDeleted:${deneme2[i][0].isDeleted},key:"${deneme2[i][0].key}",isActive:true,canDelete:false}) MERGE (n)-[:PARENT_OF]->(b)`;
     //   await this.neo4jService.write(cypher)
 
     //   for (let index = 1; index < deneme2[i].length; index++) {
        
            
-    //         let cypher2= `Match  (n:${deneme2[i][0].name_EN} {isDeleted:false}) MERGE (b {name_EN:"${deneme2[i][index].name_EN}",isDeleted:${deneme2[i][index].isDeleted},key:"${deneme2[i][index].key}",isActive:{deneme2[i][0].isActive},canDelete:{deneme2[i][0].canDelete}}) MERGE (n)-[:PARENT_OF]->(b)`;
+    //         let cypher2= `Match  (n:${deneme2[i][0].name} {isDeleted:false}) MERGE (b {name:"${deneme2[i][index].name}",isDeleted:${deneme2[i][index].isDeleted},key:"${deneme2[i][index].key}",isActive:{deneme2[i][0].isActive},canDelete:{deneme2[i][0].canDelete}}) MERGE (n)-[:PARENT_OF]->(b)`;
     //       await this.neo4jService.write(cypher2)
     //   }
     //  }

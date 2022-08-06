@@ -127,16 +127,71 @@ export class ClassificationRepository implements classificationInterface<Classif
 
   async getClassificationByIsActiveStatus(realm: string,language: string){
 
-    let cypher =`MATCH path = (p:Classification {realm:"${realm}"})-[:PARENT_OF*]->(m) where m.isActive=true\
-    WITH collect(path) AS paths \
-    CALL apoc.convert.toTree(paths) \
-    YIELD value \
-    RETURN value;`
+    // let cypher =`MATCH path = (p:Classification {realm:"${realm}"})-[:PARENT_OF*]->(m) where m.isActive=true\
+    // WITH collect(path) AS paths \
+    // CALL apoc.convert.toTree(paths) \
+    // YIELD value \
+    // RETURN value;`
   
-    let data =await this.neo4jService.read(cypher);
-     let rootObject ={root: data.records[0]["_fields"][0]}
-     let result =await this.neo4jService.changeObjectChildOfPropToChildren(rootObject)
-     return result
+    // let data =await this.neo4jService.read(cypher);
+    //  let rootObject ={root: data.records[0]["_fields"][0]}
+    //  let result =await this.neo4jService.changeObjectChildOfPropToChildren(rootObject)
+    //  return result
+
+    
+      let cypher=`MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) MATCH path =(c)-[:PARENT_OF]->(n)  WITH DISTINCT labels(n) AS labels \
+      UNWIND labels AS label \
+      RETURN DISTINCT label\
+      `
+      
+      let data =await this.neo4jService.read(cypher);
+      let returnData=[]
+      for (let index = 0; index < data.records.length; index++) {
+        returnData.push(data.records[index]["_fields"][0])
+        
+      }
+      
+      let cypher2=`MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) RETURN c`
+      
+      let data2 =await this.neo4jService.read(cypher2);
+      let _id=data2.records[0]["_fields"][0].identity;
+      let root={parent_of:[],_id,...data2.records[0]["_fields"][0].properties}
+      
+      
+    let abc=[]
+    for (let index = 0; index < returnData.length; index++) {
+      if(returnData[index].endsWith("_"+language)==true){
+     
+        abc.push(returnData[index])
+      }
+      
+    }
+    
+      for (let index = 0; index < abc.length; index++) {
+        let cypher2=`MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${abc[index]} {realm:"${realm}"})  MATCH path = (b)-[:PARENT_OF*]->(m) where m.isActive=true m.isDeleted=false \
+        WITH collect(path) AS paths\
+        CALL apoc.convert.toTree(paths)\
+        YIELD value\
+        RETURN value;`
+        
+        let data2 =await this.neo4jService.read(cypher2);
+        if(data2.records[0]["_fields"][0].parent_of?.length>0){
+          root.parent_of.push(data2.records[0]["_fields"][0])
+        }
+        else{
+          let cypher2=`MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${abc[index]} {realm:"${realm}"}) RETURN b`
+      
+        let data3 =await this.neo4jService.read(cypher2);
+        let _id=data3.records[0]["_fields"][0].identity;
+        let data ={_id,...data3.records[0]["_fields"][0].properties}
+        root.parent_of.push(data)
+         }
+      }
+    
+       let rootObject ={root}
+       let result =await this.neo4jService.changeObjectChildOfPropToChildren(rootObject)
+       return result
+      
     
   }
 
@@ -144,7 +199,7 @@ export class ClassificationRepository implements classificationInterface<Classif
     let cypher=`MATCH (n) where id(n)=${Number(id)} SET n.isActive=true`
     await this.neo4jService.write(cypher)
 
-  let cypher2=`MATCH (n) where id(n)=${Number(id)} MATCH (n)-[:PARENT_OF*]->(a) SET a.isActive=true`;
+  let cypher2=`MATCH (n) where id(n)=${Number(id)} MATCH (n)-[:PARENT_OF*]->(a) SET a.isActive=true `;
     await this.neo4jService.write(cypher2)
   }
 
@@ -193,7 +248,7 @@ for (let index = 0; index < returnData.length; index++) {
 }
 
   for (let index = 0; index < abc.length; index++) {
-    let cypher2=`MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${abc[index]} {realm:"${realm}"})  MATCH path = (b)-[:PARENT_OF*]->(m)  \
+    let cypher2=`MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${abc[index]} {realm:"${realm}"})  MATCH path = (b)-[:PARENT_OF*]->(m) where m.isDeleted=false  \
     WITH collect(path) AS paths\
     CALL apoc.convert.toTree(paths)\
     YIELD value\

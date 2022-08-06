@@ -15,27 +15,31 @@ export class StructureController {
   @Unprotected()
   //@Roles({ roles: [UserRoles.ADMIN] })
   @ApiBody({
-    type: CreateFacilityStructureDto,
+    type: Object,
     description: 'create  facility structure',
   })
-  @Post()
-  create(@Param('id') id: string, @Body() createFacilityStructureDto: Object) {
-    return this.facilityStructuresService.create(id, createFacilityStructureDto);
+  @Post(':parent_key')
+  create(@Param('parent_key') key: string, @Body() createFacilityStructureDto: Object) {
+    return this.facilityStructuresService.create(key, createFacilityStructureDto);
+  }
+  
+  @ApiBody({
+    type: Object,
+    description: 'Update  facility structure',
+  })
+  @Patch(':key')
+  @Unprotected()
+  update(@Param('key') key: string, @Body() updateFacilityStructureDto: Object) {
+    return this.facilityStructuresService.update(key, updateFacilityStructureDto);
   }
 
-  @Get(':label/:realm')
   @Unprotected()
+  @Get('/:key')
   @NoCache()
-  findOne(@Param('label') label: string, @Param('realm') realm: string) {
-    return this.facilityStructuresService.findOne(label, realm);
+  findOneNode(@Param('key') key: string) {
+    return this.facilityStructuresService.findOneNode(key);
   }
-
-  @Patch(':id')
-  @Unprotected()
-  update(@Param('id') id: string, @Body() updateFacilityStructureDto: UpdateFacilityStructureDto) {
-    return this.facilityStructuresService.update(id, updateFacilityStructureDto);
-  }
-
+ 
   @Delete(':id')
   @Unprotected()
   remove(@Param('id') id: string) {
@@ -47,12 +51,6 @@ export class StructureController {
     return this.facilityStructuresService.changeNodeBranch(id, target_parent_id);
   }
 
-  @Unprotected()
-  @Get('/:key')
-  @NoCache()
-  findOneNode(@Param('key') key: string) {
-    return this.facilityStructuresService.findOneNode(key);
-  }
 
   @Get('/structuretypes/:label/:realm')
   @Unprotected()
@@ -61,21 +59,18 @@ export class StructureController {
     return this.facilityStructuresService.findOneFirstLevel(label, realm);
   }
 
-  // @Get('/structuretypes/properties/:first_node_label/:first_node_realm/:second_child_node_label/:second_child_node_name/:children_nodes_label/:relationName/:relationDirection')
-  // @Unprotected()
-  // @NoCache()
-  // findChildrenByFacilityTypeNode(@Param('first_node_label') first_node_label: string, @Param('first_node_realm') first_node_realm: string,
-  //             @Param('second_child_node_label') second_child_node_label: string, @Param('second_child_node_name') second_child_node_name: string,
-  //             @Param('children_nodes_label') children_nodes_label: string, @Param('relationName') relationName: string , 
-  //             @Param('relationDirection') relationDirection: RelationDirection ) {
-  //         return this.facilityStructuresService.findChildrenByFacilityTypeNode(first_node_label, first_node_realm, second_child_node_label,
-  //           second_child_node_name, children_nodes_label,relationName, relationDirection);
-  // }
-
   @Get('/structuretypes/properties/:language/:realm/:typename')
   @Unprotected()
   @NoCache()
   findChildrenByFacilityTypeNode(@Param('language') language: string, @Param('realm') realm: string, @Param('typename') typename: string) {
           return this.facilityStructuresService.findChildrenByFacilityTypeNode(language,realm, typename);
   }
+
+  @Get(':label/:realm')
+  @Unprotected()
+  @NoCache()
+  findOne(@Param('label') label: string, @Param('realm') realm: string) {
+    return this.facilityStructuresService.findOne(label, realm);
+  }
+
 }
