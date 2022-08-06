@@ -148,45 +148,56 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     await this.neo4jService.addRelations(facilityTypesNode3.identity.low, facilityTypesNode.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode4.identity.low, facilityTypesNode.identity.low);
 
-   
-
-    const allowedBuildingStructureRoot=await this.neo4jService.createNode({
+    const allowedForFacilityStructureBuilding=await this.neo4jService.createNode({
       canDelete: false,
       isDeleted: false,
-      name: 'AllowedBuildingStructureRoot',
+      name: 'Building',
+      isActive: true,
+      canDisplay: false,
+    },['AllowedStructure']);
+    await this.neo4jService.addRelations(allowedForFacilityStructureBuilding.identity.low,facilityTypesNode4.identity.low);
+
+    const allowedForBuildingStructureBlock=await this.neo4jService.createNode({
+      canDelete: false,
+      isDeleted: false,
+      name: 'Block',
+      isActive: true,
+      canDisplay: false,
+    },['AllowedStructure']);
+    const allowedForBuildingStructureFloor=await this.neo4jService.createNode({
+      canDelete: false,
+      isDeleted: false,
+      name: 'Floor',
       isActive: true,
       canDisplay: false,
     },['AllowedStructure']);
 
-    const allowedFloorStructureRoot=await this.neo4jService.createNode({
-      canDelete: false,
-      isDeleted: false,
-      name: 'AllowedFloorStructureRoot',
-      isActive: true,
-      canDisplay: false,
-    },['AllowedStructure']);
+    await this.neo4jService.addRelations(allowedForBuildingStructureBlock.identity.low,facilityTypesNode1.identity.low);
+    await this.neo4jService.addRelations(allowedForBuildingStructureFloor.identity.low,facilityTypesNode1.identity.low);
 
-    const allowedBlockStructureRoot=await this.neo4jService.createNode({
+    const allowedForFloorStructureSpace=await this.neo4jService.createNode({
       canDelete: false,
       isDeleted: false,
-      name: 'AllowedBlockStructureRoot',
+      name: 'Space',
       isActive: true,
       canDisplay: false,
     },['AllowedStructure']);
+    await this.neo4jService.addRelations(allowedForFloorStructureSpace.identity.low,facilityTypesNode2.identity.low);
+
+    const allowedForBlockStructureFloor=await this.neo4jService.createNode({
+      canDelete: false,
+      isDeleted: false,
+      name: 'Floor',
+      isActive: true,
+      canDisplay: false,
+    },['AllowedStructure']);
+    await this.neo4jService.addRelations(allowedForBlockStructureFloor.identity.low,facilityTypesNode3.identity.low);
     
-    const allowedFacilityStructureRoot=await this.neo4jService.createNode({
-      canDelete: false,
-      isDeleted: false,
-      name: 'AllowedFacilityStructureRoot',
-      isActive: true,
-      canDisplay: false,
-    },['AllowedStructure']);
 
    
-    await this.neo4jService.addRelations(allowedBuildingStructureRoot.identity.low,facilityTypesNode1.identity.low);
-    await this.neo4jService.addRelations(allowedFloorStructureRoot.identity.low,facilityTypesNode2.identity.low);
-    await this.neo4jService.addRelations(allowedBlockStructureRoot.identity.low,facilityTypesNode3.identity.low);
-    await this.neo4jService.addRelations(allowedFacilityStructureRoot.identity.low,facilityTypesNode4.identity.low);
+   
+   
+
   
     
     const facilityTypesNode1property1 = await this.neo4jService.createNode({

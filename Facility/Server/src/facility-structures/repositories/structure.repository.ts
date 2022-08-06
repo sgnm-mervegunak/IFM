@@ -183,7 +183,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       if (!node) {
         throw new FacilityStructureNotFountException(key);
       }
-      
+      console.log(node)
       //create facility-structure node
       let baseFacilityObject = new BaseFacilityObject();
       baseFacilityObject = assignDtoPropToEntity(baseFacilityObject, structureData);
