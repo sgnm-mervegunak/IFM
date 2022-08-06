@@ -212,12 +212,20 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     if (!node) {
       throw new FacilityStructureNotFountException(key);
     }
-    const allowedStructureTypeNode = await this.neo4jService.read('match (n:FacilityTypes_EN {realm:$realm}) match(p {name:$name}) match(n)-[:PARENT_OF]->(p) return p', { realm: node.properties.realm, name: node.labels[0] })
-
+   let structureRootNode;
+   if(node.labels[0]==='FacilityStructure'){
+    structureRootNode=node
+   }else{
+    structureRootNode=await this.findStructureRootNode(key)
+   }
+   console.log(structureRootNode)
+    const allowedStructureTypeNode = await this.neo4jService.read('match (n:FacilityTypes_EN {realm:$realm}) match(p {name:$name}) match(n)-[:PARENT_OF]->(p) return p', { realm: structureRootNode.properties.realm, name: node.labels[0] })
+    console.log(allowedStructureTypeNode.records[0]['_fields'][0])
     const allowedStructures=await this.neo4jService.read('match(n {key:$key}) match(p) match (n)-[:PARENT_OF]->(p) return p',{key:allowedStructureTypeNode.records[0]['_fields'][0].properties.key})
     //create facility-structure node
-
+    
     const isExist=allowedStructures.records.filter(allowedStructure=>{
+      console.log(allowedStructure['_fields'])
       if(allowedStructure['_fields'][0].properties.name===structureData['nodetype']){
         return allowedStructure
       }
@@ -227,10 +235,18 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     }
     let baseFacilityObject = new BaseFacilityObject();
     baseFacilityObject = assignDtoPropToEntity(baseFacilityObject, structureData);
-    const createNode = await this.neo4jService.createNode(baseFacilityObject, [Neo4jLabelEnum.FACILITY_STRUCTURE]);
+    const createNode = await this.neo4jService.createNode(baseFacilityObject, [structureData['nodetype']]);
     //create PARENT_OF relation between parent facility structure node and child facility structure node.
     await this.neo4jService.addRelationWithRelationNameByKey(key, createNode.properties.key, RelationName.PARENT_OF);
     const response = { id: createNode['identity'].low, labels: createNode['labels'], properties: createNode['properties'] };
     return response;
+  }
+  //------------------------------------------
+  async findStructureRootNode(key){
+   const structureRootNode=await this.neo4jService.read('match(n:FacilityStructure) match(p {key:$key}) match (n)-[:PARENT_OF*]->(p) return n',{key})
+    console.log(structureRootNode.records[0]['_fields'][0])
+  
+
+   return structureRootNode.records[0]['_fields'][0]
   }
 }
