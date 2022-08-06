@@ -157,7 +157,7 @@ const Input = ({ value, onChange, type, ...rest }: InputProps) => {
       return (
         <div>
           <label>{rest?.label2}</label>
-          <FileUploadComponent 
+          <FileUploadComponent
             isImage
             uploadedFiles={value}
             setUploadedFiles={onChange}
@@ -168,23 +168,23 @@ const Input = ({ value, onChange, type, ...rest }: InputProps) => {
       return (
         <div>
           <label>{rest?.label2}</label>
-          <FileUploadComponent 
+          <FileUploadComponent
             isDocument
             uploadedFiles={value}
             setUploadedFiles={onChange}
           />
         </div>
       );
-      case "treeselect":
-        return (
-          <TreeSelectComponent selectedNode={value} setSelectedNode={onChange} placeholder={rest?.placeholder}/>
-        );
-      case "textarray":
-        return(
-          <div>
-            <Chips value={value} onChange={(e) => onChange(e.value)} style={{width: '100%' }} className="structureChips" />
-          </div>
-        )
+    case "treeselect":
+      return (
+        <TreeSelectComponent selectedNode={value} setSelectedNode={onChange} placeholder={rest?.placeholder} />
+      );
+    case "textarray":
+      return (
+        <div>
+          <Chips value={value} onChange={(e) => onChange(e.value)} style={{ width: '100%' }} className="structureChips" />
+        </div>
+      )
     default:
       return null;
   }
@@ -454,8 +454,7 @@ const FormGenerateStructure = ({
               Object.keys(items).map((e: any) => {
                 const { rules, defaultValue, label }: any = items[e];
                 return (
-                  <section key={e}>
-                    {/* <label className="mb-4">{label}</label> */}
+                  <div className="field" key={e}>
                     <h5 style={{ marginBottom: "0.5em" }}>{label}</h5>
                     <Controller
                       name={label.replaceAll(" ", "")}
@@ -473,10 +472,7 @@ const FormGenerateStructure = ({
                         </div>
                       )}
                     />
-                    {errors[label.replaceAll(" ", "")] && (
-                      <Error>This field is required</Error>
-                    )}
-                  </section>
+                  </div>
                 );
               })}
           </form>
