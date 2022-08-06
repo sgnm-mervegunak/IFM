@@ -43,4 +43,12 @@ export class CreateClassificationDto {
   @ApiProperty()
   @IsOptional()
   formTypeId?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  realm?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  isRoot?: boolean;
 }

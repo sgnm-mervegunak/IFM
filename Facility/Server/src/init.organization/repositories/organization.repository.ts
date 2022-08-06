@@ -1076,7 +1076,7 @@ RETURN input, output, error`;
   const realmName="Signum"
   ///////// the process start here
 
-      let cypher= `Match (a:Infra {realm:"${realmName}"})-[:PARENT_OF]->(n:Classification {realm:"${realmName}"}) MERGE (b:${classificationName2}_${language} {code:"${newClassification[0].parentCode}",name:"${classificationName2}",isDeleted:${newClassification[i].isDeleted},canCopied:true,canDelete:false,realm:"${realmName}",isRoot:true}) MERGE (n)-[:PARENT_OF]->(b)`;
+      let cypher= `Match (a:Infra {realm:"${realmName}"})-[:PARENT_OF]->(n:Classification {realm:"${realmName}"}) MERGE (b:${classificationName2}_${language} {code:"${newClassification[0].parentCode}",isActive: true,name:"${classificationName2}",isDeleted:${newClassification[i].isDeleted},canCopied:true,canDelete:false,realm:"${realmName}",isRoot:true}) MERGE (n)-[:PARENT_OF]->(b)`;
       let data =await this.neo4jService.write(cypher);
         console.log(data)
       

@@ -31,9 +31,24 @@ export class ClassificationRepository implements classificationInterface<Classif
   }
 
   async create(createClassificationDto: CreateClassificationDto) {
+    function assignDtoPropToEntity(entity, dto) {
+      Object.keys(dto).forEach((element) => {
+        if (
+          element != "parentId" &&
+
+          element != "parentKey"
+        ) {
+          entity[element] = dto[element];
+        }
+      });
+    
+      return entity;
+    }
     const classification = new Classification();
     const classificationObject = assignDtoPropToEntity(classification, createClassificationDto);
     let value;
+    console.log(classificationObject);
+    
     if (classificationObject['labels']) {
       value = await this.neo4jService.createNode(classificationObject, classificationObject['labels']);
     } else {
@@ -139,7 +154,7 @@ export class ClassificationRepository implements classificationInterface<Classif
     //  return result
 
     
-      let cypher=`MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) MATCH path =(c)-[:PARENT_OF]->(n)  WITH DISTINCT labels(n) AS labels \
+      let cypher=`MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) MATCH path =(c)-[:PARENT_OF]->(n) WHERE n.isActive=true  WITH DISTINCT labels(n) AS labels \
       UNWIND labels AS label \
       RETURN DISTINCT label\
       `
@@ -168,7 +183,7 @@ export class ClassificationRepository implements classificationInterface<Classif
     }
     
       for (let index = 0; index < abc.length; index++) {
-        let cypher2=`MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${abc[index]} {realm:"${realm}"})  MATCH path = (b)-[:PARENT_OF*]->(m) where m.isActive=true m.isDeleted=false \
+        let cypher2=`MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${abc[index]} {realm:"${realm}"})  MATCH path = (b)-[:PARENT_OF*]->(m) where b.isActive=true and b.isDeleted=false and m.isActive=true and m.isDeleted=false \
         WITH collect(path) AS paths\
         CALL apoc.convert.toTree(paths)\
         YIELD value\

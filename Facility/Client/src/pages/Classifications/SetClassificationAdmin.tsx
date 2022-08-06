@@ -96,7 +96,7 @@ const SetClassificationAdmin = () => {
   ];
 
   const getClassification = () => {
-    ClassificationsService.findAll({realm,language:"en"}).then((res) => {
+    ClassificationsService.findAll({ realm, language: "en" }).then((res) => {
 
       if (!res.data.root.children) {
         setData([res.data.root.properties] || []);
@@ -145,7 +145,11 @@ const SetClassificationAdmin = () => {
     let newNode: any = {};
     ClassificationsService.nodeInfo(key)
       .then((res) => {
-        if (labels.length > 0) {
+        console.log(res.data);
+
+        if (res.data.labels[0] === "Classification") {
+          console.log("Classification");
+          
           newNode = {
             key: uuidv4(),
             parentId: res.data.id,
@@ -153,7 +157,9 @@ const SetClassificationAdmin = () => {
             code: code,
             tag: tag,
             description: "",
-            labels: [],
+            labels: [`${name}_EN`],
+            realm: realm,
+            isRoot: true,
           }
         } else {
           newNode = {
@@ -165,6 +171,29 @@ const SetClassificationAdmin = () => {
             description: "",
           }
         }
+        console.log(newNode);
+        
+
+        // if (labels.length > 0) {
+        //   newNode = {
+        //     key: uuidv4(),
+        //     parentId: res.data.id,
+        //     name: name,
+        //     code: code,
+        //     tag: tag,
+        //     description: "",
+        //     labels: [`${name}_EN`],
+        //   }
+        // } else {
+        //   newNode = {
+        //     key: uuidv4(),
+        //     parentId: res.data.id,
+        //     name: name,
+        //     code: code,
+        //     tag: tag,
+        //     description: "",
+        //   }
+        // }
 
         ClassificationsService.create(newNode)
           .then((res) => {
@@ -223,9 +252,9 @@ const SetClassificationAdmin = () => {
           };
         }
         console.log(res.data.id, updateNode);
-        
+
         ClassificationsService.update(res.data.id, updateNode)
-          .then(async(res) => {
+          .then(async (res) => {
             console.log("deneme2");
             toast.current.show({
               severity: "success",
@@ -234,8 +263,8 @@ const SetClassificationAdmin = () => {
               life: 3000,
             });
             console.log(res.data);
-            
-            
+
+
             if (res.data.properties.isActive === true) {
               await ClassificationsService.setActive(res.data.id)
             } else {
