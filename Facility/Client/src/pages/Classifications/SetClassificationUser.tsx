@@ -469,10 +469,6 @@ const SetClassificationUser = () => {
           <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
           <Chips value={tag} onChange={(e) => setTag(e.value)} style={{ width: '100%' }} />
         </div>
-        <div className="field flex">
-          <h5 style={{ marginBottom: "0.5em" }}>Is Active</h5>
-          <Checkbox className="ml-3" onChange={e => setIsActive(e.checked)} checked={isActive}></Checkbox>
-        </div>
       </Dialog>
       <h1>Edit Classification</h1>
       <div className="field">

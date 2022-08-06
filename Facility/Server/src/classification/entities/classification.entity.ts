@@ -4,6 +4,6 @@ export class Classification extends BaseGraphObject {
   labels?: string[];
   realm?: string;
   isRoot?: boolean;
-  code: string;
+  code?: string;
   className: string = Classification.name;
 }

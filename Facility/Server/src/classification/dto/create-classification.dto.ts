@@ -6,7 +6,7 @@ import { IsNotEmptyWithI18nMessage } from 'ifmcommon';
 
 export class CreateClassificationDto {
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   @Length(1, 50)
   code: string;

@@ -53,6 +53,7 @@ const SetClassificationAdmin = () => {
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
   const [labels, setLabels] = useState<string[]>([]);
+  const [codeShow, setCodeShow] = useState(false);
   // console.log(auth);
 
 
@@ -70,6 +71,11 @@ const SetClassificationAdmin = () => {
       command: () => {
         ClassificationsService.nodeInfo(selectedNodeKey)
           .then((res) => {
+            console.log(res);
+            
+            if (res.data.properties.code!==undefined) {
+              setCodeShow(true);
+            }
             setName(res.data.properties.name || "");
             setCode(res.data.properties.code || "");
             setTag(res.data.properties.tag || []);
@@ -149,7 +155,7 @@ const SetClassificationAdmin = () => {
 
         if (res.data.labels[0] === "Classification") {
           console.log("Classification");
-          
+
           newNode = {
             key: uuidv4(),
             parentId: res.data.id,
@@ -172,7 +178,7 @@ const SetClassificationAdmin = () => {
           }
         }
         console.log(newNode);
-        
+
 
         // if (labels.length > 0) {
         //   newNode = {
@@ -233,10 +239,12 @@ const SetClassificationAdmin = () => {
     let updateNode: any = {};
     ClassificationsService.nodeInfo(key)
       .then((res) => {
+        console.log(res.data);
+        
+        
         if (labels.length > 0) {
           updateNode = {
             name: name,
-            code: code,
             tag: tag,
             description: "",
             labels: labels,
@@ -245,7 +253,6 @@ const SetClassificationAdmin = () => {
         } else {
           updateNode = {
             name: name,
-            code: code,
             tag: tag,
             description: "",
             isActive: isActive,
@@ -478,14 +485,15 @@ const SetClassificationAdmin = () => {
           setEditDia(false);
         }}
       >
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
-          <InputText
-            value={code}
-            onChange={(event) => setCode(event.target.value)}
-            style={{ width: '100%' }}
-          />
-        </div>
+        {codeShow && (
+          <div className="field">
+            <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
+            <InputText
+              value={code}
+              onChange={(event) => setCode(event.target.value)}
+              style={{ width: '100%' }}
+            />
+          </div>)}
         <div className="field">
           <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
           <InputText
