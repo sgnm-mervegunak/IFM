@@ -75,4 +75,10 @@ export class ClassificationController {
   async getClassificationsByLanguage(@Param('realm') realm:string,@Param('language') language:string){
     return this.classificationService.getClassificationsByLanguage(realm, language);
   }
+
+  @Unprotected()
+  @Get('getAClassificationByRealmAndLabelNameAndLanguage/:realm/:labelName/:language')
+  async getAClassificationByRealmAndLabelNameAndLanguage(@Param('realm') realm:string,@Param('labelName') labelName:string,@Param('language') language:string){
+    return this.classificationService.getAClassificationByRealmAndLabelNameAndLanguage(realm,labelName, language);
+  }
 }

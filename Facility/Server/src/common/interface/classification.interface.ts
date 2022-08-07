@@ -6,5 +6,6 @@ export interface classificationInterface<T> extends GeciciInterface<T> {
   setIsActiveFalseOfClassificationAndItsChild(id:string):any;
   getClassificationByIsActiveStatus(realm: string,language: string): any;
   getClassificationsByLanguage(realm: string,language: string): any;
+  getAClassificationByRealmAndLabelNameAndLanguage(realm: string,labelName: string,language: string): any;
 
 }

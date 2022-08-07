@@ -141,18 +141,6 @@ export class ClassificationRepository implements classificationInterface<Classif
   }
 
   async getClassificationByIsActiveStatus(realm: string,language: string){
-
-    // let cypher =`MATCH path = (p:Classification {realm:"${realm}"})-[:PARENT_OF*]->(m) where m.isActive=true\
-    // WITH collect(path) AS paths \
-    // CALL apoc.convert.toTree(paths) \
-    // YIELD value \
-    // RETURN value;`
-  
-    // let data =await this.neo4jService.read(cypher);
-    //  let rootObject ={root: data.records[0]["_fields"][0]}
-    //  let result =await this.neo4jService.changeObjectChildOfPropToChildren(rootObject)
-    //  return result
-
     
       let cypher=`MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) MATCH path =(c)-[:PARENT_OF]->(n) WHERE n.isActive=true  WITH DISTINCT labels(n) AS labels \
       UNWIND labels AS label \
@@ -291,6 +279,18 @@ for (let index = 0; index < returnData.length; index++) {
 
   async findChildrenByFacilityTypeNode(language: string,realm: string, typename:string) {
       return null;
+    }
+
+  async getAClassificationByRealmAndLabelNameAndLanguage(realm: string, labelName: string,language: string){
+      let cypher2=`MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${labelName}_${language} {realm:"${realm}"})  MATCH path = (b)-[:PARENT_OF*]->(m)  where b.isActive=true and b.isDeleted=false and m.isActive=true and m.isDeleted=false  \
+      WITH collect(path) AS paths\
+      CALL apoc.convert.toTree(paths)\
+      YIELD value\
+      RETURN value;`
+  
+      let data2 =await this.neo4jService.read(cypher2);
+    console.log(data2.records[0]["_fields"][0])
+      return data2.records[0]["_fields"][0];
     }
 }
 

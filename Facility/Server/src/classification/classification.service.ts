@@ -78,4 +78,10 @@ export class ClassificationService {
     return await this.classificationRepository.getClassificationsByLanguage(realm, language);
   }
   
+  @Span('get a classification by labelName, realm and language')
+  @OtelMethodCounter()
+  async getAClassificationByRealmAndLabelNameAndLanguage(realm: string, labelName: string,language: string){
+    return await this.classificationRepository.getAClassificationByRealmAndLabelNameAndLanguage(realm,labelName, language);
+  }
+  
 }
