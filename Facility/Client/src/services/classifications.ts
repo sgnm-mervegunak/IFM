@@ -26,6 +26,12 @@ interface ActiveInterface {
   language: string;
 }
 
+interface ActiveInterfaceWithLabel {
+  realm: string;
+  label: string;
+  language: string;
+}
+
 interface ClassificationInterface2 {
   identity?: {
     low: string;
@@ -65,6 +71,13 @@ const findAllActive = async (params:ActiveInterface) => {
   );
 };
 
+const findAllActiveByLabel = async (params:ActiveInterfaceWithLabel) => {
+  params.language=params.language.toUpperCase();
+  return axios.get(
+    url + "/getAClassificationByRealmAndLabelNameAndLanguage/" + params.realm + "/" + params.label + "/" + params.language
+  );
+};
+
 const findOne = async (id: string) => {
   return axios.get(url + "/Classification/" + id);
 };
@@ -101,6 +114,6 @@ const setPassive = async (id: string) => {
   return axios.patch(url + "/setIsActiveFalseOfClassificationAndItsChild/" + id);
 };
 
-const service = { findAll, findAllActive, findOne, create, update, remove, relation, nodeInfo, setActive, setPassive };
+const service = { findAll, findAllActive, findOne, create, update, remove, relation, nodeInfo, setActive, setPassive, findAllActiveByLabel };
 
 export default service;
