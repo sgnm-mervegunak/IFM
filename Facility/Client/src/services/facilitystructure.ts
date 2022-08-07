@@ -63,8 +63,8 @@ const createForm = async (key: string, form: FormInterface) => {
     return axios.post(url3 + key, form);
 };
 
-const update = async (id: string, structure: StructureInterface) => {
-    return axios.patch(url + "/" + id, structure);
+const update = async (key: string, structure: any) => {
+    return axios.patch(url + "/" + key, structure);
 };
 
 const remove = async (id: string) => {
