@@ -24,29 +24,6 @@ import { Chips } from "primereact/chips";
 
 // import "./FormGenerate.css";
 
-interface Node {
-  cantDeleted: boolean;
-  children: Node[];
-  description: string;
-  isActive: boolean;
-  isDeleted: boolean;
-  key: string;
-  name: string;
-  code: string;
-  realm: string;
-  tag: string[];
-  _id: {
-    low: string;
-    high: string;
-  },
-  formTypeId?: string;
-  icon?: string;
-  label?: string;
-  labels?: string[]; // for form type
-  parentId?: string;
-}
-
-
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   value: any;
   onChange: any;
@@ -54,19 +31,17 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   options?: any;
   label2: string;
   label: any;
-  
 }
 
 interface Params {
-  selectedFacilityType: string|undefined;
+  selectedFacilityType: string | undefined;
   submitted: boolean;
   setSubmitted: any;
   addItem: any;
   editItem: any;
   realm: string;
   selectedNodeKey: string;
-  editDia:boolean;
-  // setFormDia: React.Dispatch<React.SetStateAction<boolean>>;
+  editDia: boolean;
 }
 
 const Error: React.FC = ({ children }) => (
@@ -144,16 +119,17 @@ const Input = ({ value, onChange, type, ...rest }: InputProps) => {
       );
 
     case "date":
+      const date1 = new Date(value);
       return (
         <div>
           <Calendar
             className="mt-1"
             dateFormat="dd.mm.yy"
             onChange={(e) => {
-              onChange(moment(e.value?.toString()).format('DD.MM.YYYY'));
+              onChange(e.value?.toString());
               // onChange(moment(e.value?.toString()).format('DD.MM.YYYY'))
             }}
-            value={value}
+            value={date1}
             placeholder={rest?.placeholder}
             showIcon
             style={{ width: "100%" }}
@@ -208,63 +184,30 @@ const FormGenerateStructure = ({
   editDia
 }: Params) => {
   const [items, setItems] = useState<any[]>([]);
-  const [passiveItems, setPassiveItems] = useState([]);
   const [hasForm, setHasForm] = useState(true);
   const [hasFormData, setHasFormData] = useState(false);
-  const [nodeType,setNodeType]=useState("");
+  const [nodeType, setNodeType] = useState("");
   const toast = React.useRef<any>(null);
-  console.log(selectedFacilityType);
-  console.log(selectedNodeKey);
-
-
-  // const location = useLocation();
-  // const params = useParams();
-  // const searchParameters = new URLSearchParams(location.search);
-
-  // const typeKey = searchParameters.get("typeKey");
-
-  // console.log(nodeKey, formKey);
 
   const history = useNavigate();
 
   useEffect(() => {
-    // if (formKey === "undefined" || formKey === null || formKey === "") {
-    //   return setHasForm(false);
-    // }
-    // const responsegetData = StructureWinformDataService.getFormData(nodeKey);
-    // console.log(responsegetData);
+
     (async () => {
       let formData = await FacilityTypePropertiesService.nodeInfo(selectedNodeKey);
-      let nodetype = formData.data.properties.nodetype;
+
+      let nodetype = formData.data.properties.NodeType;
+
       setNodeType(nodetype);
       FacilityTypePropertiesService.getFacilityTypeProperties(
         realm,
         selectedFacilityType || nodetype
       )
         .then(async (responsegetProperties) => {
-          console.log(responsegetProperties.data);
-          let isFormData;
-          await FacilityTypePropertiesService.nodeInfo(selectedNodeKey)
-            .then((res) => {
-              console.log("testttttt");
-              console.log(res.data);
-              if (res.data.properties.isActive) {
-                isFormData = true;
-              
-              } else {
-                isFormData = false;
-             
-              }
-            })
-            .catch((err) => {
-            });
 
-          if (isFormData === true) {
-            console.log("hasFormData");
+          if (editDia === true) {
 
             const responsegetData = await FacilityTypePropertiesService.nodeInfo(selectedNodeKey);
-            console.log(responsegetData);
-            console.log("responsegetData");
 
             const convertedData = responsegetProperties.data.map(function (
               item: any
@@ -273,7 +216,7 @@ const FormGenerateStructure = ({
               // console.log(responsegetData.data[item.label.replaceAll(" ", "")]);
               // console.log([responsegetData.data].length);
               console.log(item);
-              
+
               return {
                 ...item,
                 defaultValue:
@@ -310,7 +253,6 @@ const FormGenerateStructure = ({
           }
         })
         .catch((err) => {
-          console.log("ana catch");
 
           // return setHasForm(false);
           toast.current.show({
@@ -324,67 +266,6 @@ const FormGenerateStructure = ({
         });
     })();
   }, [selectedFacilityType]);
-
-  // useEffect(() => {
-  //   (async () => {
-  //     FormBuilderService.getPassivePropertiesWithKey(formKey)
-  //       .then(async (responsegetPropertiesPassive) => {
-  //         let isFormData;
-  //         await StructureWinformDataService.getFormData(nodeKey)
-  //           .then((res) => {
-  //             if (res.data.isActive) {
-  //               isFormData = true;
-  //             } else {
-  //               isFormData = false;
-  //             }
-  //           })
-  //           .catch((err) => {
-  //           });
-
-  //         if (isFormData === true) {
-  //           console.log("11");
-
-  //           const responsegetData = await StructureWinformDataService.getFormData(nodeKey);
-  //           console.log(responsegetData);
-  //           console.log(responsegetPropertiesPassive);
-
-  //           const convertedData = responsegetPropertiesPassive.data?.map(function (item: any) {
-
-  //             console.log(responsegetData.data[item.label.replaceAll(" ", "")]);
-  //             console.log([responsegetData.data].length);
-
-  //             return {
-  //               ...item,
-  //               defaultValue:
-  //                 [responsegetData.data].length > 0
-  //                   ? responsegetData.data[item.label.replaceAll(" ", "")]
-  //                     ? responsegetData.data[item.label.replaceAll(" ", "")]
-  //                     : item.defaultValue
-  //                   : item.defaultValue,
-  //               rules: { required: item.rules[0] },
-  //               options: item.options.map(function (option: any) {
-  //                 return { optionsName: option };
-  //               }),
-  //             };
-  //           });
-  //           setPassiveItems(convertedData);
-  //         }
-
-  //       })
-  //       .catch((err) => {
-  //         console.log(err);
-  //         return;
-  //         toast.current.show({
-  //           severity: "error",
-  //           summary: "Error",
-  //           detail: err.responsegetPropertiesPassive
-  //             ? err.responsegetPropertiesPassive.data.message
-  //             : err.message,
-  //           life: 2000,
-  //         });
-  //       });
-  //   })();
-  // }, [])
 
   const {
     handleSubmit,
@@ -404,26 +285,19 @@ const FormGenerateStructure = ({
   }, [submitted]);
 
   const onSubmit = (data: any) => {
-    // console.log(data);
     const key = uuidv4();
-    
+
     // const formData = {
     //   nodeKey: nodeKey,
     //   data: data,
     // };
     console.log(data);
-    // addItem(data);
-    // console.log(formData);
-    // console.log(formData);
-
-    console.log(hasFormData);
-
 
     if (editDia === false) {
-      data.nodetype = selectedFacilityType;
+      data.NodeType = selectedFacilityType;
       addItem(data);
     } else {
-      data.nodetype = nodeType;
+      data.NodeType = nodeType;
       editItem(data);
 
     }

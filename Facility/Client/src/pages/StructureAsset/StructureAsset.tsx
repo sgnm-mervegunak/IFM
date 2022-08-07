@@ -38,6 +38,7 @@ interface Node {
   labels?: string[]; // for form type
   parentId?: string;
   className?: string;
+  Name?: string;
 }
 
 const StructureAsset = () => {
@@ -68,8 +69,8 @@ const StructureAsset = () => {
         }
         for (let i of nodes) {
           iconAssetNodes(i.children)
-            i.icon = "pi pi pi-cog";
-            i.label = i.name;
+          i.icon = "pi pi pi-cog";
+          i.label = i.name;
         }
       };
       iconAssetNodes(temp);
@@ -167,7 +168,7 @@ const StructureAsset = () => {
     for (let i of nodes) {
       fixNodes(i.children)
       i.icon = "pi pi-fw pi-building";
-      i.label = i.name;
+      i.label = i.name || i.Name;
     }
   };
 
@@ -180,7 +181,7 @@ const StructureAsset = () => {
           referenceKey: assetKey,
         };
 
-        StructureAssetService.createAsset(key,newAsset)
+        StructureAssetService.createAsset(key, newAsset)
           .then((res) => {
             toast.current.show({
               severity: "success",
@@ -298,14 +299,14 @@ const StructureAsset = () => {
             options={assetData}
             onChange={(e) => {
               setAssetKey(e.value);
-              console.log(e);              
+              console.log(e);
             }}
             filter
             style={{ width: '100%' }}
           />
         </div>
       </Dialog>
-  
+
       <h1>Edit Structure-Asset</h1>
       <div className="field">
         <Tree
@@ -334,74 +335,74 @@ const StructureAsset = () => {
           filterBy="name,code"
           filterPlaceholder="Search"
           className="font-bold"
-          // nodeTemplate={(data: Node, options) => <span className="flex align-items-center font-bold">{data.label} {
-          //   <>
-          //     <span className="ml-4 ">
-          //       <Button
-          //         icon="pi pi-plus" className="p-button-rounded p-button-secondary p-button-text" aria-label="Add Item"
-          //         onClick={() => {
-          //           setSelectedNodeKey(data.key);
-          //           setAddDia(true)
-          //         }
-          //         }
-          //         title="Add Item"
-          //       />
-          //       <Button
-          //         icon="pi pi-pencil" className="p-button-rounded p-button-secondary p-button-text" aria-label="Edit Item"
-          //         onClick={() => {
-          //           setSelectedNodeKey(data.key);
-          //           let dataKey: any = data.key
+        // nodeTemplate={(data: Node, options) => <span className="flex align-items-center font-bold">{data.label} {
+        //   <>
+        //     <span className="ml-4 ">
+        //       <Button
+        //         icon="pi pi-plus" className="p-button-rounded p-button-secondary p-button-text" aria-label="Add Item"
+        //         onClick={() => {
+        //           setSelectedNodeKey(data.key);
+        //           setAddDia(true)
+        //         }
+        //         }
+        //         title="Add Item"
+        //       />
+        //       <Button
+        //         icon="pi pi-pencil" className="p-button-rounded p-button-secondary p-button-text" aria-label="Edit Item"
+        //         onClick={() => {
+        //           setSelectedNodeKey(data.key);
+        //           let dataKey: any = data.key
 
-          //           getNodeInfoAndEdit(dataKey)
-          //           setEditDia(true);
-          //         }
-          //         }
-          //         title="Edit Item"
-          //       />
-          //       <Button
-          //         icon="pi pi-trash" className="p-button-rounded p-button-secondary p-button-text" aria-label="Delete"
-          //         onClick={() => {
-          //           setSelectedNodeKey(data.key);
-          //           setDelDia(true)
-          //         }}
-          //         title="Delete Item"
-          //       />
-          //       {/* {
-          //         data.hasType &&  */}
-          //       <Button
-          //         icon="pi pi-book" className="p-button-rounded p-button-secondary p-button-text" aria-label="Edit Form"
-          //         // onClick={(e) => navigate(`/formgenerate/${data.key}?id=${data._id.low}`, 
-          //         // {
-          //         //   state: {
-          //         //     data: data,
-          //         //     rootId: structure.root._id.low,
-          //         //   }
-          //         // }
-          //         // )} 
-          //         onClick={() => window.open(`http://localhost:3001/formgenerate/${data._id.low}?formType=${data.labels}?className=${data.className}`, '_blank')}
+        //           getNodeInfoAndEdit(dataKey)
+        //           setEditDia(true);
+        //         }
+        //         }
+        //         title="Edit Item"
+        //       />
+        //       <Button
+        //         icon="pi pi-trash" className="p-button-rounded p-button-secondary p-button-text" aria-label="Delete"
+        //         onClick={() => {
+        //           setSelectedNodeKey(data.key);
+        //           setDelDia(true)
+        //         }}
+        //         title="Delete Item"
+        //       />
+        //       {/* {
+        //         data.hasType &&  */}
+        //       <Button
+        //         icon="pi pi-book" className="p-button-rounded p-button-secondary p-button-text" aria-label="Edit Form"
+        //         // onClick={(e) => navigate(`/formgenerate/${data.key}?id=${data._id.low}`, 
+        //         // {
+        //         //   state: {
+        //         //     data: data,
+        //         //     rootId: structure.root._id.low,
+        //         //   }
+        //         // }
+        //         // )} 
+        //         onClick={() => window.open(`http://localhost:3001/formgenerate/${data._id.low}?formType=${data.labels}?className=${data.className}`, '_blank')}
 
 
-          //         title="Edit Form"
-          //       />
-          //       {/* <Button
-          //         icon="pi pi-book" className="p-button-rounded p-button-secondary p-button-text" aria-label="Edit Form"
-          //         // onClick={(e) => navigate(`/formgenerate/${data.key}?id=${data._id.low}`, 
-          //         // {
-          //         //   state: {
-          //         //     data: data,
-          //         //     rootId: structure.root._id.low,
-          //         //   }
-          //         // }
-          //         // )} 
-          //         onClick={(e) => console.log(data)}
+        //         title="Edit Form"
+        //       />
+        //       {/* <Button
+        //         icon="pi pi-book" className="p-button-rounded p-button-secondary p-button-text" aria-label="Edit Form"
+        //         // onClick={(e) => navigate(`/formgenerate/${data.key}?id=${data._id.low}`, 
+        //         // {
+        //         //   state: {
+        //         //     data: data,
+        //         //     rootId: structure.root._id.low,
+        //         //   }
+        //         // }
+        //         // )} 
+        //         onClick={(e) => console.log(data)}
 
-          //         title="Edit Form"
-          //       /> */}
+        //         title="Edit Form"
+        //       /> */}
 
-          //     </span>
-          //   </>
-          // }
-          // </span>}
+        //     </span>
+        //   </>
+        // }
+        // </span>}
         />
       </div>
 
