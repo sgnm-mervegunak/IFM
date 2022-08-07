@@ -54,14 +54,18 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   options?: any;
   label2: string;
   label: any;
+  
 }
 
 interface Params {
-  selectedFacilityType: string;
+  selectedFacilityType: string|undefined;
   submitted: boolean;
   setSubmitted: any;
   addItem: any;
+  editItem: any;
   realm: string;
+  selectedNodeKey: string;
+  editDia:boolean;
   // setFormDia: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -145,9 +149,9 @@ const Input = ({ value, onChange, type, ...rest }: InputProps) => {
           <Calendar
             className="mt-1"
             dateFormat="dd.mm.yy"
-            onChange={(e)=>{
-              
-              onChange(moment(e.value?.toString()).format('DD.MM.YYYY'))
+            onChange={(e) => {
+              onChange(moment(e.value?.toString()).format('DD.MM.YYYY'));
+              // onChange(moment(e.value?.toString()).format('DD.MM.YYYY'))
             }}
             value={value}
             placeholder={rest?.placeholder}
@@ -199,13 +203,19 @@ const FormGenerateStructure = ({
   submitted,
   setSubmitted,
   addItem,
+  editItem,
+  selectedNodeKey,
+  editDia
 }: Params) => {
   const [items, setItems] = useState<any[]>([]);
   const [passiveItems, setPassiveItems] = useState([]);
   const [hasForm, setHasForm] = useState(true);
   const [hasFormData, setHasFormData] = useState(false);
+  const [nodeType,setNodeType]=useState("");
   const toast = React.useRef<any>(null);
   console.log(selectedFacilityType);
+  console.log(selectedNodeKey);
+
 
   // const location = useLocation();
   // const params = useParams();
@@ -224,48 +234,54 @@ const FormGenerateStructure = ({
     // const responsegetData = StructureWinformDataService.getFormData(nodeKey);
     // console.log(responsegetData);
     (async () => {
+      let formData = await FacilityTypePropertiesService.nodeInfo(selectedNodeKey);
+      let nodetype = formData.data.properties.nodetype;
+      setNodeType(nodetype);
       FacilityTypePropertiesService.getFacilityTypeProperties(
         realm,
-        selectedFacilityType
+        selectedFacilityType || nodetype
       )
         .then(async (responsegetProperties) => {
           console.log(responsegetProperties.data);
           let isFormData;
-          // await StructureWinformDataService.getFormData(nodeKey)
-          //   .then((res) => {
-          //     console.log("testttttt");
-          //     console.log(res.data);
-          //     if (res.data.isActive) {
-          //       isFormData = true;
-          //       setHasFormData(true);
-          //     } else {
-          //       isFormData = false;
-          //       setHasFormData(false);
-          //     }
-          //   })
-          //   .catch((err) => {
-          //   });
+          await FacilityTypePropertiesService.nodeInfo(selectedNodeKey)
+            .then((res) => {
+              console.log("testttttt");
+              console.log(res.data);
+              if (res.data.properties.isActive) {
+                isFormData = true;
+              
+              } else {
+                isFormData = false;
+             
+              }
+            })
+            .catch((err) => {
+            });
 
           if (isFormData === true) {
             console.log("hasFormData");
 
-            // const responsegetData = await StructureWinformDataService.getFormData(nodeKey);
-            // console.log(responsegetData);
+            const responsegetData = await FacilityTypePropertiesService.nodeInfo(selectedNodeKey);
+            console.log(responsegetData);
+            console.log("responsegetData");
+
             const convertedData = responsegetProperties.data.map(function (
               item: any
             ) {
               // console.log(formData[`'${item.label}'`]);
               // console.log(responsegetData.data[item.label.replaceAll(" ", "")]);
               // console.log([responsegetData.data].length);
-
+              console.log(item);
+              
               return {
                 ...item,
-                // defaultValue:
-                //   [responsegetData.data].length > 0
-                //     ? responsegetData.data[item.label.replaceAll(" ", "")]
-                //       ? responsegetData.data[item.label.replaceAll(" ", "")]
-                //       : item.defaultValue
-                //     : item.defaultValue,
+                defaultValue:
+                  [responsegetData.data].length > 0
+                    ? responsegetData.data.properties[item.label.replaceAll(" ", "")]
+                      ? responsegetData.data.properties[item.label.replaceAll(" ", "")]
+                      : item.defaultValue
+                    : item.defaultValue,
                 label: item.label,
                 rules: { required: item.rules[0] },
                 options: item.options.map(function (option: any) {
@@ -390,59 +406,27 @@ const FormGenerateStructure = ({
   const onSubmit = (data: any) => {
     // console.log(data);
     const key = uuidv4();
-    data.nodetype = selectedFacilityType;
+    
     // const formData = {
     //   nodeKey: nodeKey,
     //   data: data,
     // };
     console.log(data);
-    addItem(data);
+    // addItem(data);
     // console.log(formData);
     // console.log(formData);
 
-    // if (hasFormData === false) {
-    //   StructureWinformDataService.createFormData(nodeKey, data)
-    //     .then((res) => {
-    //       toast.current.show({
-    //         severity: "success",
-    //         summary: "Successful",
-    //         detail: "Form Data Created",
-    //         life: 3000,
-    //       });
-    //       setTimeout(() => {
-    //         setFormDia(false);
-    //       }, 1000);
-    //     })
-    //     .catch((err) => {
-    //       toast.current.show({
-    //         severity: "error",
-    //         summary: "Error",
-    //         detail: err.response ? err.response.data.message : err.message,
-    //         life: 2000,
-    //       });
-    //     });
-    // } else {
-    //   StructureWinformDataService.updateFormData(nodeKey, data)
-    //     .then((res) => {
-    //       toast.current.show({
-    //         severity: "success",
-    //         summary: "Successful",
-    //         detail: "Form Data Updated",
-    //         life: 3000,
-    //       });
-    //       setTimeout(() => {
-    //         setFormDia(false);
-    //       }, 1000);
-    //     })
-    //     .catch((err) => {
-    //       toast.current.show({
-    //         severity: "error",
-    //         summary: "Error",
-    //         detail: err.response ? err.response.data.message : err.message,
-    //         life: 2000,
-    //       });
-    //     });
-    // }
+    console.log(hasFormData);
+
+
+    if (editDia === false) {
+      data.nodetype = selectedFacilityType;
+      addItem(data);
+    } else {
+      data.nodetype = nodeType;
+      editItem(data);
+
+    }
   };
 
   return (

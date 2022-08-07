@@ -95,9 +95,7 @@ const SetFacilityStructure2 = () => {
   const [generateFormTypeKey, setGenerateFormTypeKey] = useState<string | undefined>("");
   const [generateNodeName, setGenerateNodeName] = useState<string | undefined>("");
   const [facilityType, setFacilityType] = useState<string[]>([]);
-  const [selectedFacilityType, setSelectedFacilityType] = useState("");
-
-
+  const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
 
   useEffect(() => {
     FacilityStructureService.getFacilityTypes("FacilityTypes_EN", realm)
@@ -333,7 +331,7 @@ const SetFacilityStructure2 = () => {
     setLabels([]);
   };
 
-  const editItem = (key: string) => {
+  const editItem = (key: string, data: any) => {
     let updateNode: any = {};
     FacilityStructureService.nodeInfo(key)
       .then((responseStructure) => {
@@ -357,34 +355,36 @@ const SetFacilityStructure2 = () => {
         }
         console.log(responseStructure.data);
 
-        StructureWinformService.findForm(key)
-          .then((res) => {
-            StructureWinformService.removeForm(key, responseStructure.data.properties.formTypeId)
-              .then((res) => {
-              })
-            let newForm: any = {};
-            newForm = {
-              referenceKey: formTypeId,
-            };
-            StructureWinformService.createForm(key, newForm)
-              .then((res) => {
-              })
-          }
-          )
-          .catch((err) => {
-            if (err.response.status === 404) {
-              let newForm: any = {};
-              newForm = {
-                referenceKey: formTypeId,
-              };
-              StructureWinformService.createForm(key, newForm)
-                .then((res) => {
-                })
-            }
-          }
-          )
+        // StructureWinformService.findForm(key)
+        //   .then((res) => {
+        //     StructureWinformService.removeForm(key, responseStructure.data.properties.formTypeId)
+        //       .then((res) => {
+        //       })
+        //     let newForm: any = {};
+        //     newForm = {
+        //       referenceKey: formTypeId,
+        //     };
+        //     StructureWinformService.createForm(key, newForm)
+        //       .then((res) => {
+        //       })
+        //   }
+        //   )
+        //   .catch((err) => {
+        //     if (err.response.status === 404) {
+        //       let newForm: any = {};
+        //       newForm = {
+        //         referenceKey: formTypeId,
+        //       };
+        //       StructureWinformService.createForm(key, newForm)
+        //         .then((res) => {
+        //         })
+        //     }
+        //   }
+        //   )
+        console.log(data);
+        
 
-        FacilityStructureService.update(responseStructure.data.id, updateNode)
+        FacilityStructureService.update(key, data)
           .then((res) => {
             toast.current.show({
               severity: "success",
@@ -518,6 +518,7 @@ const SetFacilityStructure2 = () => {
             setFormTypeId(undefined);
             setLabels([]);
             setTag([]);
+            setSelectedFacilityType(undefined);
           }}
           className="p-button-text"
         />
@@ -537,19 +538,13 @@ const SetFacilityStructure2 = () => {
         <Button
           label="Cancel"
           icon="pi pi-times"
-          onClick={() => {
-            setEditDia(false);
-            setName("");
-            setTag([]);
-            setLabels([]);
-            setFormTypeId(undefined);
-          }}
+          onClick={() => setEditDia(false)}
           className="p-button-text"
         />
         <Button
           label="Save"
           icon="pi pi-check"
-          onClick={() => editItem(selectedNodeKey)}
+          onClick={() => setSubmitted(true)}
           autoFocus
         />
       </div>
@@ -606,7 +601,16 @@ const SetFacilityStructure2 = () => {
             style={{ width: '100%' }}
           />
         </div>
-        {selectedFacilityType && <FormGenerateStructure selectedFacilityType={selectedFacilityType} realm={realm} addItem={(data: any) => addItem(selectedNodeKey, data)} setSubmitted={setSubmitted} submitted={submitted} />}
+        {selectedFacilityType && <FormGenerateStructure
+          selectedFacilityType={selectedFacilityType}
+          realm={realm}
+          addItem={(data: any) => addItem(selectedNodeKey, data)}
+          editItem={(data: any) => editItem(selectedNodeKey, data)}
+          setSubmitted={setSubmitted}
+          submitted={submitted}
+          selectedNodeKey={selectedNodeKey}
+          editDia={editDia}
+        />}
 
       </Dialog>
       <Dialog
@@ -622,7 +626,16 @@ const SetFacilityStructure2 = () => {
           setEditDia(false);
         }}
       >
-        <FormGenerateStructure selectedFacilityType={selectedFacilityType} realm={realm} addItem={(data: any) => addItem(selectedNodeKey, data)} setSubmitted={setSubmitted} submitted={submitted} />
+        <FormGenerateStructure
+          selectedFacilityType={selectedFacilityType}
+          realm={realm}
+          addItem={(data: any) => addItem(selectedNodeKey, data)}
+          editItem={(data: any) => editItem(selectedNodeKey, data)}
+          setSubmitted={setSubmitted}
+          submitted={submitted}
+          selectedNodeKey={selectedNodeKey}
+          editDia={editDia}
+        />
       </Dialog>
 
       <Dialog
