@@ -82,7 +82,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     if (!node) {
       throw new FacilityStructureNotFountException(key);
     }
-    const structureRootNode=await this.findStructureRootNode(key);
+    const structureRootNode=await this.neo4jService.findStructureRootNode(key);
     //const properties = this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['NodeType']);
     const properties = await this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['NodeType']);
     let proper = {};
@@ -130,13 +130,14 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
 
   async delete(_id: string) {
     try {
-      const node = await this.neo4jService.read(
-        `match(n {isDeleted:false}) where id(n)=$id and not n:Virtual return n`,
-        { id: parseInt(_id) },
-      );
-      if (!node.records[0]) {
-        throw new HttpException({ code: 5005 }, 404);
-      }
+      // const node = await this.neo4jService.read(
+      //   `match(n {isDeleted:false}) where id(n)=$id and not n:Virtual return n`,
+      //   { id: parseInt(_id) },
+      // );
+      const node = await this.neo4jService.findByIdWithoutVirtualNode(_id);
+      // if (!node.records[0]) {
+      //   throw new HttpException({ code: 5005 }, 404);
+      // }
       await this.neo4jService.getParentById(_id);
       let deletedNode;
 
@@ -148,7 +149,8 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
         if (hasAssetRelation.length > 0) {
           await this.kafkaService.producerSendMessage(
             'deleteStructure',
-            JSON.stringify({ referenceKey: node.records[0]['_fields'][0].properties.key }),
+            //JSON.stringify({ referenceKey: node.records[0]['_fields'][0].properties.key }),
+            JSON.stringify({ referenceKey: node.properties.key }),
           );
         }
 
@@ -245,13 +247,13 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
    if(node.labels[0]==='FacilityStructure'){
     structureRootNode=node
    }else{
-    structureRootNode=await this.findStructureRootNode(key)
+    structureRootNode=await this.neo4jService.findStructureRootNode(key)
    }
-   console.log(structureRootNode)
-    const allowedStructureTypeNode = await this.neo4jService.read('match (n:FacilityTypes_EN {realm:$realm}) match(p {name:$name}) match(n)-[:PARENT_OF]->(p) return p', { realm: structureRootNode.properties.realm, name: node.labels[0] })
-    console.log(allowedStructureTypeNode.records[0]['_fields'][0])
-    const allowedStructures=await this.neo4jService.read('match(n {key:$key}) match(p) match (n)-[:PARENT_OF]->(p) return p',{key:allowedStructureTypeNode.records[0]['_fields'][0].properties.key})
-    //create facility-structure node
+
+    //const allowedStructureTypeNode = await this.neo4jService.read('match (n:FacilityTypes_EN {realm:$realm}) match(p {name:$name}) match(n)-[:PARENT_OF]->(p) return p', { realm: structureRootNode.properties.realm, name: node.labels[0] })
+    const allowedStructureTypeNode = await this.neo4jService.getAllowedStructureTypeNode(structureRootNode.properties.realm, node.labels[0]);
+    //const allowedStructures=await this.neo4jService.read('match(n {key:$key}) match(p) match (n)-[:PARENT_OF]->(p) return p',{key:allowedStructureTypeNode.records[0]['_fields'][0].properties.key})
+    const allowedStructures =  await this.neo4jService.getAllowedStructures(allowedStructureTypeNode.records[0]['_fields'][0].properties.key)
     
     const isExist=allowedStructures.records.filter(allowedStructure=>{
       console.log(allowedStructure['_fields'])
@@ -300,11 +302,11 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     return response;
   }
   //------------------------------------------
-  async findStructureRootNode(key){
-   const structureRootNode=await this.neo4jService.read('match(n:FacilityStructure) match(p {key:$key}) match (n)-[:PARENT_OF*]->(p) return n',{key})
-    console.log(structureRootNode.records[0]['_fields'][0])
+  // async findStructureRootNode(key){
+  //  const structureRootNode=await this.neo4jService.read('match(n:FacilityStructure) match(p {key:$key}) match (n)-[:PARENT_OF*]->(p) return n',{key})
+  //   console.log(structureRootNode.records[0]['_fields'][0])
   
 
-   return structureRootNode.records[0]['_fields'][0]
-  }
+  //  return structureRootNode.records[0]['_fields'][0]
+  // }
 }
