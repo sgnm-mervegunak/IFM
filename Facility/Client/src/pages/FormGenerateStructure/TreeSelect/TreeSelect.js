@@ -15,7 +15,7 @@ const fixNodes = (nodes) => {
 const TreeSelectComponent = ({ selectedNode, setSelectedNode, placeholder }) => {
     const [nodes,setNodes] = React.useState([])
   React.useEffect(() => {
-    ClassificationsService.findAllActive({ realm: "IFM", language: "en" }).then(
+    ClassificationsService.findAllActiveByLabel({ realm: "IFM", label: "OmniClass11", language: "en" }).then(
       (res) => {
         let temp = JSON.parse(JSON.stringify([res.data.root] || []));
         fixNodes(temp);
