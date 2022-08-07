@@ -282,6 +282,12 @@ for (let index = 0; index < returnData.length; index++) {
     }
 
   async getAClassificationByRealmAndLabelNameAndLanguage(realm: string, labelName: string,language: string){
+    
+    let cypher=`MATCH (c:Classification {realm:"${realm}"}) return c` 
+    let data =await this.neo4jService.read(cypher);
+    
+    let root ={parent_of:[],...data.records[0]["_fields"][0].properties}
+
       let cypher2=`MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${labelName}_${language} {realm:"${realm}"})  MATCH path = (b)-[:PARENT_OF*]->(m)  where b.isActive=true and b.isDeleted=false and m.isActive=true and m.isDeleted=false  \
       WITH collect(path) AS paths\
       CALL apoc.convert.toTree(paths)\
@@ -289,8 +295,15 @@ for (let index = 0; index < returnData.length; index++) {
       RETURN value;`
   
       let data2 =await this.neo4jService.read(cypher2);
-    console.log(data2.records[0]["_fields"][0])
-      return data2.records[0]["_fields"][0];
+      let p=data2.records[0]["_fields"][0];
+     
+      root.parent_of.push(p);
+    
+      console.log(root)
+       let result =await this.neo4jService.changeObjectChildOfPropToChildren(root)
+       console.log(result)
+       return result
+      
     }
 }
 
