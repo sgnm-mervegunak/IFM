@@ -141,7 +141,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isDeleted: false,
       name: 'FacilityStructure',
       isActive: true,
-      canDisplay: true,  
+      canDisplay: false,  
     },['FacilityType']);
     const facilityTypesNode5 = await this.neo4jService.createNode({
       canDelete: true,
