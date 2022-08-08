@@ -7,7 +7,7 @@ const FileItem = (props) => {
         <div className="flex align-items-center" style={{ width: "40%" }}>
           {props.isImage && <img alt={props.name} role="presentation" src={props.url} width={100} />}
           <span className="flex flex-column text-left ml-3">
-            {props.name}
+            <a href={props.url}>{props.name}</a>
             <small>{new Date().toLocaleDateString()}</small>
           </span>
         </div>

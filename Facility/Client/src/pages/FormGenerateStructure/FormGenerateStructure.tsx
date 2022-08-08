@@ -28,6 +28,8 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   value: any;
   onChange: any;
   type: any;
+  uploadFiles: any;
+  setUploadFiles: any;
   options?: any;
   label2: string;
   label: any;
@@ -39,6 +41,8 @@ interface Params {
   setSubmitted: any;
   addItem: any;
   editItem: any;
+  uploadFiles: any;
+  setUploadFiles: any;
   realm: string;
   selectedNodeKey: string;
   editDia: boolean;
@@ -47,7 +51,14 @@ interface Params {
 const Error: React.FC = ({ children }) => (
   <p style={{ color: "red" }}>{children}</p>
 );
-const Input = ({ value, onChange, type, ...rest }: InputProps) => {
+const Input = ({
+  value,
+  onChange,
+  uploadFiles,
+  setUploadFiles,
+  type,
+  ...rest
+}: InputProps) => {
   const options2 = rest?.options?.map((item: any | null) => {
     return Object.values(item);
   });
@@ -141,9 +152,12 @@ const Input = ({ value, onChange, type, ...rest }: InputProps) => {
         <div>
           <label>{rest?.label2}</label>
           <FileUploadComponent
+            value={value}
+            onChange={onChange}
+            label={rest?.label}
+            uploadFiles={uploadFiles}
+            setUploadFiles={setUploadFiles}
             isImage
-            uploadedFiles={value}
-            setUploadedFiles={onChange}
           />
         </div>
       );
@@ -153,21 +167,33 @@ const Input = ({ value, onChange, type, ...rest }: InputProps) => {
           <label>{rest?.label2}</label>
           <FileUploadComponent
             isDocument
-            uploadedFiles={value}
-            setUploadedFiles={onChange}
+            label={rest?.label}
+            value={value}
+            onChange={onChange}
+            uploadFiles={uploadFiles}
+            setUploadFiles={setUploadFiles}
           />
         </div>
       );
     case "treeselect":
       return (
-        <TreeSelectComponent selectedNode={value} setSelectedNode={onChange} placeholder={rest?.placeholder} />
+        <TreeSelectComponent
+          selectedNode={value}
+          setSelectedNode={onChange}
+          placeholder={rest?.placeholder}
+        />
       );
     case "textarray":
       return (
         <div>
-          <Chips value={value} onChange={(e) => onChange(e.value)} style={{ width: '100%' }} className="structureChips" />
+          <Chips
+            value={value}
+            onChange={(e) => onChange(e.value)}
+            style={{ width: "100%" }}
+            className="structureChips"
+          />
         </div>
-      )
+      );
     default:
       return null;
   }
@@ -180,8 +206,10 @@ const FormGenerateStructure = ({
   setSubmitted,
   addItem,
   editItem,
+  uploadFiles,
+  setUploadFiles,
   selectedNodeKey,
-  editDia
+  editDia,
 }: Params) => {
   const [items, setItems] = useState<any[]>([]);
   const [hasForm, setHasForm] = useState(true);
@@ -192,9 +220,10 @@ const FormGenerateStructure = ({
   const history = useNavigate();
 
   useEffect(() => {
-
     (async () => {
-      let formData = await FacilityTypePropertiesService.nodeInfo(selectedNodeKey);
+      let formData = await FacilityTypePropertiesService.nodeInfo(
+        selectedNodeKey
+      );
 
       let nodetype = formData.data.properties.NodeType;
 
@@ -204,10 +233,10 @@ const FormGenerateStructure = ({
         selectedFacilityType || nodetype
       )
         .then(async (responsegetProperties) => {
-
           if (editDia === true) {
-
-            const responsegetData = await FacilityTypePropertiesService.nodeInfo(selectedNodeKey);
+            const responsegetData =
+              await FacilityTypePropertiesService.nodeInfo(selectedNodeKey);
+              console.log(responsegetData);
 
             const convertedData = responsegetProperties.data.map(function (
               item: any
@@ -221,8 +250,12 @@ const FormGenerateStructure = ({
                 ...item,
                 defaultValue:
                   [responsegetData.data].length > 0
-                    ? responsegetData.data.properties[item.label.replaceAll(" ", "")]
-                      ? responsegetData.data.properties[item.label.replaceAll(" ", "")]
+                    ? responsegetData.data.properties[
+                        item.label.replaceAll(" ", "")
+                      ]
+                      ? responsegetData.data.properties[
+                          item.label.replaceAll(" ", "")
+                        ]
                       : item.defaultValue
                     : item.defaultValue,
                 label: item.label,
@@ -253,7 +286,6 @@ const FormGenerateStructure = ({
           }
         })
         .catch((err) => {
-
           // return setHasForm(false);
           toast.current.show({
             severity: "error",
@@ -291,15 +323,12 @@ const FormGenerateStructure = ({
     //   nodeKey: nodeKey,
     //   data: data,
     // };
-    console.log(data);
-
     if (editDia === false) {
       data.NodeType = selectedFacilityType;
       addItem(data);
     } else {
       data.NodeType = nodeType;
       editItem(data);
-
     }
   };
 
@@ -328,6 +357,8 @@ const FormGenerateStructure = ({
                           <Input
                             value={field.value || ""}
                             onChange={field.onChange}
+                            uploadFiles={uploadFiles}
+                            setUploadFiles={setUploadFiles}
                             {...(items[e] as any)}
                           />
                         </div>

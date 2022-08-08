@@ -96,6 +96,7 @@ const SetFacilityStructure2 = () => {
   const [generateNodeName, setGenerateNodeName] = useState<string | undefined>("");
   const [facilityType, setFacilityType] = useState<string[]>([]);
   const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
+  const [uploadFiles,setUploadFiles] = useState<any>({});
 
   useEffect(() => {
     FacilityStructureService.getFacilityTypes("FacilityTypes_EN", realm)
@@ -260,6 +261,16 @@ const SetFacilityStructure2 = () => {
     }
   };
 
+  const UploadAnyFile = (folderName:string,file:any) => {
+    const url = "http://localhost:3004/file-upload/single";
+    const formData = new FormData();
+
+    formData.append("file", file);
+    formData.append("realmName", "ifm");
+    formData.append("folderName", folderName);
+    return axios.post(url, formData)
+  };
+
   const addItem = (key: string, data: any) => {
     let newNode: any = {};
     FacilityStructureService.nodeInfo(key)
@@ -290,22 +301,36 @@ const SetFacilityStructure2 = () => {
 
         console.log("data", data)
         FacilityStructureService.createStructure(key, data)
-          .then((res) => {
+          .then(async(res) => {
             toast.current.show({
               severity: "success",
               summary: "Successful",
               detail: "Structure Created",
               life: 3000,
             });
-            let newForm: any = {};
-            newForm = {
-              referenceKey: formTypeId,
-            };
-            StructureWinformService.createForm(res.data.properties.key, newForm)
-              .then((res) => {
-              })
+            // let newForm: any = {};
+            // newForm = {
+            //   referenceKey: formTypeId,
+            // };
+            // StructureWinformService.createForm(res.data.properties.key, newForm)
+            //   .then((res) => {
+            //   })
             getFacilityStructure();
-            setSelectedFacilityType(undefined);
+            let temp = {} as any
+            for(let item in uploadFiles) {
+              temp[item] = []
+              for(let file of uploadFiles[item]) {
+                let resFile = await UploadAnyFile(item,file)
+                delete resFile.data.message
+                temp[item].push(resFile.data)
+              }
+            }
+            for(let item in temp){
+              temp[item] = JSON.stringify(temp[item])
+            }
+            FacilityStructureService.update(res.data.properties.key, {...data,...temp})
+            setUploadFiles({})
+
           })
           .catch((err) => {
             toast.current.show({
@@ -314,7 +339,6 @@ const SetFacilityStructure2 = () => {
               detail: err.response ? err.response.data.message : err.message,
               life: 2000,
             });
-            setSelectedFacilityType(undefined);
           });
 
       })
@@ -335,6 +359,7 @@ const SetFacilityStructure2 = () => {
 
   const editItem = (key: string, data: any) => {
     let updateNode: any = {};
+    console.log(data)
     FacilityStructureService.nodeInfo(key)
       .then((responseStructure) => {
         if (labels.length > 0) {
@@ -387,14 +412,29 @@ const SetFacilityStructure2 = () => {
         
 
         FacilityStructureService.update(key, data)
-          .then((res) => {
+          .then(async(res) => {
             toast.current.show({
               severity: "success",
               summary: "Successful",
               detail: "Structure Updated",
               life: 3000,
             });
+            let temp = {} as any
+            for(let item in uploadFiles) {
+              temp[item] = []
+              for(let file of uploadFiles[item]) {
+                let resFile = await UploadAnyFile(item,file)
+                delete resFile.data.message
+                temp[item].push(resFile.data)
+              }
+            }
+            for(let item in temp){
+              temp[item] = [...JSON.parse(data[item]),...temp[item]]
+              temp[item] = JSON.stringify(temp[item])
+            }
+            FacilityStructureService.update(res.data.properties.key, {...data,...temp})
             getFacilityStructure();
+            setUploadFiles({})
           })
           .catch((err) => {
             toast.current.show({
@@ -529,6 +569,7 @@ const SetFacilityStructure2 = () => {
           icon="pi pi-check"
           onClick={() => {
             setSubmitted(true);
+            // setSelectedFacilityType(undefined);
           }}
           autoFocus
         />
@@ -608,6 +649,8 @@ const SetFacilityStructure2 = () => {
         </div>
         {selectedFacilityType && <FormGenerateStructure
           selectedFacilityType={selectedFacilityType}
+          uploadFiles={uploadFiles}
+          setUploadFiles={setUploadFiles}
           realm={realm}
           addItem={(data: any) => addItem(selectedNodeKey, data)}
           editItem={(data: any) => editItem(selectedNodeKey, data)}
@@ -634,6 +677,8 @@ const SetFacilityStructure2 = () => {
         <FormGenerateStructure
           selectedFacilityType={selectedFacilityType}
           realm={realm}
+          uploadFiles={uploadFiles}
+          setUploadFiles={setUploadFiles}
           addItem={(data: any) => addItem(selectedNodeKey, data)}
           editItem={(data: any) => editItem(selectedNodeKey, data)}
           setSubmitted={setSubmitted}

@@ -1,75 +1,32 @@
 import React, { useRef } from "react";
 import { Toast } from "primereact/toast";
 import { FileUpload } from "primereact/fileupload";
-import axios from "axios";
 import FileItem from "./FileItem";
 
 const FileUploadComponent = ({
-  uploadedFiles,
-  setUploadedFiles,
+  value = [],
+  onChange,
+  uploadFiles,
+  label,
+  setUploadFiles,
   isDocument = false,
   isImage = false,
 }) => {
   const toast = useRef(null);
   const uploadRef = useRef(null);
 
-  const Upload = (e) => {
-    const file = e.files[0];
-    const url = "http://localhost:3004/file-upload/single";
-    const formData = new FormData();
-
-    formData.append("file", file);
-    formData.append("realmName", "ifm");
-    formData.append("folderName", "test-123");
-    axios
-      .post(url, formData)
-      .then((response) => {
-        setTimeout(() => {
-          let temp;
-          delete response.data.message;
-
-          if (isImage) {
-            temp = [
-              ...uploadedFiles,
-              {
-                ...response.data,
-                main: uploadedFiles.length === 0 ? true : false,
-              },
-            ];
-          } else {
-            temp = [...uploadedFiles, { ...response.data }];
-          }
-
-          setUploadedFiles(temp);
-        }, 500);
-        toast.current.show({
-          severity: "success",
-          summary: "File uploaded",
-          life: 3000,
-        });
-      })
-      .catch((error) => {
-        toast.current.show({
-          severity: "error",
-          summary: "File not uploaded",
-          life: 3000,
-        });
-      });
-
-    uploadRef.current.clear();
-  };
 
   const Delete = (index) => {
-    let temp = uploadedFiles.filter((_, i) => i !== index)
-    if(temp.length === 1 && isImage) {
-      temp[0].main = true
+    let temp = value.filter((_, i) => i !== index);
+    if (temp.length === 1 && isImage) {
+      temp[0].main = true;
     }
-    setUploadedFiles(temp);
+    onChange(temp);
   };
 
   const SetMain = (index) => {
-    setUploadedFiles(
-      uploadedFiles.map((item, i) => {
+    onChange(
+      value.map((item, i) => {
         if (i === index) {
           item.main = true;
         } else {
@@ -80,18 +37,52 @@ const FileUploadComponent = ({
     );
   };
 
+  const headerTemplate = (options) => {
+    const { className, chooseButton, cancelButton } = options;
+
+    return (
+      <div
+        className={className}
+        style={{
+          backgroundColor: "transparent",
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        {chooseButton}
+        {cancelButton}
+      </div>
+    );
+  };
+
+  const onSelect = (e) => {
+    setUploadFiles((prev) => ({ ...prev, [label]: uploadRef.current.files }));
+  };
+
+  const onRemove = (e) => {
+    setUploadFiles((prev) => ({
+      ...prev,
+      [label]: prev[label].filter((i) => i.objectURL !== e.file.objectURL),
+    }));
+  };
+
+  const onClear = (e) => {
+    setUploadFiles((prev) => ({ ...prev, [label]: [] }));
+  };
+
   return (
     <div className="p-5">
       <Toast ref={toast}></Toast>
-
       <div className="card">
         <FileUpload
           name="demo[]"
-          mode="basic"
+          headerTemplate={headerTemplate}
           customUpload={true}
-          uploadHandler={Upload}
           accept={isImage ? "image/*" : "*"}
           maxFileSize={5000000}
+          onRemove={onRemove}
+          onClear={onClear}
+          onSelect={onSelect}
           ref={uploadRef}
           emptyTemplate={
             <p className="m-0">Drag and drop files to here to upload.</p>
@@ -99,8 +90,21 @@ const FileUploadComponent = ({
         />
       </div>
       <div className="card p-5">
-        {uploadedFiles &&
-          uploadedFiles.map((item, index) => (
+        {(value && typeof value === "string") ? value === "" ? null: JSON.parse(value).map((item, index) => (
+            <FileItem
+              key={index}
+              name={item.name}
+              url={item.image_url}
+              main={item.main}
+              isDocument={isDocument}
+              isImage={isImage}
+              delete={() => Delete(index)}
+              setMain={() => SetMain(index)}
+            />
+          )):null}
+        {value &&
+          typeof value === "object" &&
+          value.map((item, index) => (
             <FileItem
               key={index}
               name={item.name}
