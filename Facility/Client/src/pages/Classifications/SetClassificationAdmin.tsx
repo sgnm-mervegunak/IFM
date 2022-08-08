@@ -415,13 +415,17 @@ const SetClassificationAdmin = () => {
             setName("");
             setCode("");
             setTag([]);
+            setCodeShow(false);
           }}
           className="p-button-text"
         />
         <Button
           label="Save"
           icon="pi pi-check"
-          onClick={() => editItem(selectedNodeKey)}
+          onClick={() => {
+            editItem(selectedNodeKey);
+            setCodeShow(false);
+          }}
           autoFocus
         />
       </div>
@@ -483,6 +487,7 @@ const SetClassificationAdmin = () => {
           setCode("");
           setTag([]);
           setEditDia(false);
+          setCodeShow(false);
         }}
       >
         {codeShow && (

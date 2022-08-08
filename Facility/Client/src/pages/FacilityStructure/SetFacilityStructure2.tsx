@@ -525,7 +525,10 @@ const SetFacilityStructure2 = () => {
         <Button
           label="Add"
           icon="pi pi-check"
-          onClick={() => setSubmitted(true)}
+          onClick={() => {
+            setSubmitted(true);
+            setSelectedFacilityType(undefined);
+          }}
           autoFocus
         />
       </div>
@@ -590,6 +593,7 @@ const SetFacilityStructure2 = () => {
           setFormTypeId(undefined);
           setLabels([]);
           setAddDia(false);
+          setSelectedFacilityType(undefined);
         }}
       >
         <div className="field">
@@ -616,7 +620,7 @@ const SetFacilityStructure2 = () => {
       <Dialog
         header="Edit Item"
         visible={editDia}
-        style={{ width: "25vw" }}
+        style={{ width: "40vw" }}
         footer={renderFooterEdit}
         onHide={() => {
           setName("");
