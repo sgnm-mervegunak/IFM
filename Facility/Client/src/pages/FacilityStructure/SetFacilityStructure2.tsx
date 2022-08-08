@@ -527,7 +527,6 @@ const SetFacilityStructure2 = () => {
           icon="pi pi-check"
           onClick={() => {
             setSubmitted(true);
-            setSelectedFacilityType(undefined);
           }}
           autoFocus
         />
