@@ -72,8 +72,8 @@ const SetClassificationAdmin = () => {
         ClassificationsService.nodeInfo(selectedNodeKey)
           .then((res) => {
             console.log(res);
-            
-            if (res.data.properties.code!==undefined) {
+
+            if (res.data.properties.code !== undefined) {
               setCodeShow(true);
             }
             setName(res.data.properties.name || "");
@@ -240,8 +240,8 @@ const SetClassificationAdmin = () => {
     ClassificationsService.nodeInfo(key)
       .then((res) => {
         console.log(res.data);
-        
-        
+
+
         if (labels.length > 0) {
           updateNode = {
             name: name,
@@ -543,11 +543,26 @@ const SetClassificationAdmin = () => {
           filterBy="name,code"
           filterPlaceholder="Search"
           className="font-bold"
+
+          nodeTemplate={(data: Node, options) => <span className="flex align-items-center font-bold">{data.label} {
+            <>
+              <span className="ml-4 ">
+
+                {
+                  data.isActive === true ?
+
+                    <span style={{ backgroundColor: "green" }} className="green-400 text-white font-bold border-round m-3">Active</span>
+                    :
+                    <span style={{ backgroundColor: "red" }} className="red-400 text-white font-bold border-round m-3">Passive</span>
+                }
+
+              </span>
+            </>
+          }
+          </span>}
         />
       </div>
-      <div className="field">
 
-      </div>
     </div>
   );
 };

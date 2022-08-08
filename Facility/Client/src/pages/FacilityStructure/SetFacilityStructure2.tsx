@@ -305,6 +305,7 @@ const SetFacilityStructure2 = () => {
               .then((res) => {
               })
             getFacilityStructure();
+            setSelectedFacilityType(undefined);
           })
           .catch((err) => {
             toast.current.show({
@@ -313,6 +314,7 @@ const SetFacilityStructure2 = () => {
               detail: err.response ? err.response.data.message : err.message,
               life: 2000,
             });
+            setSelectedFacilityType(undefined);
           });
 
       })
