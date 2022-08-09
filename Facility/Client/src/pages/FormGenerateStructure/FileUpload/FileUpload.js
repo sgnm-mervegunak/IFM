@@ -108,7 +108,7 @@ const FileUploadComponent = ({
         />
       </div>
       <div className="card p-5">
-        {value && typeof value === "string"
+        {value && typeof value === "string" && value.startsWith("[")
           ? value === ""
             ? null
             : JSON.parse(value).map((item, index) => (

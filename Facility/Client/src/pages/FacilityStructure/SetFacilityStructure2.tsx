@@ -439,7 +439,11 @@ const SetFacilityStructure2 = () => {
               }
             }
             for(let item in temp){
-              temp[item] = [...JSON.parse(data[item]),...temp[item]]
+              try {
+                temp[item] = [...JSON.parse(data[item]),...temp[item]]
+              }
+              catch(err) {
+              }
               temp[item] = JSON.stringify(temp[item])
             }
 
