@@ -944,7 +944,7 @@ RETURN input, output, error`;
 
     let firstThree=[ApprovalBy,AreaUnit,AssetType];
     //let classifications =[category_facility,category_space,category_product,category_role];
-    let classifications =[category_facility];
+    let classifications =[category_facility,category_space];
     
     /////////// classifications ////////////////////////////////
     for (let i = 0; i < classifications.length; i++) {
@@ -958,8 +958,10 @@ RETURN input, output, error`;
       for(let i=0;i<deneme.length;i++){
         deneme[i][0]=deneme[i][0].replace(/ /g, '-');
       }
-      //let sortedValue =this.ascendingSort2(deneme)
+      
+      let collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
 
+      deneme.sort(collator.compare[0]);
       let classificationName2=`OmniClass${deneme[0][0].slice(0,2)}`;
   
 
