@@ -101,8 +101,6 @@ const SetFacilityStructure = () => {
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
 
-  const facilityTypes = ["Facility", "Building", "Block", "Floor", "Room", "Open Area", "Park Area", "Garden", "Other"];
-
   useEffect(() => {
     FacilityStructureService.getFacilityTypes("FacilityTypes_EN", realm)
       .then((res) => {
@@ -149,13 +147,7 @@ const SetFacilityStructure = () => {
   const getNodeInfoAndEdit = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
       .then((res) => {
-        console.log(res.data);
         setSelectedFacilityType(res.data.properties.NodeType);
-
-        // setName(res.data.properties.name || "");
-        // setTag(res.data.properties.tag || []);
-        // setIsActive(res.data.properties.isActive);
-        // setFormTypeId(res.data.properties.formTypeId);
       })
       .catch((err) => {
         toast.current.show({
