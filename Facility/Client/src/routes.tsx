@@ -21,6 +21,7 @@ import ShowAsset from "./pages/StructureAsset/ShowAsset";
 import { useAppSelector } from "./app/hook";
 import SetClassificationUser from "./pages/Classifications/SetClassificationUser";
 import SetFacilityStructure2 from "./pages/FacilityStructure/SetFacilityStructure2";
+import SpaceJoin from "./pages/SpaceJoin/SpaceJoin";
 // import Main from './pages/Main';
 
 export default function Router() {
@@ -41,6 +42,7 @@ export default function Router() {
         // { path: "formgenerate", element: <FormGenerate />},
         { path: "contact", element: <Contact /> },
         { path: "structure-asset", element: <StructureAsset /> },
+        { path: "spacejoin", element: <SpaceJoin /> },
       ],
     },
     {

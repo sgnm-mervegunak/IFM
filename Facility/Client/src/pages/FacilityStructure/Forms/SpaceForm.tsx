@@ -246,6 +246,7 @@ const SpaceForm = ({
 
     return (
         <div>
+            <Toast ref={toast} position="top-right" />
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
                 <InputText
