@@ -2,11 +2,14 @@ import React, { useRef } from "react";
 import { Toast } from "primereact/toast";
 import { FileUpload } from "primereact/fileupload";
 import FileItem from "./FileItem";
+import { confirmDialog } from "primereact/confirmdialog";
 
 const FileUploadComponent = ({
   value = [],
   onChange,
   uploadFiles,
+  deleteFiles,
+  setDeleteFiles,
   label,
   setUploadFiles,
   isDocument = false,
@@ -15,13 +18,28 @@ const FileUploadComponent = ({
   const toast = useRef(null);
   const uploadRef = useRef(null);
 
-
-  const Delete = (index) => {
-    let temp = value.filter((_, i) => i !== index);
+  const accept = (index) => {
+    setDeleteFiles(prev=>([...prev, JSON.parse(value)[index]]));
+    let temp = JSON.parse(value).filter((_, i) => i !== index);
     if (temp.length === 1 && isImage) {
       temp[0].main = true;
     }
-    onChange(temp);
+    onChange(JSON.stringify(temp));
+    toast.current.show({
+      severity: "success",
+      summary: "Delete!",
+      detail: "You have accepted",
+      life: 3000,
+    });
+  };
+
+  const Delete = (index) => {
+    confirmDialog({
+      message: "Are you sure you want to proceed?",
+      header: "Confirmation",
+      icon: "pi pi-exclamation-triangle",
+      accept: ()=>accept(index),
+    });
   };
 
   const SetMain = (index) => {
@@ -90,18 +108,22 @@ const FileUploadComponent = ({
         />
       </div>
       <div className="card p-5">
-        {(value && typeof value === "string") ? value === "" ? null: JSON.parse(value).map((item, index) => (
-            <FileItem
-              key={index}
-              name={item.name}
-              url={item.image_url}
-              main={item.main}
-              isDocument={isDocument}
-              isImage={isImage}
-              delete={() => Delete(index)}
-              setMain={() => SetMain(index)}
-            />
-          )):null}
+        {value && typeof value === "string"
+          ? value === ""
+            ? null
+            : JSON.parse(value).map((item, index) => (
+                <FileItem
+                  key={index}
+                  name={item.name}
+                  url={item.image_url}
+                  main={item.main}
+                  isDocument={isDocument}
+                  isImage={isImage}
+                  delete={() => Delete(index)}
+                  setMain={() => SetMain(index)}
+                />
+              ))
+          : null}
         {value &&
           typeof value === "object" &&
           value.map((item, index) => (

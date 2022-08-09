@@ -30,6 +30,8 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   type: any;
   uploadFiles: any;
   setUploadFiles: any;
+  deleteFiles: any;
+  setDeleteFiles: any;
   options?: any;
   label2: string;
   label: any;
@@ -43,6 +45,8 @@ interface Params {
   editItem: any;
   uploadFiles: any;
   setUploadFiles: any;
+  deleteFiles: any;
+  setDeleteFiles: any;
   realm: string;
   selectedNodeKey: string;
   editDia: boolean;
@@ -56,6 +60,8 @@ const Input = ({
   onChange,
   uploadFiles,
   setUploadFiles,
+  deleteFiles,
+  setDeleteFiles,
   type,
   ...rest
 }: InputProps) => {
@@ -155,6 +161,8 @@ const Input = ({
             value={value}
             onChange={onChange}
             label={rest?.label}
+            deleteFiles={deleteFiles}
+            setDeleteFiles={setDeleteFiles}
             uploadFiles={uploadFiles}
             setUploadFiles={setUploadFiles}
             isImage
@@ -170,6 +178,8 @@ const Input = ({
             label={rest?.label}
             value={value}
             onChange={onChange}
+            deleteFiles={deleteFiles}
+            setDeleteFiles={setDeleteFiles}
             uploadFiles={uploadFiles}
             setUploadFiles={setUploadFiles}
           />
@@ -208,6 +218,8 @@ const FormGenerateStructure = ({
   editItem,
   uploadFiles,
   setUploadFiles,
+  deleteFiles,
+  setDeleteFiles,
   selectedNodeKey,
   editDia,
 }: Params) => {
@@ -236,7 +248,7 @@ const FormGenerateStructure = ({
           if (editDia === true) {
             const responsegetData =
               await FacilityTypePropertiesService.nodeInfo(selectedNodeKey);
-              console.log(responsegetData);
+            console.log(responsegetData);
 
             const convertedData = responsegetProperties.data.map(function (
               item: any
@@ -358,6 +370,8 @@ const FormGenerateStructure = ({
                             value={field.value || ""}
                             onChange={field.onChange}
                             uploadFiles={uploadFiles}
+                            deleteFiles={deleteFiles}
+                            setDeleteFiles={setDeleteFiles}
                             setUploadFiles={setUploadFiles}
                             {...(items[e] as any)}
                           />

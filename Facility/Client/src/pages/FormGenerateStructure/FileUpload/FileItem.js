@@ -8,10 +8,10 @@ const FileItem = (props) => {
           {props.isImage && <img alt={props.name} role="presentation" src={props.url} width={100} />}
           <span className="flex flex-column text-left ml-3">
             <a href={props.url}>{props.name}</a>
-            <small>{new Date().toLocaleDateString()}</small>
+            {/* <small>{new Date().toLocaleDateString()}</small> */}
           </span>
         </div>
-        {props.isImage && <Button
+        {/* {props.isImage && <Button
           type="button"
           disabled={props.main}
           icon="pi pi-bookmark-fill"
@@ -20,7 +20,7 @@ const FileItem = (props) => {
             (props.main ? " p-button-success" : "")
           }
           onClick={props.setMain}
-        />}
+        />} */}
         <Button
           type="button"
           icon="pi pi-times"

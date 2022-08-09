@@ -97,6 +97,7 @@ const SetFacilityStructure2 = () => {
   const [facilityType, setFacilityType] = useState<string[]>([]);
   const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
   const [uploadFiles,setUploadFiles] = useState<any>({});
+  const [deleteFiles,setDeleteFiles] = useState<any>([]);
 
   useEffect(() => {
     FacilityStructureService.getFacilityTypes("FacilityTypes_EN", realm)
@@ -202,6 +203,7 @@ const SetFacilityStructure2 = () => {
 
         getNodeInfoAndEdit(selectedNodeKey);
         setEditDia(true);
+        setDeleteFiles([]);
       },
     },
     {
@@ -271,6 +273,13 @@ const SetFacilityStructure2 = () => {
     return axios.post(url, formData)
   };
 
+
+  const DeleteAnyFile = (realmName:string,fileName:string) => {
+    const url = "http://localhost:3004/file-upload/removeOne";
+
+    return axios.delete(url, {data:{fileName, realmName}})
+  };
+
   const addItem = (key: string, data: any) => {
     let newNode: any = {};
     FacilityStructureService.nodeInfo(key)
@@ -320,7 +329,7 @@ const SetFacilityStructure2 = () => {
             for(let item in uploadFiles) {
               temp[item] = []
               for(let file of uploadFiles[item]) {
-                let resFile = await UploadAnyFile(item,file)
+                let resFile = await UploadAnyFile(res.data.properties.key+"/"+item,file)
                 delete resFile.data.message
                 temp[item].push(resFile.data)
               }
@@ -419,11 +428,12 @@ const SetFacilityStructure2 = () => {
               detail: "Structure Updated",
               life: 3000,
             });
+            // upload files
             let temp = {} as any
             for(let item in uploadFiles) {
               temp[item] = []
               for(let file of uploadFiles[item]) {
-                let resFile = await UploadAnyFile(item,file)
+                let resFile = await UploadAnyFile(key+"/"+item,file)
                 delete resFile.data.message
                 temp[item].push(resFile.data)
               }
@@ -432,6 +442,17 @@ const SetFacilityStructure2 = () => {
               temp[item] = [...JSON.parse(data[item]),...temp[item]]
               temp[item] = JSON.stringify(temp[item])
             }
+
+            // delete files
+            for(let item of deleteFiles) {
+              let temp = item.image_url.split("/")
+              let urlIndex = temp.findIndex((item:any) => item === "172.30.99.120:9000")
+              let temp2 = temp.slice(urlIndex+1)
+
+              await DeleteAnyFile(temp2[0],temp2.slice(1).join("/"))
+            }
+
+            // update node
             FacilityStructureService.update(res.data.properties.key, {...data,...temp})
             getFacilityStructure();
             setUploadFiles({})
@@ -651,6 +672,8 @@ const SetFacilityStructure2 = () => {
           selectedFacilityType={selectedFacilityType}
           uploadFiles={uploadFiles}
           setUploadFiles={setUploadFiles}
+          deleteFiles={deleteFiles}
+          setDeleteFiles={setDeleteFiles}
           realm={realm}
           addItem={(data: any) => addItem(selectedNodeKey, data)}
           editItem={(data: any) => editItem(selectedNodeKey, data)}
@@ -679,6 +702,8 @@ const SetFacilityStructure2 = () => {
           realm={realm}
           uploadFiles={uploadFiles}
           setUploadFiles={setUploadFiles}
+          deleteFiles={deleteFiles}
+          setDeleteFiles={setDeleteFiles}
           addItem={(data: any) => addItem(selectedNodeKey, data)}
           editItem={(data: any) => editItem(selectedNodeKey, data)}
           setSubmitted={setSubmitted}
@@ -748,6 +773,7 @@ const SetFacilityStructure2 = () => {
 
                     getNodeInfoAndEdit(dataKey)
                     setEditDia(true);
+                    setDeleteFiles([]);
                   }
                   }
                   title="Edit Item"
