@@ -9,6 +9,7 @@ export class BaseFacilityObject {
   isActive = true;
   isDeleted = false;
   canDelete = true;
+  canDisplay = true;
 }
 
 function generateUuid() {

@@ -45,5 +45,9 @@ export class StructureService {
   findOne(label: string, realm: string) {
       return this.facilityStructureRepository.findOneByRealm(label, realm);
     }
-  
+  findStructureFirstLevelNodes(label: string, realm: string) {
+      return this.facilityStructureRepository.findStructureFirstLevelNodes(label, realm);
+    }
+    
+   
 }
