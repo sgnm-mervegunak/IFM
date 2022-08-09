@@ -10,6 +10,7 @@ export default [
       { label: 'Facility Structure', icon: 'pi pi-fw pi-building', to: '/facilitystructure' },
       { label: 'Contact', icon: 'pi pi-id-card', to: '/contact' },
       { label: 'Structure-Asset', icon: 'pi pi-share-alt', to: '/structure-asset' },
+      { label: 'Space Join', icon: 'pi pi-th-large', to: '/spacejoin' },
     ],
   },
   // {

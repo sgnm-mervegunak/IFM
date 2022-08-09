@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Tree } from "primereact/tree";
+import { Tree, TreeSelectionKeys } from "primereact/tree";
 import { ContextMenu } from "primereact/contextmenu";
 import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
@@ -20,10 +20,6 @@ import { useAppSelector } from "../../app/hook";
 
 import axios from "axios";
 import FormGenerate from "../FormGenerate/FormGenerate";
-import BuildingForm from "./Forms/BuildingForm";
-import BlockForm from "./Forms/BlockForm";
-import FloorForm from "./Forms/FloorForm";
-import SpaceForm from "./Forms/SpaceForm";
 
 interface Node {
   cantDeleted: boolean;
@@ -46,6 +42,8 @@ interface Node {
   parentId?: string;
   className?: string;
   Name?: string;
+  selectable?: boolean;
+  NodeType?: string;
 }
 
 interface FormNode {
@@ -74,8 +72,9 @@ interface FormNode {
   icon?: string;
 }
 
-const SetFacilityStructure = () => {
-  const [selectedNodeKey, setSelectedNodeKey] = useState<any>("");
+const SpaceJoin = () => {
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+  const [selectedNodeKey, setSelectedNodeKey] = useState<any>([]);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
   const [name, setName] = useState("");
@@ -100,6 +99,8 @@ const SetFacilityStructure = () => {
   const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
+
+  const facilityTypes = ["Facility", "Building", "Block", "Floor", "Room", "Open Area", "Park Area", "Garden", "Other"];
 
   useEffect(() => {
     FacilityStructureService.getFacilityTypes("FacilityTypes_EN", realm)
@@ -147,7 +148,13 @@ const SetFacilityStructure = () => {
   const getNodeInfoAndEdit = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
       .then((res) => {
+        console.log(res.data);
         setSelectedFacilityType(res.data.properties.NodeType);
+
+        // setName(res.data.properties.name || "");
+        // setTag(res.data.properties.tag || []);
+        // setIsActive(res.data.properties.isActive);
+        // setFormTypeId(res.data.properties.formTypeId);
       })
       .catch((err) => {
         toast.current.show({
@@ -172,7 +179,7 @@ const SetFacilityStructure = () => {
       icon: "pi pi-pencil",
       command: () => {
         setIsUpdate(true);
-        getNodeInfoAndEdit(selectedNodeKey);
+        // getNodeInfoAndEdit(selectedNodeKey);
         setEditDia(true);
       },
     },
@@ -228,6 +235,12 @@ const SetFacilityStructure = () => {
       fixNodes(i.children)
       i.icon = "pi pi-fw pi-building";
       i.label = i.name || i.Name;
+      if (i.NodeType === "Space") {
+        i.selectable = true;
+      } else {
+        i.selectable = false;
+      }
+
     }
   };
 
@@ -553,7 +566,7 @@ const SetFacilityStructure = () => {
         message="Do you want to delete?"
         header="Delete Confirmation"
         icon="pi pi-exclamation-triangle"
-        accept={() => deleteItem(selectedNodeKey)}
+      // accept={() => deleteItem(selectedNodeKey)}
       />
       <Dialog
         header="Add New Item"
@@ -579,58 +592,6 @@ const SetFacilityStructure = () => {
             style={{ width: '100%' }}
           />
         </div>
-        {selectedFacilityType === "Building" ? <BuildingForm
-          selectedFacilityType={selectedFacilityType}
-          submitted={submitted}
-          setSubmitted={setSubmitted}
-          selectedNodeKey={selectedNodeKey}
-          editDia={editDia}
-          getFacilityStructure={getFacilityStructure}
-          setAddDia={setAddDia}
-          setEditDia={setEditDia}
-          isUpdate={isUpdate}
-          setIsUpdate={setIsUpdate}
-          setSelectedFacilityType={setSelectedFacilityType}
-        /> : null}
-        {selectedFacilityType === "Block" ? <BlockForm
-          selectedFacilityType={selectedFacilityType}
-          submitted={submitted}
-          setSubmitted={setSubmitted}
-          selectedNodeKey={selectedNodeKey}
-          editDia={editDia}
-          getFacilityStructure={getFacilityStructure}
-          setAddDia={setAddDia}
-          setEditDia={setEditDia}
-          isUpdate={isUpdate}
-          setIsUpdate={setIsUpdate}
-          setSelectedFacilityType={setSelectedFacilityType}
-        /> : null}
-        {selectedFacilityType === "Floor" ? <FloorForm
-          selectedFacilityType={selectedFacilityType}
-          submitted={submitted}
-          setSubmitted={setSubmitted}
-          selectedNodeKey={selectedNodeKey}
-          editDia={editDia}
-          getFacilityStructure={getFacilityStructure}
-          setAddDia={setAddDia}
-          setEditDia={setEditDia}
-          isUpdate={isUpdate}
-          setIsUpdate={setIsUpdate}
-          setSelectedFacilityType={setSelectedFacilityType}
-        /> : null}
-        {selectedFacilityType === "Space" ? <SpaceForm
-          selectedFacilityType={selectedFacilityType}
-          submitted={submitted}
-          setSubmitted={setSubmitted}
-          selectedNodeKey={selectedNodeKey}
-          editDia={editDia}
-          getFacilityStructure={getFacilityStructure}
-          setAddDia={setAddDia}
-          setEditDia={setEditDia}
-          isUpdate={isUpdate}
-          setIsUpdate={setIsUpdate}
-          setSelectedFacilityType={setSelectedFacilityType}
-        /> : null}
 
 
         {/* <div className="field">
@@ -689,58 +650,7 @@ const SetFacilityStructure = () => {
           setSelectedFacilityType(undefined);
         }}
       >
-        {selectedFacilityType === "Building" ? <BuildingForm
-          selectedFacilityType={selectedFacilityType}
-          submitted={submitted}
-          setSubmitted={setSubmitted}
-          selectedNodeKey={selectedNodeKey}
-          editDia={editDia}
-          getFacilityStructure={getFacilityStructure}
-          setAddDia={setAddDia}
-          setEditDia={setEditDia}
-          isUpdate={isUpdate}
-          setIsUpdate={setIsUpdate}
-          setSelectedFacilityType={setSelectedFacilityType}
-        /> : null}
-        {selectedFacilityType === "Block" ? <BlockForm
-          selectedFacilityType={selectedFacilityType}
-          submitted={submitted}
-          setSubmitted={setSubmitted}
-          selectedNodeKey={selectedNodeKey}
-          editDia={editDia}
-          getFacilityStructure={getFacilityStructure}
-          setAddDia={setAddDia}
-          setEditDia={setEditDia}
-          isUpdate={isUpdate}
-          setIsUpdate={setIsUpdate}
-          setSelectedFacilityType={setSelectedFacilityType}
-        /> : null}
-        {selectedFacilityType === "Floor" ? <FloorForm
-          selectedFacilityType={selectedFacilityType}
-          submitted={submitted}
-          setSubmitted={setSubmitted}
-          selectedNodeKey={selectedNodeKey}
-          editDia={editDia}
-          getFacilityStructure={getFacilityStructure}
-          setAddDia={setAddDia}
-          setEditDia={setEditDia}
-          isUpdate={isUpdate}
-          setIsUpdate={setIsUpdate}
-          setSelectedFacilityType={setSelectedFacilityType}
-        /> : null}
-        {selectedFacilityType === "Space" ? <SpaceForm
-          selectedFacilityType={selectedFacilityType}
-          submitted={submitted}
-          setSubmitted={setSubmitted}
-          selectedNodeKey={selectedNodeKey}
-          editDia={editDia}
-          getFacilityStructure={getFacilityStructure}
-          setAddDia={setAddDia}
-          setEditDia={setEditDia}
-          isUpdate={isUpdate}
-          setIsUpdate={setIsUpdate}
-          setSelectedFacilityType={setSelectedFacilityType}
-        /> : null}
+
         {/* <div className="field">
           <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
           <InputText
@@ -799,17 +709,12 @@ const SetFacilityStructure = () => {
         <FormGenerate nodeKey={generateNodeKey} formKey={generateFormTypeKey} nodeName={generateNodeName} setFormDia={setFormDia} />
 
       </Dialog>
-      <h1>Edit Facility Structure</h1>
+      <h1>Space Join</h1>
       <div className="field">
         <Tree
           loading={loading}
           value={data}
           dragdropScope="-"
-          contextMenuSelectionKey={selectedNodeKey ? selectedNodeKey : ""}
-          onContextMenuSelectionChange={(event: any) =>
-            setSelectedNodeKey(event.value)
-          }
-          onContextMenu={(event) => cm.current.show(event.originalEvent)}
           onDragDrop={(event: any) => {
             console.log(event);
             if (event.value.length > 1) {
@@ -826,87 +731,25 @@ const SetFacilityStructure = () => {
           filter
           filterBy="name,code"
           filterPlaceholder="Search"
-          nodeTemplate={(data: Node, options) => <span className="flex align-items-center font-bold">{data.label} {
-            <>
-              <span className="ml-4 ">
-                <Button
-                  icon="pi pi-plus" className="p-button-rounded p-button-secondary p-button-text" aria-label="Add Item"
-                  onClick={() => {
-                    setSelectedNodeKey(data.key);
-                    setAddDia(true)
-                  }
-                  }
-                  title="Add Item"
-                />
-                <Button
-                  icon="pi pi-pencil" className="p-button-rounded p-button-secondary p-button-text" aria-label="Edit Item"
-                  onClick={() => {
-                    setSelectedNodeKey(data.key);
-                    let dataKey: any = data.key
-
-                    getNodeInfoAndEdit(dataKey)
-                    setEditDia(true);
-                  }
-                  }
-                  title="Edit Item"
-                />
-                <Button
-                  icon="pi pi-trash" className="p-button-rounded p-button-secondary p-button-text" aria-label="Delete"
-                  onClick={() => {
-                    setSelectedNodeKey(data.key);
-                    setDelDia(true)
-                  }}
-                  title="Delete Item"
-                />
-                {/* {
-                  data.hasType &&  */}
-                <Button
-                  icon="pi pi-book" className="p-button-rounded p-button-secondary p-button-text" aria-label="Edit Form"
-                  // onClick={(e) => navigate(`/formgenerate/${data.key}?id=${data._id.low}`, 
-                  // {
-                  //   state: {
-                  //     data: data,
-                  //     rootId: structure.root._id.low,
-                  //   }
-                  // }
-                  // )} 
-                  // onClick={() => window.open(`http://localhost:3001/formgenerate/${data._id.low}?formType=${data.labels}?className=${data.className}`, '_blank')}
-                  // onClick={(e) => navigate(`/formgenerate/${data._id.low}?typeKey=${data.formTypeId}`)}
-                  onClick={() => {
-                    console.log(data);
-                    setGenerateNodeKey(data.key);
-                    setGenerateFormTypeKey(data.formTypeId);
-                    setGenerateNodeName(data.label);
-                    setFormDia(true)
-                  }}
-
-
-                  title="Edit Form"
-                />
-                {/* <Button
-                  icon="pi pi-book" className="p-button-rounded p-button-secondary p-button-text" aria-label="Edit Form"
-                  // onClick={(e) => navigate(`/formgenerate/${data.key}?id=${data._id.low}`, 
-                  // {
-                  //   state: {
-                  //     data: data,
-                  //     rootId: structure.root._id.low,
-                  //   }
-                  // }
-                  // )} 
-                  onClick={(e) => console.log(data)}
-
-                  title="Edit Form"
-                /> */}
-
-              </span>
-            </>
+          selectionMode="checkbox"
+          onSelectionChange={(event: any) => {
+            setSelectedNodeKey(event.value);
+            setSelectedKeys(Object.keys(event.value));
           }
-          </span>}
+          }
+          selectionKeys={selectedNodeKey}
+          propagateSelectionUp={false}
+          className="font-bold"
         />
       </div>
 
+      {/* <Button
+          label="Click"
+          onClick={() => console.log(selectedKeys)}
+          autoFocus
+        /> */}
     </div>
   );
 };
 
-export default SetFacilityStructure;
+export default SpaceJoin;

@@ -94,7 +94,7 @@ const SpaceForm = ({
 
     const getClassificationSpace = async () => {
         await ClassificationsService.findAllActiveByLabel({ realm: realm, label: "OmniClass11", language: "en" }).then((res) => {
-            let temp = JSON.parse(JSON.stringify([res.data.root] || []));
+            let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
             fixNodes(temp);
             setClassificationSpace(temp);
         });
@@ -102,7 +102,7 @@ const SpaceForm = ({
 
     const getClassificationStatus = async () => {
         await ClassificationsService.findAllActiveByLabel({ realm: realm, label: "FacilityStatus", language: "en" }).then((res) => {
-            let temp = JSON.parse(JSON.stringify([res.data.root] || []));
+            let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
             fixNodes(temp);
             setclassificationStatus(temp);
         });
@@ -246,6 +246,7 @@ const SpaceForm = ({
 
     return (
         <div>
+            <Toast ref={toast} position="top-right" />
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
                 <InputText
