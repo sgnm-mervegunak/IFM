@@ -16,12 +16,6 @@ export class CreateJointSpaceDto {
   ArchitecturalCode: string;
 
   @ApiProperty()
-  @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
-  @LengthWithI18nMessage(i18nValidationMessageEnum.LENGTH, 1, 50)
-  @IsOptional()
-  key?: string;
-
-  @ApiProperty()
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
   name: string;

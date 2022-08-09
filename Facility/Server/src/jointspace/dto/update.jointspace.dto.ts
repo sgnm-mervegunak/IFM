@@ -3,7 +3,7 @@ import { IsBoolean, IsOptional, IsString } from 'class-validator';
 import { CreateJointSpaceDto } from './create.jointspace.dto';
 import * as moment from 'moment';
 
-export class UpdateJointSpaceDto extends OmitType(CreateJointSpaceDto, ['key']) {
+export class UpdateJointSpaceDto extends OmitType(CreateJointSpaceDto, ['code']) {
   @ApiProperty()
   @IsOptional()
   @IsBoolean()

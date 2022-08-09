@@ -7,6 +7,7 @@ import { RelationName } from 'src/common/const/relation.name.enum';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
 import { CreateJointSpaceDto } from '../dto/create.jointspace.dto';
 import { JointSpace } from '../entities/jointspace.entity';
+import * as moment from 'moment';
 
 @Injectable()
 export class JointSpaceRepository implements GeciciInterface<any> {
@@ -32,7 +33,7 @@ export class JointSpaceRepository implements GeciciInterface<any> {
     await Promise.all(
       nodeKeys.map(async (element) => {
         const node = await this.neo4jService.read(
-          `match(n{isDeleted:false,key:$key }) where n:Space or n:JointSpace return n`,
+          `match(n{isDeleted:false,key:$key,isActive:true }) where n:Space or n:JointSpace return n`,
           {
             key: element,
           },
@@ -40,13 +41,39 @@ export class JointSpaceRepository implements GeciciInterface<any> {
         if (!node.records.length) {
           throw new HttpException('Node not found', HttpStatus.NOT_FOUND);
         }
+        if (node.records[0]['_fields'][0].labels[0] === 'Space') {
+          const hasMergedRelation = await this.neo4jService.read(
+            `match(n{key:$key}) match(p:JointSpace {isActive:true}) match(n)-[:MERGED]->(p) return p`,
+            { key: node.records[0]['_fields'][0].properties.key },
+          );
+          if (hasMergedRelation.records.length) {
+            throw new HttpException('Node is already in joint space', HttpStatus.BAD_REQUEST);
+          } else {
+            nodes.push(node.records[0]['_fields'][0]);
+          }
+        }
+
+        if (node.records[0]['_fields'][0].labels[0] === 'JointSpace') {
+          const mergedNodes = await this.neo4jService.read(
+            `match(n {key:$key}) match(p {isActive:true,isDeleted:false}) match(p)-[:MERGED]->(n) return p`,
+            { key: node.records[0]['_fields'][0].properties.key },
+          );
+
+          mergedNodes.records.map((mergedNode) => {
+            nodes.push(mergedNode['_fields'][0]);
+          });
+
+          const updateJointSpace = await this.neo4jService.updateById(node.records[0]['_fields'][0].identity.low, {
+            isActive: false,
+            jointEndDate: moment().format('YYYY-MM-DD HH:mm:ss'),
+          });
+        }
         const parentStructure = await this.neo4jService.read(
           `match (n:Building) match(p {key:$key}) match(n)-[r:PARENT_OF*]->(p) return n`,
           { key: element },
         );
         parentNodes.push(parentStructure.records[0]['_fields'][0]);
         //   const isInJointSpace = await this.neo4jService.read(`match(n{isDeleted:false,key:$key }) where n:JointSpace return n`, {})
-        nodes.push(node.records[0]['_fields'][0]);
       }),
     );
 
@@ -72,11 +99,11 @@ export class JointSpaceRepository implements GeciciInterface<any> {
       jointSpace.identity.low,
       jointSpacesNode.records[0]['_fields'][0].identity.low,
     );
-    nodeKeys.map(async (element) => {
+    nodes.map(async (element) => {
       const node = await this.neo4jService.read(
         `match(n{isDeleted:false,key:$key }) where n:Space or n:JointSpace return n`,
         {
-          key: element,
+          key: element.properties.key,
         },
       );
       if (!node.records.length) {
@@ -260,7 +287,7 @@ export class JointSpaceRepository implements GeciciInterface<any> {
         { realm: realm, key: label },
       );
       const cypher = `MATCH p=(n:Building)-[:PARENT_OF*]->(m) \
-            WHERE  n.key = $key and n.isDeleted=false and m.isDeleted=false \
+            WHERE  n.key = $key and n.isDeleted=false and m.isDeleted=false  and m.isActive=true\
             WITH COLLECT(p) AS ps \
             CALL apoc.convert.toTree(ps) yield value \
             RETURN value`;
