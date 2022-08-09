@@ -38,7 +38,7 @@ export default function Router() {
         // { path: "classifications", element: <Classifications /> },
         { path: "classifications", element: auth.auth.type === "facility_client_role_admin" ? <SetClassificationAdmin /> : <SetClassificationUser /> },
         // { path: "facilitystructure", element: <FacilityStructure /> },
-        { path: "facilitystructure", element: <SetFacilityStructure2 /> },
+        { path: "facilitystructure", element: <SetFacilityStructure /> },
         // { path: "formgenerate", element: <FormGenerate />},
         { path: "contact", element: <Contact /> },
         { path: "structure-asset", element: <StructureAsset /> },
