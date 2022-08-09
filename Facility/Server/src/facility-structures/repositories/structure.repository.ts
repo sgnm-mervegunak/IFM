@@ -16,6 +16,8 @@ import { AnyARecord } from 'dns';
 import { FacilityInterface } from 'src/common/interface/facility.interface';
 import * as moment from 'moment';
 import { copyFile } from 'fs';
+import { JointSpaces } from '../entities/joint-spaces.entity';
+
 
 @Injectable()
 export class FacilityStructureRepository implements FacilityInterface<any> {
@@ -82,7 +84,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     if (!node) {
       throw new FacilityStructureNotFountException(key);
     }
-    const structureRootNode=await this.neo4jService.findStructureRootNode(key);
+    const structureRootNode=await this.neo4jService.findStructureRootNode(key, 'FacilityStructure');
     //const properties = this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['NodeType']);
     const properties = await this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['NodeType']);
     let proper = {};
@@ -247,7 +249,8 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
    if(node.labels[0]==='FacilityStructure'){
     structureRootNode=node
    }else{
-    structureRootNode=await this.neo4jService.findStructureRootNode(key)
+    structureRootNode=await this.neo4jService.findStructureRootNode(key, 'FacilityStructure');
+    //structureRootNode=await this.findStructureRootNode(key, 'FacilityStructure');
    }
 
     //const allowedStructureTypeNode = await this.neo4jService.read('match (n:FacilityTypes_EN {realm:$realm}) match(p {name:$name}) match(n)-[:PARENT_OF]->(p) return p', { realm: structureRootNode.properties.realm, name: node.labels[0] })
@@ -298,6 +301,11 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     const createNode = await this.neo4jService.createNode(baseFacilityObject, [structureData['NodeType']]);
     //create PARENT_OF relation between parent facility structure node and child facility structure node.
     await this.neo4jService.addRelationWithRelationNameByKey(key, createNode.properties.key, RelationName.PARENT_OF);
+    let jointSpaces = new JointSpaces();
+    if (createNode['labels'][0]==='Building') {
+      const createJointSpacesNode  = await this.neo4jService.createNode(jointSpaces, ['JointSpaces']);
+      await this.neo4jService.addRelationWithRelationNameByKey(createNode['properties'].key, jointSpaces.key, RelationName.PARENT_OF);
+    }
     const response = { id: createNode['identity'].low, labels: createNode['labels'], properties: createNode['properties'] };
     return response;
   }
@@ -309,4 +317,30 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
 
   //  return structureRootNode.records[0]['_fields'][0]
   // }
+
+  // async findStructureRootNode(key, label){
+
+  //   try {
+  //     if (!key) {
+  //       throw new HttpException('key olmalıdır', 400); 
+  //     }
+
+  //     const cypher = `match(n:${label}) match(p {key:$key}) match (n)-[:PARENT_OF*]->(p) return n`;
+  //     const structureRootNode = await this.neo4jService.read(cypher, { key });
+  //     if (!structureRootNode || !structureRootNode["records"].length) {
+  //       throw new HttpException({code:'3000',message:'Hatalı işlem yaptınız'}, 400);
+  //     }
+  //     return structureRootNode.records[0]['_fields'][0];
+
+  //   } catch (error) {
+  //     if (error.response?.code) {
+  //       throw new HttpException(
+  //         { message: error.response?.message, code: error.response?.code },
+  //         error.status
+  //       );
+  //     } else {
+  //       throw new HttpException("500 hatası", 500);
+  //     }
+  //   }
+  // } 
 }
