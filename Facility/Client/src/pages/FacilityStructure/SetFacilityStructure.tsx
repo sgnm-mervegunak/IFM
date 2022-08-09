@@ -9,6 +9,7 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Checkbox } from 'primereact/checkbox';
 import { TreeSelect } from "primereact/treeselect";
+import { Dropdown } from 'primereact/dropdown';
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 
@@ -19,6 +20,10 @@ import { useAppSelector } from "../../app/hook";
 
 import axios from "axios";
 import FormGenerate from "../FormGenerate/FormGenerate";
+import BuildingForm from "./Forms/BuildingForm";
+import BlockForm from "./Forms/BlockForm";
+import FloorForm from "./Forms/FloorForm";
+import SpaceForm from "./Forms/SpaceForm";
 
 interface Node {
   cantDeleted: boolean;
@@ -40,6 +45,7 @@ interface Node {
   labels?: string[]; // for form type
   parentId?: string;
   className?: string;
+  Name?: string;
 }
 
 interface FormNode {
@@ -90,8 +96,27 @@ const SetFacilityStructure = () => {
   const [generateNodeKey, setGenerateNodeKey] = useState("");
   const [generateFormTypeKey, setGenerateFormTypeKey] = useState<string | undefined>("");
   const [generateNodeName, setGenerateNodeName] = useState<string | undefined>("");
+  const [facilityType, setFacilityType] = useState<string[]>([]);
+  const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
+  const [submitted, setSubmitted] = useState(false);
+  const [isUpdate, setIsUpdate] = useState(false);
 
   const facilityTypes = ["Facility", "Building", "Block", "Floor", "Room", "Open Area", "Park Area", "Garden", "Other"];
+
+  useEffect(() => {
+    FacilityStructureService.getFacilityTypes("FacilityTypes_EN", realm)
+      .then((res) => {
+        setFacilityType(res.data.map((item: any) => item.name))
+      })
+      .catch((err) => {
+        toast.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: err.response ? err.response.data.message : err.message,
+          life: 2000,
+        });
+      });
+  }, [])
 
   const getForms = async () => {
     await FormTypeService.findOne('111').then((res) => {
@@ -117,45 +142,20 @@ const SetFacilityStructure = () => {
     });
   };
 
-  // function handleClick() {
-
-  //   const headers = {
-  //     'api-key': '<API_KEY>',
-  //     'Access-Control-Allow-Origin': true,
-  //   }
-
-  //   const data = {
-  //     to: '<TO_NUMBER>',
-  //     sender: '<FROM_NUMBER>',
-  //     body: '<MESSAGE>',
-  //     type: 'OTP',
-  //   }
-
-  //   axios.post('http://localhost:3001/formgenerate', data, {
-  //     headers: headers
-  //   })
-  //     .then((response) => {
-  //       console.log()
-  //     })
-  //     .catch((error) => {
-  //       console.log(error)
-  //     })
-
-  // }
-
   useEffect(() => {
     getForms();
-    // handleClick();
-
   }, []);
 
   const getNodeInfoAndEdit = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
       .then((res) => {
-        setName(res.data.properties.name || "");
-        setTag(res.data.properties.tag || []);
-        setIsActive(res.data.properties.isActive);
-        setFormTypeId(res.data.properties.formTypeId);
+        console.log(res.data);
+        setSelectedFacilityType(res.data.properties.NodeType);
+
+        // setName(res.data.properties.name || "");
+        // setTag(res.data.properties.tag || []);
+        // setIsActive(res.data.properties.isActive);
+        // setFormTypeId(res.data.properties.formTypeId);
       })
       .catch((err) => {
         toast.current.show({
@@ -179,7 +179,7 @@ const SetFacilityStructure = () => {
       label: "Edit Item",
       icon: "pi pi-pencil",
       command: () => {
-
+        setIsUpdate(true);
         getNodeInfoAndEdit(selectedNodeKey);
         setEditDia(true);
       },
@@ -235,7 +235,7 @@ const SetFacilityStructure = () => {
     for (let i of nodes) {
       fixNodes(i.children)
       i.icon = "pi pi-fw pi-building";
-      i.label = i.name;
+      i.label = i.name || i.Name;
     }
   };
 
@@ -494,13 +494,15 @@ const SetFacilityStructure = () => {
             setFormTypeId(undefined);
             setLabels([]);
             setTag([]);
+
+            setSelectedFacilityType(undefined);
           }}
           className="p-button-text"
         />
         <Button
           label="Add"
           icon="pi pi-check"
-          onClick={() => addItem(selectedNodeKey)}
+          onClick={() => setSubmitted(true)}
           autoFocus
         />
       </div>
@@ -519,13 +521,15 @@ const SetFacilityStructure = () => {
             setTag([]);
             setLabels([]);
             setFormTypeId(undefined);
+
+            setSelectedFacilityType(undefined);
           }}
           className="p-button-text"
         />
         <Button
           label="Save"
           icon="pi pi-check"
-          onClick={() => editItem(selectedNodeKey)}
+          onClick={() => setSubmitted(true)}
           autoFocus
         />
       </div>
@@ -562,7 +566,7 @@ const SetFacilityStructure = () => {
       <Dialog
         header="Add New Item"
         visible={addDia}
-        style={{ width: "25vw" }}
+        style={{ width: "40vw" }}
         footer={renderFooterAdd}
         onHide={() => {
           setName("");
@@ -570,9 +574,74 @@ const SetFacilityStructure = () => {
           setFormTypeId(undefined);
           setLabels([]);
           setAddDia(false);
+
+          setSelectedFacilityType(undefined);
         }}
       >
         <div className="field">
+          <h5 style={{ marginBottom: "0.5em" }}>Facility Type</h5>
+          <Dropdown
+            value={selectedFacilityType}
+            options={facilityType}
+            onChange={(event) => setSelectedFacilityType(event.value)}
+            style={{ width: '100%' }}
+          />
+        </div>
+        {selectedFacilityType === "Building" ? <BuildingForm
+          selectedFacilityType={selectedFacilityType}
+          submitted={submitted}
+          setSubmitted={setSubmitted}
+          selectedNodeKey={selectedNodeKey}
+          editDia={editDia}
+          getFacilityStructure={getFacilityStructure}
+          setAddDia={setAddDia}
+          setEditDia={setEditDia}
+          isUpdate={isUpdate}
+          setIsUpdate={setIsUpdate}
+          setSelectedFacilityType={setSelectedFacilityType}
+        /> : null}
+        {selectedFacilityType === "Block" ? <BlockForm
+          selectedFacilityType={selectedFacilityType}
+          submitted={submitted}
+          setSubmitted={setSubmitted}
+          selectedNodeKey={selectedNodeKey}
+          editDia={editDia}
+          getFacilityStructure={getFacilityStructure}
+          setAddDia={setAddDia}
+          setEditDia={setEditDia}
+          isUpdate={isUpdate}
+          setIsUpdate={setIsUpdate}
+          setSelectedFacilityType={setSelectedFacilityType}
+        /> : null}
+        {selectedFacilityType === "Floor" ? <FloorForm
+          selectedFacilityType={selectedFacilityType}
+          submitted={submitted}
+          setSubmitted={setSubmitted}
+          selectedNodeKey={selectedNodeKey}
+          editDia={editDia}
+          getFacilityStructure={getFacilityStructure}
+          setAddDia={setAddDia}
+          setEditDia={setEditDia}
+          isUpdate={isUpdate}
+          setIsUpdate={setIsUpdate}
+          setSelectedFacilityType={setSelectedFacilityType}
+        /> : null}
+        {selectedFacilityType === "Space" ? <SpaceForm
+          selectedFacilityType={selectedFacilityType}
+          submitted={submitted}
+          setSubmitted={setSubmitted}
+          selectedNodeKey={selectedNodeKey}
+          editDia={editDia}
+          getFacilityStructure={getFacilityStructure}
+          setAddDia={setAddDia}
+          setEditDia={setEditDia}
+          isUpdate={isUpdate}
+          setIsUpdate={setIsUpdate}
+          setSelectedFacilityType={setSelectedFacilityType}
+        /> : null}
+
+
+        {/* <div className="field">
           <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
           <InputText
             value={name}
@@ -611,12 +680,12 @@ const SetFacilityStructure = () => {
         <div className="field structureChips">
           <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
           <Chips value={tag} onChange={(e) => setTag(e.value)} style={{ width: "100%" }} />
-        </div>
+        </div> */}
       </Dialog>
       <Dialog
         header="Edit Item"
         visible={editDia}
-        style={{ width: "25vw" }}
+        style={{ width: "40vw" }}
         footer={renderFooterEdit}
         onHide={() => {
           setName("");
@@ -624,9 +693,63 @@ const SetFacilityStructure = () => {
           setFormTypeId(undefined);
           setLabels([]);
           setEditDia(false);
+
+          setSelectedFacilityType(undefined);
         }}
       >
-        <div className="field">
+        {selectedFacilityType === "Building" ? <BuildingForm
+          selectedFacilityType={selectedFacilityType}
+          submitted={submitted}
+          setSubmitted={setSubmitted}
+          selectedNodeKey={selectedNodeKey}
+          editDia={editDia}
+          getFacilityStructure={getFacilityStructure}
+          setAddDia={setAddDia}
+          setEditDia={setEditDia}
+          isUpdate={isUpdate}
+          setIsUpdate={setIsUpdate}
+          setSelectedFacilityType={setSelectedFacilityType}
+        /> : null}
+        {selectedFacilityType === "Block" ? <BlockForm
+          selectedFacilityType={selectedFacilityType}
+          submitted={submitted}
+          setSubmitted={setSubmitted}
+          selectedNodeKey={selectedNodeKey}
+          editDia={editDia}
+          getFacilityStructure={getFacilityStructure}
+          setAddDia={setAddDia}
+          setEditDia={setEditDia}
+          isUpdate={isUpdate}
+          setIsUpdate={setIsUpdate}
+          setSelectedFacilityType={setSelectedFacilityType}
+        /> : null}
+        {selectedFacilityType === "Floor" ? <FloorForm
+          selectedFacilityType={selectedFacilityType}
+          submitted={submitted}
+          setSubmitted={setSubmitted}
+          selectedNodeKey={selectedNodeKey}
+          editDia={editDia}
+          getFacilityStructure={getFacilityStructure}
+          setAddDia={setAddDia}
+          setEditDia={setEditDia}
+          isUpdate={isUpdate}
+          setIsUpdate={setIsUpdate}
+          setSelectedFacilityType={setSelectedFacilityType}
+        /> : null}
+        {selectedFacilityType === "Space" ? <SpaceForm
+          selectedFacilityType={selectedFacilityType}
+          submitted={submitted}
+          setSubmitted={setSubmitted}
+          selectedNodeKey={selectedNodeKey}
+          editDia={editDia}
+          getFacilityStructure={getFacilityStructure}
+          setAddDia={setAddDia}
+          setEditDia={setEditDia}
+          isUpdate={isUpdate}
+          setIsUpdate={setIsUpdate}
+          setSelectedFacilityType={setSelectedFacilityType}
+        /> : null}
+        {/* <div className="field">
           <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
           <InputText
             value={name}
@@ -668,7 +791,7 @@ const SetFacilityStructure = () => {
         <div className="field flex">
           <h5 style={{ marginBottom: "0.5em" }}>Is Active</h5>
           <Checkbox className="ml-3" onChange={e => setIsActive(e.checked)} checked={isActive}></Checkbox>
-        </div>
+        </div> */}
       </Dialog>
 
       <Dialog
