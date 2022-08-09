@@ -73,4 +73,10 @@ export class StructureController {
     return this.facilityStructuresService.findOne(label, realm);
   }
 
+  @Get('/structurefirstlevel/nodes/:label/:realm')
+  @Unprotected()
+  @NoCache()
+  findStructureFirstLevelNodes(@Param('label') label: string, @Param('realm') realm: string) {
+    return this.facilityStructuresService.findStructureFirstLevelNodes(label, realm);
+  }
 }
