@@ -21,8 +21,8 @@ import ShowAsset from "./pages/StructureAsset/ShowAsset";
 import { useAppSelector } from "./app/hook";
 import SetClassificationUser from "./pages/Classifications/SetClassificationUser";
 import SetFacilityStructure2 from "./pages/FacilityStructure/SetFacilityStructure2";
-import SpaceJoin from "./pages/SpaceJoin/SpaceJoin";
-import SetSpaceJoin from "./pages/SpaceJoin/SetSpaceJoin";
+import JointSpace from "./pages/SpaceJoin/JointSpace";
+import SetJointSpace from "./pages/SpaceJoin/SetJointSpace";
 
 // import Main from './pages/Main';
 
@@ -39,12 +39,11 @@ export default function Router() {
         { path: "facility", element: <Facility2 /> },
         // { path: "classifications", element: <Classifications /> },
         { path: "classifications", element: auth.auth.type === "facility_client_role_admin" ? <SetClassificationAdmin /> : <SetClassificationUser /> },
-        { path: "spacejoin", element: <SpaceJoin /> },
+        { path: "jointspace", element: <JointSpace /> },
         { path: "facilitystructure", element: <SetFacilityStructure /> },
         // { path: "formgenerate", element: <FormGenerate />},
         { path: "contact", element: <Contact /> },
         { path: "structure-asset", element: <StructureAsset /> },
-        // { path: "spacejoin", element: <SpaceJoin /> },
       ],
     },
     {
@@ -78,9 +77,9 @@ export default function Router() {
       children: [{ path: "showasset", element: <ShowAsset /> }],
     },
     {
-      path: "/spacejoin",
+      path: "/jointspace",
       element: <AppLayout />,
-      children: [{ path: ":id", element: <SetSpaceJoin /> }],
+      children: [{ path: ":id", element: <SetJointSpace /> }],
     },
     {
       path: "/404",
