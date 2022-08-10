@@ -17,6 +17,7 @@ import { FacilityInterface } from 'src/common/interface/facility.interface';
 import * as moment from 'moment';
 import { copyFile } from 'fs';
 import { JointSpaces } from '../entities/joint-spaces.entity';
+import { WrongFacilityStructureExceptions } from 'src/common/badRequestExceptions/bad.request.exception';
 
 
 @Injectable()
@@ -265,7 +266,8 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       }
     })
     if(!isExist.length){
-      throw new HttpException('Yapıyı Bu şekilde oluşturamazsınız1',400)
+      throw new WrongFacilityStructureExceptions(structureData['NodeType'],node.properties["NodeType"]);
+      //throw new HttpException('Yapıyı Bu şekilde oluşturamazsınız1',400)
     }
 
   ////////////////////////////// Control of input properties with facility type properties //////////////////////////////////////////////////
