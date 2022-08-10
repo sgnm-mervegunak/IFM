@@ -9,11 +9,13 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Checkbox } from 'primereact/checkbox';
 import { TreeSelect } from "primereact/treeselect";
+import { Calendar } from "primereact/calendar";
 import { Dropdown } from 'primereact/dropdown';
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 
 import FacilityStructureService from "../../services/facilitystructure";
+import ClassificationsService from "../../services/classifications";
 import FormTypeService from "../../services/formType";
 import StructureWinformService from "../../services/structureWinform";
 import JointSpaceService from "../../services/jointspace";
@@ -75,13 +77,25 @@ interface FormNode {
 
 const SetSpaceJoin = () => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+  const [selectedKeysName, setSelectedKeysName] = useState<string[]>([]);
   const [selectedNodeKey, setSelectedNodeKey] = useState<any>([]);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
-  const [name, setName] = useState("");
+  const [ArchitecturalName, setArchitecturalName] = useState<string>("");
+  const [ArchitecturalCode, setArchitecturalCode] = useState<string>("");
+  const [name, setName] = useState<string>("");
+  const [code, setCode] = useState<string>("");
+  const [tag, setTag] = useState<string[]>([]);
+  const [m2, setM2] = useState<string>("");
+  const [spaceType, setSpaceType] = useState<any>(undefined);
+  const [status, setStatus] = useState<any>(undefined);
+  const [jointStartDate, setJointStartDate] = useState<any>(undefined);
+  const [jointEndDate, setJointEndDate] = useState<any>(undefined);
+  const [nodeKeys, setNodeKeys] = useState<string[]>([]);
+  const [classificationSpace, setClassificationSpace] = useState<Node[]>([]);
+  const [classificationStatus, setclassificationStatus] = useState<Node[]>([]);
   const [formTypeId, setFormTypeId] = useState<any>(undefined);
   const [labels, setLabels] = useState<string[]>([]);
-  const [tag, setTag] = useState<string[]>([]);
   const [isActive, setIsActive] = useState<boolean>(true);
   const [addDia, setAddDia] = useState(false);
   const [editDia, setEditDia] = useState(false);
@@ -101,6 +115,38 @@ const SetSpaceJoin = () => {
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const params = useParams();
+
+  const fixNodesClassification = (nodes: Node[]) => {
+    if (!nodes || nodes.length === 0) {
+      return;
+    }
+    for (let i of nodes) {
+      fixNodesClassification(i.children);
+      i.label = i.name;
+      i.selectable = true;
+    }
+  };
+
+  const getClassificationSpace = async () => {
+    await ClassificationsService.findAllActiveByLabel({ realm: realm, label: "OmniClass11", language: "en" }).then((res) => {
+      let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
+      fixNodesClassification(temp);
+      setClassificationSpace(temp);
+    });
+  };
+
+  const getClassificationStatus = async () => {
+    await ClassificationsService.findAllActiveByLabel({ realm: realm, label: "FacilityStatus", language: "en" }).then((res) => {
+      let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
+      fixNodesClassification(temp);
+      setclassificationStatus(temp);
+    });
+  };
+
+  useEffect(() => {
+    getClassificationSpace();
+    getClassificationStatus();
+  }, []);
 
   const getNodeInfoAndEdit = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
@@ -202,60 +248,35 @@ const SetSpaceJoin = () => {
     }
   };
 
-  const addItem = (key: string) => {
+  const addItem = () => {
     let newNode: any = {};
-    FacilityStructureService.nodeInfo(key)
+
+    newNode = {
+      ArchitecturalName: ArchitecturalName,
+      ArchitecturalCode: ArchitecturalCode,
+      name: name,
+      code: code,
+      tag: tag,
+      m2: m2,
+      spaceType: spaceType,
+      status: status,
+      jointStartDate: jointStartDate,
+      jointEndDate: jointEndDate,
+      nodeKeys: selectedKeys
+    };
+    console.log(newNode);
+    
+
+    JointSpaceService.createJointSpace(newNode)
       .then((res) => {
-        console.log(res.data);
-        if (labels.length > 0) {
-          newNode = {
-            key: uuidv4(),
-            parentId: res.data.id,
-            name: name,
-            tag: tag,
-            description: "",
-            // labels: optionalLabels[0]?.replace(/ /g, '').split(",") || [],
-            labels: [labels[0]],
-            formTypeId: formTypeId,
-          };
-        } else {
-          newNode = {
-            key: uuidv4(),
-            parentId: res.data.id,
-            name: name,
-            tag: tag,
-            description: "",
-            formTypeId: formTypeId,
-            // labels: optionalLabels[0]?.replace(/ /g, '').split(",") || [],
-          };
-        }
+        toast.current.show({
+          severity: "success",
+          summary: "Successful",
+          detail: "Structure Created",
+          life: 3000,
+        });
 
-        FacilityStructureService.create(newNode)
-          .then((res) => {
-            toast.current.show({
-              severity: "success",
-              summary: "Successful",
-              detail: "Structure Created",
-              life: 3000,
-            });
-            let newForm: any = {};
-            newForm = {
-              referenceKey: formTypeId,
-            };
-            StructureWinformService.createForm(res.data.properties.key, newForm)
-              .then((res) => {
-              })
-            getFacilityStructure();
-          })
-          .catch((err) => {
-            toast.current.show({
-              severity: "error",
-              summary: "Error",
-              detail: err.response ? err.response.data.message : err.message,
-              life: 2000,
-            });
-          });
-
+        getFacilityStructure();
       })
       .catch((err) => {
         toast.current.show({
@@ -265,6 +286,9 @@ const SetSpaceJoin = () => {
           life: 2000,
         });
       });
+
+
+
     setName("");
     setTag([]);
     setFormTypeId(undefined);
@@ -426,6 +450,23 @@ const SetSpaceJoin = () => {
       });
   };
 
+  const findKeyName = (key: string) => {
+    FacilityStructureService.nodeInfo(key)
+      .then((res) => {
+        console.log(res.data);
+
+        setSelectedKeysName(res.data.properties.Name);
+      })
+      .catch((err) => {
+        toast.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: err.response ? err.response.data.message : err.message,
+          life: 2000,
+        });
+      });
+  };
+
   const dragConfirm = (dragId: string, dropId: string) => {
     confirmDialog({
       message: 'Are you sure you want to move?',
@@ -465,7 +506,7 @@ const SetSpaceJoin = () => {
         <Button
           label="Add"
           icon="pi pi-check"
-          onClick={() => setSubmitted(true)}
+          onClick={() => addItem()}
           autoFocus
         />
       </div>
@@ -542,11 +583,96 @@ const SetSpaceJoin = () => {
         }}
       >
         <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Facility Type</h5>
-          <Dropdown
-            value={selectedFacilityType}
-            options={facilityType}
-            onChange={(event) => setSelectedFacilityType(event.value)}
+          <h5 style={{ marginBottom: "0.5em" }}>ArchitecturalName</h5>
+          <InputText
+            value={ArchitecturalName}
+            onChange={(event) => setArchitecturalName(event.target.value)}
+            style={{ width: '100%' }}
+          />
+        </div>
+        <div className="field">
+          <h5 style={{ marginBottom: "0.5em" }}>ArchitecturalCode</h5>
+          <InputText
+            value={ArchitecturalCode}
+            onChange={(event) => setArchitecturalCode(event.target.value)}
+            style={{ width: '100%' }}
+          />
+        </div>
+        <div className="field">
+          <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
+          <InputText
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            style={{ width: '100%' }}
+          />
+        </div>
+        <div className="field">
+          <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
+          <InputText
+            value={code}
+            onChange={(event) => setCode(event.target.value)}
+            style={{ width: '100%' }}
+          />
+        </div>
+        <div className="field structureChips">
+          <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
+          <Chips
+            value={tag}
+            onChange={(e) => setTag(e.value)}
+            style={{ width: "100%" }}
+          />
+        </div>
+        <div className="field">
+          <h5 style={{ marginBottom: "0.5em" }}>M2</h5>
+          <InputText
+            value={m2}
+            onChange={(event) => setM2(event.target.value)}
+            style={{ width: '100%' }}
+          />
+        </div>
+        <div className="field">
+          <h5 style={{ marginBottom: "0.5em" }}>Space Type</h5>
+          <TreeSelect
+            value={spaceType}
+            options={classificationSpace}
+            onChange={(e) => {
+              setSpaceType(e.value);
+            }}
+            filter
+            placeholder="Select Type"
+            style={{ width: '100%' }}
+          />
+        </div>
+        <div className="field">
+          <h5 style={{ marginBottom: "0.5em" }}>Status</h5>
+          <TreeSelect
+            value={status}
+            options={classificationStatus}
+            onChange={(e) => {
+              setStatus(e.value);
+            }}
+            filter
+            placeholder="Select Type"
+            style={{ width: '100%' }}
+          />
+        </div>
+        <div className="field">
+          <h5 style={{ marginBottom: "0.5em" }}>Joint Start Date</h5>
+          <Calendar
+            dateFormat="dd/mm/yy"
+            value={jointStartDate}
+            onChange={(e) => setJointStartDate(e.value?.toString())}
+            showIcon
+            style={{ width: '100%' }}
+          />
+        </div>
+        <div className="field">
+          <h5 style={{ marginBottom: "0.5em" }}>Joint End Date</h5>
+          <Calendar
+            dateFormat="dd/mm/yy"
+            value={jointEndDate}
+            onChange={(e) => setJointEndDate(e.value?.toString())}
+            showIcon
             style={{ width: '100%' }}
           />
         </div>
@@ -667,8 +793,20 @@ const SetSpaceJoin = () => {
         <FormGenerate nodeKey={generateNodeKey} formKey={generateFormTypeKey} nodeName={generateNodeName} setFormDia={setFormDia} />
 
       </Dialog>
-      <h1>Space Join</h1>
-      <div className="field">
+      <h3>Space Join</h3>
+      <div>
+        <span style={{ fontWeight: "bold" }}>Selected Spaces:</span>{` ${selectedKeys} `}
+
+        {selectedKeys.length > 1 &&
+          <div className="mt-4">
+
+            <Button label="Join" icon="pi pi-check" className="ml-2" onClick={() => setAddDia(true)} />
+
+          </div>
+        }
+
+      </div>
+      <div className="field mt-4">
         <Tree
           loading={loading}
           value={data}
@@ -691,8 +829,11 @@ const SetSpaceJoin = () => {
           filterPlaceholder="Search"
           selectionMode="checkbox"
           onSelectionChange={(event: any) => {
+
+
             setSelectedNodeKey(event.value);
             setSelectedKeys(Object.keys(event.value));
+            // selectedKeys?.map((key) =>{findKeyName(key)});
           }
           }
           selectionKeys={selectedNodeKey}
@@ -701,11 +842,10 @@ const SetSpaceJoin = () => {
         />
       </div>
 
-      {/* <Button
-          label="Click"
-          onClick={() => console.log(selectedKeys)}
-          autoFocus
-        /> */}
+
+
+
+
     </div>
   );
 };
