@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Tree } from "primereact/tree";
+import { Tree, TreeSelectionKeys } from "primereact/tree";
 import { ContextMenu } from "primereact/contextmenu";
 import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
@@ -8,19 +8,19 @@ import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Checkbox } from 'primereact/checkbox';
-import { Dropdown } from 'primereact/dropdown';
 import { TreeSelect } from "primereact/treeselect";
+import { Dropdown } from 'primereact/dropdown';
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 
 import FacilityStructureService from "../../services/facilitystructure";
 import FormTypeService from "../../services/formType";
 import StructureWinformService from "../../services/structureWinform";
+import JointSpaceService from "../../services/jointspace";
 import { useAppSelector } from "../../app/hook";
 
 import axios from "axios";
 import FormGenerate from "../FormGenerate/FormGenerate";
-import FormGenerateStructure from "../FormGenerateStructure/FormGenerateStructure";
 
 interface Node {
   cantDeleted: boolean;
@@ -43,6 +43,8 @@ interface Node {
   parentId?: string;
   className?: string;
   Name?: string;
+  selectable?: boolean;
+  NodeType?: string;
 }
 
 interface FormNode {
@@ -71,9 +73,9 @@ interface FormNode {
   icon?: string;
 }
 
-const SetFacilityStructure2 = () => {
-  const [selectedNodeKey, setSelectedNodeKey] = useState<any>("");
-  const [submitted, setSubmitted] = useState(false)
+const SetSpaceJoin = () => {
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+  const [selectedNodeKey, setSelectedNodeKey] = useState<any>([]);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
   const [name, setName] = useState("");
@@ -96,87 +98,20 @@ const SetFacilityStructure2 = () => {
   const [generateNodeName, setGenerateNodeName] = useState<string | undefined>("");
   const [facilityType, setFacilityType] = useState<string[]>([]);
   const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
-  const [uploadFiles,setUploadFiles] = useState<any>({});
-  const [deleteFiles,setDeleteFiles] = useState<any>([]);
-
-  useEffect(() => {
-    FacilityStructureService.getFacilityTypes("FacilityTypes_EN", realm)
-      .then((res) => {
-        setFacilityType(res.data.map((item: any) => item.name))
-      })
-      .catch((err) => {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
-        });
-      });
-  }, [])
-
-  const getForms = async () => {
-    await FormTypeService.findOne('111').then((res) => {
-      let temp = JSON.parse(JSON.stringify([res.data.root] || []));
-      const iconFormNodes = (nodes: FormNode[]) => {
-        if (!nodes || nodes.length === 0) {
-          return;
-        }
-        for (let i of nodes) {
-          iconFormNodes(i.children)
-          if (i.hasType === true) {
-            i.icon = "pi pi-fw pi-book";
-            // i.selectable = true;
-          }
-          // else {
-          //   i.selectable = false;
-          // }
-        }
-      };
-      iconFormNodes(temp);
-
-      setFormData(temp);
-    });
-  };
-
-  // function handleClick() {
-
-  //   const headers = {
-  //     'api-key': '<API_KEY>',
-  //     'Access-Control-Allow-Origin': true,
-  //   }
-
-  //   const data = {
-  //     to: '<TO_NUMBER>',
-  //     sender: '<FROM_NUMBER>',
-  //     body: '<MESSAGE>',
-  //     type: 'OTP',
-  //   }
-
-  //   axios.post('http://localhost:3001/formgenerate', data, {
-  //     headers: headers
-  //   })
-  //     .then((response) => {
-  //       console.log()
-  //     })
-  //     .catch((error) => {
-  //       console.log(error)
-  //     })
-
-  // }
-
-  useEffect(() => {
-    getForms();
-    // handleClick();
-
-  }, []);
+  const [submitted, setSubmitted] = useState(false);
+  const [isUpdate, setIsUpdate] = useState(false);
+  const params = useParams();
 
   const getNodeInfoAndEdit = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
       .then((res) => {
-        setName(res.data.properties.name || "");
-        setTag(res.data.properties.tag || []);
-        setIsActive(res.data.properties.isActive);
-        setFormTypeId(res.data.properties.formTypeId);
+        console.log(res.data);
+        setSelectedFacilityType(res.data.properties.NodeType);
+
+        // setName(res.data.properties.name || "");
+        // setTag(res.data.properties.tag || []);
+        // setIsActive(res.data.properties.isActive);
+        // setFormTypeId(res.data.properties.formTypeId);
       })
       .catch((err) => {
         toast.current.show({
@@ -200,10 +135,9 @@ const SetFacilityStructure2 = () => {
       label: "Edit Item",
       icon: "pi pi-pencil",
       command: () => {
-
-        getNodeInfoAndEdit(selectedNodeKey);
+        setIsUpdate(true);
+        // getNodeInfoAndEdit(selectedNodeKey);
         setEditDia(true);
-        setDeleteFiles([]);
       },
     },
     {
@@ -216,7 +150,8 @@ const SetFacilityStructure2 = () => {
   ];
 
   const getFacilityStructure = () => {
-    FacilityStructureService.findOne(realm).then((res) => {
+    const key = params.id || "";
+    JointSpaceService.findBuildingWithKey(key, realm).then((res) => {
 
       if (!res.data.root.children) {
         setData([res.data.root.properties] || []);
@@ -256,31 +191,18 @@ const SetFacilityStructure2 = () => {
     }
     for (let i of nodes) {
       fixNodes(i.children)
-      console.log(i);
-
       i.icon = "pi pi-fw pi-building";
-      i.label = i.Name || i.name;
+      i.label = i.name || i.Name;
+      if (i.NodeType === "Space") {
+        i.selectable = true;
+      } else {
+        i.selectable = false;
+      }
+
     }
   };
 
-  const UploadAnyFile = (folderName:string,file:any) => {
-    const url = "http://localhost:3004/file-upload/single";
-    const formData = new FormData();
-
-    formData.append("file", file);
-    formData.append("realmName", "ifm");
-    formData.append("folderName", folderName);
-    return axios.post(url, formData)
-  };
-
-
-  const DeleteAnyFile = (realmName:string,fileName:string) => {
-    const url = "http://localhost:3004/file-upload/removeOne";
-
-    return axios.delete(url, {data:{fileName, realmName}})
-  };
-
-  const addItem = (key: string, data: any) => {
+  const addItem = (key: string) => {
     let newNode: any = {};
     FacilityStructureService.nodeInfo(key)
       .then((res) => {
@@ -308,38 +230,22 @@ const SetFacilityStructure2 = () => {
           };
         }
 
-        console.log("data", data)
-        FacilityStructureService.createStructure(key, data)
-          .then(async(res) => {
+        FacilityStructureService.create(newNode)
+          .then((res) => {
             toast.current.show({
               severity: "success",
               summary: "Successful",
               detail: "Structure Created",
               life: 3000,
             });
-            // let newForm: any = {};
-            // newForm = {
-            //   referenceKey: formTypeId,
-            // };
-            // StructureWinformService.createForm(res.data.properties.key, newForm)
-            //   .then((res) => {
-            //   })
+            let newForm: any = {};
+            newForm = {
+              referenceKey: formTypeId,
+            };
+            StructureWinformService.createForm(res.data.properties.key, newForm)
+              .then((res) => {
+              })
             getFacilityStructure();
-            let temp = {} as any
-            for(let item in uploadFiles) {
-              temp[item] = []
-              for(let file of uploadFiles[item]) {
-                let resFile = await UploadAnyFile(res.data.properties.key+"/"+item,file)
-                delete resFile.data.message
-                temp[item].push(resFile.data)
-              }
-            }
-            for(let item in temp){
-              temp[item] = JSON.stringify(temp[item])
-            }
-            FacilityStructureService.update(res.data.properties.key, {...data,...temp})
-            setUploadFiles({})
-
           })
           .catch((err) => {
             toast.current.show({
@@ -366,9 +272,8 @@ const SetFacilityStructure2 = () => {
     setLabels([]);
   };
 
-  const editItem = (key: string, data: any) => {
+  const editItem = (key: string) => {
     let updateNode: any = {};
-    console.log(data)
     FacilityStructureService.nodeInfo(key)
       .then((responseStructure) => {
         if (labels.length > 0) {
@@ -391,75 +296,42 @@ const SetFacilityStructure2 = () => {
         }
         console.log(responseStructure.data);
 
-        // StructureWinformService.findForm(key)
-        //   .then((res) => {
-        //     StructureWinformService.removeForm(key, responseStructure.data.properties.formTypeId)
-        //       .then((res) => {
-        //       })
-        //     let newForm: any = {};
-        //     newForm = {
-        //       referenceKey: formTypeId,
-        //     };
-        //     StructureWinformService.createForm(key, newForm)
-        //       .then((res) => {
-        //       })
-        //   }
-        //   )
-        //   .catch((err) => {
-        //     if (err.response.status === 404) {
-        //       let newForm: any = {};
-        //       newForm = {
-        //         referenceKey: formTypeId,
-        //       };
-        //       StructureWinformService.createForm(key, newForm)
-        //         .then((res) => {
-        //         })
-        //     }
-        //   }
-        //   )
-        console.log(data);
-        
+        StructureWinformService.findForm(key)
+          .then((res) => {
+            StructureWinformService.removeForm(key, responseStructure.data.properties.formTypeId)
+              .then((res) => {
+              })
+            let newForm: any = {};
+            newForm = {
+              referenceKey: formTypeId,
+            };
+            StructureWinformService.createForm(key, newForm)
+              .then((res) => {
+              })
+          }
+          )
+          .catch((err) => {
+            if (err.response.status === 404) {
+              let newForm: any = {};
+              newForm = {
+                referenceKey: formTypeId,
+              };
+              StructureWinformService.createForm(key, newForm)
+                .then((res) => {
+                })
+            }
+          }
+          )
 
-        FacilityStructureService.update(key, data)
-          .then(async(res) => {
+        FacilityStructureService.update(responseStructure.data.id, updateNode)
+          .then((res) => {
             toast.current.show({
               severity: "success",
               summary: "Successful",
               detail: "Structure Updated",
               life: 3000,
             });
-            // upload files
-            let temp = {} as any
-            for(let item in uploadFiles) {
-              temp[item] = []
-              for(let file of uploadFiles[item]) {
-                let resFile = await UploadAnyFile(key+"/"+item,file)
-                delete resFile.data.message
-                temp[item].push(resFile.data)
-              }
-            }
-            for(let item in temp){
-              try {
-                temp[item] = [...JSON.parse(data[item]),...temp[item]]
-              }
-              catch(err) {
-              }
-              temp[item] = JSON.stringify(temp[item])
-            }
-
-            // delete files
-            for(let item of deleteFiles) {
-              let temp = item.image_url.split("/")
-              let urlIndex = temp.findIndex((item:any) => item === "172.30.99.120:9000")
-              let temp2 = temp.slice(urlIndex+1)
-
-              await DeleteAnyFile(temp2[0],temp2.slice(1).join("/"))
-            }
-
-            // update node
-            FacilityStructureService.update(res.data.properties.key, {...data,...temp})
             getFacilityStructure();
-            setUploadFiles({})
           })
           .catch((err) => {
             toast.current.show({
@@ -585,6 +457,7 @@ const SetFacilityStructure2 = () => {
             setFormTypeId(undefined);
             setLabels([]);
             setTag([]);
+
             setSelectedFacilityType(undefined);
           }}
           className="p-button-text"
@@ -592,10 +465,7 @@ const SetFacilityStructure2 = () => {
         <Button
           label="Add"
           icon="pi pi-check"
-          onClick={() => {
-            setSubmitted(true);
-            // setSelectedFacilityType(undefined);
-          }}
+          onClick={() => setSubmitted(true)}
           autoFocus
         />
       </div>
@@ -608,7 +478,15 @@ const SetFacilityStructure2 = () => {
         <Button
           label="Cancel"
           icon="pi pi-times"
-          onClick={() => setEditDia(false)}
+          onClick={() => {
+            setEditDia(false);
+            setName("");
+            setTag([]);
+            setLabels([]);
+            setFormTypeId(undefined);
+
+            setSelectedFacilityType(undefined);
+          }}
           className="p-button-text"
         />
         <Button
@@ -646,12 +524,11 @@ const SetFacilityStructure2 = () => {
         message="Do you want to delete?"
         header="Delete Confirmation"
         icon="pi pi-exclamation-triangle"
-        accept={() => deleteItem(selectedNodeKey)}
+      // accept={() => deleteItem(selectedNodeKey)}
       />
       <Dialog
         header="Add New Item"
         visible={addDia}
-        maximizable
         style={{ width: "40vw" }}
         footer={renderFooterAdd}
         onHide={() => {
@@ -660,6 +537,7 @@ const SetFacilityStructure2 = () => {
           setFormTypeId(undefined);
           setLabels([]);
           setAddDia(false);
+
           setSelectedFacilityType(undefined);
         }}
       >
@@ -672,21 +550,48 @@ const SetFacilityStructure2 = () => {
             style={{ width: '100%' }}
           />
         </div>
-        {selectedFacilityType && <FormGenerateStructure
-          selectedFacilityType={selectedFacilityType}
-          uploadFiles={uploadFiles}
-          setUploadFiles={setUploadFiles}
-          deleteFiles={deleteFiles}
-          setDeleteFiles={setDeleteFiles}
-          realm={realm}
-          addItem={(data: any) => addItem(selectedNodeKey, data)}
-          editItem={(data: any) => editItem(selectedNodeKey, data)}
-          setSubmitted={setSubmitted}
-          submitted={submitted}
-          selectedNodeKey={selectedNodeKey}
-          editDia={editDia}
-        />}
 
+
+        {/* <div className="field">
+          <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
+          <InputText
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            style={{ width: '100%' }}
+          />
+        </div>
+        <div className="field">
+          <h5 style={{ marginBottom: "0.5em" }}>Facility Type</h5>
+          <TreeSelect
+            value={formTypeId}
+            options={formData}
+            onChange={(e) => {
+              setFormTypeId(e.value);
+              console.log(e);
+              let nodeKey: any = e.value;
+              FormTypeService.nodeInfo(nodeKey)
+                .then((res) => {
+                  console.log(res.data);
+                  setLabels([res.data.properties.name])
+                })
+                .catch((err) => {
+                  toast.current.show({
+                    severity: "error",
+                    summary: "Error",
+                    detail: err.response ? err.response.data.message : err.message,
+                    life: 2000,
+                  });
+                });
+            }}
+            filter
+            placeholder="Select Type"
+            style={{ width: '100%' }}
+          />
+        </div>
+        <div className="field structureChips">
+          <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
+          <Chips value={tag} onChange={(e) => setTag(e.value)} style={{ width: "100%" }} />
+        </div> */}
       </Dialog>
       <Dialog
         header="Edit Item"
@@ -699,22 +604,54 @@ const SetFacilityStructure2 = () => {
           setFormTypeId(undefined);
           setLabels([]);
           setEditDia(false);
+
+          setSelectedFacilityType(undefined);
         }}
       >
-        <FormGenerateStructure
-          selectedFacilityType={selectedFacilityType}
-          realm={realm}
-          uploadFiles={uploadFiles}
-          setUploadFiles={setUploadFiles}
-          deleteFiles={deleteFiles}
-          setDeleteFiles={setDeleteFiles}
-          addItem={(data: any) => addItem(selectedNodeKey, data)}
-          editItem={(data: any) => editItem(selectedNodeKey, data)}
-          setSubmitted={setSubmitted}
-          submitted={submitted}
-          selectedNodeKey={selectedNodeKey}
-          editDia={editDia}
-        />
+
+        {/* <div className="field">
+          <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
+          <InputText
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            style={{ width: '100%' }}
+          />
+        </div>
+        <div className="field">
+          <h5 style={{ marginBottom: "0.5em" }}>Facility Type</h5>
+          <TreeSelect
+            value={formTypeId}
+            options={formData}
+            onChange={(e) => {
+              setFormTypeId(e.value);
+              let nodeKey: any = e.value;
+              FormTypeService.nodeInfo(nodeKey)
+                .then((res) => {
+                  console.log(res.data);
+                  setLabels([res.data.properties.name])
+                })
+                .catch((err) => {
+                  toast.current.show({
+                    severity: "error",
+                    summary: "Error",
+                    detail: err.response ? err.response.data.message : err.message,
+                    life: 2000,
+                  });
+                });
+            }}
+            filter
+            placeholder="Select Type"
+            style={{ width: '100%' }}
+          />
+        </div>
+        <div className="field structureChips">
+          <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
+          <Chips value={tag} onChange={(e) => setTag(e.value)} style={{ width: '100%' }} />
+        </div>
+        <div className="field flex">
+          <h5 style={{ marginBottom: "0.5em" }}>Is Active</h5>
+          <Checkbox className="ml-3" onChange={e => setIsActive(e.checked)} checked={isActive}></Checkbox>
+        </div> */}
       </Dialog>
 
       <Dialog
@@ -730,17 +667,12 @@ const SetFacilityStructure2 = () => {
         <FormGenerate nodeKey={generateNodeKey} formKey={generateFormTypeKey} nodeName={generateNodeName} setFormDia={setFormDia} />
 
       </Dialog>
-      <h1>Edit Facility Structure</h1>
+      <h1>Space Join</h1>
       <div className="field">
         <Tree
           loading={loading}
           value={data}
           dragdropScope="-"
-          contextMenuSelectionKey={selectedNodeKey ? selectedNodeKey : ""}
-          onContextMenuSelectionChange={(event: any) =>
-            setSelectedNodeKey(event.value)
-          }
-          onContextMenu={(event) => cm.current.show(event.originalEvent)}
           onDragDrop={(event: any) => {
             console.log(event);
             if (event.value.length > 1) {
@@ -755,90 +687,27 @@ const SetFacilityStructure2 = () => {
             dragConfirm(event.dragNode._id.low, event.dropNode._id.low)
           }}
           filter
-          filterBy="name,code,Name,Description"
+          filterBy="name,code"
           filterPlaceholder="Search"
-          nodeTemplate={(data: Node, options) => <span className="flex align-items-center font-bold">{data.label} {
-            <>
-              <span className="ml-4 ">
-                <Button
-                  icon="pi pi-plus" className="p-button-rounded p-button-secondary p-button-text" aria-label="Add Item"
-                  onClick={() => {
-                    setSelectedNodeKey(data.key);
-                    setAddDia(true)
-                  }
-                  }
-                  title="Add Item"
-                />
-                <Button
-                  icon="pi pi-pencil" className="p-button-rounded p-button-secondary p-button-text" aria-label="Edit Item"
-                  onClick={() => {
-                    setSelectedNodeKey(data.key);
-                    let dataKey: any = data.key
-
-                    getNodeInfoAndEdit(dataKey)
-                    setEditDia(true);
-                    setDeleteFiles([]);
-                  }
-                  }
-                  title="Edit Item"
-                />
-                <Button
-                  icon="pi pi-trash" className="p-button-rounded p-button-secondary p-button-text" aria-label="Delete"
-                  onClick={() => {
-                    setSelectedNodeKey(data.key);
-                    setDelDia(true)
-                  }}
-                  title="Delete Item"
-                />
-                {/* {
-                  data.hasType &&  */}
-                <Button
-                  icon="pi pi-book" className="p-button-rounded p-button-secondary p-button-text" aria-label="Edit Form"
-                  // onClick={(e) => navigate(`/formgenerate/${data.key}?id=${data._id.low}`, 
-                  // {
-                  //   state: {
-                  //     data: data,
-                  //     rootId: structure.root._id.low,
-                  //   }
-                  // }
-                  // )} 
-                  // onClick={() => window.open(`http://localhost:3001/formgenerate/${data._id.low}?formType=${data.labels}?className=${data.className}`, '_blank')}
-                  // onClick={(e) => navigate(`/formgenerate/${data._id.low}?typeKey=${data.formTypeId}`)}
-                  onClick={() => {
-                    console.log(data);
-                    setGenerateNodeKey(data.key);
-                    setGenerateFormTypeKey(data.formTypeId);
-                    setGenerateNodeName(data.label);
-                    setFormDia(true)
-                  }}
-
-
-                  title="Edit Form"
-                />
-                {/* <Button
-                  icon="pi pi-book" className="p-button-rounded p-button-secondary p-button-text" aria-label="Edit Form"
-                  // onClick={(e) => navigate(`/formgenerate/${data.key}?id=${data._id.low}`, 
-                  // {
-                  //   state: {
-                  //     data: data,
-                  //     rootId: structure.root._id.low,
-                  //   }
-                  // }
-                  // )} 
-                  onClick={(e) => console.log(data)}
-
-                  title="Edit Form"
-                /> */}
-
-              </span>
-            </>
+          selectionMode="checkbox"
+          onSelectionChange={(event: any) => {
+            setSelectedNodeKey(event.value);
+            setSelectedKeys(Object.keys(event.value));
           }
-          </span>}
+          }
+          selectionKeys={selectedNodeKey}
+          propagateSelectionUp={false}
+          className="font-bold"
         />
       </div>
 
+      {/* <Button
+          label="Click"
+          onClick={() => console.log(selectedKeys)}
+          autoFocus
+        /> */}
     </div>
   );
 };
 
-export default SetFacilityStructure2;
+export default SetSpaceJoin;

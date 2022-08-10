@@ -41,6 +41,10 @@ const findOne = async (id: string) => {
     return axios.get(url + "/FacilityStructure/" + id);
 };
 
+const findStuctureFirstLevel = async (realm: string) => {
+    return axios.get(url + "/structurefirstlevel/nodes/FacilityStructure/" + realm);
+};
+
 const findAssets = async (key: string) => {
     return axios.get(url2 + key);
 };
@@ -49,8 +53,8 @@ const create = async (structure: StructureInterface) => {
     return axios.post(url, structure);
 };
 
-const createStructure = async (key:string,structure:any) => {
-    return axios.post(url + "/" + key,structure);
+const createStructure = async (key: string, structure: any) => {
+    return axios.post(url + "/" + key, structure);
 };
 
 const createAsset = async (key: string, asset: AssetInterface) => {
@@ -91,6 +95,21 @@ const getFacilityTypeProperties = async (
         second_child_node_name);
 };
 
-const service = { findAll, findOne, findAssets, create, createAsset, createForm, update, remove, relation, nodeInfo, getFacilityTypes, getFacilityTypeProperties, createStructure };
+const service = {
+    findAll,
+    findOne,
+    findAssets,
+    create,
+    createAsset,
+    createForm,
+    update,
+    remove,
+    relation,
+    nodeInfo,
+    getFacilityTypes,
+    getFacilityTypeProperties,
+    createStructure,
+    findStuctureFirstLevel
+};
 
 export default service;
