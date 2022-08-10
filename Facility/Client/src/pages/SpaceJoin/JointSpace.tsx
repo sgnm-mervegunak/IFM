@@ -164,7 +164,7 @@ const JointSpace = () => {
         className="datatable-responsive"
         // totalRecords={countClassifications}
         globalFilter={globalFilter}
-        emptyMessage="No classifications found."
+        emptyMessage="Joint Space not found"
         header={header}
         style={{ fontWeight: "bold" }}
         selectionMode="single"

@@ -101,7 +101,7 @@ const SpaceForm = ({
   const getClassificationSpace = async () => {
     await ClassificationsService.findAllActiveByLabel({
       realm: realm,
-      label: "OmniClass11",
+      label: "OmniClass13",
       language: "en",
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));

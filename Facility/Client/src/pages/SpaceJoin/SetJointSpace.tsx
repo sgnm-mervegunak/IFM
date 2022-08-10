@@ -18,7 +18,7 @@ import FacilityStructureService from "../../services/facilitystructure";
 import ClassificationsService from "../../services/classifications";
 import FormTypeService from "../../services/formType";
 import StructureWinformService from "../../services/structureWinform";
-import JointSpaceService from "../../services/jointspace";
+import JointSpaceService from "../../services/jointSpace";
 import { useAppSelector } from "../../app/hook";
 
 import axios from "axios";
@@ -47,6 +47,7 @@ interface Node {
   Name?: string;
   selectable?: boolean;
   NodeType?: string;
+  isBlocked?: boolean;
 }
 
 interface FormNode {
@@ -79,6 +80,7 @@ const SetJointSpace = () => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [selectedKeysName, setSelectedKeysName] = useState<string[]>([]);
   const [selectedNodeKey, setSelectedNodeKey] = useState<any>([]);
+  const [deleteNodeKey, setDeleteNodeKey] = useState<any>("");
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
   const [ArchitecturalName, setArchitecturalName] = useState<string>("");
@@ -128,7 +130,7 @@ const SetJointSpace = () => {
   };
 
   const getClassificationSpace = async () => {
-    await ClassificationsService.findAllActiveByLabel({ realm: realm, label: "OmniClass11", language: "en" }).then((res) => {
+    await ClassificationsService.findAllActiveByLabel({ realm: realm, label: "OmniClass13", language: "en" }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodesClassification(temp);
       setClassificationSpace(temp);
@@ -239,7 +241,7 @@ const SetJointSpace = () => {
       fixNodes(i.children)
       i.icon = "pi pi-fw pi-building";
       i.label = i.name || i.Name;
-      if (i.NodeType === "Space" || i.NodeType === "JointSpace") {
+      if ((i.NodeType === "Space" || i.NodeType === "JointSpace") && i.isBlocked !== true) {
         i.selectable = true;
       } else {
         i.selectable = false;
@@ -277,6 +279,9 @@ const SetJointSpace = () => {
         });
 
         getFacilityStructure();
+        setSelectedNodeKey([]);
+        setSelectedKeys([]);
+
       })
       .catch((err) => {
         toast.current.show({
@@ -286,14 +291,20 @@ const SetJointSpace = () => {
           life: 2000,
         });
       });
+      
 
 
-
+    setArchitecturalName("");
+    setArchitecturalCode("");
     setName("");
+    setCode("");
     setTag([]);
-    setFormTypeId(undefined);
+    setM2("");
+    setSpaceType(undefined);
+    setStatus(undefined);
+    setJointStartDate("");
+    setJointEndDate("");
     setAddDia(false);
-    setLabels([]);
   };
 
   const editItem = (key: string) => {
@@ -382,47 +393,17 @@ const SetJointSpace = () => {
   }
 
   const deleteItem = (key: string) => {
-    FacilityStructureService.nodeInfo(key)
-      .then((res) => {
-        if (res.data.properties.hasParent === false) {
-          FacilityStructureService.remove(res.data.id)
-            .then(() => {
-              toast.current.show({
-                severity: "success",
-                summary: "Success",
-                detail: "Structure Deleted",
-                life: 2000,
-              });
-              navigate("/facilitystructure")
-            })
-            .catch((err) => {
-              toast.current.show({
-                severity: "error",
-                summary: "Error",
-                detail: err.response ? err.response.data.message : err.message,
-                life: 2000,
-              });
-            });
-        } else {
-          FacilityStructureService.remove(res.data.id)
-            .then(() => {
-              toast.current.show({
-                severity: "success",
-                summary: "Success",
-                detail: "Structure Deleted",
-                life: 2000,
-              });
-              getFacilityStructure();
-            })
-            .catch((err) => {
-              toast.current.show({
-                severity: "error",
-                summary: "Error",
-                detail: err.response ? err.response.data.message : err.message,
-                life: 2000,
-              });
-            });
-        }
+    JointSpaceService.remove(key)
+      .then(() => {
+        toast.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: "Joint Space Deleted",
+          life: 2000,
+        });
+        getFacilityStructure();
+        setSelectedNodeKey([]);
+        setSelectedKeys([]);
       })
       .catch((err) => {
         toast.current.show({
@@ -565,7 +546,7 @@ const SetJointSpace = () => {
         message="Do you want to delete?"
         header="Delete Confirmation"
         icon="pi pi-exclamation-triangle"
-      // accept={() => deleteItem(selectedNodeKey)}
+        accept={() => deleteItem(deleteNodeKey)}
       />
       <Dialog
         header="Add New Item"
@@ -839,6 +820,27 @@ const SetJointSpace = () => {
           selectionKeys={selectedNodeKey}
           propagateSelectionUp={false}
           className="font-bold"
+          nodeTemplate={(data: Node, options) => <span className="flex align-items-center font-bold">{data.label} {
+            <>
+              <span className="ml-4 ">
+
+                {
+                  data.NodeType === "JointSpace" ? <Button
+                    icon="pi pi-trash" className="p-button-rounded p-button-secondary p-button-text" aria-label="Delete"
+                    onClick={() => {
+                      setDeleteNodeKey(data.key);
+                      setDelDia(true)
+                    }}
+                    title="Delete Item"
+                  />
+                    : null
+                }
+
+
+              </span>
+            </>
+          }
+          </span>}
         />
       </div>
 
