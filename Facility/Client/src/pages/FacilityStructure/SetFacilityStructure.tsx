@@ -843,7 +843,7 @@ const SetFacilityStructure = () => {
                   onClick={() => {
                     setSelectedNodeKey(data.key);
                     let dataKey: any = data.key
-
+                    setIsUpdate(true);
                     getNodeInfoAndEdit(dataKey)
                     setEditDia(true);
                   }
