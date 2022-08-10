@@ -41,6 +41,7 @@ export class JointSpaceRepository implements GeciciInterface<any> {
         if (!node.records.length) {
           throw new HttpException('Node not found', HttpStatus.NOT_FOUND);
         }
+        //checkt type and has active merged relationship
         if (node.records[0]['_fields'][0].labels[0] === 'Space') {
           const hasMergedRelation = await this.neo4jService.read(
             `match(n{key:$key}) match(p:JointSpace {isActive:true}) match(n)-[:MERGED]->(p) return p`,
@@ -53,6 +54,7 @@ export class JointSpaceRepository implements GeciciInterface<any> {
           }
         }
 
+        //check type and has active merged relationship and updateJointSpace property
         if (node.records[0]['_fields'][0].labels[0] === 'JointSpace') {
           const mergedNodes = await this.neo4jService.read(
             `match(n {key:$key}) match(p {isActive:true,isDeleted:false}) match(p)-[:MERGED]->(n) return p`,
@@ -83,6 +85,28 @@ export class JointSpaceRepository implements GeciciInterface<any> {
         throw new HttpException('Building must be same', HttpStatus.BAD_REQUEST);
       }
     });
+
+    await Promise.all(
+      nodeKeys.map(async (element) => {
+        const node = await this.neo4jService.read(
+          `match(n{isDeleted:false,key:$key,isActive:true }) where n:Space or n:JointSpace return n`,
+          {
+            key: element,
+          },
+        );
+        if (!node.records.length) {
+          throw new HttpException('Node not found', HttpStatus.NOT_FOUND);
+        }
+
+        //check type and has active merged relationship and updateJointSpace property
+        if (node.records[0]['_fields'][0].labels[0] === 'JointSpace') {
+          const updateJointSpace = await this.neo4jService.updateById(node.records[0]['_fields'][0].identity.low, {
+            isActive: false,
+            jointEndDate: moment().format('YYYY-MM-DD HH:mm:ss'),
+          });
+        }
+      }),
+    );
 
     //get building node Jointspaces
     const jointSpacesNode = await this.neo4jService.read(
@@ -163,50 +187,23 @@ export class JointSpaceRepository implements GeciciInterface<any> {
     return result;
   }
 
-  async delete(_id: string) {
-    try {
-      // const node = await this.neo4jService.read(
-      //   `match(n {isDeleted:false}) where id(n)=$id and not n:Virtual return n`,
-      //   { id: parseInt(_id) },
-      // );
-      const node = await this.neo4jService.findByIdWithoutVirtualNode(_id);
-      // if (!node.records[0]) {
-      //   throw new HttpException({ code: 5005 }, 404);
-      // }
-      await this.neo4jService.getParentById(_id);
-      let deletedNode;
-
-      const hasChildren = await this.neo4jService.findChildrenById(_id);
-
-      if (hasChildren['records'].length == 0) {
-        const hasAssetRelation = await this.neo4jService.findNodesWithRelationNameById(_id, 'HAS');
-        console.log(hasAssetRelation);
-        if (hasAssetRelation.length > 0) {
-          await this.kafkaService.producerSendMessage(
-            'deleteStructure',
-            //JSON.stringify({ referenceKey: node.records[0]['_fields'][0].properties.key }),
-            JSON.stringify({ referenceKey: node.properties.key }),
-          );
-        }
-
-        deletedNode = await this.neo4jService.delete(_id);
-        if (!deletedNode) {
-          throw new FacilityStructureNotFountException(_id);
-        }
-      }
-
-      return deletedNode;
-    } catch (error) {
-      console.log(error);
-      const { code, message } = error.response;
-      if (code === CustomNeo4jError.HAS_CHILDREN) {
-        nodeHasChildException(_id);
-      } else if (code === 5005) {
-        FacilityStructureNotFountException(_id);
-      } else {
-        throw new HttpException(message, code);
-      }
+  async delete(key: string) {
+    const node = await this.neo4jService.read(
+      `match(n{isDeleted:false,key:$key,isActive:true }) where n:JointSpace return n`,
+      {
+        key,
+      },
+    );
+    if (!node.records.length) {
+      throw new HttpException('Node not found', HttpStatus.NOT_FOUND);
     }
+
+    //check type and has active merged relationship and updateJointSpace property
+
+    const updateJointSpace = await this.neo4jService.updateById(node.records[0]['_fields'][0].identity.low, {
+      isActive: false,
+      jointEndDate: moment().format('YYYY-MM-DD HH:mm:ss'),
+    });
   }
 
   async changeNodeBranch(_id: string, _target_parent_id: string) {

@@ -39,10 +39,10 @@ export class JointSpaceController {
     return this.jointSpaceService.findOneNode(key);
   }
 
-  @Delete(':id')
+  @Delete(':key')
   @Unprotected()
-  remove(@Param('id') id: string) {
-    return this.jointSpaceService.remove(id);
+  remove(@Param('key') key: string) {
+    return this.jointSpaceService.remove(key);
   }
   @Unprotected()
   @Post('/relation/:id/:target_parent_id')
@@ -68,10 +68,10 @@ export class JointSpaceController {
     return this.jointSpaceService.findChildrenByFacilityTypeNode(language, realm, typename);
   }
 
-  @Get(':label/:realm')
+  @Get(':key/:realm')
   @Unprotected()
   @NoCache()
-  findOne(@Param('label') label: string, @Param('realm') realm: string) {
+  findOne(@Param('key') label: string, @Param('realm') realm: string) {
     return this.jointSpaceService.findOne(label, realm);
   }
 }
