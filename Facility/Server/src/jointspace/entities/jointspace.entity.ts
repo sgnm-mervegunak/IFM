@@ -23,4 +23,6 @@ export class JointSpace extends BaseGraphObject {
   jointEndDate: string;
 
   nodeKeys: [];
+
+  NodeType: string = JointSpace.name;
 }
