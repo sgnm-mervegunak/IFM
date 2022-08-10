@@ -59,6 +59,8 @@ export class JointSpaceRepository implements GeciciInterface<any> {
           }
         }
 
+        console.log(nodes);
+
         //check type and has active merged relationship and updateJointSpace property
         if (node.records[0]['_fields'][0].labels[0] === 'JointSpace') {
           const mergedNodes = await this.neo4jService.read(
@@ -125,17 +127,9 @@ export class JointSpaceRepository implements GeciciInterface<any> {
       jointSpacesNode.records[0]['_fields'][0].identity.low,
     );
     nodes.map(async (element) => {
-      const node = await this.neo4jService.read(
-        `match(n{isDeleted:false,key:$key }) where n:Space or n:JointSpace return n`,
-        {
-          key: element.properties.key,
-        },
-      );
-      if (!node.records.length) {
-        throw new HttpException('Node not found', HttpStatus.NOT_FOUND);
-      }
+      await this.neo4jService.updateById(element.identity.low, { isBlocked: true });
       await this.neo4jService.addRelationWithRelationName(
-        node.records[0]['_fields'][0].identity.low,
+        element.identity.low,
         jointSpace.identity.low,
         RelationName.MERGED,
       );
