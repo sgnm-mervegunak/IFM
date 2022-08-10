@@ -44,29 +44,6 @@ export class JointSpaceController {
   remove(@Param('key') key: string) {
     return this.jointSpaceService.remove(key);
   }
-  @Unprotected()
-  @Post('/relation/:id/:target_parent_id')
-  changeNodeBranch(@Param('id') id: string, @Param('target_parent_id') target_parent_id: string) {
-    return this.jointSpaceService.changeNodeBranch(id, target_parent_id);
-  }
-
-  @Get('/structuretypes/:label/:realm')
-  @Unprotected()
-  @NoCache()
-  findOneFirstLevel(@Param('label') label: string, @Param('realm') realm: string) {
-    return this.jointSpaceService.findOneFirstLevel(label, realm);
-  }
-
-  @Get('/structuretypes/properties/:language/:realm/:typename')
-  @Unprotected()
-  @NoCache()
-  findChildrenByFacilityTypeNode(
-    @Param('language') language: string,
-    @Param('realm') realm: string,
-    @Param('typename') typename: string,
-  ) {
-    return this.jointSpaceService.findChildrenByFacilityTypeNode(language, realm, typename);
-  }
 
   @Get(':key/:realm')
   @Unprotected()

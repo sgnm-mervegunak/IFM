@@ -1,8 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { FacilityStructureNotFountException } from '../../common/notFoundExceptions/not.found.exception';
-import { NestKafkaService, nodeHasChildException } from 'ifmcommon';
-import { Neo4jService, assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError } from 'sgnm-neo4j/dist';
-import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
+import { NestKafkaService } from 'ifmcommon';
+import { Neo4jService, assignDtoPropToEntity, createDynamicCyperObject } from 'sgnm-neo4j/dist';
 import { RelationName } from 'src/common/const/relation.name.enum';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
 import { CreateJointSpaceDto } from '../dto/create.jointspace.dto';
@@ -12,6 +11,12 @@ import * as moment from 'moment';
 @Injectable()
 export class JointSpaceRepository implements GeciciInterface<any> {
   constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) {}
+  changeNodeBranch(id: string, target_parent_id: string) {
+    throw new Error('Method not implemented.');
+  }
+  findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) {
+    throw new Error('Method not implemented.');
+  }
 
   async findOneByRealm(label: string, realm: string) {
     let node = await this.findByRealmWithTreeStructure(label, realm);
@@ -64,11 +69,6 @@ export class JointSpaceRepository implements GeciciInterface<any> {
           mergedNodes.records.map((mergedNode) => {
             nodes.push(mergedNode['_fields'][0]);
           });
-
-          const updateJointSpace = await this.neo4jService.updateById(node.records[0]['_fields'][0].identity.low, {
-            isActive: false,
-            jointEndDate: moment().format('YYYY-MM-DD HH:mm:ss'),
-          });
         }
         const parentStructure = await this.neo4jService.read(
           `match (n:Building) match(p {key:$key}) match(n)-[r:PARENT_OF*]->(p) return n`,
@@ -100,8 +100,9 @@ export class JointSpaceRepository implements GeciciInterface<any> {
 
         //check type and has active merged relationship and updateJointSpace property
         if (node.records[0]['_fields'][0].labels[0] === 'JointSpace') {
-          const updateJointSpace = await this.neo4jService.updateById(node.records[0]['_fields'][0].identity.low, {
+          await this.neo4jService.updateById(node.records[0]['_fields'][0].identity.low, {
             isActive: false,
+            isDeleted: true,
             jointEndDate: moment().format('YYYY-MM-DD HH:mm:ss'),
           });
         }
@@ -133,34 +134,15 @@ export class JointSpaceRepository implements GeciciInterface<any> {
       if (!node.records.length) {
         throw new HttpException('Node not found', HttpStatus.NOT_FOUND);
       }
-      const relation = await this.neo4jService.addRelationWithRelationName(
+      await this.neo4jService.addRelationWithRelationName(
         node.records[0]['_fields'][0].identity.low,
         jointSpace.identity.low,
         RelationName.MERGED,
       );
       //   const isInJointSpace = await this.neo4jService.read(`match(n{isDeleted:false,key:$key }) where n:JointSpace return n`, {})
-
-      return await node.records[0]['_fields'][0];
     });
 
-    return 'as';
-
-    // const facilityStructure = new FacilityStructure();
-    // const facilityStructureObject = assignDtoPropToEntity(facilityStructure, createFacilityStructureDto);
-
-    // let value;
-    // if (createFacilityStructureDto['labels']) {
-    //   createFacilityStructureDto.labels.push('FacilityStructure');
-    //   value = await this.neo4jService.createNode(facilityStructureObject, createFacilityStructureDto.labels);
-    // } else {
-    //   value = await this.neo4jService.createNode(facilityStructureObject, ['FacilityStructure']);
-    // }
-    // value['properties']['id'] = value['identity'].low;
-    // const result = { id: value['identity'].low, labels: value['labels'], properties: value['properties'] };
-    // if (createFacilityStructureDto['parentId']) {
-    //   await this.neo4jService.addRelations(result['id'], createFacilityStructureDto['parentId']);
-    // }
-    // return result;
+    return jointSpace.properties;
   }
   ///////////////////////// Static DTO ////////////////////////////////////////////////////////////////////
   async update(_id: string, updateFacilityStructureDto) {
@@ -200,31 +182,13 @@ export class JointSpaceRepository implements GeciciInterface<any> {
 
     //check type and has active merged relationship and updateJointSpace property
 
-    const updateJointSpace = await this.neo4jService.updateById(node.records[0]['_fields'][0].identity.low, {
+    const deletedNode = await this.neo4jService.updateById(node.records[0]['_fields'][0].identity.low, {
       isActive: false,
+      isDeleted: true,
       jointEndDate: moment().format('YYYY-MM-DD HH:mm:ss'),
     });
-  }
 
-  async changeNodeBranch(_id: string, _target_parent_id: string) {
-    try {
-      await this.neo4jService.deleteRelations(_id);
-      await this.neo4jService.addRelations(_id, _target_parent_id);
-    } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
-
-  async deleteRelations(_id: string) {
-    await this.neo4jService.deleteRelations(_id);
-  }
-
-  async addRelations(_id: string, _target_parent_id: string) {
-    try {
-      await this.neo4jService.addRelations(_id, _target_parent_id);
-    } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return deletedNode.properties;
   }
 
   async findOneNodeByKey(key: string) {
@@ -243,33 +207,6 @@ export class JointSpaceRepository implements GeciciInterface<any> {
     node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
 
     return node['root']['children'];
-  }
-
-  async findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) {
-    let node = await this.neo4jService.findChildNodesOfFirstParentNodeByLabelsRealmAndName(
-      'FacilityTypes_' + language,
-      realm,
-      'FacilityType',
-      typename,
-      'FacilityTypeProperty',
-      RelationName.PARENT_OF,
-      RelationDirection.RIGHT,
-    );
-
-    if (!node) {
-      throw new FacilityStructureNotFountException(realm); //DEĞİŞECEK
-    }
-    if (node['records'] && node['records'][0]) {
-      let propertyList = [];
-      for (let i = 0; i < node['records'].length; i++) {
-        let property = node['records'][i];
-        property['_fields'][0]['properties']._id = property['_fields'][0]['identity']['low'];
-        propertyList.push(property['_fields'][0]['properties']);
-      }
-      return propertyList;
-    }
-
-    return [];
   }
 
   //-------------------------------------------------------neo4j-------------------------------------------------------

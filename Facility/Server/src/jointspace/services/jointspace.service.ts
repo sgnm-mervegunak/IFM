@@ -27,19 +27,11 @@ export class JointSpaceService {
     return this.jointSpaceRepository.delete(id);
   }
 
-  async changeNodeBranch(id: string, target_parent_id: string) {
-    return await this.jointSpaceRepository.changeNodeBranch(id, target_parent_id);
-  }
-
   findOneFirstLevel(label: string, realm: string) {
     return this.jointSpaceRepository.findOneFirstLevelByRealm(label, realm);
   }
 
-  findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) {
-    return this.jointSpaceRepository.findChildrenByFacilityTypeNode(language, realm, typename);
-  }
-
-  findOne(label: string, realm: string) {
-    return this.jointSpaceRepository.findOneByRealm(label, realm);
+  findOne(key: string, realm: string) {
+    return this.jointSpaceRepository.findOneByRealm(key, realm);
   }
 }
