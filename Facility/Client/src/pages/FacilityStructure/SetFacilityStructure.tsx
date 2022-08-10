@@ -46,6 +46,8 @@ interface Node {
   parentId?: string;
   className?: string;
   Name?: string;
+  Description?: string;
+  Tag?: string[];
 }
 
 interface FormNode {
@@ -187,6 +189,8 @@ const SetFacilityStructure = () => {
 
   const getFacilityStructure = () => {
     FacilityStructureService.findOne(realm).then((res) => {
+      console.log(res.data);
+
 
       if (!res.data.root.children) {
         setData([res.data.root.properties] || []);
@@ -824,7 +828,7 @@ const SetFacilityStructure = () => {
             dragConfirm(event.dragNode._id.low, event.dropNode._id.low)
           }}
           filter
-          filterBy="name,code"
+          filterBy="name, code, Name"
           filterPlaceholder="Search"
           nodeTemplate={(data: Node, options) => <span className="flex align-items-center font-bold">{data.label} {
             <>

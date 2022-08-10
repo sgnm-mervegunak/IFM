@@ -40,7 +40,7 @@ interface Node {
 }
 
 
-const SpaceJoin = () => {
+const JointSpace = () => {
 
 
   const navigate = useNavigate();
@@ -117,7 +117,7 @@ const SpaceJoin = () => {
 
   const header = (
     <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-      <h5 className="m-0">Space Join</h5>
+      <h3 className="m-0">Joint Space</h3>
       <span className="block mt-2 md:mt-0">
         <InputText
           type="search"
@@ -169,7 +169,7 @@ const SpaceJoin = () => {
         style={{ fontWeight: "bold" }}
         selectionMode="single"
         onSelectionChange={(e) => {
-          navigate("/spacejoin/" + e.value.key);
+          navigate("/jointspace/" + e.value.key);
           console.log(e.value);
           
         }}
@@ -218,4 +218,4 @@ const SpaceJoin = () => {
   );
 };
 
-export default SpaceJoin;
+export default JointSpace;

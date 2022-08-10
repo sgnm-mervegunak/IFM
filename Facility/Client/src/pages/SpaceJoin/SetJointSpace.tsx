@@ -75,7 +75,7 @@ interface FormNode {
   icon?: string;
 }
 
-const SetSpaceJoin = () => {
+const SetJointSpace = () => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [selectedKeysName, setSelectedKeysName] = useState<string[]>([]);
   const [selectedNodeKey, setSelectedNodeKey] = useState<any>([]);
@@ -239,7 +239,7 @@ const SetSpaceJoin = () => {
       fixNodes(i.children)
       i.icon = "pi pi-fw pi-building";
       i.label = i.name || i.Name;
-      if (i.NodeType === "Space") {
+      if (i.NodeType === "Space" || i.NodeType === "JointSpace") {
         i.selectable = true;
       } else {
         i.selectable = false;
@@ -265,7 +265,7 @@ const SetSpaceJoin = () => {
       nodeKeys: selectedKeys
     };
     console.log(newNode);
-    
+
 
     JointSpaceService.createJointSpace(newNode)
       .then((res) => {
@@ -793,7 +793,7 @@ const SetSpaceJoin = () => {
         <FormGenerate nodeKey={generateNodeKey} formKey={generateFormTypeKey} nodeName={generateNodeName} setFormDia={setFormDia} />
 
       </Dialog>
-      <h3>Space Join</h3>
+      <h3>Joint Space</h3>
       <div>
         <span style={{ fontWeight: "bold" }}>Selected Spaces:</span>{` ${selectedKeys} `}
 
@@ -850,4 +850,4 @@ const SetSpaceJoin = () => {
   );
 };
 
-export default SetSpaceJoin;
+export default SetJointSpace;
