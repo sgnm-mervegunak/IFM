@@ -828,7 +828,7 @@ const SetFacilityStructure = () => {
             dragConfirm(event.dragNode._id.low, event.dropNode._id.low)
           }}
           filter
-          filterBy="name, code, Name"
+          filterBy="name, code, Name,Description,Tag"
           filterPlaceholder="Search"
           nodeTemplate={(data: Node, options) => <span className="flex align-items-center font-bold">{data.label} {
             <>

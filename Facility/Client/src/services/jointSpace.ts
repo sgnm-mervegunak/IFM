@@ -24,9 +24,14 @@ const createJointSpace = async (jointData: JointSpaceInterface) => {
     return axios.post(url, jointData);
 };
 
+const remove = async (key: string) => {
+    return axios.delete(url + key);
+};
+
 const service = {
     findBuildingWithKey,
-    createJointSpace
+    createJointSpace,
+    remove
 };
 
 export default service;
