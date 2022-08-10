@@ -146,6 +146,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     const facilityTypesNode5 = await this.neo4jService.createNode({
       canDelete: true,
       isDeleted: false,
+      isBlocked: false,
       name: 'Space',
       isActive: true,
       canDisplay: true,
@@ -186,7 +187,6 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     const allowedForFloorStructureSpace=await this.neo4jService.createNode({
       canDelete: false,
       isDeleted: false,
-      isBlocked: false,
       name: 'Space',
       isActive: true,
       canDisplay: false,
