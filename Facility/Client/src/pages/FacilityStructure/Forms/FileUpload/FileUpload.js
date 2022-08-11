@@ -119,7 +119,7 @@ const FileUploadComponent = ({
                   main={item.main}
                   isDocument={isDocument}
                   isImage={isImage}
-                  delete={() => Delete(index)}
+                  deleteFunc={() => Delete(index)}
                   setMain={() => SetMain(index)}
                 />
               ))
@@ -134,7 +134,7 @@ const FileUploadComponent = ({
               main={item.main}
               isDocument={isDocument}
               isImage={isImage}
-              delete={() => Delete(index)}
+              deleteFunc={() => Delete(index)}
               setMain={() => SetMain(index)}
             />
           ))}

@@ -24,6 +24,7 @@ import BuildingForm from "./Forms/BuildingForm";
 import BlockForm from "./Forms/BlockForm";
 import FloorForm from "./Forms/FloorForm";
 import SpaceForm from "./Forms/SpaceForm";
+import DisplayNode from "./Display/DisplayNode";
 
 interface Node {
   cantDeleted: boolean;
@@ -102,6 +103,8 @@ const SetFacilityStructure = () => {
   const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
+  const [display,setDisplay] = useState(false);
+  const [displayKey,setDisplayKey] = useState("");
 
   useEffect(() => {
     FacilityStructureService.getFacilityTypes("FacilityTypes_EN", realm)
@@ -183,6 +186,14 @@ const SetFacilityStructure = () => {
       icon: "pi pi-trash",
       command: () => {
         setDelDia(true);
+      },
+    },
+    {
+      label: "Display",
+      icon: "pi pi-eye",
+      command: () => {
+        setDisplay(true);
+        setDisplayKey(selectedNodeKey);
       },
     },
   ];
@@ -812,6 +823,20 @@ const SetFacilityStructure = () => {
         <FormGenerate nodeKey={generateNodeKey} formKey={generateFormTypeKey} nodeName={generateNodeName} setFormDia={setFormDia} />
 
       </Dialog>
+      <Dialog
+        header="Structure Detail"
+        visible={display}
+        position={"right"}
+        modal={false}
+        style={{ width: "30vw" }}
+        onHide={() => {
+          setDisplay(false)
+          setDisplayKey("")
+        }}
+        resizable
+      >
+        <DisplayNode displayKey={displayKey}/>
+      </Dialog>
       <h1>Edit Facility Structure</h1>
       <div className="field">
         <Tree
@@ -896,6 +921,17 @@ const SetFacilityStructure = () => {
 
                   title="Edit Form"
                 />
+                <Button
+                      icon="pi pi-eye"
+                      className="p-button-rounded p-button-secondary p-button-text"
+                      aria-label="Display Item"
+                      onClick={() => {
+                        setSelectedNodeKey(data.key);
+                        setDisplay(true);
+                        setDisplayKey(data.key)
+                      }}
+                      title="Edit Item"
+                    />
                 {/* <Button
                   icon="pi pi-book" className="p-button-rounded p-button-secondary p-button-text" aria-label="Edit Form"
                   // onClick={(e) => navigate(`/formgenerate/${data.key}?id=${data._id.low}`, 

@@ -1,13 +1,13 @@
 import React from "react";
 import { Button } from "primereact/button";
 
-const FileItem = (props) => {
+const FileItem = ({name,url,isImage=false,deleteFunc = ()=>{},displayDelete=true,main=false}) => {
     return (
       <div className="flex align-items-center flex-wrap my-4">
         <div className="flex align-items-center" style={{ width: "40%" }}>
-          {props.isImage && <img alt={props.name} role="presentation" src={props.url} width={100} />}
+          {isImage && <img alt={name} role="presentation" src={url} width={100} />}
           <span className="flex flex-column text-left ml-3">
-            <a href={props.url}>{props.name}</a>
+            <a href={url}>{name}</a>
             {/* <small>{new Date().toLocaleDateString()}</small> */}
           </span>
         </div>
@@ -21,12 +21,12 @@ const FileItem = (props) => {
           }
           onClick={props.setMain}
         />} */}
-        <Button
+        {displayDelete && <Button
           type="button"
           icon="pi pi-times"
           className="p-button-outlined p-button-rounded p-button-danger ml-auto"
-          onClick={props.delete}
-        />
+          onClick={deleteFunc}
+        />}
       </div>
     );
   };
