@@ -693,6 +693,15 @@ const SetFacilityStructure = () => {
           setSelectedFacilityType(undefined);
         }}
       >
+        <div className="field">
+          <h5 style={{ marginBottom: "0.5em" }}>Facility Type</h5>
+          <Dropdown
+            value={selectedFacilityType}
+            options={[selectedFacilityType]}
+            disabled
+            style={{ width: '100%' }}
+          />
+        </div>
         {selectedFacilityType === "Building" ? <BuildingForm
           selectedFacilityType={selectedFacilityType}
           submitted={submitted}
@@ -828,7 +837,7 @@ const SetFacilityStructure = () => {
             dragConfirm(event.dragNode._id.low, event.dropNode._id.low)
           }}
           filter
-          filterBy="name, code, Name,Description,Tag"
+          filterBy="label, name, Name,Description,Tag"
           filterPlaceholder="Search"
           nodeTemplate={(data: Node, options) => <span className="flex align-items-center font-bold">{data.label} {
             <>
