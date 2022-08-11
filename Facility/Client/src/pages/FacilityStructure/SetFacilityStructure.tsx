@@ -113,7 +113,7 @@ const SetFacilityStructure = () => {
           severity: "error",
           summary: "Error",
           detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
+          life: 4000,
         });
       });
   }, [])
@@ -156,7 +156,7 @@ const SetFacilityStructure = () => {
           severity: "error",
           summary: "Error",
           detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
+          life: 4000,
         });
       });
   }
@@ -211,7 +211,7 @@ const SetFacilityStructure = () => {
           severity: "error",
           summary: "Error",
           detail: "Facility Structure not found",
-          life: 3000,
+          life: 4000,
         });
         setTimeout(() => {
           navigate("/facility")
@@ -269,7 +269,7 @@ const SetFacilityStructure = () => {
               severity: "success",
               summary: "Successful",
               detail: "Structure Created",
-              life: 3000,
+              life: 4000,
             });
             let newForm: any = {};
             newForm = {
@@ -285,7 +285,7 @@ const SetFacilityStructure = () => {
               severity: "error",
               summary: "Error",
               detail: err.response ? err.response.data.message : err.message,
-              life: 2000,
+              life: 4000,
             });
           });
 
@@ -295,7 +295,7 @@ const SetFacilityStructure = () => {
           severity: "error",
           summary: "Error",
           detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
+          life: 4000,
         });
       });
     setName("");
@@ -362,7 +362,7 @@ const SetFacilityStructure = () => {
               severity: "success",
               summary: "Successful",
               detail: "Structure Updated",
-              life: 3000,
+              life: 4000,
             });
             getFacilityStructure();
           })
@@ -371,7 +371,7 @@ const SetFacilityStructure = () => {
               severity: "error",
               summary: "Error",
               detail: err.response ? err.response.data.message : err.message,
-              life: 2000,
+              life: 4000,
             });
           });
       })
@@ -380,7 +380,7 @@ const SetFacilityStructure = () => {
           severity: "error",
           summary: "Error",
           detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
+          life: 4000,
         });
       });
     setName("");
@@ -400,7 +400,7 @@ const SetFacilityStructure = () => {
                 severity: "success",
                 summary: "Success",
                 detail: "Structure Deleted",
-                life: 2000,
+                life: 4000,
               });
               navigate("/facilitystructure")
             })
@@ -409,7 +409,7 @@ const SetFacilityStructure = () => {
                 severity: "error",
                 summary: "Error",
                 detail: err.response ? err.response.data.message : err.message,
-                life: 2000,
+                life: 4000,
               });
             });
         } else {
@@ -419,7 +419,7 @@ const SetFacilityStructure = () => {
                 severity: "success",
                 summary: "Success",
                 detail: "Structure Deleted",
-                life: 2000,
+                life: 4000,
               });
               getFacilityStructure();
             })
@@ -428,7 +428,7 @@ const SetFacilityStructure = () => {
                 severity: "error",
                 summary: "Error",
                 detail: err.response ? err.response.data.message : err.message,
-                life: 2000,
+                life: 4000,
               });
             });
         }
@@ -438,7 +438,7 @@ const SetFacilityStructure = () => {
           severity: "error",
           summary: "Error",
           detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
+          life: 4000,
         });
       });
   };
@@ -454,7 +454,7 @@ const SetFacilityStructure = () => {
           severity: "error",
           summary: "Error",
           detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
+          life: 4000,
         });
       });
   };
@@ -474,7 +474,7 @@ const SetFacilityStructure = () => {
       severity: "success",
       summary: "Success Message",
       detail: detail,
-      life: 3000,
+      life: 4000,
     });
   };
 
@@ -830,7 +830,7 @@ const SetFacilityStructure = () => {
                 severity: "error",
                 summary: "Error",
                 detail: "You can't drag here.",
-                life: 1000,
+                life: 2000,
               });
               return
             }

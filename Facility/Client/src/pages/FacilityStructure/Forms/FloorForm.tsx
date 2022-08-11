@@ -91,7 +91,7 @@ const FloorForm = ({
                     severity: "error",
                     summary: "Error",
                     detail: err.response ? err.response.data.message : err.message,
-                    life: 2000,
+                    life: 4000,
                 });
             });
     }
@@ -116,7 +116,7 @@ const FloorForm = ({
                         severity: "success",
                         summary: "Successful",
                         detail: "Structure Created",
-                        life: 3000,
+                        life: 4000,
                     });
                     // let newForm: any = {};
                     // newForm = {
@@ -133,7 +133,7 @@ const FloorForm = ({
                         severity: "error",
                         summary: "Error",
                         detail: err.response ? err.response.data.message : err.message,
-                        life: 2000,
+                        life: 4000,
                     });
 
                 });
@@ -161,7 +161,7 @@ const FloorForm = ({
                         severity: "success",
                         summary: "Successful",
                         detail: "Structure Updated",
-                        life: 3000,
+                        life: 4000,
                     });
                     getFacilityStructure();
                 })
@@ -170,7 +170,7 @@ const FloorForm = ({
                         severity: "error",
                         summary: "Error",
                         detail: err.response ? err.response.data.message : err.message,
-                        life: 2000,
+                        life: 4000,
                     });
                 });
             setTimeout(() => {

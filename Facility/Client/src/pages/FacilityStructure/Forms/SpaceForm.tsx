@@ -159,7 +159,7 @@ const SpaceForm = ({
           severity: "error",
           summary: "Error",
           detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
+          life: 4000,
         });
       });
   };
@@ -203,7 +203,7 @@ const SpaceForm = ({
             severity: "success",
             summary: "Successful",
             detail: "Structure Created",
-            life: 3000,
+            life: 4000,
           });
           // let newForm: any = {};
           // newForm = {
@@ -239,7 +239,7 @@ const SpaceForm = ({
             severity: "error",
             summary: "Error",
             detail: err.response ? err.response.data.message : err.message,
-            life: 2000,
+            life: 4000,
           });
         });
 
@@ -269,7 +269,7 @@ const SpaceForm = ({
             severity: "success",
             summary: "Successful",
             detail: "Structure Updated",
-            life: 3000,
+            life: 4000,
           });
           // upload files
           let temp = {} as any
@@ -310,7 +310,7 @@ const SpaceForm = ({
             severity: "error",
             summary: "Error",
             detail: err.response ? err.response.data.message : err.message,
-            life: 2000,
+            life: 4000,
           });
         });
       setTimeout(() => {
