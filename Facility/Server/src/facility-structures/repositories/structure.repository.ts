@@ -17,7 +17,7 @@ import { FacilityInterface } from 'src/common/interface/facility.interface';
 import * as moment from 'moment';
 import { copyFile } from 'fs';
 import { JointSpaces } from '../entities/joint-spaces.entity';
-import { WrongFacilityStructureExceptions } from 'src/common/badRequestExceptions/bad.request.exception';
+import { WrongFacilityStructureExceptions, WrongFacilityStructurePropsExceptions } from 'src/common/badRequestExceptions/bad.request.exception';
 
 
 @Injectable()
@@ -243,7 +243,8 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     if (!node) {
       throw new FacilityStructureNotFountException(key);
     }
-
+  // delete  structureData['Description'];
+  // structureData['Description1']='deneme';
   //////////////////////////// Control of childnode type which will be added to parent node. /////////////////////////////////////////
 
    let structureRootNode;
@@ -292,7 +293,8 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
           }
         });
         if (i == 0) {
-          throw new HttpException('Yapıyı Bu şekilde oluşturamazsınız2',400)
+          throw new WrongFacilityStructurePropsExceptions(structureData['NodeType']);
+          //throw new HttpException('Yapıyı Bu şekilde oluşturamazsınız2',400)
         }
       }
     });

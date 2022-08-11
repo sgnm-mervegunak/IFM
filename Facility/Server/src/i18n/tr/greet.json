@@ -21,5 +21,6 @@
   "RELATION_NOT_FOUND": "relation bulunamadı",
   "CONTACT_NOT_FOUND": "#{id} no lu iletişim bilgisi bulunamadı",
   "HAS_RELATION": " {id} bu node zaten ilişkiye sahip",
-  "WRONG_FACILITY_STRUCTURE": "{node1}, {node2}'nin altına eklenemez."
+  "WRONG_FACILITY_STRUCTURE": "{node1}, {node2}'nin altına eklenemez.",
+  "WRONG_FACILITY_STRUCTURE_PROPS": "{node1} hatalı özellikler içermektedir."
 }

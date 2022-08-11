@@ -22,6 +22,7 @@
   "RELATION_NOT_FOUND": "relation not found",
   "CONTACT_NOT_FOUND": "contact not found (id=#{id})",
   "HAS_RELATION": " {id} this node already has relation",
-  "WRONG_FACILITY_STRUCTURE": "{node1} can not added under {node2} ."
+  "WRONG_FACILITY_STRUCTURE": "{node1} can not added under {node2} .",
+  "WRONG_FACILITY_STRUCTURE_PROPS": "{node1} contains incorrect properties."
   
 }
