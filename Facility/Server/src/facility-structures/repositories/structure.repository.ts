@@ -17,7 +17,7 @@ import { FacilityInterface } from 'src/common/interface/facility.interface';
 import * as moment from 'moment';
 import { copyFile } from 'fs';
 import { JointSpaces } from '../entities/joint-spaces.entity';
-import { WrongFacilityStructureExceptions, WrongFacilityStructurePropsExceptions } from 'src/common/badRequestExceptions/bad.request.exception';
+import { FacilityStructureDeleteExceptions, WrongFacilityStructureExceptions, WrongFacilityStructurePropsExceptions } from 'src/common/badRequestExceptions/bad.request.exception';
 
 
 @Injectable()
@@ -132,23 +132,21 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
 
 
   async delete(_id: string) {
-    try {
-      // const node = await this.neo4jService.read(
-      //   `match(n {isDeleted:false}) where id(n)=$id and not n:Virtual return n`,
-      //   { id: parseInt(_id) },
-      // );
+    //try {
+      
       const node = await this.neo4jService.findByIdWithoutVirtualNode(_id);
-      // if (!node.records[0]) {
-      //   throw new HttpException({ code: 5005 }, 404);
-      // }
+      
       await this.neo4jService.getParentById(_id);
       let deletedNode;
 
       const hasChildren = await this.neo4jService.findChildrenById(_id);
+      let canDelete = false;
+      if (node['properties']['NodeType']  == 'Building' && hasChildren['records'].length == 1 && hasChildren['records'][0]['_fields'][0]["labels"][0] == 'JointSpaces') {
+         canDelete = true;
+      }
 
-      if (hasChildren['records'].length == 0) {
+      if (hasChildren['records'].length == 0 || canDelete) {
         const hasAssetRelation = await this.neo4jService.findNodesWithRelationNameById(_id, 'HAS');
-        console.log(hasAssetRelation);
         if (hasAssetRelation.length > 0) {
           await this.kafkaService.producerSendMessage(
             'deleteStructure',
@@ -162,19 +160,21 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
           throw new FacilityStructureNotFountException(_id);
         }
       }
-
-      return deletedNode;
-    } catch (error) {
-      console.log(error);
-      const { code, message } = error.response;
-      if (code === CustomNeo4jError.HAS_CHILDREN) {
-        nodeHasChildException(_id);
-      } else if (code === 5005) {
-        FacilityStructureNotFountException(_id);
-      } else {
-        throw new HttpException(message, code);
+      else {
+        throw new FacilityStructureDeleteExceptions(node['properties']['NodeType']);
       }
-    }
+      return deletedNode;
+    // } catch (error) {
+    //   console.log(error);
+    //   const { code, message } = error.response;
+    //   if (code === CustomNeo4jError.HAS_CHILDREN) {
+    //     nodeHasChildException(_id);
+    //   } else if (code === 5005) {
+    //     FacilityStructureNotFountException(_id);
+    //   } else {
+    //     throw new HttpException(message, code);
+    //   }
+    //}
   }
 
   async changeNodeBranch(_id: string, _target_parent_id: string) {
@@ -243,8 +243,6 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     if (!node) {
       throw new FacilityStructureNotFountException(key);
     }
-  // delete  structureData['Description'];
-  // structureData['Description1']='deneme';
   //////////////////////////// Control of childnode type which will be added to parent node. /////////////////////////////////////////
 
    let structureRootNode;

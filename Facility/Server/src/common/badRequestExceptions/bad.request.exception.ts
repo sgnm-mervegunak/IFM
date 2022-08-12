@@ -7,3 +7,6 @@ export function WrongFacilityStructureExceptions(node1,node2) {
 export function WrongFacilityStructurePropsExceptions(node1) {
   throw new HttpException({ key: I18NEnums.WRONG_FACILITY_STRUCTURE_PROPS, args: { node1: node1} }, HttpStatus.NOT_FOUND);
 }
+export function FacilityStructureDeleteExceptions(node1) {
+  throw new HttpException({ key: I18NEnums.WRONG_FACILITY_STRUCTURE_DELETE, args: { node1: node1} }, HttpStatus.NOT_FOUND);
+}
