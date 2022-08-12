@@ -1,19 +1,59 @@
 // eslint-disable-next-line import/no-anonymous-default-export
 export default [
   {
-    label: 'Menu',
-    icon: 'pi pi-fw pi-home',
+    label: "Menu",
+    icon: "pi pi-fw pi-home",
     items: [
-      { label: 'Dashboard', icon: 'pi pi-fw pi-chart-bar', to: '/' },
-      { label: 'Facility', icon: 'pi pi-fw pi-pencil', to: '/facility' },
-      { label: 'Classifications', icon: 'pi pi-fw pi-align-left', to: '/classifications' },
-      { label: 'Facility Structure', icon: 'pi pi-fw pi-building', to: '/facilitystructure' },
-      { label: 'JointSpace', icon: 'pi pi-th-large', to: '/jointspace' },
-      { label: 'Contact', icon: 'pi pi-id-card', to: '/contact' },
-      { label: 'Structure-Asset', icon: 'pi pi-share-alt', to: '/structure-asset' },
-
+      { label: "Dashboard", icon: "pi pi-fw pi-chart-bar", to: "/" },
+      { label: "Facility", icon: "pi pi-fw pi-pencil", to: "/facility" },
+      {
+        label: "Classifications",
+        icon: "pi pi-fw pi-align-left",
+        to: "/classifications",
+      },
+      {
+        label: "Facility Structure",
+        icon: "pi pi-fw pi-building",
+        to: "/facilitystructure",
+      },
+      { label: "JointSpace", icon: "pi pi-th-large", to: "/jointspace" },
+      { label: "Contact", icon: "pi pi-id-card", to: "/contact" },
+      {
+        label: "Structure-Asset",
+        icon: "pi pi-share-alt",
+        to: "/structure-asset",
+      },
+      {
+        label: "Submenu 2",
+        icon: "pi pi-fw pi-align-left",
+        items: [
+          {
+            label: "Submenu 2.1",
+            icon: "pi pi-fw pi-align-left",
+            items: [
+              { label: "Submenu 2.1.1", icon: "pi pi-fw pi-align-left" },
+              { label: "Submenu 2.1.2", icon: "pi pi-fw pi-align-left" },
+            ],
+          },
+          {
+            label: "Submenu 2.2",
+            icon: "pi pi-fw pi-align-left",
+            items: [
+              {
+                label: "Submenu 2.2.1",
+                icon: "pi pi-fw pi-align-left",
+                items: [
+                  { label: "Submenu 2.2.1.1", icon: "pi pi-fw pi-align-left" },
+                  { label: "Submenu 2.2.1.2", icon: "pi pi-fw pi-align-left" },
+                ],
+              },
+            ],
+          },
+        ],
+      },
     ],
   },
+
   // {
   //     label: "Favorites", icon: "pi pi-fw pi-home",
   //     items: [
