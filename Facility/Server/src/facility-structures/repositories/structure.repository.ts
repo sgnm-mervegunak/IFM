@@ -106,7 +106,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
           }
         });
         if (i == 0) {
-          throw new HttpException('Yapıyı Bu şekilde oluşturamazsınız2',400)
+          throw new WrongFacilityStructurePropsExceptions(structureData['NodeType']);
         }
       }
     });
@@ -244,7 +244,6 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       throw new FacilityStructureNotFountException(key);
     }
   //////////////////////////// Control of childnode type which will be added to parent node. /////////////////////////////////////////
-
    let structureRootNode;
    if(node.labels[0]==='FacilityStructure'){
     structureRootNode=node

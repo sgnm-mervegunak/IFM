@@ -94,7 +94,7 @@ export class ClassificationRepository implements classificationInterface<Classif
       let deletedNode;
       const hasChildren = await this.neo4jService.findChildrenById(_id);
       if (hasChildren['records'].length == 0) {
-        deletedNode = await this.neo4jService.delete(_id);
+        deletedNode = await this.delete(_id);
       } else {
         throw new HttpException(has_children_error, 400);
       }
