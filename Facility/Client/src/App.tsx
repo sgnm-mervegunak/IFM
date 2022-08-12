@@ -2,14 +2,21 @@ import React from "react";
 import keycloak from "./keycloak";
 import { useAppDispatch } from "./app/hook";
 import { login } from "./features/auth/authSlice";
+import { setToast } from "./features/toast/toastSlice";
 import axios from "axios";
 // routes
 import Router from "./routes";
 //components
 import ScrollToTop from "./components/ScrollToTop";
+import { Toast } from "primereact/toast";
 
 function App() {
   const dispatch = useAppDispatch();
+  const toast = React.useRef(null);
+
+  React.useEffect(()=>{
+    dispatch(setToast(toast));
+  },[])
   keycloak
     .init({ onLoad: "login-required" })
     .success((auth) => {
@@ -62,6 +69,7 @@ function App() {
     });
   return (
     <>
+      <Toast ref={toast} position="top-right" baseZIndex={99999} />
       <ScrollToTop />
       <Router />
     </>
