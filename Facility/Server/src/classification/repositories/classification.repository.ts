@@ -108,6 +108,7 @@ export class ClassificationRepository implements classificationInterface<Classif
       }
     }
   }
+  
   async changeNodeBranch(_id: string, target_parent_id: string) {
     try {
       await this.neo4jService.deleteRelations(_id);
