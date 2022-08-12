@@ -85,6 +85,28 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
 
     await this.neo4jService.addRelations(facilityTypesNode.identity.low, typeNode.identity.low);
 
+    const facilityDocTypeNode1 = await this.neo4jService.createNode({
+      canDelete: true,
+      isDeleted: false,
+      name: 'Situation plan',
+      isActive: true,
+    });
+    const facilityDocTypeNode2 = await this.neo4jService.createNode({
+      canDelete: true,
+      isDeleted: false,
+      name: 'architectural drawings',
+      isActive: true,
+    });
+    const facilityDocTypeNode3 = await this.neo4jService.createNode({
+      canDelete: true,
+      isDeleted: false,
+      name: 'Other documents',
+      isActive: true,
+    });
+    await this.neo4jService.addRelations(facilityDocTypeNode1.identity.low, FacilityDocTypesNode.identity.low);
+    await this.neo4jService.addRelations(facilityDocTypeNode2.identity.low, FacilityDocTypesNode.identity.low);
+    await this.neo4jService.addRelations(facilityDocTypeNode3.identity.low, FacilityDocTypesNode.identity.low);
+
     const facilityStatusNode1 = await this.neo4jService.createNode({
       canDelete: true,
       isDeleted: false,
