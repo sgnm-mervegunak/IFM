@@ -806,7 +806,7 @@ const SetJointSpace = () => {
             dragConfirm(event.dragNode._id.low, event.dropNode._id.low)
           }}
           filter
-          filterBy="name,code"
+          filterBy="name,code,Name"
           filterPlaceholder="Search"
           selectionMode="checkbox"
           onSelectionChange={(event: any) => {
