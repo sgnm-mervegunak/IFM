@@ -143,7 +143,7 @@ export class ClassificationRepository implements classificationInterface<Classif
 
   async getClassificationByIsActiveStatus(realm: string,language: string){
     
-      let cypher=`MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) MATCH path =(c)-[:PARENT_OF]->(n) WHERE n.isActive=true  WITH DISTINCT labels(n) AS labels \
+      let cypher=`MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) MATCH path =(c)-[:PARENT_OF]->(n) WHERE (n.isActive=true and n.isDeleted=false) WITH DISTINCT labels(n) AS labels \
       UNWIND labels AS label \
       RETURN DISTINCT label\
       `
@@ -154,7 +154,6 @@ export class ClassificationRepository implements classificationInterface<Classif
         returnData.push(data.records[index]["_fields"][0])
         
       }
-      
       let cypher2=`MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) RETURN c`
       
       let data2 =await this.neo4jService.read(cypher2);
@@ -223,10 +222,10 @@ export class ClassificationRepository implements classificationInterface<Classif
   
   async getClassificationsByLanguage(realm:string, language:string) 
   {
-  let cypher=`MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) MATCH path =(c)-[:PARENT_OF]->(n)  WITH DISTINCT labels(n) AS labels \
-  UNWIND labels AS label \
-  RETURN DISTINCT label\
-  `
+    let cypher=`MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) MATCH path =(c)-[:PARENT_OF]->(n) where n.isDeleted=false WITH DISTINCT labels(n) AS labels \
+    UNWIND labels AS label \
+    RETURN DISTINCT label\
+    `
   
   let data =await this.neo4jService.read(cypher);
   let returnData=[]
