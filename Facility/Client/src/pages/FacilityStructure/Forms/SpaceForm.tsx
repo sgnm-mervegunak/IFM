@@ -10,12 +10,11 @@ import { Calendar } from "primereact/calendar";
 import { Chips } from "primereact/chips";
 import { TreeSelect } from "primereact/treeselect";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { Toast } from "primereact/toast";
+import { useAppSelector } from "../../../app/hook";
 import axios from "axios";
 
 import ClassificationsService from "../../../services/classifications";
 import FacilityStructureService from "../../../services/facilitystructure";
-import { useAppSelector } from "../../../app/hook";
 import FileUploadComponent from "./FileUpload/FileUpload";
 
 interface Params {
@@ -86,7 +85,7 @@ const SpaceForm = ({
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
   const [uploadFiles, setUploadFiles] = useState<any>({});
 
-  const toast = React.useRef<any>(null);
+  const {toast} = useAppSelector(state => state.toast);
 
   const fixNodes = (nodes: Node[]) => {
     if (!nodes || nodes.length === 0) {
@@ -323,7 +322,6 @@ const SpaceForm = ({
 
   return (
     <div>
-      <Toast ref={toast} position="top-right" />
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
         <InputText

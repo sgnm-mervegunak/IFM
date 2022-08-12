@@ -11,7 +11,6 @@ import { Chips } from "primereact/chips";
 import { TreeSelect } from "primereact/treeselect";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios"
-import { Toast } from "primereact/toast";
 
 import ClassificationsService from "../../../services/classifications";
 import FacilityStructureService from "../../../services/facilitystructure";
@@ -94,8 +93,7 @@ const BuildingForm = ({
 
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
   const [uploadFiles, setUploadFiles] = useState<any>({});
-
-  const toast = React.useRef<any>(null);
+  const {toast} = useAppSelector((state) => state.toast);
 
   const buildingStructures = [
     "Building-Floor-Block",
@@ -363,7 +361,6 @@ const BuildingForm = ({
 
   return (
     <div>
-      <Toast ref={toast} position="top-right" />
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
         <InputText

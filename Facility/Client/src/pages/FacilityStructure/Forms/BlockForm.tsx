@@ -3,7 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import { InputText } from "primereact/inputtext";
 import { Chips } from 'primereact/chips';
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { Toast } from "primereact/toast";
+import { useAppSelector } from '../../../app/hook';
 
 import FacilityStructureService from "../../../services/facilitystructure";
 
@@ -61,7 +61,7 @@ const BlockForm = ({
     const [Tag, setTag] = useState<string[]>([]);
     const [Description, setDescription] = useState<string>("");
     const [ProjectName, setProjectName] = useState<string>("");
-    const toast = React.useRef<any>(null);
+    const {toast} = useAppSelector(state => state.toast);
 
     useEffect(() => {
         if (submitted) {
@@ -184,7 +184,6 @@ const BlockForm = ({
 
     return (
         <div>
-            <Toast ref={toast} position="top-right" />
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
                 <InputText
