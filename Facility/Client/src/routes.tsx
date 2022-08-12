@@ -21,8 +21,8 @@ import ShowAsset from "./pages/StructureAsset/ShowAsset";
 import { useAppSelector } from "./app/hook";
 import SetClassificationUser from "./pages/Classifications/SetClassificationUser";
 import SetFacilityStructure2 from "./pages/FacilityStructure/SetFacilityStructure2";
-import JointSpace from "./pages/SpaceJoin/JointSpace";
-import SetJointSpace from "./pages/SpaceJoin/SetJointSpace";
+import JointSpace from "./pages/JointSpace/JointSpace";
+import SetJointSpace from "./pages/JointSpace/SetJointSpace";
 
 // import Main from './pages/Main';
 

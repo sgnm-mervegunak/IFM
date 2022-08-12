@@ -306,34 +306,24 @@ const SetClassificationAdmin = () => {
   const deleteItem = (key: string) => {
     ClassificationsService.nodeInfo(key)
       .then((res) => {
-        if (res.data.properties.canDelete === true) {
-          ClassificationsService.remove(res.data.id)
-            .then(() => {
-              toast.current.show({
-                severity: "success",
-                summary: "Success",
-                detail: "Classification Deleted",
-                life: 2000,
-              });
-              getClassification();
-            })
-            .catch((err) => {
-              toast.current.show({
-                severity: "error",
-                summary: "Error",
-                detail: err.response ? err.response.data.message : err.message,
-                life: 2000,
-              });
+        ClassificationsService.remove(res.data.id)
+          .then(() => {
+            toast.current.show({
+              severity: "success",
+              summary: "Success",
+              detail: "Classification Deleted",
+              life: 2000,
             });
-        } else {
-
-          toast.current.show({
-            severity: "error",
-            summary: "Error",
-            detail: "Can not delete this classification",
-            life: 2000,
+            getClassification();
+          })
+          .catch((err) => {
+            toast.current.show({
+              severity: "error",
+              summary: "Error",
+              detail: err.response ? err.response.data.message : err.message,
+              life: 2000,
+            });
           });
-        }
       })
       .catch((err) => {
         toast.current.show({
