@@ -154,7 +154,8 @@ export class ClassificationRepository implements classificationInterface<Classif
         returnData.push(data.records[index]["_fields"][0])
         
       }
-      let cypher2=`MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) RETURN c`
+   
+      let cypher2=`MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"})  RETURN c`
       
       let data2 =await this.neo4jService.read(cypher2);
       let _id=data2.records[0]["_fields"][0].identity;
@@ -169,9 +170,9 @@ export class ClassificationRepository implements classificationInterface<Classif
       }
       
     }
-    
+  
       for (let index = 0; index < abc.length; index++) {
-        let cypher2=`MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${abc[index]} {realm:"${realm}"})  MATCH path = (b)-[:PARENT_OF*]->(m) where b.isActive=true and b.isDeleted=false and m.isActive=true and m.isDeleted=false \
+        let cypher2=`MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${abc[index]} {realm:"${realm}"})  MATCH path = (b)-[:PARENT_OF*]->(m) where (b.isActive=true and b.isDeleted=false) and (m.isActive=true and m.isDeleted=false) \
         WITH collect(path) AS paths\
         CALL apoc.convert.toTree(paths)\
         YIELD value\
@@ -182,7 +183,7 @@ export class ClassificationRepository implements classificationInterface<Classif
           root.parent_of.push(data2.records[0]["_fields"][0])
         }
         else{
-          let cypher2=`MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${abc[index]} {realm:"${realm}"}) RETURN b`
+          let cypher2=`MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${abc[index]} {realm:"${realm}"}) where b.isDeleted=false RETURN b`
       
         let data3 =await this.neo4jService.read(cypher2);
         let _id=data3.records[0]["_fields"][0].identity;
@@ -299,7 +300,7 @@ for (let index = 0; index < returnData.length; index++) {
      
       root.root.parent_of.push(p);
     
-      console.log(root)
+     
        let result =await this.neo4jService.changeObjectChildOfPropToChildren(root)
        console.log(result)
        return result
