@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Tree } from "primereact/tree";
 import { ContextMenu } from "primereact/contextmenu";
 import { Dialog } from "primereact/dialog";
-import { Toast } from "primereact/toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { Chips } from 'primereact/chips';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
@@ -47,7 +46,7 @@ const SetClassificationAdmin = () => {
   const [addDia, setAddDia] = useState(false);
   const [editDia, setEditDia] = useState(false);
   const [delDia, setDelDia] = useState<boolean>(false);
-  const toast = React.useRef<any>(null);
+  const { toast } = useAppSelector((state) => state.toast);
   const cm: any = React.useRef(null);
   const navigate = useNavigate();
   const auth = useAppSelector((state) => state.auth);
@@ -424,7 +423,6 @@ const SetClassificationAdmin = () => {
 
   return (
     <div className="container">
-      <Toast ref={toast} position="top-right" />
       <ContextMenu model={menu} ref={cm} />
       <ConfirmDialog
         visible={delDia}

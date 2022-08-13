@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Dialog } from "primereact/dialog";
-import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -30,7 +29,7 @@ const ShowAsset = () => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
   const [nodeName, setNodeName] = useState("");
-  const toast = React.useRef<any>(null);
+  const { toast } = useAppSelector((state) => state.toast);
   const cm: any = React.useRef(null);
   const navigate = useNavigate()
   const [assetData, setAssetData] = useState<Node[]>([]);
@@ -145,7 +144,6 @@ const ShowAsset = () => {
 
   return (
     <div className="container">
-      <Toast ref={toast} position="top-right" />
 
       <div className="card">
         <DataTable

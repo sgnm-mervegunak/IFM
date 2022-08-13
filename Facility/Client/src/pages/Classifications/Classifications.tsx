@@ -4,12 +4,12 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
-import { Toast } from "primereact/toast";
 import { Toolbar } from "primereact/toolbar";
 import { Menu } from 'primereact/menu';
 import { Chips } from 'primereact/chips';
 import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
+import { useAppSelector } from "../../app/hook";
 
 import ClassificationsService from "../../services/classifications";
 
@@ -69,8 +69,8 @@ const Classifications = () => {
 
   });
   const dt = useRef<any>();
-  const toast = useRef<any>();
   const menu = useRef<any>(null);
+  const { toast } = useAppSelector((state) => state.toast);
 
   useEffect(() => {
     loadLazyData();
@@ -239,7 +239,6 @@ const Classifications = () => {
 
   return (
     <div className="card">
-      <Toast ref={toast} />
       <Toolbar className="mb-4"
         left={leftToolbarTemplate}
         right={rightToolbarTemplate}

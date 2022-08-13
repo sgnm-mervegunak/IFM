@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Tree } from "primereact/tree";
 import { ContextMenu } from "primereact/contextmenu";
 import { Dialog } from "primereact/dialog";
-import { Toast } from "primereact/toast";
 import { Chips } from 'primereact/chips';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { Button } from "primereact/button";
@@ -53,7 +52,7 @@ const StructureAsset = () => {
   const [addDia, setAddDia] = useState(false);
   const [editDia, setEditDia] = useState(false);
   const [delDia, setDelDia] = useState<boolean>(false);
-  const toast = React.useRef<any>(null);
+  const { toast } = useAppSelector((state) => state.toast);
   const cm: any = React.useRef(null);
   const navigate = useNavigate()
   const [assetData, setAssetData] = useState<Node[]>([]);
@@ -277,7 +276,6 @@ const StructureAsset = () => {
 
   return (
     <div className="container">
-      <Toast ref={toast} position="top-right" />
       <ContextMenu model={menu} ref={cm} />
       <Dialog
         header="Add New Asset"

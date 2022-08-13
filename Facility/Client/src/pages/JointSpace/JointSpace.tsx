@@ -7,7 +7,6 @@ import { InputText } from "primereact/inputtext";
 import React, { useEffect, useState, useRef } from "react";
 // import { useAppDispatch, useAppSelector } from "../../app/hook";
 // import { save } from "../../features/tree/treeSlice";
-import { Toast } from "primereact/toast";
 import { Toolbar } from "primereact/toolbar";
 import { useNavigate } from "react-router-dom";
 import { Menu } from 'primereact/menu';
@@ -54,7 +53,7 @@ const JointSpace = () => {
   const [loading, setLoading] = useState(false);
 
   const dt = useRef<any>();
-  const toast = useRef<any>();
+  const { toast } = useAppSelector((state) => state.toast);
   const menu = useRef<any>(null);
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
@@ -153,7 +152,6 @@ const JointSpace = () => {
 
   return (
     <div className="card">
-      <Toast ref={toast} />
  
       <DataTable
         ref={dt}

@@ -1,8 +1,8 @@
 import React, { useRef } from "react";
-import { Toast } from "primereact/toast";
 import { FileUpload } from "primereact/fileupload";
 import FileItem from "./FileItem";
 import { confirmDialog } from "primereact/confirmdialog";
+import { useAppSelector } from "../../../../app/hook";
 
 const FileUploadComponent = ({
   value,
@@ -15,11 +15,11 @@ const FileUploadComponent = ({
   isDocument = false,
   isImage = false,
 }) => {
-  const toast = useRef(null);
   const uploadRef = useRef(null);
+  const { toast } = useAppSelector((state) => state.toast);
 
   const accept = (index) => {
-    setDeleteFiles(prev=>([...prev, JSON.parse(value)[index]]));
+    setDeleteFiles((prev) => [...prev, JSON.parse(value)[index]]);
     let temp = JSON.parse(value).filter((_, i) => i !== index);
     if (temp.length === 1 && isImage) {
       temp[0].main = true;
@@ -38,7 +38,7 @@ const FileUploadComponent = ({
       message: "Are you sure you want to proceed?",
       header: "Confirmation",
       icon: "pi pi-exclamation-triangle",
-      accept: ()=>accept(index),
+      accept: () => accept(index),
     });
   };
 
@@ -90,7 +90,6 @@ const FileUploadComponent = ({
 
   return (
     <div className="p-5">
-      <Toast ref={toast}></Toast>
       <div className="card">
         <FileUpload
           name="demo[]"
