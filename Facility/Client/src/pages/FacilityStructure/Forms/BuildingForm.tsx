@@ -10,12 +10,13 @@ import { Calendar } from "primereact/calendar";
 import { Chips } from "primereact/chips";
 import { TreeSelect } from "primereact/treeselect";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import axios from "axios"
+import axios from "axios";
 
 import ClassificationsService from "../../../services/classifications";
 import FacilityStructureService from "../../../services/facilitystructure";
 import { useAppSelector } from "../../../app/hook";
 import FileUploadComponent from "./FileUpload/FileUpload";
+import ImageUploadComponent from "./FileUpload/ImageUpload/ImageUpload";
 
 interface Params {
   selectedFacilityType: string | undefined;
@@ -93,7 +94,7 @@ const BuildingForm = ({
 
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
   const [uploadFiles, setUploadFiles] = useState<any>({});
-  const {toast} = useAppSelector((state) => state.toast);
+  const { toast } = useAppSelector((state) => state.toast);
 
   const buildingStructures = [
     "Building-Floor-Block",
@@ -229,7 +230,7 @@ const BuildingForm = ({
       };
 
       FacilityStructureService.createStructure(selectedNodeKey, newNode)
-        .then(async(res) => {
+        .then(async (res) => {
           toast.current.show({
             severity: "success",
             summary: "Successful",
@@ -247,12 +248,21 @@ const BuildingForm = ({
           for (let item in uploadFiles) {
             temp[item] = [];
             for (let file of uploadFiles[item]) {
-              let resFile = await UploadAnyFile(
-                res.data.properties.key + "/" + item,
-                file
-              );
-              delete resFile.data.message;
-              temp[item].push(resFile.data);
+              if (file.isImage) {
+                let resFile = await UploadAnyFile(
+                  res.data.properties.key + "/" + item,
+                  file.file
+                );
+                delete resFile.data.message;
+                temp[item].push({ ...resFile.data, main: file.main });
+              } else {
+                let resFile = await UploadAnyFile(
+                  res.data.properties.key + "/" + item,
+                  file
+                );
+                delete resFile.data.message;
+                temp[item].push(resFile.data);
+              }
             }
           }
           for (let item in temp) {
@@ -302,7 +312,7 @@ const BuildingForm = ({
       };
 
       FacilityStructureService.update(selectedNodeKey, updateNode)
-        .then(async(res) => {
+        .then(async (res) => {
           toast.current.show({
             severity: "success",
             summary: "Successful",
@@ -310,38 +320,53 @@ const BuildingForm = ({
             life: 4000,
           });
           // upload files
-          let temp = {} as any
-          for(let item in uploadFiles) {
-            temp[item] = []
-            for(let file of uploadFiles[item]) {
-              let resFile = await UploadAnyFile(selectedNodeKey+"/"+item,file)
-              delete resFile.data.message
-              temp[item].push(resFile.data)
+          let temp = {} as any;
+          for (let item in uploadFiles) {
+            temp[item] = [];
+            for (let file of uploadFiles[item]) {
+              if (file.isImage) {
+                let resFile = await UploadAnyFile(
+                  res.data.properties.key + "/" + item,
+                  file.file
+                );
+                delete resFile.data.message;
+                temp[item].push({ ...resFile.data, main: file.main });
+              } else {
+                let resFile = await UploadAnyFile(
+                  res.data.properties.key + "/" + item,
+                  file
+                );
+                delete resFile.data.message;
+                temp[item].push(resFile.data);
+              }
             }
           }
-          for(let item in temp){
+          for (let item in temp) {
             try {
-              temp[item] = [...JSON.parse(updateNode[item]),...temp[item]]
-            }
-            catch(err) {
-            }
-            temp[item] = JSON.stringify(temp[item])
+              temp[item] = [...JSON.parse(updateNode[item]), ...temp[item]];
+            } catch (err) {}
+            temp[item] = JSON.stringify(temp[item]);
           }
 
           // delete files
-          for(let item of deleteFiles) {
-            let temp = item.image_url.split("/")
-            let urlIndex = temp.findIndex((item:any) => item === "172.30.99.120:9000")
-            let temp2 = temp.slice(urlIndex+1)
+          for (let item of deleteFiles) {
+            let temp = item.image_url.split("/");
+            let urlIndex = temp.findIndex(
+              (item: any) => item === "172.30.99.120:9000"
+            );
+            let temp2 = temp.slice(urlIndex + 1);
 
-            await DeleteAnyFile(temp2[0],temp2.slice(1).join("/"))
+            await DeleteAnyFile(temp2[0], temp2.slice(1).join("/"));
           }
 
           // update node
-          FacilityStructureService.update(res.data.properties.key, {...updateNode,...temp})
+          FacilityStructureService.update(res.data.properties.key, {
+            ...updateNode,
+            ...temp,
+          });
           getFacilityStructure();
-          setUploadFiles({})
-          setDeleteFiles([])
+          setUploadFiles({});
+          setDeleteFiles([]);
         })
         .catch((err) => {
           toast.current.show({
@@ -354,7 +379,7 @@ const BuildingForm = ({
       setTimeout(() => {
         setEditDia(false);
         setUploadFiles({});
-        setDeleteFiles([])
+        setDeleteFiles([]);
       }, 1000);
     }
   };
@@ -493,8 +518,7 @@ const BuildingForm = ({
       </div>
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Images</h5>
-        <FileUploadComponent
-          isImage
+        <ImageUploadComponent
           label={"Images"}
           value={Images}
           onChange={setImages}
