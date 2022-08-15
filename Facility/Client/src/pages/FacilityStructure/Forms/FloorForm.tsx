@@ -40,6 +40,7 @@ interface Node {
     labels?: string[]; // for form type
     parentId?: string;
     className?: string;
+
 }
 
 const FloorForm = ({
@@ -60,6 +61,9 @@ const FloorForm = ({
     const [Tag, setTag] = useState<string[]>([]);
     const [Description, setDescription] = useState<string>("");
     const [ProjectName, setProjectName] = useState<string>("");
+    const [Elevation, setElevation] = useState<string>("");
+    const [Height, setHeight] = useState<string>("");
+
     const {toast} = useAppSelector(state => state.toast);
 
     useEffect(() => {
@@ -107,6 +111,8 @@ const FloorForm = ({
                 Description: Description,
                 ProjectName: ProjectName,
                 NodeType: selectedFacilityType,
+                // Elevation:Elevation, //will be uncomment after db operations
+                // Height: Height
             };
 
             FacilityStructureService.createStructure(selectedNodeKey, newNode)
@@ -152,6 +158,8 @@ const FloorForm = ({
                 Description: Description,
                 ProjectName: ProjectName,
                 NodeType: selectedFacilityType,
+                // Elevation: Elevation, //will be uncomment after db operations
+                // Height: Height
             };
 
             FacilityStructureService.update(selectedNodeKey, updateNode)
@@ -204,6 +212,45 @@ const FloorForm = ({
                     style={{ width: '100%' }}
                 />
             </div>
+            <div className="field">
+                <h5 style={{ marginBottom: "0.5em" }}>Elevation (cm)</h5>
+                <InputText
+                    value={Elevation}
+                    onChange={(event) => {
+                        const value=event.target.value; //convert value from type string to number 
+                        console.log("------------", !isNaN(+value), "------"); //check if it is a number
+                        
+                        if (!isNaN(+value)) {
+                            
+                            setElevation(value);
+                        } else {
+                         alert("Elevation alanı için lütfen sayısal bir deger giriniz!")
+                        }
+                    }}
+                    style={{ width: '100%' }}
+                />
+            </div>
+
+
+            <div className="field">
+                <h5 style={{ marginBottom: "0.5em" }}>Height (cm)</h5>
+                <InputText
+                    value={Height}
+                    onChange={(event) => {
+                        const value = event.target.value; //convert value from type string to number 
+                        console.log("------------", !isNaN(+value), "------"); //check if it is a number
+
+                        if (!isNaN(+value)) {
+
+                            setHeight(value);
+                        } else {
+                            alert("Height alanı için lütfen sayısal bir deger giriniz!")
+                        }
+                    }}
+                    style={{ width: '100%' }}
+                />
+            </div>
+           
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Project Name</h5>
                 <InputText
