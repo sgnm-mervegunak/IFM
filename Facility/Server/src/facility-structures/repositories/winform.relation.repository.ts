@@ -5,7 +5,6 @@ import {
   RelationNotFountException,
 } from '../../common/notFoundExceptions/not.found.exception';
 import { FacilityStructure } from '../entities/facility-structure.entity';
-import { NestKafkaService } from 'ifmcommon';
 import { VirtualNodeInterface } from 'src/common/interface/relation.node.interface';
 
 import { HttpService } from '@nestjs/axios';
@@ -69,17 +68,17 @@ export class WinformRelationRepository implements VirtualNodeInterface<FacilityS
         }),
       )
       .pipe(map((response) => response.data));
-      
-      const winform = await firstValueFrom(winformObservableObject);
 
-      //ilgili formun başka bir structureda tanımlı olup olmadığını gösteren query
-      // const virtualNodeCountInDbByReferenceKey = await this.neo4jService.checkSpecificVirtualNodeCountInDb(
-      //   createWinformRelationDto.referenceKey,
-      // RelationName.HAS_FORM,
-      // );
-      // if (virtualNodeCountInDbByReferenceKey.length > 0) {
-      // throw new HttpException('already has relation with other nodes', 400);
-      // }
+    const winform = await firstValueFrom(winformObservableObject);
+
+    //ilgili formun başka bir structureda tanımlı olup olmadığını gösteren query
+    // const virtualNodeCountInDbByReferenceKey = await this.neo4jService.checkSpecificVirtualNodeCountInDb(
+    //   createWinformRelationDto.referenceKey,
+    // RelationName.HAS_FORM,
+    // );
+    // if (virtualNodeCountInDbByReferenceKey.length > 0) {
+    // throw new HttpException('already has relation with other nodes', 400);
+    // }
 
     const relationExistanceBetweenVirtualNodeAndNodeByKey = await this.neo4jService.findNodeByKeysAndRelationName(
       key,
@@ -99,7 +98,11 @@ export class WinformRelationRepository implements VirtualNodeInterface<FacilityS
 
     console.log(value.properties.key);
     await this.neo4jService.addRelationWithRelationNameByKey(key, value.properties.key, RelationName.HAS_FORM);
-    await this.neo4jService.addRelationWithRelationNameByKey(key, value.properties.key, RelationName.HAS_VIRTUAL_RELATION);
+    await this.neo4jService.addRelationWithRelationNameByKey(
+      key,
+      value.properties.key,
+      RelationName.HAS_VIRTUAL_RELATION,
+    );
 
     // const structureUrl = `${process.env.STRUCTURE_URL}/${node.properties.key}`;
     // const kafkaObject = { referenceKey: key, parentKey: createWinformRelationDto.referenceKey, url: structureUrl };
@@ -107,7 +110,7 @@ export class WinformRelationRepository implements VirtualNodeInterface<FacilityS
 
     const response = { structure: node, winform: winform };
 
-   return response;
+    return response;
   }
 
   async delete(key: string, referenceKey) {
