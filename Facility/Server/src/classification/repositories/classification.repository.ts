@@ -90,23 +90,24 @@ export class ClassificationRepository implements classificationInterface<Classif
     return result;
   }
   async delete(_id: string) {
-    // try {
+    try {
       let deletedNode;
-      const hasChildren = await this.neo4jService.findChildrenById(_id);
-      if (hasChildren['records'].length == 0) {
-        deletedNode = await this.neo4jService.delete(_id);
-      } else {
-        throw new HttpException(has_children_error, 400);
-      }
-
+      // const hasChildren = await this.neo4jService.findChildrenById(_id);
+      // if (hasChildren['records'].length == 0) {
+      //   deletedNode = await this.neo4jService.delete(_id);
+      // } else {
+      //   throw new HttpException(has_children_error, 400);
+      // }
+      deletedNode = await this.neo4jService.delete(_id);
       return deletedNode;
-    // } catch (error) {
-    //   if (error.response?.code == CustomTreeError.HAS_CHILDREN) {
-    //     throw new HttpException(has_children_error, 400);
-    //   } else {
-    //     throw new HttpException(error.response?.message, error.response?.code);
-    //   }
-    // }
+     } catch (error) {
+       if (error.response?.code == CustomTreeError.HAS_CHILDREN) {
+         throw new HttpException(has_children_error, 400);
+       } else {
+         //throw new HttpException(error.response?.message, error.response?.code);
+         throw new HttpException({ message: error.response?.message, code: 400 }, 400);
+       }
+     }
   }
   
   async changeNodeBranch(_id: string, target_parent_id: string) {
