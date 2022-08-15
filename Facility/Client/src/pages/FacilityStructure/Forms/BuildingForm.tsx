@@ -17,6 +17,7 @@ import FacilityStructureService from "../../../services/facilitystructure";
 import { useAppSelector } from "../../../app/hook";
 import FileUploadComponent from "./FileUpload/FileUpload";
 import ImageUploadComponent from "./FileUpload/ImageUpload/ImageUpload";
+import DocumentUploadComponent from "./FileUpload/DocumentUpload/DocumentUpload";
 
 interface Params {
   selectedFacilityType: string | undefined;
@@ -132,6 +133,7 @@ const BuildingForm = ({
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodes(temp);
+      temp[0].selectable = false
       setclassificationStatus(temp);
     });
   };
@@ -258,10 +260,10 @@ const BuildingForm = ({
               } else {
                 let resFile = await UploadAnyFile(
                   res.data.properties.key + "/" + item,
-                  file
+                  file.file
                 );
                 delete resFile.data.message;
-                temp[item].push(resFile.data);
+                temp[item].push({...resFile.data, type: file.type});
               }
             }
           }
@@ -334,10 +336,10 @@ const BuildingForm = ({
               } else {
                 let resFile = await UploadAnyFile(
                   res.data.properties.key + "/" + item,
-                  file
+                  file.file
                 );
                 delete resFile.data.message;
-                temp[item].push(resFile.data);
+                temp[item].push({...resFile.data, type: file.type});
               }
             }
           }
@@ -530,8 +532,7 @@ const BuildingForm = ({
       </div>
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Documents</h5>
-        <FileUploadComponent
-          isDocument
+        <DocumentUploadComponent
           label={"Documents"}
           value={Documents}
           onChange={setDocuments}
