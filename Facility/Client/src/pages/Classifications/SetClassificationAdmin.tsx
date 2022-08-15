@@ -8,6 +8,8 @@ import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Checkbox } from 'primereact/checkbox';
+import { Toolbar } from "primereact/toolbar";
+import { Menu } from 'primereact/menu';
 import { v4 as uuidv4 } from "uuid";
 
 import ClassificationsService from "../../services/classifications";
@@ -421,8 +423,48 @@ const SetClassificationAdmin = () => {
     );
   };
 
+  const rightToolbarTemplate = () => {
+    return (
+      <React.Fragment>
+        {/* <Menu model={items} popup ref={menu} id="popup_menu" />
+        <Button className="mr-2" label="Import" icon="pi pi-upload" onClick={(event) => menu.current.toggle(event)} aria-controls="popup_menu" aria-haspopup /> */}
+        <Button
+          label="Export"
+          icon="pi pi-download"
+          className="p-button"
+          onClick={exportCSV}
+        />
+      </React.Fragment>
+    );
+  };
+
+  const items = [
+    {
+      label: 'Download Sample File',
+      icon: 'pi pi-download',
+      command: () => {
+        window.location.href = 'http://localhost:3000/documents/classification-sample-data.xlsx';
+      }
+    },
+    {
+      label: 'Upload File',
+      icon: 'pi pi-upload',
+      command: () => {
+        navigate("/classifications/fileimport");
+      }
+    }
+  ];
+
+  const exportCSV = () => {
+    
+  };
+
+
   return (
     <div className="container">
+      <Toolbar className="mb-4"
+        right={rightToolbarTemplate}
+      ></Toolbar>
       <ContextMenu model={menu} ref={cm} />
       <ConfirmDialog
         visible={delDia}
@@ -507,6 +549,7 @@ const SetClassificationAdmin = () => {
       <h1>Edit Classification</h1>
       <div className="field">
         <Tree
+          
           loading={loading}
           value={data}
           dragdropScope="-"
