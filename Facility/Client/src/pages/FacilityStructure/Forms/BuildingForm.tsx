@@ -70,22 +70,22 @@ const BuildingForm = ({
   setIsUpdate,
   setSelectedFacilityType,
 }: Params) => {
-  const [Name, setName] = useState<string>("");
-  const [Category, setCategory] = useState<any>(undefined);
-  const [Address, setAddress] = useState<string>("");
-  const [BuildingStructure, setBuildingStructure] = useState("");
-  const [Images, setImages] = useState("");
-  const [Status, setStatus] = useState<any>(undefined);
-  const [Owner, setOwner] = useState<string>("");
-  const [Operator, setOperator] = useState<string>("");
-  const [Contractor, setContractor] = useState<string>("");
-  const [HandoverDate, setHandoverDate] = useState<any>(undefined);
-  const [OperationStartDate, setOperationStartDate] = useState<any>(undefined);
-  const [WarrantyExpireDate, setWarrantyExpireDate] = useState<any>(undefined);
-  const [Documents, setDocuments] = useState("");
-  const [Tag, setTag] = useState<string[]>([]);
-  const [Description, setDescription] = useState<string>("");
-  const [ProjectName, setProjectName] = useState<string>("");
+  const [name, setName] = useState<string>("");
+  const [category, setCategory] = useState<any>(undefined);
+  const [address, setAddress] = useState<string>("");
+  const [buildingStructure, setBuildingStructure] = useState("");
+  const [images, setImages] = useState("");
+  const [status, setStatus] = useState<any>(undefined);
+  const [owner, setOwner] = useState<string>("");
+  const [operator, setOperator] = useState<string>("");
+  const [contractor, setContractor] = useState<string>("");
+  const [handoverDate, setHandoverDate] = useState<any>(undefined);
+  const [operationStartDate, setOperationStartDate] = useState<any>(undefined);
+  const [warrantyExpireDate, setWarrantyExpireDate] = useState<any>(undefined);
+  const [documents, setDocuments] = useState("");
+  const [tag, setTag] = useState<string[]>([]);
+  const [description, setDescription] = useState<string>("");
+  const [projectName, setProjectName] = useState<string>("");
   const [classificationCategory, setClassificationCategory] = useState<Node[]>(
     []
   );
@@ -160,26 +160,28 @@ const BuildingForm = ({
   const getNodeInfoForUpdate = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
       .then((res) => {
-        setName(res.data.properties.Name || "");
-        setCategory(res.data.properties.Category);
-        setAddress(res.data.properties.Address || "");
-        setBuildingStructure(res.data.properties.BuildingStructure || "");
-        setImages(res.data.properties.Images || "");
-        setStatus(res.data.properties.Status);
-        setOwner(res.data.properties.Owner || "");
-        setOperator(res.data.properties.Operator || "");
-        setContractor(res.data.properties.Contractor || "");
-        setHandoverDate(new Date(res.data.properties.HandoverDate) || "");
+        console.log(res.data);
+        
+        setName(res.data.properties.name || "");
+        setCategory(res.data.properties.category);
+        setAddress(res.data.properties.address || "");
+        setBuildingStructure(res.data.properties.buildingStructure || "");
+        setImages(res.data.properties.images || "");
+        setStatus(res.data.properties.status);
+        setOwner(res.data.properties.owner || "");
+        setOperator(res.data.properties.operator || "");
+        setContractor(res.data.properties.contractor || "");
+        setHandoverDate(new Date(res.data.properties.handoverDate) || "");
         setOperationStartDate(
-          new Date(res.data.properties.OperationStartDate) || ""
+          new Date(res.data.properties.operationStartDate) || ""
         );
         setWarrantyExpireDate(
-          new Date(res.data.properties.WarrantyExpireDate) || ""
+          new Date(res.data.properties.warrantyExpireDate) || ""
         );
-        setDocuments(res.data.properties.Documents || "");
-        setTag(res.data.properties.Tag || []);
-        setDescription(res.data.properties.Description || "");
-        setProjectName(res.data.properties.ProjectName || "");
+        setDocuments(res.data.properties.documents || "");
+        setTag(res.data.properties.tag || []);
+        setDescription(res.data.properties.description || "");
+        setProjectName(res.data.properties.projectName || "");
       })
       .catch((err) => {
         toast.current.show({
@@ -212,24 +214,26 @@ const BuildingForm = ({
       let newNode: any = {};
 
       newNode = {
-        Name: Name,
-        Category: Category,
-        Address: Address,
-        BuildingStructure: BuildingStructure,
-        Images: Images,
-        Status: Status,
-        Owner: Owner,
-        Operator: Operator,
-        Contractor: Contractor,
-        HandoverDate: HandoverDate,
-        OperationStartDate: OperationStartDate,
-        WarrantyExpireDate: WarrantyExpireDate,
-        Documents: Documents,
-        Tag: Tag,
-        Description: Description,
-        ProjectName: ProjectName,
+        name: name,
+        category: category,
+        address: address,
+        buildingStructure: buildingStructure,
+        images: images,
+        status: status,
+        owner: owner,
+        operator: operator,
+        contractor: contractor,
+        handoverDate: handoverDate,
+        operationStartDate: operationStartDate,
+        warrantyExpireDate: warrantyExpireDate,
+        documents: documents,
+        tag: tag,
+        description: description,
+        projectName: projectName,
         nodeType: selectedFacilityType,
       };
+      console.log(newNode);
+      
 
       FacilityStructureService.createStructure(selectedNodeKey, newNode)
         .then(async (res) => {
@@ -294,22 +298,22 @@ const BuildingForm = ({
     } else {
       let updateNode: any = {};
       updateNode = {
-        Name: Name,
-        Category: Category,
-        Address: Address,
-        BuildingStructure: BuildingStructure,
-        Images: Images,
-        Status: Status,
-        Owner: Owner,
-        Operator: Operator,
-        Contractor: Contractor,
-        HandoverDate: HandoverDate,
-        OperationStartDate: OperationStartDate,
-        WarrantyExpireDate: WarrantyExpireDate,
-        Documents: Documents,
-        Tag: Tag,
-        Description: Description,
-        ProjectName: ProjectName,
+        name: name,
+        category: category,
+        address: address,
+        buildingStructure: buildingStructure,
+        images: images,
+        status: status,
+        owner: owner,
+        operator: operator,
+        contractor: contractor,
+        handoverDate: handoverDate,
+        operationStartDate: operationStartDate,
+        warrantyExpireDate: warrantyExpireDate,
+        documents: documents,
+        tag: tag,
+        description: description,
+        projectName: projectName,
         nodeType: selectedFacilityType,
       };
 
@@ -391,7 +395,7 @@ const BuildingForm = ({
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
         <InputText
-          value={Name}
+          value={name}
           onChange={(event) => setName(event.target.value)}
           style={{ width: "100%" }}
         />
@@ -399,7 +403,7 @@ const BuildingForm = ({
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Category</h5>
         <TreeSelect
-          value={Category}
+          value={category}
           options={classificationCategory}
           onChange={(e) => {
             setCategory(e.value);
@@ -412,7 +416,7 @@ const BuildingForm = ({
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Address</h5>
         <InputText
-          value={Address}
+          value={address}
           onChange={(event) => setAddress(event.target.value)}
           style={{ width: "100%" }}
         />
@@ -420,7 +424,7 @@ const BuildingForm = ({
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Building Structure</h5>
         <Dropdown
-          value={BuildingStructure}
+          value={buildingStructure}
           options={buildingStructures}
           onChange={(e) => setBuildingStructure(e.value)}
           placeholder="Select Building Structure"
@@ -430,7 +434,7 @@ const BuildingForm = ({
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Status</h5>
         <TreeSelect
-          value={Status}
+          value={status}
           options={classificationStatus}
           onChange={(e) => {
             setStatus(e.value);
@@ -443,7 +447,7 @@ const BuildingForm = ({
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Owner</h5>
         <InputText
-          value={Owner}
+          value={owner}
           onChange={(event) => setOwner(event.target.value)}
           style={{ width: "100%" }}
         />
@@ -451,7 +455,7 @@ const BuildingForm = ({
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Operator</h5>
         <InputText
-          value={Operator}
+          value={operator}
           onChange={(event) => setOperator(event.target.value)}
           style={{ width: "100%" }}
         />
@@ -459,7 +463,7 @@ const BuildingForm = ({
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Contractor</h5>
         <InputText
-          value={Contractor}
+          value={contractor}
           onChange={(event) => setContractor(event.target.value)}
           style={{ width: "100%" }}
         />
@@ -468,7 +472,7 @@ const BuildingForm = ({
         <h5 style={{ marginBottom: "0.5em" }}>Handover Date</h5>
         <Calendar
           dateFormat="dd/mm/yy"
-          value={HandoverDate}
+          value={handoverDate}
           onChange={(e) => setHandoverDate(e.value?.toString())}
           showIcon
           style={{ width: "100%" }}
@@ -478,7 +482,7 @@ const BuildingForm = ({
         <h5 style={{ marginBottom: "0.5em" }}>Operation Start Date</h5>
         <Calendar
           dateFormat="dd/mm/yy"
-          value={OperationStartDate}
+          value={operationStartDate}
           onChange={(e) => setOperationStartDate(e.value?.toString())}
           showIcon
           style={{ width: "100%" }}
@@ -488,7 +492,7 @@ const BuildingForm = ({
         <h5 style={{ marginBottom: "0.5em" }}>Warranty Expire Date</h5>
         <Calendar
           dateFormat="dd/mm/yy"
-          value={WarrantyExpireDate}
+          value={warrantyExpireDate}
           onChange={(e) => setWarrantyExpireDate(e.value?.toString())}
           showIcon
           style={{ width: "100%" }}
@@ -497,7 +501,7 @@ const BuildingForm = ({
       <div className="field structureChips">
         <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
         <Chips
-          value={Tag}
+          value={tag}
           onChange={(e) => setTag(e.value)}
           style={{ width: "100%" }}
         />
@@ -505,7 +509,7 @@ const BuildingForm = ({
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Description</h5>
         <InputText
-          value={Description}
+          value={description}
           onChange={(event) => setDescription(event.target.value)}
           style={{ width: "100%" }}
         />
@@ -513,7 +517,7 @@ const BuildingForm = ({
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Project Name</h5>
         <InputText
-          value={ProjectName}
+          value={projectName}
           onChange={(event) => setProjectName(event.target.value)}
           style={{ width: "100%" }}
         />
@@ -521,8 +525,8 @@ const BuildingForm = ({
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Images</h5>
         <ImageUploadComponent
-          label={"Images"}
-          value={Images}
+          label={"images"}
+          value={images}
           onChange={setImages}
           deleteFiles={deleteFiles}
           setDeleteFiles={setDeleteFiles}
@@ -533,8 +537,8 @@ const BuildingForm = ({
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Documents</h5>
         <DocumentUploadComponent
-          label={"Documents"}
-          value={Documents}
+          label={"documents"}
+          value={documents}
           onChange={setDocuments}
           deleteFiles={deleteFiles}
           setDeleteFiles={setDeleteFiles}

@@ -57,10 +57,10 @@ const BlockForm = ({
     setSelectedFacilityType
 }: Params) => {
 
-    const [Name, setName] = useState<string>("");
-    const [Tag, setTag] = useState<string[]>([]);
-    const [Description, setDescription] = useState<string>("");
-    const [ProjectName, setProjectName] = useState<string>("");
+    const [name, setName] = useState<string>("");
+    const [tag, setTag] = useState<string[]>([]);
+    const [description, setDescription] = useState<string>("");
+    const [projectName, setProjectName] = useState<string>("");
     const {toast} = useAppSelector(state => state.toast);
 
     useEffect(() => {
@@ -81,10 +81,10 @@ const BlockForm = ({
     const getNodeInfoForUpdate = (selectedNodeKey: string) => {
         FacilityStructureService.nodeInfo(selectedNodeKey)
             .then((res) => {
-                setName(res.data.properties.Name || "");
-                setTag(res.data.properties.Tag || []);
-                setDescription(res.data.properties.Description || "");
-                setProjectName(res.data.properties.ProjectName || "");
+                setName(res.data.properties.name || "");
+                setTag(res.data.properties.tag || []);
+                setDescription(res.data.properties.description || "");
+                setProjectName(res.data.properties.projectName || "");
             })
             .catch((err) => {
                 toast.current.show({
@@ -103,10 +103,10 @@ const BlockForm = ({
             let newNode: any = {};
 
             newNode = {
-                Name: Name,
-                Tag: Tag,
-                Description: Description,
-                ProjectName: ProjectName,
+                name: name,
+                tag: tag,
+                description: description,
+                projectName: projectName,
                 nodeType: selectedFacilityType,
             };
 
@@ -151,10 +151,10 @@ const BlockForm = ({
 
             let updateNode: any = {};
             updateNode = {
-                Name: Name,
-                Tag: Tag,
-                Description: Description,
-                ProjectName: ProjectName,
+                name: name,
+                tag: tag,
+                description: description,
+                projectName: projectName,
                 nodeType: selectedFacilityType,
             };
 
@@ -187,7 +187,7 @@ const BlockForm = ({
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
                 <InputText
-                    value={Name}
+                    value={name}
                     onChange={(event) => setName(event.target.value)}
                     style={{ width: '100%' }}
                 />
@@ -195,7 +195,7 @@ const BlockForm = ({
             <div className="field structureChips">
                 <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
                 <Chips
-                    value={Tag}
+                    value={tag}
                     onChange={(e) => setTag(e.value)}
                     style={{ width: "100%" }}
                 />
@@ -203,7 +203,7 @@ const BlockForm = ({
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Description</h5>
                 <InputText
-                    value={Description}
+                    value={description}
                     onChange={(event) => setDescription(event.target.value)}
                     style={{ width: '100%' }}
                 />
@@ -211,7 +211,7 @@ const BlockForm = ({
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Project Name</h5>
                 <InputText
-                    value={ProjectName}
+                    value={projectName}
                     onChange={(event) => setProjectName(event.target.value)}
                     style={{ width: '100%' }}
                 />

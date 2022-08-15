@@ -68,15 +68,15 @@ const SpaceForm = ({
   setIsUpdate,
   setSelectedFacilityType,
 }: Params) => {
-  const [Code, setCode] = useState<string>("");
-  const [Name, setName] = useState<string>("");
-  const [ArchitecturalName, setArchitecturalName] = useState<string>("");
-  const [SpaceType, setSpaceType] = useState<any>(undefined);
-  const [M2, setM2] = useState<string>("");
-  const [Usage, setUsage] = useState<string>("");
-  const [Tag, setTag] = useState<string[]>([]);
-  const [Images, setImages] = useState("");
-  const [Status, setStatus] = useState<any>(undefined);
+  const [code, setCode] = useState<string>("");
+  const [name, setName] = useState<string>("");
+  const [architecturalName, setArchitecturalName] = useState<string>("");
+  const [spaceType, setSpaceType] = useState<any>(undefined);
+  const [m2, setM2] = useState<string>("");
+  const [usage, setUsage] = useState<string>("");
+  const [tag, setTag] = useState<string[]>([]);
+  const [images, setImages] = useState("");
+  const [status, setStatus] = useState<any>(undefined);
   const [classificationSpace, setClassificationSpace] = useState<Node[]>([]);
   const [classificationStatus, setclassificationStatus] = useState<Node[]>([]);
   const auth = useAppSelector((state) => state.auth);
@@ -144,15 +144,15 @@ const SpaceForm = ({
   const getNodeInfoForUpdate = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
       .then((res) => {
-        setCode(res.data.properties.Code || "");
-        setName(res.data.properties.Name || "");
-        setArchitecturalName(res.data.properties.ArchitecturalName || "");
-        setSpaceType(res.data.properties.Category);
-        setM2(res.data.properties.M2 || "");
-        setUsage(res.data.properties.Usage);
-        setTag(res.data.properties.Tag || []);
-        setImages(res.data.properties.Images || "");
-        setStatus(res.data.properties.Status);
+        setCode(res.data.properties.code || "");
+        setName(res.data.properties.name || "");
+        setArchitecturalName(res.data.properties.architecturalName || "");
+        setSpaceType(res.data.properties.category);
+        setM2(res.data.properties.m2 || "");
+        setUsage(res.data.properties.usage);
+        setTag(res.data.properties.tag || []);
+        setImages(res.data.properties.images || "");
+        setStatus(res.data.properties.status);
       })
       .catch((err) => {
         toast.current.show({
@@ -185,15 +185,15 @@ const SpaceForm = ({
       let newNode: any = {};
 
       newNode = {
-        Code: Code,
-        Name: Name,
-        ArchitecturalName: ArchitecturalName,
-        SpaceType: SpaceType,
-        M2: M2,
-        Usage: Usage,
-        Tag: Tag,
-        Images: Images,
-        Status: Status,
+        code: code,
+        name: name,
+        architecturalName: architecturalName,
+        spaceType: spaceType,
+        m2: m2,
+        usage: usage,
+        tag: tag,
+        images: images,
+        status: status,
         nodeType: selectedFacilityType,
       };
 
@@ -260,15 +260,15 @@ const SpaceForm = ({
     } else {
       let updateNode: any = {};
       updateNode = {
-        Code: Code,
-        Name: Name,
-        ArchitecturalName: ArchitecturalName,
-        SpaceType: SpaceType,
-        M2: M2,
-        Usage: Usage,
-        Tag: Tag,
-        Images: Images,
-        Status: Status,
+        code: code,
+        name: name,
+        architecturalName: architecturalName,
+        spaceType: spaceType,
+        m2: m2,
+        usage: usage,
+        tag: tag,
+        images: images,
+        status: status,
         nodeType: selectedFacilityType,
       };
 
@@ -348,7 +348,7 @@ const SpaceForm = ({
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
         <InputText
-          value={Code}
+          value={code}
           onChange={(event) => setCode(event.target.value)}
           style={{ width: "100%" }}
         />
@@ -356,7 +356,7 @@ const SpaceForm = ({
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
         <InputText
-          value={Name}
+          value={name}
           onChange={(event) => setName(event.target.value)}
           style={{ width: "100%" }}
         />
@@ -364,7 +364,7 @@ const SpaceForm = ({
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Architectural Name</h5>
         <InputText
-          value={ArchitecturalName}
+          value={architecturalName}
           onChange={(event) => setArchitecturalName(event.target.value)}
           style={{ width: "100%" }}
         />
@@ -372,7 +372,7 @@ const SpaceForm = ({
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Space Type</h5>
         <TreeSelect
-          value={SpaceType}
+          value={spaceType}
           options={classificationSpace}
           onChange={(e) => {
             setSpaceType(e.value);
@@ -385,7 +385,7 @@ const SpaceForm = ({
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>M2</h5>
         <InputText
-          value={M2}
+          value={m2}
           onChange={(event) => setM2(event.target.value)}
           style={{ width: "100%" }}
         />
@@ -393,7 +393,7 @@ const SpaceForm = ({
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Usage</h5>
         <InputText
-          value={Usage}
+          value={usage}
           onChange={(event) => setUsage(event.target.value)}
           style={{ width: "100%" }}
         />
@@ -401,7 +401,7 @@ const SpaceForm = ({
       <div className="field structureChips">
         <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
         <Chips
-          value={Tag}
+          value={tag}
           onChange={(e) => setTag(e.value)}
           style={{ width: "100%" }}
         />
@@ -410,7 +410,7 @@ const SpaceForm = ({
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Status</h5>
         <TreeSelect
-          value={Status}
+          value={status}
           options={classificationStatus}
           onChange={(e) => {
             setStatus(e.value);
@@ -424,7 +424,7 @@ const SpaceForm = ({
         <h5 style={{ marginBottom: "0.5em" }}>Images</h5>
         <ImageUploadComponent
           label={"Images"}
-          value={Images}
+          value={images}
           onChange={setImages}
           deleteFiles={deleteFiles}
           setDeleteFiles={setDeleteFiles}
