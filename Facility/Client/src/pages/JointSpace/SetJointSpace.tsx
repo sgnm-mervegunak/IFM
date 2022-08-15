@@ -196,7 +196,7 @@ const SetJointSpace = () => {
     },
   ];
 
-  const getFacilityStructure = () => {
+  const getJointSpace = () => {
     const key = params.id || "";
     JointSpaceService.findBuildingWithKey(key, realm).then((res) => {
 
@@ -218,18 +218,18 @@ const SetJointSpace = () => {
         toast.current.show({
           severity: "error",
           summary: "Error",
-          detail: "Facility Structure not found",
+          detail: "Joint Space not found",
           life: 3000,
         });
         setTimeout(() => {
-          navigate("/facility")
+          navigate("/jointspace")
         }, 3000)
       }
     })
   }
 
   useEffect(() => {
-    getFacilityStructure();
+    getJointSpace();
   }, []);
 
   const fixNodes = (nodes: Node[]) => {
@@ -273,11 +273,11 @@ const SetJointSpace = () => {
         toast.current.show({
           severity: "success",
           summary: "Successful",
-          detail: "Structure Created",
+          detail: "Joint Space Created",
           life: 3000,
         });
 
-        getFacilityStructure();
+        getJointSpace();
         setSelectedNodeKey([]);
         setSelectedKeys([]);
 
@@ -290,8 +290,6 @@ const SetJointSpace = () => {
           life: 2000,
         });
       });
-      
-
 
     setArchitecturalName("");
     setArchitecturalCode("");
@@ -328,34 +326,6 @@ const SetJointSpace = () => {
             formTypeId: formTypeId,
           }
         }
-        console.log(responseStructure.data);
-
-        StructureWinformService.findForm(key)
-          .then((res) => {
-            StructureWinformService.removeForm(key, responseStructure.data.properties.formTypeId)
-              .then((res) => {
-              })
-            let newForm: any = {};
-            newForm = {
-              referenceKey: formTypeId,
-            };
-            StructureWinformService.createForm(key, newForm)
-              .then((res) => {
-              })
-          }
-          )
-          .catch((err) => {
-            if (err.response.status === 404) {
-              let newForm: any = {};
-              newForm = {
-                referenceKey: formTypeId,
-              };
-              StructureWinformService.createForm(key, newForm)
-                .then((res) => {
-                })
-            }
-          }
-          )
 
         FacilityStructureService.update(responseStructure.data.id, updateNode)
           .then((res) => {
@@ -365,7 +335,7 @@ const SetJointSpace = () => {
               detail: "Structure Updated",
               life: 3000,
             });
-            getFacilityStructure();
+            getJointSpace();
           })
           .catch((err) => {
             toast.current.show({
@@ -400,7 +370,7 @@ const SetJointSpace = () => {
           detail: "Joint Space Deleted",
           life: 2000,
         });
-        getFacilityStructure();
+        getJointSpace();
         setSelectedNodeKey([]);
         setSelectedKeys([]);
       })
@@ -414,48 +384,21 @@ const SetJointSpace = () => {
       });
   };
 
-  const dragDropUpdate = (dragId: string, dropId: string) => {
-    FacilityStructureService.relation(dragId, dropId)
-      .then((res) => {
-        showSuccess("Structure Updated");
-        getFacilityStructure();
-      })
-      .catch((err) => {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
-        });
-      });
+  const findKeyName = (data: any) => {
+
+    setSelectedKeysName([])
+
+    if (data.length > 0) {
+      data.map((key: any) => {
+        FacilityStructureService.nodeInfo(key)
+          .then((res) => {
+            setSelectedKeysName(prev => [...prev, res.data.properties.Name||res.data.properties.name]);
+          })
+      }
+      )
+    }
   };
 
-  const findKeyName = (key: string) => {
-    FacilityStructureService.nodeInfo(key)
-      .then((res) => {
-        console.log(res.data);
-
-        setSelectedKeysName(res.data.properties.Name);
-      })
-      .catch((err) => {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
-        });
-      });
-  };
-
-  const dragConfirm = (dragId: string, dropId: string) => {
-    confirmDialog({
-      message: 'Are you sure you want to move?',
-      header: 'Confirmation',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => { setLoading(true); dragDropUpdate(dragId, dropId) },
-      reject: () => { setLoading(true); getFacilityStructure() }
-    });
-  }
 
   const showSuccess = (detail: string) => {
     toast.current.show({
@@ -655,49 +598,8 @@ const SetJointSpace = () => {
             style={{ width: '100%' }}
           />
         </div>
-
-
-        {/* <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
-          <InputText
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Facility Type</h5>
-          <TreeSelect
-            value={formTypeId}
-            options={formData}
-            onChange={(e) => {
-              setFormTypeId(e.value);
-              console.log(e);
-              let nodeKey: any = e.value;
-              FormTypeService.nodeInfo(nodeKey)
-                .then((res) => {
-                  console.log(res.data);
-                  setLabels([res.data.properties.name])
-                })
-                .catch((err) => {
-                  toast.current.show({
-                    severity: "error",
-                    summary: "Error",
-                    detail: err.response ? err.response.data.message : err.message,
-                    life: 2000,
-                  });
-                });
-            }}
-            filter
-            placeholder="Select Type"
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field structureChips">
-          <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
-          <Chips value={tag} onChange={(e) => setTag(e.value)} style={{ width: "100%" }} />
-        </div> */}
       </Dialog>
+
       <Dialog
         header="Edit Item"
         visible={editDia}
@@ -713,50 +615,6 @@ const SetJointSpace = () => {
           setSelectedFacilityType(undefined);
         }}
       >
-
-        {/* <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
-          <InputText
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Facility Type</h5>
-          <TreeSelect
-            value={formTypeId}
-            options={formData}
-            onChange={(e) => {
-              setFormTypeId(e.value);
-              let nodeKey: any = e.value;
-              FormTypeService.nodeInfo(nodeKey)
-                .then((res) => {
-                  console.log(res.data);
-                  setLabels([res.data.properties.name])
-                })
-                .catch((err) => {
-                  toast.current.show({
-                    severity: "error",
-                    summary: "Error",
-                    detail: err.response ? err.response.data.message : err.message,
-                    life: 2000,
-                  });
-                });
-            }}
-            filter
-            placeholder="Select Type"
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field structureChips">
-          <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
-          <Chips value={tag} onChange={(e) => setTag(e.value)} style={{ width: '100%' }} />
-        </div>
-        <div className="field flex">
-          <h5 style={{ marginBottom: "0.5em" }}>Is Active</h5>
-          <Checkbox className="ml-3" onChange={e => setIsActive(e.checked)} checked={isActive}></Checkbox>
-        </div> */}
       </Dialog>
 
       <Dialog
@@ -774,7 +632,7 @@ const SetJointSpace = () => {
       </Dialog>
       <h3>Joint Space</h3>
       <div>
-        <span style={{ fontWeight: "bold" }}>Selected Spaces:</span>{` ${selectedKeys} `}
+        <span style={{ fontWeight: "bold", fontSize: "16px" }}>Selected Spaces:{` ${selectedKeysName} `}</span>
 
         {selectedKeys.length > 1 &&
           <div className="mt-4">
@@ -790,28 +648,17 @@ const SetJointSpace = () => {
           loading={loading}
           value={data}
           dragdropScope="-"
-          onDragDrop={(event: any) => {
-            console.log(event);
-            if (event.value.length > 1) {
-              toast.current.show({
-                severity: "error",
-                summary: "Error",
-                detail: "You can't drag here.",
-                life: 1000,
-              });
-              return
-            }
-            dragConfirm(event.dragNode._id.low, event.dropNode._id.low)
-          }}
           filter
           filterBy="name,code,Name"
           filterPlaceholder="Search"
           selectionMode="checkbox"
           onSelectionChange={(event: any) => {
 
+            console.log(event);
 
             setSelectedNodeKey(event.value);
             setSelectedKeys(Object.keys(event.value));
+            findKeyName(Object.keys(event.value));
             // selectedKeys?.map((key) =>{findKeyName(key)});
           }
           }
@@ -841,10 +688,6 @@ const SetJointSpace = () => {
           </span>}
         />
       </div>
-
-
-
-
 
     </div>
   );

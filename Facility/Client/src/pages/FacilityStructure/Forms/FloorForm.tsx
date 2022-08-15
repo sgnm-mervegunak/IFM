@@ -114,7 +114,7 @@ const FloorForm = ({
                     toast.current.show({
                         severity: "success",
                         summary: "Successful",
-                        detail: "Structure Created",
+                        detail: "Floor Created",
                         life: 4000,
                     });
                     // let newForm: any = {};
@@ -159,7 +159,7 @@ const FloorForm = ({
                     toast.current.show({
                         severity: "success",
                         summary: "Successful",
-                        detail: "Structure Updated",
+                        detail: "Floor Updated",
                         life: 4000,
                     });
                     getFacilityStructure();
