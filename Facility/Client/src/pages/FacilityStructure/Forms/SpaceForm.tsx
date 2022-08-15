@@ -194,7 +194,7 @@ const SpaceForm = ({
         Tag: Tag,
         Images: Images,
         Status: Status,
-        NodeType: selectedFacilityType,
+        nodeType: selectedFacilityType,
       };
 
       FacilityStructureService.createStructure(selectedNodeKey, newNode)
@@ -269,7 +269,7 @@ const SpaceForm = ({
         Tag: Tag,
         Images: Images,
         Status: Status,
-        NodeType: selectedFacilityType,
+        nodeType: selectedFacilityType,
       };
 
       FacilityStructureService.update(selectedNodeKey, updateNode)

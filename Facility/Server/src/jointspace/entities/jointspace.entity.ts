@@ -24,5 +24,5 @@ export class JointSpace extends BaseGraphObject {
 
   nodeKeys: [];
 
-  NodeType: string = JointSpace.name;
+  nodeType: string = JointSpace.name;
 }

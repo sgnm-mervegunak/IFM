@@ -45,7 +45,7 @@ interface Node {
   className?: string;
   Name?: string;
   selectable?: boolean;
-  NodeType?: string;
+  nodeType?: string;
   isBlocked?: boolean;
 }
 
@@ -153,7 +153,7 @@ const SetJointSpace = () => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
       .then((res) => {
         console.log(res.data);
-        setSelectedFacilityType(res.data.properties.NodeType);
+        setSelectedFacilityType(res.data.properties.nodeType);
 
         // setName(res.data.properties.name || "");
         // setTag(res.data.properties.tag || []);
@@ -240,7 +240,7 @@ const SetJointSpace = () => {
       fixNodes(i.children)
       i.icon = "pi pi-fw pi-building";
       i.label = i.name || i.Name;
-      if ((i.NodeType === "Space" || i.NodeType === "JointSpace") && i.isBlocked !== true) {
+      if ((i.nodeType === "Space" || i.nodeType === "JointSpace") && i.isBlocked !== true) {
         i.selectable = true;
       } else {
         i.selectable = false;
@@ -670,7 +670,7 @@ const SetJointSpace = () => {
               <span className="ml-4 ">
 
                 {
-                  data.NodeType === "JointSpace" ? <Button
+                  data.nodeType === "JointSpace" ? <Button
                     icon="pi pi-trash" className="p-button-rounded p-button-secondary p-button-text" aria-label="Delete"
                     onClick={() => {
                       setDeleteNodeKey(data.key);

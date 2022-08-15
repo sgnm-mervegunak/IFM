@@ -12,7 +12,7 @@ const DisplayNode = ({ displayKey }: Params) => {
   const [type, setType] = useState<string>("");
   useEffect(() => {
     FacilityStructureService.nodeInfo(displayKey).then((res) => {
-      setType(res.data.properties.NodeType);
+      setType(res.data.properties.nodeType);
       setData(res.data.properties);
       console.log(res.data.properties);
     });
