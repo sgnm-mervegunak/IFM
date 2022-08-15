@@ -237,7 +237,7 @@ const FormGenerateStructure = ({
         selectedNodeKey
       );
 
-      let nodetype = formData.data.properties.NodeType;
+      let nodetype = formData.data.properties.nodeType;
 
       setNodeType(nodetype);
       FacilityTypePropertiesService.getFacilityTypeProperties(
@@ -336,10 +336,10 @@ const FormGenerateStructure = ({
     //   data: data,
     // };
     if (editDia === false) {
-      data.NodeType = selectedFacilityType;
+      data.nodeType = selectedFacilityType;
       addItem(data);
     } else {
-      data.NodeType = nodeType;
+      data.nodeType = nodeType;
       editItem(data);
     }
   };

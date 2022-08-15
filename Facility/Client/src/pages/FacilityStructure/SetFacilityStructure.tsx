@@ -152,7 +152,7 @@ const SetFacilityStructure = () => {
   const getNodeInfoAndEdit = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
       .then((res) => {
-        setSelectedFacilityType(res.data.properties.NodeType);
+        setSelectedFacilityType(res.data.properties.nodeType);
       })
       .catch((err) => {
         toast.current.show({

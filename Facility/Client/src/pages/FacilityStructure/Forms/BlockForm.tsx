@@ -107,7 +107,7 @@ const BlockForm = ({
                 Tag: Tag,
                 Description: Description,
                 ProjectName: ProjectName,
-                NodeType: selectedFacilityType,
+                nodeType: selectedFacilityType,
             };
 
             console.log(newNode);
@@ -155,7 +155,7 @@ const BlockForm = ({
                 Tag: Tag,
                 Description: Description,
                 ProjectName: ProjectName,
-                NodeType: selectedFacilityType,
+                nodeType: selectedFacilityType,
             };
 
             FacilityStructureService.update(selectedNodeKey, updateNode)

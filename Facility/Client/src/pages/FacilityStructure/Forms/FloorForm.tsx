@@ -106,7 +106,7 @@ const FloorForm = ({
                 Tag: Tag,
                 Description: Description,
                 ProjectName: ProjectName,
-                NodeType: selectedFacilityType,
+                nodeType: selectedFacilityType,
             };
 
             FacilityStructureService.createStructure(selectedNodeKey, newNode)
@@ -151,7 +151,7 @@ const FloorForm = ({
                 Tag: Tag,
                 Description: Description,
                 ProjectName: ProjectName,
-                NodeType: selectedFacilityType,
+                nodeType: selectedFacilityType,
             };
 
             FacilityStructureService.update(selectedNodeKey, updateNode)

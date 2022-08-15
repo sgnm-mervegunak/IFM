@@ -174,7 +174,7 @@ const JointSpace = () => {
         responsiveLayout="scroll"
       >
         <Column field="Name" header="Name" sortable></Column>
-        <Column field="NodeType" header="Facility Type" sortable></Column>
+        <Column field="nodeType" header="Facility Type" sortable></Column>
       </DataTable>
       <Dialog
         header="Add New Facility Structure"
