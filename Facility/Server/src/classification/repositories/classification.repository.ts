@@ -86,13 +86,13 @@ export class ClassificationRepository implements classificationInterface<Classif
   async delete(_id: string) {
     try {
       let deletedNode;
-      const hasChildren = await this.neo4jService.findChildrenById(_id);
-      if (hasChildren['records'].length == 0) {
-        deletedNode = await this.neo4jService.delete(_id);
-      } else {
-        throw new HttpException(has_children_error, 400);
-      }
-
+      // const hasChildren = await this.neo4jService.findChildrenById(_id);
+      // if (hasChildren['records'].length == 0) {
+      //   deletedNode = await this.neo4jService.delete(_id);
+      // } else {
+      //   throw new HttpException(has_children_error, 400);
+      // }
+      deletedNode = await this.neo4jService.delete(_id);
       return deletedNode;
     } catch (error) {
       if (error.response?.code == CustomTreeError.HAS_CHILDREN) {
