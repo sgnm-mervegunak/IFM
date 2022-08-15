@@ -7,7 +7,7 @@ export class BaseJointSpacesObject {
   isDeleted = false;
   canDelete = false;
   canDisplay = false;
-  name = 'Joinet Space'
+  name = 'Joint Space'
 }
 function generateUuid() {
   return uuidv4();

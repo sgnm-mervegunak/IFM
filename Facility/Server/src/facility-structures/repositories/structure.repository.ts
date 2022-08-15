@@ -86,8 +86,8 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       throw new FacilityStructureNotFountException(key);
     }
     const structureRootNode=await this.neo4jService.findStructureRootNode(key, 'FacilityStructure');
-    //const properties = this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['NodeType']);
-    const properties = await this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['NodeType']);
+    //const properties = this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['nodeType']);
+    const properties = await this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['nodeType']);
     let proper = {};
     Object.keys(properties).forEach((element) => { 
       let prop = properties[element]['label'].split(' ');
@@ -98,7 +98,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       properties[element]['label']= pro;
     });
     Object.keys(structureData).forEach((property) => {
-      if (property != 'NodeType') {
+      if (property != 'nodeType') {
         let i = 0;
         Object.keys(properties).forEach((element) => {
           if (property == properties[element]['label']) {
@@ -106,7 +106,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
           }
         });
         if (i == 0) {
-          throw new WrongFacilityStructurePropsExceptions(structureData['NodeType']);
+          throw new WrongFacilityStructurePropsExceptions(structureData['nodeType']);
         }
       }
     });
@@ -141,7 +141,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
 
       const hasChildren = await this.neo4jService.findChildrenById(_id);
       let canDelete = false;
-      if (node['properties']['NodeType']  == 'Building' && hasChildren['records'].length == 1 && hasChildren['records'][0]['_fields'][0]["labels"][0] == 'JointSpaces') {
+      if (node['properties']['nodeType']  == 'Building' && hasChildren['records'].length == 1 && hasChildren['records'][0]['_fields'][0]["labels"][0] == 'JointSpaces') {
          canDelete = true;
       }
 
@@ -161,7 +161,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
         }
       }
       else {
-        throw new FacilityStructureDeleteExceptions(node['properties']['NodeType']);
+        throw new FacilityStructureDeleteExceptions(node['properties']['nodeType']);
       }
       return deletedNode;
     // } catch (error) {
@@ -259,19 +259,19 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     
     const isExist=allowedStructures.records.filter(allowedStructure=>{
       console.log(allowedStructure['_fields'])
-      if(allowedStructure['_fields'][0].properties.name===structureData['NodeType']){
+      if(allowedStructure['_fields'][0].properties.name===structureData['nodeType']){
         return allowedStructure
       }
     })
     if(!isExist.length){
-      throw new WrongFacilityStructureExceptions(structureData['NodeType'],node.properties["NodeType"]);
+      throw new WrongFacilityStructureExceptions(structureData['nodeType'],node.properties["nodeType"]);
       //throw new HttpException('Yapıyı Bu şekilde oluşturamazsınız1',400)
     }
 
   ////////////////////////////// Control of input properties with facility type properties //////////////////////////////////////////////////
 
-    //const properties = this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['NodeType']);
-    const properties = await this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['NodeType']);
+    //const properties = this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['nodeType']);
+    const properties = await this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['nodeType']);
     let proper = {};
     Object.keys(properties).forEach((element) => { 
       let prop = properties[element]['label'].split(' ');
@@ -282,7 +282,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       properties[element]['label']= pro;
     });
     Object.keys(structureData).forEach((property) => {
-      if (property != 'NodeType') {
+      if (property != 'nodeType') {
         let i = 0;
         Object.keys(properties).forEach((element) => {
           if (property == properties[element]['label']) {
@@ -290,7 +290,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
           }
         });
         if (i == 0) {
-          throw new WrongFacilityStructurePropsExceptions(structureData['NodeType']);
+          throw new WrongFacilityStructurePropsExceptions(structureData['nodeType']);
           //throw new HttpException('Yapıyı Bu şekilde oluşturamazsınız2',400)
         }
       }
@@ -299,7 +299,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
 
     let baseFacilityObject = new BaseFacilityObject();
     baseFacilityObject = assignDtoPropToEntity(baseFacilityObject, structureData);
-    const createNode = await this.neo4jService.createNode(baseFacilityObject, [structureData['NodeType']]);
+    const createNode = await this.neo4jService.createNode(baseFacilityObject, [structureData['nodeType']]);
     //create PARENT_OF relation between parent facility structure node and child facility structure node.
     await this.neo4jService.addRelationWithRelationNameByKey(key, createNode.properties.key, RelationName.PARENT_OF);
     let jointSpaces = new JointSpaces();
