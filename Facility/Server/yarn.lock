@@ -5367,10 +5367,17 @@ ieee754@^1.1.13, ieee754@^1.2.1:
   resolved "https://registry.npmjs.org/ieee754/-/ieee754-1.2.1.tgz"
   integrity sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==
 
+<<<<<<< HEAD
 ifmcommon@^0.0.38:
   version "0.0.38"
   resolved "https://registry.npmjs.org/ifmcommon/-/ifmcommon-0.0.38.tgz"
   integrity sha512-T3XJ8HB6mZykdZG6a4/XscYZSgu58QU3EnumUudaxbPPmo3JFGlY+Hf7OdYDkWK7dlT13Fps2SVSZiQ+6Ypetw==
+=======
+"ifmcommon@^0.0.41":
+  "integrity" "sha512-R5hqBhWlaQnKCIq2fI0wxyB7D+A1MAhnVzLADOxyKZxbga3z565LtDaF4qqKU6bZfVAfMX7A9NrNPefQj9A9kQ=="
+  "resolved" "https://registry.npmjs.org/ifmcommon/-/ifmcommon-0.0.41.tgz"
+  "version" "0.0.41"
+>>>>>>> develop_gecis
   dependencies:
     "@nestjs/common" "^8.0.0"
     "@nestjs/config" "^2.2.0"

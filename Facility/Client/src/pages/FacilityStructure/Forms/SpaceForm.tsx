@@ -15,7 +15,7 @@ import axios from "axios";
 
 import ClassificationsService from "../../../services/classifications";
 import FacilityStructureService from "../../../services/facilitystructure";
-import FileUploadComponent from "./FileUpload/FileUpload";
+import ImageUploadComponent from "./FileUpload/ImageUpload/ImageUpload";
 
 interface Params {
   selectedFacilityType: string | undefined;
@@ -117,6 +117,7 @@ const SpaceForm = ({
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodes(temp);
+      temp[0].selectable = false
       setclassificationStatus(temp);
     });
   };
@@ -215,12 +216,21 @@ const SpaceForm = ({
           for (let item in uploadFiles) {
             temp[item] = [];
             for (let file of uploadFiles[item]) {
-              let resFile = await UploadAnyFile(
-                res.data.properties.key + "/" + item,
-                file
-              );
-              delete resFile.data.message;
-              temp[item].push(resFile.data);
+              if (file.isImage) {
+                let resFile = await UploadAnyFile(
+                  res.data.properties.key + "/" + item,
+                  file.file
+                );
+                delete resFile.data.message;
+                temp[item].push({ ...resFile.data, main: file.main });
+              } else {
+                let resFile = await UploadAnyFile(
+                  res.data.properties.key + "/" + item,
+                  file.file
+                );
+                delete resFile.data.message;
+                temp[item].push({...resFile.data, type: file.type});
+              }
             }
           }
           for (let item in temp) {
@@ -271,13 +281,26 @@ const SpaceForm = ({
             life: 4000,
           });
           // upload files
-          let temp = {} as any
-          for(let item in uploadFiles) {
-            temp[item] = []
-            for(let file of uploadFiles[item]) {
-              let resFile = await UploadAnyFile(selectedNodeKey+"/"+item,file)
-              delete resFile.data.message
-              temp[item].push(resFile.data)
+          let temp = {} as any;
+          for (let item in uploadFiles) {
+            temp[item] = [];
+            for (let file of uploadFiles[item]) {
+              if (file.isImage) {
+                let resFile = await UploadAnyFile(
+                  res.data.properties.key + "/" + item,
+                  file.file
+                );
+                delete resFile.data.message;
+                temp[item].push({ ...resFile.data, main: file.main });
+              } else {
+                let resFile = await UploadAnyFile(
+                  res.data.properties.key + "/" + item,
+                  file.file
+                );
+                delete resFile.data.message;
+                console.log(resFile)
+                temp[item].push({...resFile.data, type: file.type});
+              }
             }
           }
           for(let item in temp){
@@ -399,8 +422,7 @@ const SpaceForm = ({
       </div>
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Images</h5>
-        <FileUploadComponent
-          isImage
+        <ImageUploadComponent
           label={"Images"}
           value={Images}
           onChange={setImages}
