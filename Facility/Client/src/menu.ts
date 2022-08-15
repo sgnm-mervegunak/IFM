@@ -16,7 +16,7 @@ export default [
         icon: "pi pi-fw pi-building",
         to: "/facilitystructure",
       },
-      { label: "JointSpace", icon: "pi pi-th-large", to: "/jointspace" },
+      { label: "Joint Space", icon: "pi pi-th-large", to: "/jointspace" },
       { label: "Contact", icon: "pi pi-id-card", to: "/contact" },
       {
         label: "Structure-Asset",

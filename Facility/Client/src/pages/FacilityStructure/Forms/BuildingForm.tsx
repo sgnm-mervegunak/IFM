@@ -236,7 +236,7 @@ const BuildingForm = ({
           toast.current.show({
             severity: "success",
             summary: "Successful",
-            detail: "Structure Created",
+            detail: "Building Created",
             life: 4000,
           });
           // let newForm: any = {};
@@ -318,7 +318,7 @@ const BuildingForm = ({
           toast.current.show({
             severity: "success",
             summary: "Successful",
-            detail: "Structure Updated",
+            detail: "Building Updated",
             life: 4000,
           });
           // upload files

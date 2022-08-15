@@ -16,8 +16,6 @@ import FacilityStructureService from "../../services/facilitystructure";
 import FormTypeService from "../../services/formType";
 import StructureWinformService from "../../services/structureWinform";
 import { useAppSelector } from "../../app/hook";
-
-import axios from "axios";
 import FormGenerate from "../FormGenerate/FormGenerate";
 import BuildingForm from "./Forms/BuildingForm";
 import BlockForm from "./Forms/BlockForm";
@@ -104,7 +102,7 @@ const SetFacilityStructure = () => {
   const [isUpdate, setIsUpdate] = useState(false);
   const [display, setDisplay] = useState(false);
   const [displayKey, setDisplayKey] = useState("");
-  const {toast} = useAppSelector(state => state.toast);
+  const { toast } = useAppSelector(state => state.toast);
 
   useEffect(() => {
     FacilityStructureService.getFacilityTypes("FacilityTypes_EN", realm)
@@ -200,8 +198,6 @@ const SetFacilityStructure = () => {
 
   const getFacilityStructure = () => {
     FacilityStructureService.findOne(realm).then((res) => {
-      console.log(res.data);
-
 
       if (!res.data.root.children) {
         setData([res.data.root.properties] || []);
@@ -246,203 +242,28 @@ const SetFacilityStructure = () => {
     }
   };
 
-  const addItem = (key: string) => {
-    let newNode: any = {};
-    FacilityStructureService.nodeInfo(key)
-      .then((res) => {
-        console.log(res.data);
-        if (labels.length > 0) {
-          newNode = {
-            key: uuidv4(),
-            parentId: res.data.id,
-            name: name,
-            tag: tag,
-            description: "",
-            // labels: optionalLabels[0]?.replace(/ /g, '').split(",") || [],
-            labels: [labels[0]],
-            formTypeId: formTypeId,
-          };
-        } else {
-          newNode = {
-            key: uuidv4(),
-            parentId: res.data.id,
-            name: name,
-            tag: tag,
-            description: "",
-            formTypeId: formTypeId,
-            // labels: optionalLabels[0]?.replace(/ /g, '').split(",") || [],
-          };
-        }
-
-        FacilityStructureService.create(newNode)
-          .then((res) => {
-            toast.current.show({
-              severity: "success",
-              summary: "Successful",
-              detail: "Structure Created",
-              life: 4000,
-            });
-            let newForm: any = {};
-            newForm = {
-              referenceKey: formTypeId,
-            };
-            StructureWinformService.createForm(res.data.properties.key, newForm)
-              .then((res) => {
-              })
-            getFacilityStructure();
-          })
-          .catch((err) => {
-            toast.current.show({
-              severity: "error",
-              summary: "Error",
-              detail: err.response ? err.response.data.message : err.message,
-              life: 4000,
-            });
-          });
-
-      })
-      .catch((err) => {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: err.response ? err.response.data.message : err.message,
-          life: 4000,
-        });
-      });
-    setName("");
-    setTag([]);
-    setFormTypeId(undefined);
-    setAddDia(false);
-    setLabels([]);
-  };
-
-  const editItem = (key: string) => {
-    let updateNode: any = {};
-    FacilityStructureService.nodeInfo(key)
-      .then((responseStructure) => {
-        if (labels.length > 0) {
-          updateNode = {
-            name: name,
-            tag: tag,
-            isActive: isActive,
-            description: "",
-            labels: [labels[0]],
-            formTypeId: formTypeId,
-          };
-        } else {
-          updateNode = {
-            name: name,
-            tag: tag,
-            isActive: isActive,
-            description: "",
-            formTypeId: formTypeId,
-          }
-        }
-        console.log(responseStructure.data);
-
-        StructureWinformService.findForm(key)
-          .then((res) => {
-            StructureWinformService.removeForm(key, responseStructure.data.properties.formTypeId)
-              .then((res) => {
-              })
-            let newForm: any = {};
-            newForm = {
-              referenceKey: formTypeId,
-            };
-            StructureWinformService.createForm(key, newForm)
-              .then((res) => {
-              })
-          }
-          )
-          .catch((err) => {
-            if (err.response.status === 404) {
-              let newForm: any = {};
-              newForm = {
-                referenceKey: formTypeId,
-              };
-              StructureWinformService.createForm(key, newForm)
-                .then((res) => {
-                })
-            }
-          }
-          )
-
-        FacilityStructureService.update(responseStructure.data.id, updateNode)
-          .then((res) => {
-            toast.current.show({
-              severity: "success",
-              summary: "Successful",
-              detail: "Structure Updated",
-              life: 4000,
-            });
-            getFacilityStructure();
-          })
-          .catch((err) => {
-            toast.current.show({
-              severity: "error",
-              summary: "Error",
-              detail: err.response ? err.response.data.message : err.message,
-              life: 4000,
-            });
-          });
-      })
-      .catch((err) => {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: err.response ? err.response.data.message : err.message,
-          life: 4000,
-        });
-      });
-    setName("");
-    setTag([]);
-    setFormTypeId(undefined);
-    setLabels([]);
-    setEditDia(false);
-  }
 
   const deleteItem = (key: string) => {
     FacilityStructureService.nodeInfo(key)
       .then((res) => {
-        if (res.data.properties.hasParent === false) {
-          FacilityStructureService.remove(res.data.id)
-            .then(() => {
-              toast.current.show({
-                severity: "success",
-                summary: "Success",
-                detail: "Structure Deleted",
-                life: 4000,
-              });
-              navigate("/facilitystructure")
-            })
-            .catch((err) => {
-              toast.current.show({
-                severity: "error",
-                summary: "Error",
-                detail: err.response ? err.response.data.message : err.message,
-                life: 4000,
-              });
+        FacilityStructureService.remove(res.data.id)
+          .then(() => {
+            toast.current.show({
+              severity: "success",
+              summary: "Success",
+              detail: "Structure Deleted",
+              life: 4000,
             });
-        } else {
-          FacilityStructureService.remove(res.data.id)
-            .then(() => {
-              toast.current.show({
-                severity: "success",
-                summary: "Success",
-                detail: "Structure Deleted",
-                life: 4000,
-              });
-              getFacilityStructure();
-            })
-            .catch((err) => {
-              toast.current.show({
-                severity: "error",
-                summary: "Error",
-                detail: err.response ? err.response.data.message : err.message,
-                life: 4000,
-              });
+            getFacilityStructure();
+          })
+          .catch((err) => {
+            toast.current.show({
+              severity: "error",
+              summary: "Error",
+              detail: err.response ? err.response.data.message : err.message,
+              life: 4000,
             });
-        }
+          });
       })
       .catch((err) => {
         toast.current.show({
@@ -497,11 +318,7 @@ const SetFacilityStructure = () => {
           icon="pi pi-times"
           onClick={() => {
             setAddDia(false);
-            setName("");
-            setFormTypeId(undefined);
-            setLabels([]);
-            setTag([]);
-
+            // setFormTypeId(undefined);
             setSelectedFacilityType(undefined);
           }}
           className="p-button-text"
@@ -524,11 +341,7 @@ const SetFacilityStructure = () => {
           icon="pi pi-times"
           onClick={() => {
             setEditDia(false);
-            setName("");
-            setTag([]);
-            setLabels([]);
-            setFormTypeId(undefined);
-
+            // setFormTypeId(undefined);
             setSelectedFacilityType(undefined);
           }}
           className="p-button-text"
@@ -575,12 +388,7 @@ const SetFacilityStructure = () => {
         style={{ width: "40vw" }}
         footer={renderFooterAdd}
         onHide={() => {
-          setName("");
-          setTag([]);
-          setFormTypeId(undefined);
-          setLabels([]);
           setAddDia(false);
-
           setSelectedFacilityType(undefined);
         }}
       >
@@ -694,12 +502,7 @@ const SetFacilityStructure = () => {
         style={{ width: "40vw" }}
         footer={renderFooterEdit}
         onHide={() => {
-          setName("");
-          setTag([]);
-          setFormTypeId(undefined);
-          setLabels([]);
           setEditDia(false);
-
           setSelectedFacilityType(undefined);
         }}
       >

@@ -202,7 +202,7 @@ const SpaceForm = ({
           toast.current.show({
             severity: "success",
             summary: "Successful",
-            detail: "Structure Created",
+            detail: "Space Created",
             life: 4000,
           });
           // let newForm: any = {};
@@ -277,7 +277,7 @@ const SpaceForm = ({
           toast.current.show({
             severity: "success",
             summary: "Successful",
-            detail: "Structure Updated",
+            detail: "Space Updated",
             life: 4000,
           });
           // upload files
