@@ -84,4 +84,15 @@ export class ClassificationService {
     return await this.classificationRepository.getAClassificationByRealmAndLabelNameAndLanguage(realm,labelName, language);
   }
   
+  @Span('add a classification list from a excel file as name')
+  @OtelMethodCounter()
+  async addAClassificationFromExcel(file: Express.Multer.File, realm: string, language: string){
+    return await this.classificationRepository.addAClassificationFromExcel(file, realm, language);
+  }
+
+  @Span('add a classification list from a excel file as code-name')
+  @OtelMethodCounter()
+  async addAClassificationWithCodeFromExcel(file: Express.Multer.File, realm: string, language: string){
+    return await this.classificationRepository.addAClassificationWithCodeFromExcel(file, realm, language);
+  }
 }

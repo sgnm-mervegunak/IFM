@@ -7,5 +7,6 @@ export interface classificationInterface<T> extends GeciciInterface<T> {
   getClassificationByIsActiveStatus(realm: string,language: string): any;
   getClassificationsByLanguage(realm: string,language: string): any;
   getAClassificationByRealmAndLabelNameAndLanguage(realm: string,labelName: string,language: string): any;
-
+  addAClassificationFromExcel(file: Express.Multer.File, realm: string, language: string)
+  addAClassificationWithCodeFromExcel(file: Express.Multer.File, realm: string, language: string)
 }

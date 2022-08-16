@@ -6,12 +6,12 @@ import { CreateClassificationDto } from '../dto/create-classification.dto';
 import { UpdateClassificationDto } from '../dto/update-classification.dto';
 import { Classification } from '../entities/classification.entity';
 import { ClassificationNotFountException } from 'src/common/notFoundExceptions/not.found.exception';
-
-import { has_children_error } from 'src/common/const/custom.error.object';
 import { CustomTreeError } from 'src/common/const/custom.error.enum';
 import { createDynamicCyperObject, Neo4jService } from 'sgnm-neo4j/dist';
 import { classificationInterface } from 'src/common/interface/classification.interface';
 import { I18NEnums } from 'ifmcommon/dist';
+const exceljs = require('exceljs');
+const { v4: uuidv4 } = require('uuid');
 
 @Injectable()
 export class ClassificationRepository implements classificationInterface<Classification> {
@@ -279,5 +279,80 @@ export class ClassificationRepository implements classificationInterface<Classif
     let result = await this.neo4jService.changeObjectChildOfPropToChildren(root);
     console.log(result);
     return result;
+  }
+
+
+
+  async addAClassificationFromExcel( file: Express.Multer.File, realm: string, language: string) {
+
+    let data;
+
+  let buffer = new Uint8Array(file.buffer);
+  const workbook = new exceljs.Workbook();
+
+  await workbook.xlsx.load(buffer).then(function async(book) {
+    const firstSheet =  book.getWorksheet(1);
+      data=firstSheet.getColumn(1).values.filter((e)=>(e!=null));
+
+ })
+
+  function key(){
+    return uuidv4()
+    }
+    let cypher=`MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) MERGE (n:${data[0]}_${language} {isRoot:true,isActive:true,name:"${data[0]}",isDeleted:false,key:"${key()}",canDelete:true,realm:"${realm}",canDisplay:true}) MERGE (c)-[:PARENT_OF]->(n)`
+   
+  
+    await this.neo4jService.write(cypher)
+
+  for (let i = 1; i < data.length; i++) {
+    function key2(){
+      return uuidv4()
+      }
+    let cypher2=`MATCH (m:${data[0]}_${language})  MERGE (n {name:"${data[i]}",key:"${key2()}",isActive:true,isDeleted:false,canDelete:true}) MERGE (m)-[:PARENT_OF]->(n) `
+    await this.neo4jService.write(cypher2)
+   
+  }
+  }
+
+
+
+  async addAClassificationWithCodeFromExcel(file: Express.Multer.File, realm: string,language: string) {
+
+    let data=[];
+
+
+ let buffer = new Uint8Array(file.buffer);
+ const workbook = new exceljs.Workbook();
+
+ await workbook.xlsx.load(buffer).then(function async(book) {
+   const firstSheet =  book.getWorksheet(1);
+
+
+    for (let i = 1; i <= 2; i++) {
+      data.push(firstSheet.getColumn(i).values.filter((e)=>(e!=null)));
+    
+   }
+
+})
+
+ function key(){
+   return uuidv4()
+   }
+
+console.log(data)
+  
+    let cypher=`MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) MERGE (n:${data[1][0]}_${language} {isRoot:true,isActive:true,name:"${data[1][0]}",isDeleted:false,key:"${key()}",canDelete:true,realm:"${realm}",canDisplay:true}) MERGE (c)-[:PARENT_OF]->(n)`
+  
+ 
+   let asda=await this.neo4jService.write(cypher)
+console.log(asda)
+ for (let i = 1; i < data[1].length; i++) {
+   function key2(){
+     return uuidv4()
+     }
+   let cypher2=`MATCH (m:${data[1][0]}_${language})  MERGE (n {code:"${data[0][i]}",name:"${data[1][i]}",key:"${key2()}",isActive:true,isDeleted:false,canDelete:true}) MERGE (m)-[:PARENT_OF]->(n) `
+   let returnData=await this.neo4jService.write(cypher2)
+   console.log(returnData)
+ }
   }
 }

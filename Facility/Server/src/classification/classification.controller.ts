@@ -1,11 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles, Unprotected } from 'nest-keycloak-connect';
 import { PaginationNeo4jParams } from 'src/common/commonDto/pagination.neo4j.dto';
 import { NoCache } from 'ifmcommon';
 import { ClassificationService } from './classification.service';
 import { CreateClassificationDto } from './dto/create-classification.dto';
 import { UpdateClassificationDto } from './dto/update-classification.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Classification')
 @ApiBearerAuth('JWT-auth')
@@ -81,4 +82,49 @@ export class ClassificationController {
   async getAClassificationByRealmAndLabelNameAndLanguage(@Param('realm') realm:string,@Param('labelName') labelName:string,@Param('language') language:string){
     return this.classificationService.getAClassificationByRealmAndLabelNameAndLanguage(realm,labelName, language);
   }
+
+  @Unprotected()
+  @Post('addAClassificationFromExcel/:realm/:language')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        }
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({
+    summary: 'Upload a single excel file',
+  })
+  @ApiConsumes('multipart/form-data')
+ async addAClassificationFromExcel(@UploadedFile() file: Express.Multer.File, @Param('realm') realm: string, @Param('language') language: string){
+  return this.classificationService.addAClassificationFromExcel(file, realm, language);
+ }
+
+
+ @Unprotected()
+  @Post('addAClassificationWithCodeFromExcel/:realm/:language')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        }
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({
+    summary: 'Upload a single excel file',
+  })
+  @ApiConsumes('multipart/form-data')
+ async addAClassificationWithCodeFromExcel(@UploadedFile() file: Express.Multer.File, @Param('realm') realm: string, @Param('language') language: string){
+  return this.classificationService.addAClassificationWithCodeFromExcel(file, realm, language);
+ }
 }
