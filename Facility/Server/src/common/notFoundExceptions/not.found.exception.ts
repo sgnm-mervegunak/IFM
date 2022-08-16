@@ -6,7 +6,7 @@ export function FacilityNotFountException(id) {
 }
 
 export function FacilityStructureNotFountException(id) {
-  throw new HttpException({ key: I18NEnums.FACILITY_NOT_FOUND, args: { id: id } }, HttpStatus.NOT_FOUND);
+  throw new HttpException({ key: I18NEnums.FACILITY_STRUCTURE_NOT_FOUND, args: { id: id } }, HttpStatus.NOT_FOUND);
 }
 
 export function ClassificationNotFountException(id) {
@@ -36,4 +36,7 @@ export function AssetNotFoundException(id) {
 
 export function RelationNotFoundException(id) {
   throw new HttpException({ key: I18NEnums.ASSET_NOT_FOUND, args: { id: id } }, HttpStatus.NOT_FOUND);
+}
+export function ParentFacilityStructureNotFountException(id) {
+  throw new HttpException({ key: I18NEnums.PARENT_FACILITY_STRUCTURE_NOT_FOUND, args: { id: id } }, HttpStatus.NOT_FOUND);
 }

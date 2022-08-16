@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { FacilityStructureNotFountException } from '../../common/notFoundExceptions/not.found.exception';
+import { FacilityStructureNotFountException, ParentFacilityStructureNotFountException } from '../../common/notFoundExceptions/not.found.exception';
 import { CreateFacilityStructureDto } from '../dto/create-facility-structure.dto';
 import { UpdateFacilityStructureDto } from '../dto/update-facility-structure.dto';
 import { FacilityStructure } from '../entities/facility-structure.entity';
@@ -18,6 +18,9 @@ import * as moment from 'moment';
 import { copyFile } from 'fs';
 import { JointSpaces } from '../entities/joint-spaces.entity';
 import { FacilityStructureDeleteExceptions, WrongFacilityStructureExceptions, WrongFacilityStructurePropsExceptions } from 'src/common/badRequestExceptions/bad.request.exception';
+import { I18NEnums } from 'src/common/const/i18n.enum';
+import { has_children_error } from 'src/common/const/custom.error.object';
+import { CustomTreeError } from 'src/common/const/custom.error.enum';
 
 
 @Injectable()
@@ -132,20 +135,23 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
 
 
   async delete(_id: string) {
-    //try {
-      
+    try {
       const node = await this.neo4jService.findByIdWithoutVirtualNode(_id);
-      
       await this.neo4jService.getParentById(_id);
-      let deletedNode;
-
       const hasChildren = await this.neo4jService.findChildrenById(_id);
       let canDelete = false;
-      if (node['properties']['nodeType']  == 'Building' && hasChildren['records'].length == 1 && hasChildren['records'][0]['_fields'][0]["labels"][0] == 'JointSpaces') {
-         canDelete = true;
+      if (hasChildren['records'].length == 0) {
+        canDelete = true;    
       }
-
-      if (hasChildren['records'].length == 0 || canDelete) {
+      else if (node['properties']['nodeType']  == 'Building' && hasChildren['records'].length == 1 &&
+                                                                  hasChildren['records'][0]['_fields'][0]["labels"][0] == 'JointSpaces') {
+        canDelete = true;
+      }
+      if (!canDelete) {
+        throw new HttpException(has_children_error, 400);
+        
+      }
+      else {
         const hasAssetRelation = await this.neo4jService.findNodesWithRelationNameById(_id, 'HAS');
         if (hasAssetRelation.length > 0) {
           await this.kafkaService.producerSendMessage(
@@ -154,27 +160,29 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
             JSON.stringify({ referenceKey: node.properties.key }),
           );
         }
-
+        let deletedNode;
         deletedNode = await this.neo4jService.delete(_id);
         if (!deletedNode) {
           throw new FacilityStructureNotFountException(_id);
         }
+        return deletedNode;
+      }
+    } catch (error) {
+
+      const { code, message } = error.response;
+      if (code === CustomNeo4jError.NOT_FOUND) {
+        throw new FacilityStructureNotFountException(_id);
+      }
+      else if (code === CustomNeo4jError.PARENT_NOT_FOUND) {
+        throw new ParentFacilityStructureNotFountException(_id);
+      }
+      else if (code === CustomTreeError.HAS_CHILDREN) {
+        throw new FacilityStructureDeleteExceptions(_id);
       }
       else {
-        throw new FacilityStructureDeleteExceptions(node['properties']['nodeType']);
-      }
-      return deletedNode;
-    // } catch (error) {
-    //   console.log(error);
-    //   const { code, message } = error.response;
-    //   if (code === CustomNeo4jError.HAS_CHILDREN) {
-    //     nodeHasChildException(_id);
-    //   } else if (code === 5005) {
-    //     FacilityStructureNotFountException(_id);
-    //   } else {
-    //     throw new HttpException(message, code);
-    //   }
-    //}
+           throw new HttpException(message, code);
+     }
+    }
   }
 
   async changeNodeBranch(_id: string, _target_parent_id: string) {
