@@ -21,17 +21,17 @@ const DisplayNode = ({ displayKey }: Params) => {
       setData(res.data.properties);
       console.log(res.data.properties);
     })
-    
+
   }, [displayKey]);
 
   return (
     <div>
-      <h4>Name</h4>
+      <h5 className="field">Name</h5>
       <p>{data?.name}</p>
       {data &&
         Object.keys(data).sort().map((key, index) => {
-          if (data[key] != "" && key!="key" && key!="Key") {
-            
+          if (data[key] != "" && key != "key" && key != "Key") {
+
             data[key].toString();
             if (key === "Tag" || key === "tag") {
               return (
@@ -104,7 +104,7 @@ const DisplayNode = ({ displayKey }: Params) => {
                   <p>{status}</p>
                 </div>
               );
-            } else if (typeof data[key] === "string") {
+            } else if (typeof data[key] === "string" && key != "name") {
               const parsed = key.replace(/([A-Z])/g, " $1"); //parse key value
               const title = parsed.charAt(0).toUpperCase() + parsed.slice(1); //toUpperCase
               return (
