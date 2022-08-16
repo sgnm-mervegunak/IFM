@@ -10,7 +10,7 @@ import Classifications from "./pages/Classifications/Classifications";
 import { NotFound } from "./layouts/App/pages/NotFound";
 import SetClassificationAdmin from "./pages/Classifications/SetClassificationAdmin";
 import FacilityFileImport from "./pages/FacilityFileImport";
-import ClassificationFileImport from "./pages/ClassificationFileImport";
+import ClassificationFileImportWithCode from "./pages/Classifications/ClassificationFileImportWithCode";
 import FacilityStructure from "./pages/FacilityStructure/FacilityStructure";
 import SetFacilityStructure from "./pages/FacilityStructure/SetFacilityStructure";
 import FormGenerate from "./pages/FormGenerate/FormGenerate";
@@ -23,6 +23,7 @@ import SetClassificationUser from "./pages/Classifications/SetClassificationUser
 import SetFacilityStructure2 from "./pages/FacilityStructure/SetFacilityStructure2";
 import JointSpace from "./pages/JointSpace/JointSpace";
 import SetJointSpace from "./pages/JointSpace/SetJointSpace";
+import ClassificationFileImportWithoutCode from "./pages/Classifications/ClassificationFileImportWithoutCode";
 
 // import Main from './pages/Main';
 
@@ -64,7 +65,12 @@ export default function Router() {
     {
       path: "/classifications",
       element: <AppLayout />,
-      children: [{ path: "fileimport", element: <ClassificationFileImport /> }],
+      children: [{ path: "fileimportwithcode", element: <ClassificationFileImportWithCode /> }],
+    },
+    {
+      path: "/classifications",
+      element: <AppLayout />,
+      children: [{ path: "fileimportwithoutcode", element: <ClassificationFileImportWithoutCode /> }],
     },
     // {
     //   path: "/formgenerate",

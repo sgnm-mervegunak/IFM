@@ -423,7 +423,7 @@ const SpaceForm = ({
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Images</h5>
         <ImageUploadComponent
-          label={"Images"}
+          label={"images"}
           value={images}
           onChange={setImages}
           deleteFiles={deleteFiles}

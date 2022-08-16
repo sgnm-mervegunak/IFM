@@ -255,7 +255,7 @@ const SetJointSpace = () => {
     newNode = {
       ArchitecturalName: ArchitecturalName,
       ArchitecturalCode: ArchitecturalCode,
-      name: name,
+      name:name,  //selectedKeysName.toString().replaceAll(",", "-"),
       code: code,
       tag: tag,
       m2: m2,

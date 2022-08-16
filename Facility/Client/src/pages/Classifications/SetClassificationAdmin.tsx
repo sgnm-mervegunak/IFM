@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Tree } from "primereact/tree";
 import { ContextMenu } from "primereact/contextmenu";
 import { Dialog } from "primereact/dialog";
@@ -10,6 +10,7 @@ import { InputText } from "primereact/inputtext";
 import { Checkbox } from 'primereact/checkbox';
 import { Toolbar } from "primereact/toolbar";
 import { Menu } from 'primereact/menu';
+import { FileUpload } from 'primereact/fileupload';
 import { v4 as uuidv4 } from "uuid";
 
 import ClassificationsService from "../../services/classifications";
@@ -55,6 +56,7 @@ const SetClassificationAdmin = () => {
   const [realm, setRealm] = useState(auth.auth.realm);
   const [labels, setLabels] = useState<string[]>([]);
   const [codeShow, setCodeShow] = useState(false);
+  const menu2 = useRef({current:{toggle:()=>{}}} as any);
   // console.log(auth);
 
 
@@ -426,13 +428,13 @@ const SetClassificationAdmin = () => {
   const rightToolbarTemplate = () => {
     return (
       <React.Fragment>
-        {/* <Menu model={items} popup ref={menu} id="popup_menu" />
-        <Button className="mr-2" label="Import" icon="pi pi-upload" onClick={(event) => menu.current.toggle(event)} aria-controls="popup_menu" aria-haspopup /> */}
+        <Menu model={items} popup ref={menu2} id="popup_menu" />
+        <Button className="mr-2" label="Import" icon="pi pi-upload" onClick={(event) => menu2.current.toggle(event)} aria-controls="popup_menu" aria-haspopup />
         <Button
           label="Export"
           icon="pi pi-download"
           className="p-button"
-          onClick={exportCSV}
+        // onClick={exportCSV}
         />
       </React.Fragment>
     );
@@ -440,24 +442,34 @@ const SetClassificationAdmin = () => {
 
   const items = [
     {
-      label: 'Download Sample File',
+      label: 'Download Sample File With Code',
       icon: 'pi pi-download',
       command: () => {
-        window.location.href = 'http://localhost:3000/documents/classification-sample-data.xlsx';
+        window.location.href = 'http://localhost:3000/documents/classification-sample-data-with-code.xlsx'
       }
     },
     {
-      label: 'Upload File',
+      label: 'Download Sample File Without Code',
+      icon: 'pi pi-download',
+      command: () => {
+        window.location.href = 'http://localhost:3000/documents/classification-sample-data-without-code.xlsx'
+      }
+    },
+    {
+      label: 'Upload File With Code',
       icon: 'pi pi-upload',
       command: () => {
-        navigate("/classifications/fileimport");
+        navigate("/classifications/fileimportwithcode");
+      }
+    },
+    {
+      label: 'Upload File Without Code',
+      icon: 'pi pi-upload',
+      command: () => {
+        navigate("/classifications/fileimportwithoutcode");
       }
     }
   ];
-
-  const exportCSV = () => {
-    
-  };
 
 
   return (
@@ -527,6 +539,7 @@ const SetClassificationAdmin = () => {
               value={code}
               onChange={(event) => setCode(event.target.value)}
               style={{ width: '100%' }}
+              disabled
             />
           </div>)}
         <div className="field">
@@ -549,7 +562,7 @@ const SetClassificationAdmin = () => {
       <h1>Edit Classification</h1>
       <div className="field">
         <Tree
-          
+
           loading={loading}
           value={data}
           dragdropScope="-"

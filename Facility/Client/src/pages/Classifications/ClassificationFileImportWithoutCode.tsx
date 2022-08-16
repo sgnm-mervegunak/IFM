@@ -2,11 +2,11 @@ import React, { useRef, useState } from 'react';
 import { Toast } from 'primereact/toast';
 import { FileUpload } from 'primereact/fileupload';
 import { Tooltip } from 'primereact/tooltip';
-import { useAppSelector } from "../app/hook";
+import { useAppSelector } from "../../app/hook";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const ClassificationFileImport: React.FC = () => {
+const ClassificationFileImportWithoutCode: React.FC = () => {
     const toast = useRef<any>();
     const refUpload = useRef<any>(null);
     const auth = useAppSelector((state) => state.auth);
@@ -50,7 +50,7 @@ const ClassificationFileImport: React.FC = () => {
             <Tooltip target=".custom-cancel-btn" content="Clear" position="bottom" />
 
             <div className="card">
-                <h5>File Import</h5>
+                <h5>Classification File Import Without Code</h5>
                 <FileUpload
                     name="upfile[]"
                     accept="csv/*"
@@ -67,4 +67,4 @@ const ClassificationFileImport: React.FC = () => {
     )
 };
 
-export default ClassificationFileImport;
+export default ClassificationFileImportWithoutCode;

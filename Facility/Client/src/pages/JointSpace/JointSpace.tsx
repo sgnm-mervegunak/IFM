@@ -173,7 +173,7 @@ const JointSpace = () => {
         }}
         responsiveLayout="scroll"
       >
-        <Column field="Name" header="Name" sortable></Column>
+        <Column field="name" header="Name" sortable></Column>
         <Column field="nodeType" header="Facility Type" sortable></Column>
       </DataTable>
       <Dialog
