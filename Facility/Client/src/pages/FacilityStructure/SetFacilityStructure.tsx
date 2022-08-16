@@ -13,6 +13,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 
 import FacilityStructureService from "../../services/facilitystructure";
+import ClassificationsService from "../../services/classifications";
 import FormTypeService from "../../services/formType";
 import StructureWinformService from "../../services/structureWinform";
 import { useAppSelector } from "../../app/hook";
@@ -99,6 +100,7 @@ const SetFacilityStructure = () => {
   const [isUpdate, setIsUpdate] = useState(false);
   const [display, setDisplay] = useState(false);
   const [displayKey, setDisplayKey] = useState("");
+  const [docTypes, setDocTypes] = React.useState([]);
   const { toast } = useAppSelector(state => state.toast);
 
   useEffect(() => {
@@ -113,6 +115,16 @@ const SetFacilityStructure = () => {
           detail: err.response ? err.response.data.message : err.message,
           life: 4000,
         });
+      });
+      ClassificationsService.findAllActiveByLabel({
+        realm: auth.auth.realm,
+        label: "FacilityDocTypes",
+        language: "en",
+      }).then((res) => {
+        let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
+        fixNodes(temp); 
+        temp[0].selectable = false
+        setDocTypes(temp);
       });
   }, [])
 
@@ -634,7 +646,7 @@ const SetFacilityStructure = () => {
         }}
         resizable
       >
-        <DisplayNode displayKey={displayKey} />
+        <DisplayNode displayKey={displayKey} docTypes={docTypes} />
       </Dialog>
       <h1>Edit Facility Structure</h1>
       <div className="field">
