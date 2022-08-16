@@ -23,6 +23,8 @@
   "HAS_RELATION": " {id} bu node zaten ilişkiye sahip",
   "WRONG_FACILITY_STRUCTURE": "{node1}, {node2}'nin altına eklenemez.",
   "WRONG_FACILITY_STRUCTURE_PROPS": "{node1} hatalı özellikler içermektedir.",
-  "WRONG_FACILITY_STRUCTURE_DELETE": "{node1}, başka yapılar içerdiğinden silinemez."
+  "WRONG_FACILITY_STRUCTURE_DELETE": "{node1}, başka yapılar içerdiğinden silinemez.",
+  "PARENT_FACILITY_STRUCTURE_NOT_FOUND":"#{id} no lu yapının bağlı olduğu yapı bulunamadı"
+
   
 }
