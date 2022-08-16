@@ -152,6 +152,11 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
         
       }
       else {
+        let deletedNode;
+        deletedNode = await this.neo4jService.deleteUnconditionally(_id);
+        if (!deletedNode) {
+          throw new FacilityStructureNotFountException(_id);
+        }
         const hasAssetRelation = await this.neo4jService.findNodesWithRelationNameById(_id, 'HAS');
         if (hasAssetRelation.length > 0) {
           await this.kafkaService.producerSendMessage(
@@ -160,11 +165,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
             JSON.stringify({ referenceKey: node.properties.key }),
           );
         }
-        let deletedNode;
-        deletedNode = await this.neo4jService.delete(_id);
-        if (!deletedNode) {
-          throw new FacilityStructureNotFountException(_id);
-        }
+
         return deletedNode;
       }
     } catch (error) {
@@ -179,11 +180,55 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       else if (code === CustomTreeError.HAS_CHILDREN) {
         throw new FacilityStructureDeleteExceptions(_id);
       }
+      else if (code === CustomNeo4jError.NODE_CANNOT_DELETE) {
+        throw new FacilityStructureDeleteExceptions(_id);
+      }
       else {
            throw new HttpException(message, code);
      }
     }
   }
+  
+  // async deleteX(id: string) {
+  //   try {
+  //     if (!id) {
+  //       //throw new HttpException(delete__must_entered_error, 400);
+  //     }
+  //     //children count query
+  //     const node = await this.neo4jService.findById(id);
+
+  //     if (!node) {
+  //       //throw new HttpException(node_not_found, 404);
+  //     }
+  //     const childrenCount = await this.neo4jService.getChildrenCount(id);
+  //     if (childrenCount > 0) {
+  //       throw new HttpException(has_children_error, 400);
+  //     } else {
+  //       const parent = await this.neo4jService.getParentById(id);
+
+  //       if (!parent) {
+  //         //throw new HttpException(delete__get_parent_by_id_error, 404);
+  //       }
+  //       if (node['properties']['canDelete'] == undefined || node['properties']['canDelete'] == null ||  node['properties']['canDelete'] == true ) {
+  //         const deletedNode = await this.neo4jService.updateIsDeletedProp(id, true);
+  //         if (!deletedNode) {
+  //             //throw new HttpException(delete__update_is_deleted_prop_error, 400);
+  //         }
+  //         return deletedNode;
+  //       }
+  //       throw new HttpException({message:"can not display", code:5080}, 400);
+  //     }
+  //   } catch (error) {
+  //     if (error.response?.code) {
+  //       throw new HttpException(
+  //         { message: error.response?.message, code: error.response?.code },
+  //         error.status
+  //       );
+  //     } else {
+  //       throw new HttpException(error, HttpStatus.NOT_ACCEPTABLE);
+  //     }
+  //   }
+  // }
 
   async changeNodeBranch(_id: string, _target_parent_id: string) {
     try {
