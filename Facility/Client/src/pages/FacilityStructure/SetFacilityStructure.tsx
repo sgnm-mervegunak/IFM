@@ -43,10 +43,7 @@ interface Node {
   labels?: string[]; // for form type
   parentId?: string;
   className?: string;
-  Name?: string;
-  Description?: string;
-  Tag?: string[];
-  Code?: string;
+  code?: string;
 }
 
 interface FormNode {
@@ -238,7 +235,7 @@ const SetFacilityStructure = () => {
     for (let i of nodes) {
       fixNodes(i.children)
       i.icon = "pi pi-fw pi-building";
-      i.label = i.name || i.Name;
+      i.label = i.name;
     }
   };
 
@@ -664,9 +661,10 @@ const SetFacilityStructure = () => {
             dragConfirm(event.dragNode._id.low, event.dropNode._id.low)
           }}
           filter
-          filterBy="label, name, Name,Description,Tag"
+          filterBy="label,name,description,tag"
           filterPlaceholder="Search"
-          nodeTemplate={(data: Node, options) => <span className="flex align-items-center font-bold">{data.Code ? data.Code + " / " : ""}{data.label} {
+          filterMode="strict"
+          nodeTemplate={(data: Node, options) => <span className="flex align-items-center font-bold">{data.code ? data.code + " / " : ""}{data.label} {
             <>
               <span className="ml-4 ">
                 <Button

@@ -584,11 +584,11 @@ const SetClassificationAdmin = () => {
             dragConfirm(event.dragNode._id.low, event.dropNode._id.low)
           }}
           filter
-          filterBy="name,code"
+          filterBy="name,code,tag"
           filterPlaceholder="Search"
           className="font-bold"
 
-          nodeTemplate={(data: Node, options) => <span className="flex align-items-center font-bold">{data.label} {
+          nodeTemplate={(data: Node, options) => <span className="flex align-items-center font-bold">{data.code ? data.code + " / " : ""}{data.label} {
             <>
               <span className="ml-4 ">
 
