@@ -255,7 +255,7 @@ const SetJointSpace = () => {
     newNode = {
       ArchitecturalName: ArchitecturalName,
       ArchitecturalCode: ArchitecturalCode,
-      name:name,  //selectedKeysName.toString().replaceAll(",", "-"),
+      name: name,  //selectedKeysName.toString().replaceAll(",", "-"),
       code: code,
       tag: tag,
       m2: m2,
@@ -392,7 +392,7 @@ const SetJointSpace = () => {
       data.map((key: any) => {
         FacilityStructureService.nodeInfo(key)
           .then((res) => {
-            setSelectedKeysName(prev => [...prev, res.data.properties.Name||res.data.properties.name]);
+            setSelectedKeysName(prev => [...prev, res.data.properties.name]);
           })
       }
       )
@@ -632,8 +632,9 @@ const SetJointSpace = () => {
       </Dialog>
       <h3>Joint Space</h3>
       <div>
-        <span style={{ fontWeight: "bold", fontSize: "16px" }}>Selected Spaces:{` ${selectedKeysName} `}</span>
-
+        <span style={{ fontWeight: "bold", fontSize: "16px" }}>Selected Spaces:</span>
+        <span style={{ fontWeight: "bold", fontSize: "14px", color: "red" }}>{` ${selectedKeysName.toString().replaceAll(",", ", ")} `}</span>
+        
         {selectedKeys.length > 1 &&
           <div className="mt-4">
 
@@ -649,7 +650,7 @@ const SetJointSpace = () => {
           value={data}
           dragdropScope="-"
           filter
-          filterBy="name,code,Name"
+          filterBy="name,code"
           filterPlaceholder="Search"
           selectionMode="checkbox"
           onSelectionChange={(event: any) => {

@@ -50,7 +50,7 @@ const ClassificationFileImportWithCode: React.FC = () => {
             <Tooltip target=".custom-cancel-btn" content="Clear" position="bottom" />
 
             <div className="card">
-                <h5>Classification File Import With Codexxx</h5>
+                <h5>Classification File Import With Code</h5>
                 <FileUpload
                     name="upfile[]"
                     accept="csv/*"

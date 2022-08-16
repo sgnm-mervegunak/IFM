@@ -33,8 +33,6 @@ interface Node {
   label?: string;
   labels?: string[]; // for form type
   parentId?: string;
-  name_EN?: string;
-  name_TR?: string;
 }
 
 const SetClassificationUser = () => {
@@ -54,8 +52,6 @@ const SetClassificationUser = () => {
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
   const [labels, setLabels] = useState<string[]>([]);
-  console.log(auth);
-  
 
   const menu = [
     {
@@ -71,7 +67,7 @@ const SetClassificationUser = () => {
       command: () => {
         ClassificationsService.nodeInfo(selectedNodeKey)
           .then((res) => {
-            setName(res.data.properties.name || res.data.properties.name_EN || "");
+            setName(res.data.properties.name || "");
             setCode(res.data.properties.code || "");
             setTag(res.data.properties.tag || []);
             setIsActive(res.data.properties.isActive);
@@ -97,9 +93,9 @@ const SetClassificationUser = () => {
   ];
 
   const getClassification = () => {
-    ClassificationsService.findAllActive({realm:realm,language:"en"}).then((res) => {
+    ClassificationsService.findAllActive({ realm: realm, language: "en" }).then((res) => {
       console.log(res.data);
-      
+
 
       if (!res.data.root.children) {
         setData([res.data.root.properties] || []);
@@ -265,38 +261,24 @@ const SetClassificationUser = () => {
   const deleteItem = (key: string) => {
     ClassificationsService.nodeInfo(key)
       .then((res) => {
-        console.log(res.data);
-
-        if (res.data.properties.canDelete === true) {
-          ClassificationsService.remove(res.data.id)
-            .then(() => {
-              toast.current.show({
-                severity: "success",
-                summary: "Success",
-                detail: "Classification Deleted",
-                life: 2000,
-              });
-              getClassification();
-            })
-            .catch((err) => {
-              toast.current.show({
-                severity: "error",
-                summary: "Error",
-                detail: err.response ? err.response.data.message : err.message,
-                life: 2000,
-              });
+        ClassificationsService.remove(res.data.id)
+          .then(() => {
+            toast.current.show({
+              severity: "success",
+              summary: "Success",
+              detail: "Classification Deleted",
+              life: 2000,
             });
-        } else {
-
-          toast.current.show({
-            severity: "error",
-            summary: "Error",
-            detail: "Can not delete this classification",
-            life: 2000,
+            getClassification();
+          })
+          .catch((err) => {
+            toast.current.show({
+              severity: "error",
+              summary: "Error",
+              detail: err.response ? err.response.data.message : err.message,
+              life: 2000,
+            });
           });
-
-        }
-
       })
       .catch((err) => {
         toast.current.show({
@@ -492,7 +474,7 @@ const SetClassificationUser = () => {
             dragConfirm(event.dragNode._id.low, event.dropNode._id.low)
           }}
           filter
-          filterBy="name,name_EN,name_TR,code"
+          filterBy="name,code,tag"
           filterPlaceholder="Search"
           className="font-bold"
         />
