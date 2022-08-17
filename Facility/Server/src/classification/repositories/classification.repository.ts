@@ -5,11 +5,12 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateClassificationDto } from '../dto/create-classification.dto';
 import { UpdateClassificationDto } from '../dto/update-classification.dto';
 import { Classification } from '../entities/classification.entity';
-import { ClassificationNotFountException } from 'src/common/notFoundExceptions/not.found.exception';
+import { ClassificationNotFountException, FacilityStructureNotFountException } from 'src/common/notFoundExceptions/not.found.exception';
 import { CustomTreeError } from 'src/common/const/custom.error.enum';
 import { createDynamicCyperObject, Neo4jService } from 'sgnm-neo4j/dist';
 import { classificationInterface } from 'src/common/interface/classification.interface';
 import { I18NEnums } from 'ifmcommon/dist';
+import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 const exceljs = require('exceljs');
 const { v4: uuidv4 } = require('uuid');
 
@@ -17,9 +18,12 @@ const { v4: uuidv4 } = require('uuid');
 export class ClassificationRepository implements classificationInterface<Classification> {
   constructor(private readonly neo4jService: Neo4jService) {}
 
+  //REVISED FOR NEW NEO4J
   async findOneByRealm(label: string, realm: string) {
-    let node = await this.neo4jService.findByRealmWithTreeStructure(label, realm);
-
+    //let node = await this.neo4jService.findByRealmWithTreeStructure(label, realm);
+    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
+      ['FacilityStructure'],{"realm":realm, "isDeleted":false},[],{"isDeleted":false, "canDisplay":true}
+    ) 
     if (!node) {
       throw new ClassificationNotFountException(realm);
     }
@@ -204,8 +208,29 @@ export class ClassificationRepository implements classificationInterface<Classif
   async findOneFirstLevelByRealm(label: string, realm: string) {
     return null;
   }
-
   async getClassificationsByLanguage(realm: string, language: string) {
+    const root_node = await this.neo4jService.findByLabelAndFilters(['Classification'],{"isDeleted":false, "realm": realm},[]);
+    const root_id = root_node[0]['_fields'][0]['identity'].low;
+    const firstNodes  = await this.neo4jService.findChildrensByIdOneLevel(root_id,{},[],{"isDeleted":false},'PARENT_OF',RelationDirection.RIGHT);
+    let labels = [];
+    for (let index = 0; index < firstNodes['length']; index++) {
+       if (firstNodes[index]['_fields'][0]['labels'][0].endsWith('_'+language)) {
+         labels.push(firstNodes[index]['_fields'][0]['labels'][0]);
+       }
+    }
+    let root = {root:{ parent_of: [], root_id, ...root_node[0]['_fields'][0].properties }};
+    for (let i = 0; i < labels.length; i++) {
+      let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
+        [labels[i]],{"realm":realm, "isDeleted":false},[],{"isDeleted":false}
+      )
+      root.root.parent_of.push(node['root']); 
+    }
+    root = await this.neo4jService.changeObjectChildOfPropToChildren(root);
+
+    return root;
+
+  }
+  async getClassificationsByLanguage1(realm: string, language: string) {
     let cypher = `MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) MATCH path =(c)-[:PARENT_OF]->(n) where n.isDeleted=false WITH DISTINCT labels(n) AS labels \
     UNWIND labels AS label \
     RETURN DISTINCT label\
