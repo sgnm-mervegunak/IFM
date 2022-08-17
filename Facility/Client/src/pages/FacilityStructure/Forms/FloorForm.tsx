@@ -5,7 +5,6 @@ import { Chips } from 'primereact/chips';
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAppSelector } from "../../../app/hook";
 import FacilityStructureService from "../../../services/facilitystructure";
-
 interface Params {
     selectedFacilityType: string | undefined;
     submitted: boolean;
@@ -64,7 +63,25 @@ const FloorForm = ({
     const [elevation, setElevation] = useState<string>("");
     const [height, setHeight] = useState<string>("");
 
-    const {toast} = useAppSelector(state => state.toast);
+    const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
+        // defaultValues: {
+        //     Name: "",
+        //     Tag: null,
+        //     Description: null,
+        //     Elevation: null,
+        //     Height: null,
+        //     ProjectName:null
+        // }
+    }); //************************* */
+    console.log("FORM ERRORS!!!", errors);
+
+    const { toast } = useAppSelector(state => state.toast);
+
+    // useEffect(() => {
+    //     console.log(name);
+
+    // }, [name]);
+
 
     useEffect(() => {
         if (submitted) {
@@ -185,80 +202,135 @@ const FloorForm = ({
     };
 
     return (
-        <div>
+        <form onSubmit={handleSubmit((data) => {
+            console.log(data);
+        })}>
+
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
                 <InputText
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
+                    {...register("Name",
+                        {
+                            required: "This area is required.",
+                            minLength: {
+                                value: 2,
+                                message: "Min length must be 2 characters long."
+                            },
+
+                            onChange: (event) => {
+                                setName(event.target.value);
+                            }
+                        }
+                    )}
                     style={{ width: '100%' }}
                 />
             </div>
+            <p style={{ color: "red" }}>{errors.Name?.message}</p>
+
+
             <div className="field structureChips">
                 <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
-                <Chips
-                    value={tag}
-                    onChange={(e) => setTag(e.value)}
-                    style={{ width: "100%" }}
-                />
-            </div>
-            <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>Description</h5>
-                <InputText
-                    value={description}
-                    onChange={(event) => setDescription(event.target.value)}
-                    style={{ width: '100%' }}
-                />
-            </div>
-            <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>Elevation (cm)</h5>
-                <InputText
-                    value={elevation}
-                    onChange={(event) => {
-                        const value=event.target.value; //convert value from type string to number 
-                        console.log("------------", !isNaN(+value), "------"); //check if it is a number
-                        
-                        if (!isNaN(+value)) {
-                            
-                            setElevation(value);
-                        } else {
-                         alert("Elevation alanı için lütfen sayısal bir deger giriniz!")
-                        }
-                    }}
-                    style={{ width: '100%' }}
+                <Controller
+                    name="Tag"
+                    control={control}
+                    render={({ field }) => (
+                        <Chips
+                            value={field.value}
+                            onChange={(e) => {
+                                console.log("field value: ", e.value);
+                                setTag(e.value);
+                                field.onChange(e.value)
+                            }}
+                            style={{ width: "100%" }}
+                        />
+                    )}
                 />
             </div>
 
+            <div className="field">
+                <h5 style={{ marginBottom: "0.5em" }}>Description</h5>
+                <InputText
+                    {...register("Description",
+                        {
+                            onChange: (event) => {
+                                setDescription(event.target.value);
+                            }
+                        }
+                    )}
+                    style={{ width: "100%" }}
+                />
+            </div>
+            <p style={{ color: "red" }}>{errors.Description?.message}</p>
+
+            <div className="field">
+                <h5 style={{ marginBottom: "0.5em" }}>Elevation (cm)</h5>
+                <InputText
+                    {...register("Elevation",
+                        {
+                            onChange: (event) => {
+                                const value = event.target.value; //convert value from type string to number
+                                console.log("------------", !isNaN(+value), "------"); //check if it is a number
+
+                                if (!isNaN(+value)) {
+
+                                    setElevation(event.target.value);
+                                } else {
+                                    alert("You can enter here only numerical values.")
+                                }
+                            }
+                        }
+
+                    )}
+                    style={{ width: "100%" }}
+                />
+            </div>
+            <p style={{ color: "red" }}>{errors.Elevation?.message}</p>
 
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Height (cm)</h5>
                 <InputText
-                    value={height}
-                    onChange={(event) => {
-                        const value = event.target.value; //convert value from type string to number 
-                        console.log("------------", !isNaN(+value), "------"); //check if it is a number
+                    {...register("Height",
+                        {
+                            onChange: (event) => {
+                                const value = event.target.value; //convert value from type string to number
+                                console.log("------------", !isNaN(+value), "------"); //check if it is a number
 
-                        if (!isNaN(+value)) {
+                                if (!isNaN(+value)) {
 
-                            setHeight(value);
-                        } else {
-                            alert("Height alanı için lütfen sayısal bir deger giriniz!")
+                                    setHeight(value);
+                                } else {
+                                    alert("You can enter here only numerical values.")
+                                }
+                            }
                         }
-                    }}
-                    style={{ width: '100%' }}
+
+                    )}
+                    style={{ width: "100%" }}
                 />
             </div>
-           
+            <p style={{ color: "red" }}>{errors.Height?.message}</p>
+
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Project Name</h5>
                 <InputText
-                    value={projectName}
-                    onChange={(event) => setProjectName(event.target.value)}
-                    style={{ width: '100%' }}
+                    {...register("ProjectName",
+                        {
+                            required: "This area is required.",
+                            onChange: (event) => {
+                                setProjectName(event.target.value);
+                            }
+                        }
+
+                    )}
+                    style={{ width: "100%" }}
                 />
             </div>
+            <p style={{ color: "red" }}>{errors.ProjectName?.message}</p>
 
-        </div>
+
+            <input type={"submit"} />
+
+        </form>
     );
 };
 
