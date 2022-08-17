@@ -5,6 +5,9 @@ import { Chips } from 'primereact/chips';
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAppSelector } from "../../../app/hook";
 import FacilityStructureService from "../../../services/facilitystructure";
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from "yup";
+
 interface Params {
     selectedFacilityType: string | undefined;
     submitted: boolean;
@@ -42,6 +45,13 @@ interface Node {
 
 }
 
+const schema = yup.object({
+    Elevation: yup.number().positive(),
+    Height: yup.number().positive(),
+    Name: yup.string().required("This area is required.").min(2, "This area is accept min 2 characters.")
+}).required();
+
+
 const FloorForm = ({
     selectedFacilityType,
     submitted,
@@ -72,6 +82,7 @@ const FloorForm = ({
         //     Height: null,
         //     ProjectName:null
         // }
+        resolver: yupResolver(schema)
     }); //************************* */
     console.log("FORM ERRORS!!!", errors);
 
@@ -211,12 +222,6 @@ const FloorForm = ({
                 <InputText
                     {...register("Name",
                         {
-                            required: "This area is required.",
-                            minLength: {
-                                value: 2,
-                                message: "Min length must be 2 characters long."
-                            },
-
                             onChange: (event) => {
                                 setName(event.target.value);
                             }
@@ -268,15 +273,15 @@ const FloorForm = ({
                     {...register("Elevation",
                         {
                             onChange: (event) => {
-                                const value = event.target.value; //convert value from type string to number
-                                console.log("------------", !isNaN(+value), "------"); //check if it is a number
+                                // const value = event.target.value; //convert value from type string to number
+                                // console.log("------------", !isNaN(+value), "------"); //check if it is a number
 
-                                if (!isNaN(+value)) {
+                                // if (!isNaN(+value)) {
 
-                                    setElevation(event.target.value);
-                                } else {
-                                    alert("You can enter here only numerical values.")
-                                }
+                                setElevation(event.target.value);
+                                // } else {
+                                //     alert("You can enter here only numerical values.")
+                                // }
                             }
                         }
 
@@ -292,15 +297,7 @@ const FloorForm = ({
                     {...register("Height",
                         {
                             onChange: (event) => {
-                                const value = event.target.value; //convert value from type string to number
-                                console.log("------------", !isNaN(+value), "------"); //check if it is a number
-
-                                if (!isNaN(+value)) {
-
-                                    setHeight(value);
-                                } else {
-                                    alert("You can enter here only numerical values.")
-                                }
+                                    setHeight(event.target.value);
                             }
                         }
 
