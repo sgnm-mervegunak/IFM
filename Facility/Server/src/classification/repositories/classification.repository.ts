@@ -338,7 +338,7 @@ export class ClassificationRepository implements classificationInterface<Classif
      let deneme=[];
    
      for (let index = 1; index < data.length; index++) {
-       const element = data[index].split(new RegExp(/\s{3,}|:\s/g));
+       const element = data[index].split(new RegExp(/\s{1,}|:\s{1,}|:/g));
       
        deneme.push(element);
      }
@@ -349,9 +349,7 @@ export class ClassificationRepository implements classificationInterface<Classif
      let collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
    
          deneme.sort(collator.compare[0]);
-     //let classificationName2=`OmniClass${deneme[0][0].slice(0,2)}`;
    
-     console.log(deneme)
      let newClassification=[]
      let codearray=[]
    
@@ -474,13 +472,12 @@ export class ClassificationRepository implements classificationInterface<Classif
    
    }
    
-   console.log(newClassification.length)
    ///////// the process start here
    function uuidReturn3(){
    return uuidv4()
    
    }
-     let cypher= `Match (a:Root {realm:"${realm}"})-[:PARENT_OF]->(n:Classification {realm:"${realm}"}) MERGE (b:${data[0]}_${language} {code:"${newClassification[0].parentCode}",name:"${data[0]}",isDeleted:false,canCopied:true,canDelete:false,realm:"${realm}",isRoot:true,canDisplay:true,key:"${uuidReturn3()}"}) MERGE (n)-[:PARENT_OF]->(b)`;
+     let cypher= `Match (a:Root {realm:"${realm}"})-[:PARENT_OF]->(n:Classification {realm:"${realm}"}) MERGE (b:${data[0]}_${language} {code:"${newClassification[0].parentCode}",name:"${data[0]}",isDeleted:false,canCopied:true,canDelete:false,realm:"${realm}",isRoot:true,canDisplay:true,key:"${uuidReturn3()}",isActive:true}) MERGE (n)-[:PARENT_OF]->(b)`;
    await this.neo4jService.write(cypher);
    
      
@@ -489,7 +486,6 @@ export class ClassificationRepository implements classificationInterface<Classif
    
       let cypher2= `MATCH (n) where n.code="${newClassification[i].parentCode}" MERGE (b {code:"${newClassification[i].code}",parentCode:"${newClassification[i].parentCode}",name:"${newClassification[i].name}",isDeleted:${newClassification[i].isDeleted},isActive:${newClassification[i].isActive},canDelete:${newClassification[i].canDelete},key:"${uuidReturn3()}"}) MERGE (n)-[:PARENT_OF]->(b)`;
       await this.neo4jService.write(cypher2)
-      //console.log(data2);
      }
     
   }
