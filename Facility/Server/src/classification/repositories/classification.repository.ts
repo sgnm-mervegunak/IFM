@@ -321,38 +321,180 @@ export class ClassificationRepository implements classificationInterface<Classif
     let data=[];
 
 
- let buffer = new Uint8Array(file.buffer);
- const workbook = new exceljs.Workbook();
-
- await workbook.xlsx.load(buffer).then(function async(book) {
-   const firstSheet =  book.getWorksheet(1);
-
-
-    for (let i = 1; i <= 2; i++) {
-      data.push(firstSheet.getColumn(i).values.filter((e)=>(e!=null)));
-    
-   }
-
-})
-
- function key(){
-   return uuidv4()
-   }
-
-console.log(data)
-  
-    let cypher=`MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) MERGE (n:${data[1][0]}_${language} {isRoot:true,isActive:true,name:"${data[1][0]}",isDeleted:false,key:"${key()}",canDelete:true,realm:"${realm}",canDisplay:true}) MERGE (c)-[:PARENT_OF]->(n)`
-  
- 
-   let asda=await this.neo4jService.write(cypher)
-console.log(asda)
- for (let i = 1; i < data[1].length; i++) {
-   function key2(){
-     return uuidv4()
+    let buffer = new Uint8Array(file.buffer);
+    const workbook = new exceljs.Workbook();
+   
+    await workbook.xlsx.load(buffer).then(function async(book) {
+      const firstSheet =  book.getWorksheet(1);
+       
+         data=firstSheet.getColumn(1).values.filter((e)=>(e!=null));
+       
+      
+   
+   })
+   
+   
+   
+     let deneme=[];
+   
+     for (let index = 1; index < data.length; index++) {
+       const element = data[index].split(new RegExp(/\s{3,}|:\s/g));
+      
+       deneme.push(element);
      }
-   let cypher2=`MATCH (m:${data[1][0]}_${language})  MERGE (n {code:"${data[0][i]}",name:"${data[1][i]}",key:"${key2()}",isActive:true,isDeleted:false,canDelete:true}) MERGE (m)-[:PARENT_OF]->(n) `
-   let returnData=await this.neo4jService.write(cypher2)
-   console.log(returnData)
- }
+     for(let i=0;i<deneme.length;i++){
+       deneme[i][0]=deneme[i][0].replace(/ /g, '-');
+     }
+   
+     let collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
+   
+         deneme.sort(collator.compare[0]);
+     //let classificationName2=`OmniClass${deneme[0][0].slice(0,2)}`;
+   
+     console.log(deneme)
+     let newClassification=[]
+     let codearray=[]
+   
+   
+     function uuidReturn(){
+       return uuidv4()
+      
+      }
+   for (let q = 0; q < deneme.length; q++) {
+     
+     let parentcode = "";   
+     var z = 0;
+     codearray= await deneme[q][0].split("-");
+   
+     for (let j=0; j < codearray.length; j++) {
+       if (codearray[j] == "00") {
+         z=z+1;
+       }
+     }
+   
+     if (z == 0) {
+       for (let i=0; i<codearray.length-1; i++ ) {
+         if (parentcode == "") {
+           parentcode = codearray[i];
+         }
+         else {
+           parentcode = parentcode + "-" + codearray[i];
+         }
+         
+       }
+       if (codearray.length == 4) {
+         parentcode = parentcode + "-" +  "00";
+       }  
+     }
+     else {
+       if (z == 1) {
+         for (let i=0; i<codearray.length-2; i++ ) {
+           if (parentcode == "") {
+             parentcode = codearray[i];
+           }
+           else {
+             parentcode = parentcode + "-" + codearray[i];
+           }
+         }
+           parentcode = parentcode + "-" + "00-00"; 
+       }
+       else if (z == 2) {
+         for (let i=0; i<codearray.length-3; i++ ) {
+           if (parentcode == "") {
+             parentcode = codearray[i];
+           }
+           else {
+             parentcode = parentcode + "-" + codearray[i];
+           }
+         }
+           parentcode = parentcode + "-" + "00-00-00"; 
+       }
+       else if (z == 3) {
+         for (let i=0; i<codearray.length-4; i++ ) {
+           if (parentcode == "") {
+             parentcode = codearray[i];
+           } 
+           else {
+             parentcode = parentcode + "-" + codearray[i];
+           }
+         }
+         if (parentcode == "") {
+           parentcode = "00-00-00-00";
+         } 
+         else {
+           parentcode = parentcode + "-" + "00-00-00-00"; 
+         }
+           
+       }
+   
+       else if (z == 4) {
+         for (let i=0; i<codearray.length-5; i++ ) {
+           if (parentcode == "") {
+             parentcode = codearray[i];
+           } 
+           else {
+             parentcode = parentcode + "-" + codearray[i];
+           }
+         }
+         if (parentcode == "") {
+           parentcode = "00-00-00-00-00";
+         } 
+         else {
+           parentcode = parentcode + "-" + "00-00-00-00-00"; 
+         }
+           
+       }
+     } 
+   
+     var codestr = "";
+     for (let t=0; t < codearray.length; t++) {
+       if (codestr == "") {
+         codestr =  codearray[t];
+       }
+       else {
+         codestr = codestr + "-" + codearray[t]; 
+       }
+       
+     }
+     
+      
+     let dto = {
+       code: codestr,
+       parentCode: parentcode.length<codestr.length ? parentcode +"-00" : parentcode,
+       name: deneme[q][1],
+       key: uuidReturn(),
+       isDeleted:false,
+       isActive:true,
+       canDelete:true,
+     };
+   
+   
+     
+     newClassification.push(dto);
+   
+   }
+   
+   console.log(newClassification.length)
+   ///////// the process start here
+   function uuidReturn3(){
+   return uuidv4()
+   
+   }
+     let cypher= `Match (a:Root {realm:"${realm}"})-[:PARENT_OF]->(n:Classification {realm:"${realm}"}) MERGE (b:${data[0]}_${language} {code:"${newClassification[0].parentCode}",name:"${data[0]}",isDeleted:false,canCopied:true,canDelete:false,realm:"${realm}",isRoot:true,canDisplay:true,key:"${uuidReturn3()}"}) MERGE (n)-[:PARENT_OF]->(b)`;
+   await this.neo4jService.write(cypher);
+   
+     
+   
+     for(let i=0;i<newClassification.length;i++){
+   
+      let cypher2= `MATCH (n) where n.code="${newClassification[i].parentCode}" MERGE (b {code:"${newClassification[i].code}",parentCode:"${newClassification[i].parentCode}",name:"${newClassification[i].name}",isDeleted:${newClassification[i].isDeleted},isActive:${newClassification[i].isActive},canDelete:${newClassification[i].canDelete},key:"${uuidReturn3()}"}) MERGE (n)-[:PARENT_OF]->(b)`;
+      await this.neo4jService.write(cypher2)
+      //console.log(data2);
+     }
+    
   }
+
+
+
+  
 }
