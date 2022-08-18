@@ -577,7 +577,7 @@ const SetClassificationAdmin = () => {
             dragConfirm(event.dragNode._id.low, event.dropNode._id.low)
           }}
           filter
-          filterBy="name,code,tag"
+          filterBy="name,code"
           filterPlaceholder="Search"
           className="font-bold"
 
