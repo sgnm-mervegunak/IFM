@@ -23,6 +23,9 @@ import BlockForm from "./Forms/BlockForm";
 import FloorForm from "./Forms/FloorForm";
 import SpaceForm from "./Forms/SpaceForm";
 import DisplayNode from "./Display/DisplayNode";
+import FloorFileImport from "./ImportPages/FloorFileImport";
+import BlockFileImport from "./ImportPages/BlockFileImport";
+import SpaceFileImport from "./ImportPages/SpaceFileImport";
 
 interface Node {
   cantDeleted: boolean;
@@ -88,22 +91,19 @@ const SetFacilityStructure = () => {
   const [editDia, setEditDia] = useState(false);
   const [delDia, setDelDia] = useState<boolean>(false);
   const [formDia, setFormDia] = useState<boolean>(false);
+  const [blockImportDia, setBlockImportDia] = useState<boolean>(false);
+  const [floorImportDia, setFloorImportDia] = useState<boolean>(false);
+  const [spaceImportDia, setSpaceImportDia] = useState<boolean>(false);
   const cm: any = React.useRef(null);
   const navigate = useNavigate();
   const [formData, setFormData] = useState<FormNode[]>([]);
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
   const [generateNodeKey, setGenerateNodeKey] = useState("");
-  const [generateFormTypeKey, setGenerateFormTypeKey] = useState<
-    string | undefined
-  >("");
-  const [generateNodeName, setGenerateNodeName] = useState<string | undefined>(
-    ""
-  );
+  const [generateFormTypeKey, setGenerateFormTypeKey] = useState<string | undefined>("");
+  const [generateNodeName, setGenerateNodeName] = useState<string | undefined>("");
   const [facilityType, setFacilityType] = useState<string[]>([]);
-  const [selectedFacilityType, setSelectedFacilityType] = useState<
-    string | undefined
-  >("");
+  const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const [display, setDisplay] = useState(false);
@@ -179,30 +179,30 @@ const SetFacilityStructure = () => {
       });
   };
 
-  const importFloor = ()=>{
-    console.log("Import Floor");
+  const importFloor = () => {
+    setFloorImportDia(true);
   }
-  const importBlock = ()=>{
-    console.log("Import Block");
+  const importBlock = () => {
+    setBlockImportDia(true);
   }
-  const importSpace = ()=>{
-    console.log("Import Space");
+  const importSpace = () => {
+    setSpaceImportDia(true);
   }
 
   const importInfoOfNode = {
     Building: [
       {
-        label: "Import Floor",
-        icon: "pi pi-fw pi-upload",
-        command: () => {
-          importFloor()
-        },
-      },
-      {
         label: "Import Block",
         icon: "pi pi-fw pi-upload",
         command: () => {
           importBlock()
+        },
+      },
+      {
+        label: "Import Floor",
+        icon: "pi pi-fw pi-upload",
+        command: () => {
+          importFloor()
         },
       },
     ],
@@ -233,7 +233,7 @@ const SetFacilityStructure = () => {
     ],
   };
 
-  const [menu,setMenu] = useState([
+  const [menu, setMenu] = useState([
     {
       label: "Add Item",
       icon: "pi pi-plus",
@@ -281,7 +281,7 @@ const SetFacilityStructure = () => {
   //     }
   //     return prev
   //   })
-    
+
   // }, [selectedNode.nodeType]);
 
   const getFacilityStructure = () => {
@@ -739,6 +739,39 @@ const SetFacilityStructure = () => {
         />
       </Dialog>
       <Dialog
+        header="Block Import"
+        visible={blockImportDia}
+        style={{ width: "25vw" }}
+        // footer={renderFooterForm}
+        onHide={() => {
+          setBlockImportDia(false);
+        }}
+      >
+        <BlockFileImport />
+      </Dialog>
+      <Dialog
+        header="Floor Import"
+        visible={floorImportDia}
+        style={{ width: "25vw" }}
+        // footer={renderFooterForm}
+        onHide={() => {
+          setFloorImportDia(false);
+        }}
+      >
+        <FloorFileImport />
+      </Dialog>
+      <Dialog
+        header="Space Import"
+        visible={spaceImportDia}
+        style={{ width: "25vw" }}
+        // footer={renderFooterForm}
+        onHide={() => {
+          setSpaceImportDia(false);
+        }}
+      >
+        <SpaceFileImport />
+      </Dialog>
+      <Dialog
         header="Structure Detail"
         visible={display}
         position={"right"}
@@ -762,9 +795,9 @@ const SetFacilityStructure = () => {
           onContextMenuSelectionChange={(event: any) =>
             setSelectedNodeKey(event.value)
           }
-          onContextMenu={(event:any) => {
+          onContextMenu={(event: any) => {
             setSelectedNode(event.node as Node);
-            setMenu(prev=>{
+            setMenu(prev => {
               prev.length = 4;
               if (event.node.nodeType === "Building") {
                 for (let item of importInfoOfNode["Building"]) {
