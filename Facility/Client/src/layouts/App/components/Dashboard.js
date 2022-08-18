@@ -68,10 +68,12 @@ const Dashboard = () => {
       return;
     }
     for (let i of nodes) {
-      fixNodes(i.children);
+      fixNodes2(i.children);
       if (i.nodeType === "Block") {
         setBlockCounts2((prev) => prev + 1);
-        setCounts((prev) => [...prev, i.count]);
+
+        console.log(i);
+
       }
       if (i.nodeType === "Floor") {
         setFloorCounts2((prev) => prev + 1);
@@ -82,12 +84,12 @@ const Dashboard = () => {
     }
   };
 
-  const getFacilityStructure = () => {
-    FacilityStructureService.findOne(realm)
-      .then((res) => {
+  const getFacilityStructure = async() => {
+    await FacilityStructureService.findOne(realm)
+      .then(async(res) => {
         setData([res.data.root] || []);
         let temp = JSON.parse(JSON.stringify([res.data.root] || []));
-        fixNodes(temp);
+       await fixNodes(temp);
         setData(temp);
       })
       .catch((err) => {
@@ -103,10 +105,11 @@ const Dashboard = () => {
   };
 
   const getBuildings = () => {
-    buildingKeys.map((key) => {
-      JointSpaceService.findBuildingWithKey(key, realm)
+     buildingKeys.map(async(key) => {
+      await JointSpaceService.findBuildingWithKey(key, realm)
       .then((res) => {
         setData2([res.data.root] || []);
+        console.log(res.data.root);
         let temp = JSON.parse(JSON.stringify([res.data.root] || []));
         fixNodes2(temp);
         setData2(temp);
@@ -136,6 +139,7 @@ const Dashboard = () => {
     setBuildingNames([]);
     setBuildingKeys([]);
     getFacilityStructure();
+    getBuildings();
   }, []);
 
   return (

@@ -23,6 +23,7 @@ import BlockForm from "./Forms/BlockForm";
 import FloorForm from "./Forms/FloorForm";
 import SpaceForm from "./Forms/SpaceForm";
 import DisplayNode from "./Display/DisplayNode";
+import FloorFileImport from "./FloorFileImport";
 
 interface Node {
   cantDeleted: boolean;
@@ -86,6 +87,7 @@ const SetFacilityStructure = () => {
   const [editDia, setEditDia] = useState(false);
   const [delDia, setDelDia] = useState<boolean>(false);
   const [formDia, setFormDia] = useState<boolean>(false);
+  const [floorImportDia, setFloorImportDia] = useState<boolean>(false);
   const cm: any = React.useRef(null);
   const navigate = useNavigate()
   const [formData, setFormData] = useState<FormNode[]>([]);
@@ -116,16 +118,16 @@ const SetFacilityStructure = () => {
           life: 4000,
         });
       });
-      ClassificationsService.findAllActiveByLabel({
-        realm: auth.auth.realm,
-        label: "FacilityDocTypes",
-        language: "en",
-      }).then((res) => {
-        let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
-        fixNodes(temp); 
-        temp[0].selectable = false
-        setDocTypes(temp);
-      });
+    ClassificationsService.findAllActiveByLabel({
+      realm: auth.auth.realm,
+      label: "FacilityDocTypes",
+      language: "en",
+    }).then((res) => {
+      let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
+      fixNodes(temp);
+      temp[0].selectable = false
+      setDocTypes(temp);
+    });
   }, [])
 
   const getForms = async () => {
@@ -632,6 +634,18 @@ const SetFacilityStructure = () => {
         }}
       >
         <FormGenerate nodeKey={generateNodeKey} formKey={generateFormTypeKey} nodeName={generateNodeName} setFormDia={setFormDia} />
+
+      </Dialog>
+      <Dialog
+        header="Floor Import"
+        visible={floorImportDia}
+        style={{ width: "25vw" }}
+        // footer={renderFooterForm}
+        onHide={() => {
+          setFloorImportDia(false);
+        }}
+      >
+        <FloorFileImport />
 
       </Dialog>
       <Dialog

@@ -6,14 +6,14 @@ import { useAppSelector } from "../../app/hook";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const ClassificationFileImportWithCode: React.FC = () => {
+const FloorFileImport: React.FC = () => {
     const toast = useRef<any>();
     const refUpload = useRef<any>(null);
     const auth = useAppSelector((state) => state.auth);
     const [token, setToken] = useState(auth.auth.token);
     const history = useNavigate();
 
-    const uploadCSV = (e: any) => {
+    const uploadCSV = (e:any) => {
         const file = e.files[0];
         const url = 'http://localhost:3010/classification/addAClassificationWithCodeFromExcel/IFM/EN';
         const formData = new FormData();
@@ -34,32 +34,30 @@ const ClassificationFileImportWithCode: React.FC = () => {
             })
 
         refUpload.current.clear();
-        function backToClassification() {
-            history('/classifications');
-        }
-
-        setTimeout(backToClassification, 1200);
-
+        function backToFacility() {
+            history('/facilitystructure');
+          }
+          
+          setTimeout(backToFacility, 1200);
+        
     }
     return (
         <>
             <Toast ref={toast}></Toast>
 
             <div className="card">
-                <h5>Classification File Import With Code</h5>
                 <FileUpload
                     name="upfile[]"
-                    accept="/*"
+                    accept="csv/*"
                     maxFileSize={1000000}
                     chooseLabel="Select File"
                     customUpload={true}
                     uploadHandler={uploadCSV}
                     ref={refUpload}
-
                 />
             </div>
         </>
     )
 };
 
-export default ClassificationFileImportWithCode;
+export default FloorFileImport;
