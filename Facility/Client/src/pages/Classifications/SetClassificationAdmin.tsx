@@ -430,12 +430,6 @@ const SetClassificationAdmin = () => {
       <React.Fragment>
         <Menu model={items} popup ref={menu2} id="popup_menu" />
         <Button className="mr-2" label="Import" icon="pi pi-upload" onClick={(event) => menu2.current.toggle(event)} aria-controls="popup_menu" aria-haspopup />
-        <Button
-          label="Export"
-          icon="pi pi-download"
-          className="p-button"
-        // onClick={exportCSV}
-        />
       </React.Fragment>
     );
   };
@@ -470,7 +464,6 @@ const SetClassificationAdmin = () => {
       }
     }
   ];
-
 
   return (
     <div className="container">

@@ -34,20 +34,16 @@ const ClassificationFileImportWithoutCode: React.FC = () => {
             })
 
         refUpload.current.clear();
-        function backToFacility() {
+        function backToClassification() {
             history('/classifications');
           }
           
-          setTimeout(backToFacility, 1200);
+          setTimeout(backToClassification, 1200);
         
     }
     return (
         <>
             <Toast ref={toast}></Toast>
-
-            <Tooltip target=".custom-choose-btn" content="Choose" position="bottom" />
-            <Tooltip target=".custom-upload-btn" content="Upload" position="bottom" />
-            <Tooltip target=".custom-cancel-btn" content="Clear" position="bottom" />
 
             <div className="card">
                 <h5>Classification File Import Without Code</h5>
@@ -55,12 +51,10 @@ const ClassificationFileImportWithoutCode: React.FC = () => {
                     name="upfile[]"
                     accept="csv/*"
                     maxFileSize={1000000}
-                    chooseLabel="Import"
-                    className="mr-2 inline-block"
+                    chooseLabel="Select File"
                     customUpload={true}
                     uploadHandler={uploadCSV}
                     ref={refUpload}
-                    emptyTemplate={<p className="m-0">Drag and drop files to here to upload.</p>}
                 />
             </div>
         </>
