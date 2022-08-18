@@ -17,7 +17,7 @@ import { FacilityInterface } from 'src/common/interface/facility.interface';
 import * as moment from 'moment';
 import { copyFile } from 'fs';
 import { JointSpaces } from '../entities/joint-spaces.entity';
-import { FacilityStructureCanNotDeleteExceptions, FacilityStructureDeleteExceptions, WrongFacilityStructureExceptions, WrongFacilityStructurePropsExceptions } from 'src/common/badRequestExceptions/bad.request.exception';
+import { FacilityStructureCanNotDeleteExceptions, FacilityStructureDeleteExceptions, WrongFacilityStructureExceptions, WrongFacilityStructurePropsExceptions, WrongFacilityStructurePropsRulesExceptions } from 'src/common/badRequestExceptions/bad.request.exception';
 import { I18NEnums } from 'src/common/const/i18n.enum';
 import { has_children_error } from 'src/common/const/custom.error.object';
 import { CustomTreeError } from 'src/common/const/custom.error.enum';
@@ -29,7 +29,6 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
 
   //REVISED FOR NEW NEO4J
   async findOneByRealm(label: string, realm: string) {
-    //let node = await this.neo4jService.findByRealmWithTreeStructure(label, realm);
     let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
       [label],{"realm":realm, "isDeleted":false},[],{"isDeleted":false, "canDisplay":true}
     ) 
@@ -344,6 +343,12 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
         Object.keys(properties).forEach((element) => {
           if (property == properties[element]['label']) {
             i = 1;
+            if (properties[element]['rules'] && properties[element]['type'] == 'text' && properties[element]['rules'].includes('not null')) {
+              if (structureData[property] == null || structureData[property] == "" || structureData[property] == undefined) {
+                throw new WrongFacilityStructurePropsRulesExceptions(property, 'not null');
+              }
+
+            }
           }
         });
         if (i == 0) {
