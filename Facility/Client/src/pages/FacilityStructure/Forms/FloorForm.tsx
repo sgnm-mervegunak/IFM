@@ -46,10 +46,10 @@ interface Node {
 }
 
 const schema = yup.object({
-    Elevation: yup.number().positive(),
-    Height: yup.number().positive(),
-    Name: yup.string().required("This area is required.").min(2, "This area is accept min 2 characters.")
-}).required();
+    elevation: yup.number().moreThan(-1).notRequired(),
+    height: yup.number().moreThan(-1).notRequired(),
+    name: yup.string().required("This area is required.").min(2, "This area is accept min 2 characters.")
+});
 
 
 const FloorForm = ({
@@ -63,7 +63,9 @@ const FloorForm = ({
     setEditDia,
     isUpdate,
     setIsUpdate,
-    setSelectedFacilityType
+    setSelectedFacilityType,
+
+    
 }: Params) => {
 
     const [name, setName] = useState<string>("");
@@ -73,15 +75,14 @@ const FloorForm = ({
     const [elevation, setElevation] = useState<string>("");
     const [height, setHeight] = useState<string>("");
 
+    const [data, setData] = useState<any>();
+
     const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
-        // defaultValues: {
-        //     Name: "",
-        //     Tag: null,
-        //     Description: null,
-        //     Elevation: null,
-        //     Height: null,
-        //     ProjectName:null
-        // }
+        defaultValues: {
+            elevation: 0,
+            height: 0,
+            ...data
+        },
         resolver: yupResolver(schema)
     }); //************************* */
     console.log("FORM ERRORS!!!", errors);
@@ -96,11 +97,12 @@ const FloorForm = ({
 
     useEffect(() => {
         if (submitted) {
-            onSubmit();
+            onSubmit(data);
         }
         setSubmitted(false);
 
     }, [submitted]);
+
 
     useEffect(() => {
         if (isUpdate) {
@@ -127,17 +129,23 @@ const FloorForm = ({
             });
     }
 
+    const onError = (errors: any, e: any) => console.log(errors, e);
 
-    const onSubmit = () => {
-
+    const onSubmit = (data: any) => {
+        console.log("dataAAA: ", data);
         if (editDia === false) {
             let newNode: any = {};
 
             newNode = {
-                name: name,
-                tag: tag,
-                description: description,
-                projectName: projectName,
+                // // name: name,
+                // // tag: tag,
+                // // description:description,
+                // // projectName:projectName,
+                // // nodeType: selectedFacilityType,
+                name: data?.name,
+                tag: data?.tag,
+                description: data?.description,
+                projectName: data?.projectName,
                 nodeType: selectedFacilityType,
 
             };
@@ -180,10 +188,15 @@ const FloorForm = ({
 
             let updateNode: any = {};
             updateNode = {
-                name: name,
-                tag: tag,
-                description: description,
-                projectName: projectName,
+                // name: name,
+                // tag: tag,
+                // description: description,
+                // projectName: projectName,
+                // nodeType: selectedFacilityType,
+                name: data?.name,
+                tag: data?.tag,
+                description: data?.description,
+                projectName: data?.projectName,
                 nodeType: selectedFacilityType,
 
             };
@@ -210,40 +223,38 @@ const FloorForm = ({
                 setEditDia(false);
             }, 1000);
         }
+
     };
 
     return (
-        <form onSubmit={handleSubmit((data) => {
-            console.log(data);
-        })}>
+        <form
+            onSubmit={handleSubmit((data) => {
+                setData(data);
+                console.log("aaaa", data);
+                onSubmit(data);
+            })}
+        >
 
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
                 <InputText
-                    {...register("Name",
-                        {
-                            onChange: (event) => {
-                                setName(event.target.value);
-                            }
-                        }
-                    )}
+                    {...register("name")}
                     style={{ width: '100%' }}
                 />
             </div>
-            <p style={{ color: "red" }}>{errors.Name?.message}</p>
+            <p style={{ color: "red" }}>{errors.name?.message}</p>
 
 
             <div className="field structureChips">
                 <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
                 <Controller
-                    name="Tag"
+                    name="tag"
                     control={control}
                     render={({ field }) => (
                         <Chips
                             value={field.value}
                             onChange={(e) => {
                                 console.log("field value: ", e.value);
-                                setTag(e.value);
                                 field.onChange(e.value)
                             }}
                             style={{ width: "100%" }}
@@ -255,74 +266,42 @@ const FloorForm = ({
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Description</h5>
                 <InputText
-                    {...register("Description",
-                        {
-                            onChange: (event) => {
-                                setDescription(event.target.value);
-                            }
-                        }
-                    )}
+                    {...register("description")}
                     style={{ width: "100%" }}
                 />
             </div>
-            <p style={{ color: "red" }}>{errors.Description?.message}</p>
+            <p style={{ color: "red" }}>{errors.description?.message}</p>
 
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Elevation (cm)</h5>
                 <InputText
-                    {...register("Elevation",
-                        {
-                            onChange: (event) => {
-                                // const value = event.target.value; //convert value from type string to number
-                                // console.log("------------", !isNaN(+value), "------"); //check if it is a number
-
-                                // if (!isNaN(+value)) {
-
-                                setElevation(event.target.value);
-                                // } else {
-                                //     alert("You can enter here only numerical values.")
-                                // }
-                            }
-                        }
-
-                    )}
+                    {...register("elevation")}
                     style={{ width: "100%" }}
                 />
             </div>
-            <p style={{ color: "red" }}>{errors.Elevation?.message}</p>
+            <p style={{ color: "red" }}>{errors.elevation?.message}</p>
 
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Height (cm)</h5>
                 <InputText
-                    {...register("Height",
-                        {
-                            onChange: (event) => {
-                                    setHeight(event.target.value);
-                            }
-                        }
-
-                    )}
+                    {...register("height")}
                     style={{ width: "100%" }}
                 />
             </div>
-            <p style={{ color: "red" }}>{errors.Height?.message}</p>
+            <p style={{ color: "red" }}>{errors.height?.message}</p>
 
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Project Name</h5>
                 <InputText
-                    {...register("ProjectName",
+                    {...register("projectName",
                         {
-                            required: "This area is required.",
-                            onChange: (event) => {
-                                setProjectName(event.target.value);
-                            }
+                            required: "This area is required."
                         }
-
                     )}
                     style={{ width: "100%" }}
                 />
             </div>
-            <p style={{ color: "red" }}>{errors.ProjectName?.message}</p>
+            <p style={{ color: "red" }}>{errors.projectName?.message}</p>
 
 
             <input type={"submit"} />
