@@ -6,7 +6,11 @@ import { useAppSelector } from "../../../app/hook";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const FloorFileImport: React.FC = () => {
+interface Params {
+    selectedNodeKey: string;
+  }
+
+const FloorFileImport = ({selectedNodeKey}:Params) => {
     const toast = useRef<any>();
     const refUpload = useRef<any>(null);
     const auth = useAppSelector((state) => state.auth);

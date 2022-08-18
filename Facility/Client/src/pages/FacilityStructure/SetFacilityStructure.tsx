@@ -747,7 +747,7 @@ const SetFacilityStructure = () => {
           setBlockImportDia(false);
         }}
       >
-        <BlockFileImport />
+        <BlockFileImport selectedNodeKey={selectedNodeKey} />
       </Dialog>
       <Dialog
         header="Floor Import"
@@ -758,7 +758,7 @@ const SetFacilityStructure = () => {
           setFloorImportDia(false);
         }}
       >
-        <FloorFileImport />
+        <FloorFileImport selectedNodeKey={selectedNodeKey}/>
       </Dialog>
       <Dialog
         header="Space Import"
@@ -769,7 +769,7 @@ const SetFacilityStructure = () => {
           setSpaceImportDia(false);
         }}
       >
-        <SpaceFileImport />
+        <SpaceFileImport selectedNodeKey={selectedNodeKey}/>
       </Dialog>
       <Dialog
         header="Structure Detail"
