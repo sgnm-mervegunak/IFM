@@ -68,6 +68,7 @@ export class ClassificationController {
   @Unprotected()
   @NoCache()
   @Get("getClassificationByIsActiveStatus/:realm/:language")
+  @NoCache()
   async getClassificationByIsActiveStatus(@Param('realm') realm:string,@Param('language') language:string){
     return this.classificationService.getClassificationByIsActiveStatus(realm,language);
   }
@@ -75,6 +76,7 @@ export class ClassificationController {
   @Unprotected()
   @NoCache()
   @Get('getClassificationsByLanguage/:realm/:language')
+  @NoCache()
   async getClassificationsByLanguage(@Param('realm') realm:string,@Param('language') language:string){
     return this.classificationService.getClassificationsByLanguage(realm, language);
   }
@@ -82,6 +84,7 @@ export class ClassificationController {
   @Unprotected()
   @NoCache()
   @Get('getAClassificationByRealmAndLabelNameAndLanguage/:realm/:labelName/:language')
+  @NoCache()
   async getAClassificationByRealmAndLabelNameAndLanguage(@Param('realm') realm:string,@Param('labelName') labelName:string,@Param('language') language:string){
     return this.classificationService.getAClassificationByRealmAndLabelNameAndLanguage(realm,labelName, language);
   }

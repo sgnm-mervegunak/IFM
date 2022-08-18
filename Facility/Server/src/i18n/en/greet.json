@@ -25,7 +25,8 @@
   "WRONG_FACILITY_STRUCTURE": "{node1} can not added under {node2} .",
   "WRONG_FACILITY_STRUCTURE_PROPS": "{node1} contains incorrect properties.",
   "WRONG_FACILITY_STRUCTURE_DELETE": "{node1}, cannot be deleted because it contains other structures.",
-  "PARENT_FACILITY_STRUCTURE_NOT_FOUND":"Parent of Facility Structure with this id #{id} not found "
-  
+  "PARENT_FACILITY_STRUCTURE_NOT_FOUND":"Parent of Facility Structure with this id {node1} not found ",
+  "WRONG_FACILITY_STRUCTURE_CAN_NOT_DELETE":"Structure no. {node1} is indelible.",
+  "WRONG_FACILITY_STRUCTURE_PROPS_RULES":"{prop} must be  {rule}."
   
 }

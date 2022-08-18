@@ -24,7 +24,7 @@
   "WRONG_FACILITY_STRUCTURE": "{node1}, {node2}'nin altına eklenemez.",
   "WRONG_FACILITY_STRUCTURE_PROPS": "{node1} hatalı özellikler içermektedir.",
   "WRONG_FACILITY_STRUCTURE_DELETE": "{node1}, başka yapılar içerdiğinden silinemez.",
-  "PARENT_FACILITY_STRUCTURE_NOT_FOUND":"#{id} no lu yapının bağlı olduğu yapı bulunamadı"
-
-  
+  "PARENT_FACILITY_STRUCTURE_NOT_FOUND":"{node1} no lu yapının bağlı olduğu yapı bulunamadı",
+  "WRONG_FACILITY_STRUCTURE_CAN_NOT_DELETE":"{node1} no lu yapı silinemez özelliktedir.",
+  "WRONG_FACILITY_STRUCTURE_PROPS_RULES":"{prop} {rule} olmalıdır."
 }
