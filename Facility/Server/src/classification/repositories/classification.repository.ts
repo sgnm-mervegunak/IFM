@@ -295,7 +295,7 @@ export class ClassificationRepository implements classificationInterface<Classif
       data=firstSheet.getColumn(1).values.filter((e)=>(e!=null));
 
  })
-
+ await data[0].replaceAll(" ","_")
   function key(){
     return uuidv4()
     }
@@ -356,8 +356,8 @@ export class ClassificationRepository implements classificationInterface<Classif
    
      function uuidReturn(){
        return uuidv4()
-      
       }
+      await data[0].replaceAll(" ","_")
    for (let q = 0; q < deneme.length; q++) {
      
      let parentcode = "";   
