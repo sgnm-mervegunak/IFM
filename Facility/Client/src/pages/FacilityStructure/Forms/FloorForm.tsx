@@ -50,7 +50,7 @@ const schema = yup.object({
     elevation: yup.number().moreThan(-1).notRequired(),
     height: yup.number().moreThan(-1).notRequired(),
     name: yup.string().required("This area is required.").min(2, "This area is accept min 2 characters."),
-    projectName: yup.string().required()
+    projectName: yup.string().required("This area is required.")
 
 });
 
@@ -87,8 +87,7 @@ const FloorForm = ({
             ...data
         },
         resolver: yupResolver(schema)
-    }); //************************* */
-    console.log("FORM ERRORS!!!", errors);
+    });
 
     const { toast } = useAppSelector(state => state.toast);
 
@@ -97,6 +96,7 @@ const FloorForm = ({
             handleSubmit(onSubmit)();
         }
         setSubmitted(false);
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [submitted]);
 
@@ -110,10 +110,6 @@ const FloorForm = ({
     const getNodeInfoForUpdate = (selectedNodeKey: string) => {
         FacilityStructureService.nodeInfo(selectedNodeKey)
             .then((res) => {
-                // setName(res.data.properties.name || "");
-                // setTag(res.data.properties.tag || []);
-                // setDescription(res.data.properties.description || "");
-                // setProjectName(res.data.properties.projectName || "");
                 setData(res.data.properties)
             })
             .catch((err) => {
@@ -126,19 +122,11 @@ const FloorForm = ({
             });
     }
 
-    const onError = (errors: any, e: any) => console.log(errors, e);
-
     const onSubmit = (data: any) => {
-        console.log("dataAAA: ", data);
         if (editDia === false) {
             let newNode: any = {};
 
             newNode = {
-                // // name: name,
-                // // tag: tag,
-                // // description:description,
-                // // projectName:projectName,
-                // // nodeType: selectedFacilityType,
                 name: data?.name,
                 tag: data?.tag,
                 description: data?.description,
@@ -185,11 +173,6 @@ const FloorForm = ({
 
             let updateNode: any = {};
             updateNode = {
-                // name: name,
-                // tag: tag,
-                // description: description,
-                // projectName: projectName,
-                // nodeType: selectedFacilityType,
                 name: data?.name,
                 tag: data?.tag,
                 description: data?.description,
@@ -254,7 +237,7 @@ const FloorForm = ({
                         <Chips
                             value={field.value}
                             onChange={(e) => {
-                                console.log("field value: ", e.value);
+                                // console.log("field value: ", e.value);
                                 field.onChange(e.value)
                             }}
                             style={{ width: "100%" }}
