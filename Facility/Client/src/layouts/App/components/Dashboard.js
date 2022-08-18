@@ -7,13 +7,16 @@ import { Column } from "primereact/column";
 import { Menu } from "primereact/menu";
 
 import FacilityStructureService from "../../../services/facilitystructure";
+import JointSpaceService from "../../../services/jointSpace";
 import { useAppSelector } from "../../../app/hook";
+
+let data2=[33,33,34];
 
 const revenueChart = {
   labels: ["Blocks", "Floors", "Spaces"],
   datasets: [
     {
-      data: [40, 35, 25],
+      data: data2,
       backgroundColor: ["#7986CB", "#4DB6AC","#5FD0E1"],
     },
   ],
@@ -22,11 +25,17 @@ const revenueChart = {
 
 const Dashboard = () => {
   const [data, setData] = useState([]);
+  const [data2, setData2] = useState([]);
   const [buildingCounts, setBuildingCounts] = useState(0);
   const [blockCounts, setBlockCounts] = useState(0);
   const [floorCounts, setFloorCounts] = useState(0);
   const [spaceCounts, setSpaceCounts] = useState(0);
+  const [blockCounts2, setBlockCounts2] = useState(0);
+  const [floorCounts2, setFloorCounts2] = useState(0);
+  const [spaceCounts2, setSpaceCounts2] = useState(0);
   const [buildingNames, setBuildingNames] = useState([]);
+  const [buildingKeys, setBuildingKeys]= useState([]);
+  const [counts,setCounts]=useState([]);
   const auth = useAppSelector((state) => state.auth);
   const { toast } = useAppSelector((state) => state.toast);
   const [realm, setRealm] = useState(auth.auth.realm);
@@ -40,6 +49,7 @@ const Dashboard = () => {
       if (i.nodeType === "Building") {
         setBuildingCounts((prev) => prev + 1);
         setBuildingNames((prev) => [...prev, i.name]);
+        setBuildingKeys((prev) => [...prev, i.key]);
       }
       if (i.nodeType === "Block") {
         setBlockCounts((prev) => prev + 1);
@@ -49,6 +59,25 @@ const Dashboard = () => {
       }
       if (i.nodeType === "Space") {
         setSpaceCounts((prev) => prev + 1);
+      }
+    }
+  };
+
+  const fixNodes2 = (nodes) => {
+    if (!nodes || nodes.length === 0) {
+      return;
+    }
+    for (let i of nodes) {
+      fixNodes(i.children);
+      if (i.nodeType === "Block") {
+        setBlockCounts2((prev) => prev + 1);
+        setCounts((prev) => [...prev, i.count]);
+      }
+      if (i.nodeType === "Floor") {
+        setFloorCounts2((prev) => prev + 1);
+      }
+      if (i.nodeType === "Space") {
+        setSpaceCounts2((prev) => prev + 1);
       }
     }
   };
@@ -73,12 +102,39 @@ const Dashboard = () => {
       });
   };
 
+  const getBuildings = () => {
+    buildingKeys.map((key) => {
+      JointSpaceService.findBuildingWithKey(key, realm)
+      .then((res) => {
+        setData2([res.data.root] || []);
+        let temp = JSON.parse(JSON.stringify([res.data.root] || []));
+        fixNodes2(temp);
+        setData2(temp);
+      })
+      .catch((err) => {
+        if (err.response.status === 500) {
+          toast.current.show({
+            severity: "error",
+            summary: "Error",
+            detail: "Facility Structure not found",
+            life: 4000,
+          });
+        }
+      });
+    }
+    )
+  };
+
   useEffect(() => {
     setBuildingCounts(0);
     setBlockCounts(0);
     setFloorCounts(0);
     setSpaceCounts(0);
+    setBlockCounts2(0);
+    setFloorCounts2(0);
+    setSpaceCounts2(0);
     setBuildingNames([]);
+    setBuildingKeys([]);
     getFacilityStructure();
   }, []);
 
@@ -121,7 +177,7 @@ const Dashboard = () => {
             <span className="overview-title">Floors</span>
             <div className="grid overview-detail">
               <div className="col-12">
-                <div className="overview-number">{buildingCounts}</div>
+                <div className="overview-number">{floorCounts}</div>
                 <div className="overview-subtext">Floors</div>
               </div>
             </div>

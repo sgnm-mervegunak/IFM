@@ -15,7 +15,7 @@ const ClassificationFileImportWithoutCode: React.FC = () => {
 
     const uploadCSV = (e:any) => {
         const file = e.files[0];
-        const url = 'http://localhost:3002/pre-classification/createclassifications';
+        const url = 'http://localhost:3010/classification/addAClassificationFromExcel/IFM/EN';
         const formData = new FormData();
 
         formData.append('file', file);
