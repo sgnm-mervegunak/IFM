@@ -2,11 +2,11 @@ import React, { useRef, useState } from 'react';
 import { Toast } from 'primereact/toast';
 import { FileUpload } from 'primereact/fileupload';
 import { Tooltip } from 'primereact/tooltip';
-import { useAppSelector } from "../../app/hook";
+import { useAppSelector } from "../../../app/hook";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const FloorFileImport: React.FC = () => {
+const SpaceFileImport: React.FC = () => {
     const toast = useRef<any>();
     const refUpload = useRef<any>(null);
     const auth = useAppSelector((state) => state.auth);
@@ -60,4 +60,4 @@ const FloorFileImport: React.FC = () => {
     )
 };
 
-export default FloorFileImport;
+export default SpaceFileImport;
