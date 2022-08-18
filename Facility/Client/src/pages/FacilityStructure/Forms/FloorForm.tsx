@@ -46,9 +46,12 @@ interface Node {
 }
 
 const schema = yup.object({
+    
     elevation: yup.number().moreThan(-1).notRequired(),
     height: yup.number().moreThan(-1).notRequired(),
-    name: yup.string().required("This area is required.").min(2, "This area is accept min 2 characters.")
+    name: yup.string().required("This area is required.").min(2, "This area is accept min 2 characters."),
+    projectName: yup.string().required()
+
 });
 
 
@@ -89,20 +92,13 @@ const FloorForm = ({
 
     const { toast } = useAppSelector(state => state.toast);
 
-    // useEffect(() => {
-    //     console.log(name);
-
-    // }, [name]);
-
-
     useEffect(() => {
         if (submitted) {
-            onSubmit(data);
+            handleSubmit(onSubmit)();
         }
         setSubmitted(false);
-
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [submitted]);
-
 
     useEffect(() => {
         if (isUpdate) {
@@ -114,10 +110,11 @@ const FloorForm = ({
     const getNodeInfoForUpdate = (selectedNodeKey: string) => {
         FacilityStructureService.nodeInfo(selectedNodeKey)
             .then((res) => {
-                setName(res.data.properties.name || "");
-                setTag(res.data.properties.tag || []);
-                setDescription(res.data.properties.description || "");
-                setProjectName(res.data.properties.projectName || "");
+                // setName(res.data.properties.name || "");
+                // setTag(res.data.properties.tag || []);
+                // setDescription(res.data.properties.description || "");
+                // setProjectName(res.data.properties.projectName || "");
+                setData(res.data.properties)
             })
             .catch((err) => {
                 toast.current.show({
@@ -226,20 +223,21 @@ const FloorForm = ({
 
     };
 
+    if (editDia && !data) {
+        return null;
+    }
+
     return (
         <form
-            onSubmit={handleSubmit((data) => {
-                setData(data);
-                console.log("aaaa", data);
-                onSubmit(data);
-            })}
         >
 
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
                 <InputText
+                    autoComplete="off"
                     {...register("name")}
                     style={{ width: '100%' }}
+                    defaultValue={data?.name || ""}
                 />
             </div>
             <p style={{ color: "red" }}>{errors.name?.message}</p>
@@ -248,6 +246,8 @@ const FloorForm = ({
             <div className="field structureChips">
                 <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
                 <Controller
+                    
+                    defaultValue={data?.tag || []}
                     name="tag"
                     control={control}
                     render={({ field }) => (
@@ -266,6 +266,8 @@ const FloorForm = ({
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Description</h5>
                 <InputText
+                    autoComplete="off"
+                    defaultValue={data?.description || ""}
                     {...register("description")}
                     style={{ width: "100%" }}
                 />
@@ -275,6 +277,7 @@ const FloorForm = ({
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Elevation (cm)</h5>
                 <InputText
+                    defaultValue={data?.elevation || ""}
                     {...register("elevation")}
                     style={{ width: "100%" }}
                 />
@@ -284,6 +287,7 @@ const FloorForm = ({
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Height (cm)</h5>
                 <InputText
+                    defaultValue={data?.height || ""}
                     {...register("height")}
                     style={{ width: "100%" }}
                 />
@@ -293,6 +297,8 @@ const FloorForm = ({
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Project Name</h5>
                 <InputText
+                    autoComplete="off"
+                    defaultValue={data?.projectName || ""}
                     {...register("projectName",
                         {
                             required: "This area is required."
@@ -304,7 +310,6 @@ const FloorForm = ({
             <p style={{ color: "red" }}>{errors.projectName?.message}</p>
 
 
-            <input type={"submit"} />
 
         </form>
     );
