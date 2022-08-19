@@ -17,6 +17,7 @@ export default [
         to: "/facilitystructure",
       },
       { label: "Joint Space", icon: "pi pi-th-large", to: "/jointspace" },
+      { label: "Zone", icon: "pi pi-flag-fill", to: "/zone" },
       { label: "Contact", icon: "pi pi-id-card", to: "/contact" },
       {
         label: "Structure-Asset",
