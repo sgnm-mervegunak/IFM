@@ -1,27 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Tree, TreeSelectionKeys } from "primereact/tree";
+import { Tree } from "primereact/tree";
 import { ContextMenu } from "primereact/contextmenu";
 import { Dialog } from "primereact/dialog";
 import { Chips } from "primereact/chips";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import { ConfirmDialog } from "primereact/confirmdialog";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-import { Checkbox } from "primereact/checkbox";
 import { TreeSelect } from "primereact/treeselect";
-import { Calendar } from "primereact/calendar";
-import { Dropdown } from "primereact/dropdown";
 import { useNavigate, useParams } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
 
 import FacilityStructureService from "../../services/facilitystructure";
 import ClassificationsService from "../../services/classifications";
-import FormTypeService from "../../services/formType";
-import StructureWinformService from "../../services/structureWinform";
-import JointSpaceService from "../../services/jointSpace";
 import ZoneService from "../../services/zone";
 import { useAppSelector } from "../../app/hook";
-
-import axios from "axios";
 import FormGenerate from "../FormGenerate/FormGenerate";
 
 interface Node {
@@ -383,7 +374,7 @@ const SetZone = () => {
   }
 
   const deleteItem = (key: string) => {
-    JointSpaceService.remove(key)
+    ZoneService.remove(key)
       .then(() => {
         toast.current.show({
           severity: "success",
@@ -674,7 +665,7 @@ const SetZone = () => {
               {
                 <>
                   <span className="ml-4 ">
-                    {data.nodeType === "JointSpace" ? (
+                    {data.nodeType === "Zone" ? (
                       <Button
                         icon="pi pi-trash"
                         className="p-button-rounded p-button-secondary p-button-text"
