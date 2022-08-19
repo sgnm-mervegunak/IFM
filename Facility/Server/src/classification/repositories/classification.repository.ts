@@ -371,7 +371,7 @@ export class ClassificationRepository implements classificationInterface<Classif
     function key2(){
       return uuidv4()
       }
-    let cypher2=`MATCH (m:${data[0]}_${language})  MERGE (n {name:"${data[i]}",key:"${key2()}",isActive:true,isDeleted:false,canDelete:true}) MERGE (m)-[:PARENT_OF]->(n) `
+    let cypher2=`MATCH (m:${data[0]}_${language})  MERGE (n {name:"${data[i]}",key:"${key2()}",isActive:true,isDeleted:false,canDelete:true,canDisplay:true}) MERGE (m)-[:PARENT_OF]->(n) `
     await this.neo4jService.write(cypher2)
    
   }
@@ -527,6 +527,7 @@ export class ClassificationRepository implements classificationInterface<Classif
        isDeleted:false,
        isActive:true,
        canDelete:true,
+       canDisplay:true
      };
    
    
@@ -547,7 +548,7 @@ export class ClassificationRepository implements classificationInterface<Classif
    
      for(let i=0;i<newClassification.length;i++){
    
-      let cypher2= `MATCH (n) where n.code="${newClassification[i].parentCode}" MERGE (b {code:"${newClassification[i].code}",parentCode:"${newClassification[i].parentCode}",name:"${newClassification[i].name}",isDeleted:${newClassification[i].isDeleted},isActive:${newClassification[i].isActive},canDelete:${newClassification[i].canDelete},key:"${uuidReturn3()}"}) MERGE (n)-[:PARENT_OF]->(b)`;
+      let cypher2= `MATCH (n) where n.code="${newClassification[i].parentCode}" MERGE (b {code:"${newClassification[i].code}",parentCode:"${newClassification[i].parentCode}",name:"${newClassification[i].name}",isDeleted:${newClassification[i].isDeleted},isActive:${newClassification[i].isActive},canDelete:${newClassification[i].canDelete},key:"${uuidReturn3()}",canDisplay:${newClassification[i].canDisplay}}) MERGE (n)-[:PARENT_OF]->(b)`;
       await this.neo4jService.write(cypher2)
      }
     
