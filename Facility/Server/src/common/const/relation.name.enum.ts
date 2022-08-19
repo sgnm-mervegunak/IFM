@@ -8,4 +8,5 @@ export enum RelationName {
   HAS_FORM_DATA = 'HAS_FORM_DATA',
   PARENT_OF = 'PARENT_OF',
   MERGED = 'MERGED',
+  MERGEDZN = 'MERGEDZN',
 }

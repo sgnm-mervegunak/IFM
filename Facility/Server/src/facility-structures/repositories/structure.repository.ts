@@ -1,5 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { FacilityStructureNotFountException, ParentFacilityStructureNotFountException } from '../../common/notFoundExceptions/not.found.exception';
+import {
+  FacilityStructureNotFountException,
+  ParentFacilityStructureNotFountException,
+} from '../../common/notFoundExceptions/not.found.exception';
 import { CreateFacilityStructureDto } from '../dto/create-facility-structure.dto';
 import { UpdateFacilityStructureDto } from '../dto/update-facility-structure.dto';
 import { FacilityStructure } from '../entities/facility-structure.entity';
@@ -17,21 +20,30 @@ import { FacilityInterface } from 'src/common/interface/facility.interface';
 import * as moment from 'moment';
 import { copyFile } from 'fs';
 import { JointSpaces } from '../entities/joint-spaces.entity';
-import { FacilityStructureCanNotDeleteExceptions, FacilityStructureDeleteExceptions, WrongFacilityStructureExceptions, WrongFacilityStructurePropsExceptions, WrongFacilityStructurePropsRulesExceptions } from 'src/common/badRequestExceptions/bad.request.exception';
+import { Zones } from '../entities/zones.entity';
+import {
+  FacilityStructureCanNotDeleteExceptions,
+  FacilityStructureDeleteExceptions,
+  WrongFacilityStructureExceptions,
+  WrongFacilityStructurePropsExceptions,
+  WrongFacilityStructurePropsRulesExceptions,
+} from 'src/common/badRequestExceptions/bad.request.exception';
 import { I18NEnums } from 'src/common/const/i18n.enum';
 import { has_children_error } from 'src/common/const/custom.error.object';
 import { CustomTreeError } from 'src/common/const/custom.error.enum';
 
-
 @Injectable()
 export class FacilityStructureRepository implements FacilityInterface<any> {
-  constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) { }
+  constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) {}
 
   //REVISED FOR NEW NEO4J
   async findOneByRealm(label: string, realm: string) {
     let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
-      [label],{"realm":realm, "isDeleted":false},[],{"isDeleted":false, "canDisplay":true}
-    ) 
+      [label],
+      { realm: realm, isDeleted: false },
+      [],
+      { isDeleted: false, canDisplay: true },
+    );
     if (!node) {
       throw new FacilityStructureNotFountException(realm);
     }
@@ -86,22 +98,26 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
 
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
   async update(key: string, structureData: Object) {
-    //is there facility-structure node 
+    //is there facility-structure node
     const node = await this.neo4jService.findOneNodeByKey(key);
     if (!node) {
       throw new FacilityStructureNotFountException(key);
     }
-    const structureRootNode=await this.neo4jService.findStructureRootNode(key, 'FacilityStructure');
+    const structureRootNode = await this.neo4jService.findStructureRootNode(key, 'FacilityStructure');
     //const properties = this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['nodeType']);
-    const properties = await this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['nodeType']);
+    const properties = await this.findChildrenByFacilityTypeNode(
+      'EN',
+      structureRootNode.properties.realm,
+      structureData['nodeType'],
+    );
     let proper = {};
-    Object.keys(properties).forEach((element) => { 
+    Object.keys(properties).forEach((element) => {
       let prop = properties[element]['label'].split(' ');
-      let pro = "";
+      let pro = '';
       Object.keys(prop).forEach((element) => {
-          pro = pro+prop[element]; 
+        pro = pro + prop[element];
       });
-      properties[element]['label']= pro;
+      properties[element]['label'] = pro;
     });
     Object.keys(structureData).forEach((property) => {
       if (property != 'nodeType') {
@@ -116,7 +132,6 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
         }
       }
     });
- 
 
     //update facility structure node
     const updatedOn = moment().format('YYYY-MM-DD HH:mm:ss');
@@ -125,7 +140,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     const updatedNode = await this.neo4jService.updateById(node.id, dynamicObject);
 
     if (!updatedNode) {
-      throw new FacilityStructureNotFountException(node.id);  //DEĞİŞECEK
+      throw new FacilityStructureNotFountException(node.id); //DEĞİŞECEK
     }
     const response = {
       id: updatedNode['identity'].low,
@@ -136,7 +151,6 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     return response;
   }
 
-
   async delete(_id: string) {
     try {
       const node = await this.neo4jService.findByIdWithoutVirtualNode(_id);
@@ -144,17 +158,17 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       const hasChildren = await this.neo4jService.findChildrenById(_id);
       let canDelete = false;
       if (hasChildren['records'].length == 0) {
-        canDelete = true;    
-      }
-      else if (node['properties']['nodeType']  == 'Building' && hasChildren['records'].length == 1 &&
-                                                                  hasChildren['records'][0]['_fields'][0]["labels"][0] == 'JointSpaces') {
+        canDelete = true;
+      } else if (
+        node['properties']['nodeType'] == 'Building' &&
+        hasChildren['records'].length == 1 &&
+        hasChildren['records'][0]['_fields'][0]['labels'][0] == 'JointSpaces'
+      ) {
         canDelete = true;
       }
-      if (!canDelete) { 
+      if (!canDelete) {
         throw new HttpException(has_children_error, 400);
-        
-      }
-      else {
+      } else {
         let deletedNode;
         deletedNode = await this.neo4jService.deleteUnconditionally(_id);
         if (!deletedNode) {
@@ -172,26 +186,21 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
         return deletedNode;
       }
     } catch (error) {
-
       const { code, message } = error.response;
       if (code === CustomNeo4jError.NOT_FOUND) {
         throw new FacilityStructureNotFountException(_id);
-      }
-      else if (code === CustomNeo4jError.PARENT_NOT_FOUND) {
+      } else if (code === CustomNeo4jError.PARENT_NOT_FOUND) {
         throw new ParentFacilityStructureNotFountException(_id);
-      }
-      else if (code === CustomTreeError.HAS_CHILDREN) {
+      } else if (code === CustomTreeError.HAS_CHILDREN) {
         throw new FacilityStructureDeleteExceptions(_id);
-      }
-      else if (code === CustomNeo4jError.NODE_CANNOT_DELETE) {
+      } else if (code === CustomNeo4jError.NODE_CANNOT_DELETE) {
         throw new FacilityStructureCanNotDeleteExceptions(_id);
+      } else {
+        throw new HttpException(message, code);
       }
-      else {
-           throw new HttpException(message, code);
-     }
     }
   }
-  
+
   // async deleteX(id: string) {
   //   try {
   //     if (!id) {
@@ -273,19 +282,25 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
   }
   //findchildrensbylabelsOnelevel ve findchildrensbyIdOnelevel   ile fonsiyon yeniden oluşturulacak.
   async findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) {
-
-    let node = await this.neo4jService.findChildNodesOfFirstParentNodeByLabelsRealmAndName('FacilityTypes_' + language, realm, 'FacilityType',
-      typename, 'FacilityTypeProperty', RelationName.PARENT_OF, RelationDirection.RIGHT);
+    let node = await this.neo4jService.findChildNodesOfFirstParentNodeByLabelsRealmAndName(
+      'FacilityTypes_' + language,
+      realm,
+      'FacilityType',
+      typename,
+      'FacilityTypeProperty',
+      RelationName.PARENT_OF,
+      RelationDirection.RIGHT,
+    );
 
     if (!node) {
       throw new FacilityStructureNotFountException(realm); //DEĞİŞECEK
     }
-    if (node["records"] && node["records"][0]) {
+    if (node['records'] && node['records'][0]) {
       let propertyList = [];
-      for (let i = 0; i < node["records"].length; i++) {
-        let property = node["records"][i];
-        property["_fields"][0]["properties"]._id = property["_fields"][0]["identity"]["low"];
-        propertyList.push(property["_fields"][0]["properties"]);
+      for (let i = 0; i < node['records'].length; i++) {
+        let property = node['records'][i];
+        property['_fields'][0]['properties']._id = property['_fields'][0]['identity']['low'];
+        propertyList.push(property['_fields'][0]['properties']);
       }
       return propertyList;
     }
@@ -294,48 +309,57 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
   }
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
   async create(key: string, structureData: Object) {
-    //is there facility-structure parent node 
+    //is there facility-structure parent node
     const node = await this.neo4jService.findOneNodeByKey(key);
     if (!node) {
       throw new FacilityStructureNotFountException(key);
     }
-  //////////////////////////// Control of childnode type which will be added to parent node. /////////////////////////////////////////
-   let structureRootNode;
-   if(node.labels[0]==='FacilityStructure'){
-    structureRootNode=node
-   }else{
-    structureRootNode=await this.neo4jService.findStructureRootNode(key, 'FacilityStructure');
-    //structureRootNode=await this.findStructureRootNode(key, 'FacilityStructure');
-   }
+    //////////////////////////// Control of childnode type which will be added to parent node. /////////////////////////////////////////
+    let structureRootNode;
+    if (node.labels[0] === 'FacilityStructure') {
+      structureRootNode = node;
+    } else {
+      structureRootNode = await this.neo4jService.findStructureRootNode(key, 'FacilityStructure');
+      //structureRootNode=await this.findStructureRootNode(key, 'FacilityStructure');
+    }
 
     //const allowedStructureTypeNode = await this.neo4jService.read('match (n:FacilityTypes_EN {realm:$realm}) match(p {name:$name}) match(n)-[:PARENT_OF]->(p) return p', { realm: structureRootNode.properties.realm, name: node.labels[0] })
-    const allowedStructureTypeNode = await this.neo4jService.getAllowedStructureTypeNode(structureRootNode.properties.realm, node.labels[0]);
+    const allowedStructureTypeNode = await this.neo4jService.getAllowedStructureTypeNode(
+      structureRootNode.properties.realm,
+      node.labels[0],
+    );
     //const allowedStructures=await this.neo4jService.read('match(n {key:$key}) match(p) match (n)-[:PARENT_OF]->(p) return p',{key:allowedStructureTypeNode.records[0]['_fields'][0].properties.key})
-    const allowedStructures =  await this.neo4jService.getAllowedStructures(allowedStructureTypeNode.records[0]['_fields'][0].properties.key)
-    
-    const isExist=allowedStructures.records.filter(allowedStructure=>{
-      console.log(allowedStructure['_fields'])
-      if(allowedStructure['_fields'][0].properties.name===structureData['nodeType']){
-        return allowedStructure
+    const allowedStructures = await this.neo4jService.getAllowedStructures(
+      allowedStructureTypeNode.records[0]['_fields'][0].properties.key,
+    );
+
+    const isExist = allowedStructures.records.filter((allowedStructure) => {
+      console.log(allowedStructure['_fields']);
+      if (allowedStructure['_fields'][0].properties.name === structureData['nodeType']) {
+        return allowedStructure;
       }
-    })
-    if(!isExist.length){
-      throw new WrongFacilityStructureExceptions(structureData['nodeType'],node.properties["nodeType"]);
+    });
+    if (!isExist.length) {
+      throw new WrongFacilityStructureExceptions(structureData['nodeType'], node.properties['nodeType']);
       //throw new HttpException('Yapıyı Bu şekilde oluşturamazsınız1',400)
     }
 
-  ////////////////////////////// Control of input properties with facility type properties //////////////////////////////////////////////////
+    ////////////////////////////// Control of input properties with facility type properties //////////////////////////////////////////////////
 
     //const properties = this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['nodeType']);
-    const properties = await this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['nodeType']);
+    const properties = await this.findChildrenByFacilityTypeNode(
+      'EN',
+      structureRootNode.properties.realm,
+      structureData['nodeType'],
+    );
     let proper = {};
-    Object.keys(properties).forEach((element) => { 
+    Object.keys(properties).forEach((element) => {
       let prop = properties[element]['label'].split(' ');
-      let pro = "";
+      let pro = '';
       Object.keys(prop).forEach((element) => {
-          pro = pro+prop[element]; 
+        pro = pro + prop[element];
       });
-      properties[element]['label']= pro;
+      properties[element]['label'] = pro;
     });
     Object.keys(structureData).forEach((property) => {
       if (property != 'nodeType') {
@@ -343,11 +367,18 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
         Object.keys(properties).forEach((element) => {
           if (property == properties[element]['label']) {
             i = 1;
-            if (properties[element]['rules'] && properties[element]['type'] == 'text' && properties[element]['rules'].includes('not null')) {
-              if (structureData[property] == null || structureData[property] == "" || structureData[property] == undefined) {
+            if (
+              properties[element]['rules'] &&
+              properties[element]['type'] == 'text' &&
+              properties[element]['rules'].includes('not null')
+            ) {
+              if (
+                structureData[property] == null ||
+                structureData[property] == '' ||
+                structureData[property] == undefined
+              ) {
                 throw new WrongFacilityStructurePropsRulesExceptions(property, 'not null');
               }
-
             }
           }
         });
@@ -357,7 +388,6 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
         }
       }
     });
-    
 
     let baseFacilityObject = new BaseFacilityObject();
     baseFacilityObject = assignDtoPropToEntity(baseFacilityObject, structureData);
@@ -365,18 +395,33 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     //create PARENT_OF relation between parent facility structure node and child facility structure node.
     await this.neo4jService.addRelationWithRelationNameByKey(key, createNode.properties.key, RelationName.PARENT_OF);
     let jointSpaces = new JointSpaces();
-    if (createNode['labels'][0]==='Building') {
-      const createJointSpacesNode  = await this.neo4jService.createNode(jointSpaces, ['JointSpaces']);
-      await this.neo4jService.addRelationWithRelationNameByKey(createNode['properties'].key, jointSpaces.key, RelationName.PARENT_OF);
+    let zones = new Zones();
+    if (createNode['labels'][0] === 'Building') {
+      const createJointSpacesNode = await this.neo4jService.createNode(jointSpaces, ['JointSpaces']);
+      await this.neo4jService.addRelationWithRelationNameByKey(
+        createNode['properties'].key,
+        jointSpaces.key,
+        RelationName.PARENT_OF,
+      );
+
+      const createZoneNode = await this.neo4jService.createNode(zones, ['Zones']);
+      await this.neo4jService.addRelationWithRelationNameByKey(
+        createNode['properties'].key,
+        zones.key,
+        RelationName.PARENT_OF,
+      );
     }
-    const response = { id: createNode['identity'].low, labels: createNode['labels'], properties: createNode['properties'] };
+    const response = {
+      id: createNode['identity'].low,
+      labels: createNode['labels'],
+      properties: createNode['properties'],
+    };
     return response;
   }
   //------------------------------------------
   // async findStructureRootNode(key){
   //  const structureRootNode=await this.neo4jService.read('match(n:FacilityStructure) match(p {key:$key}) match (n)-[:PARENT_OF*]->(p) return n',{key})
   //   console.log(structureRootNode.records[0]['_fields'][0])
-  
 
   //  return structureRootNode.records[0]['_fields'][0]
   // }
@@ -385,7 +430,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
 
   //   try {
   //     if (!key) {
-  //       throw new HttpException('key olmalıdır', 400); 
+  //       throw new HttpException('key olmalıdır', 400);
   //     }
 
   //     const cypher = `match(n:${label}) match(p {key:$key}) match (n)-[:PARENT_OF*]->(p) return n`;
@@ -405,7 +450,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
   //       throw new HttpException("500 hatası", 500);
   //     }
   //   }
-  // } 
+  // }
 
   async findStructureFirstLevelNodes(label: string, realm: string) {
     let node = await this.neo4jService.findByRealmWithTreeStructureOneLevel(label, realm);
@@ -416,5 +461,4 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
 
     return node['root']['children'];
   }
-  
 }
