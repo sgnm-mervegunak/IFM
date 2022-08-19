@@ -149,21 +149,20 @@ export class ZoneRepository implements GeciciInterface<any> {
       throw new HttpException('Node not found', HttpStatus.NOT_FOUND);
     }
 
-    const mergedNodes = await this.neo4jService.read(
-      `match(n {key:$key,isDeleted:false,isActive:true}) match(p {isActive:true,isDeleted:false,isBlocked:true}) match(p)-[:MERGED]->(n) return p`,
-      { key: node.records[0]['_fields'][0].properties.key },
-    );
+    // const mergedZnNodes = await this.neo4jService.read(
+    //   `match(n {key:$key}) match(p) match(p)-[:MERGEDZN]->(n) return p`,
+    //   { key: node.records[0]['_fields'][0].properties.key },
+    // );
 
-    mergedNodes.records.map(async (mergedNode) => {
-      await this.neo4jService.updateById(mergedNode['_fields'][0].identity.low, { isBlocked: false });
-    });
+    // mergedZnNodes.records.map(async (mergedNode) => {
+    //   await this.neo4jService.updateById(mergedNode['_fields'][0].identity.low, { isBlocked: false });
+    // });
 
     //check type and has active merged relationship and updateZone property
 
     const deletedNode = await this.neo4jService.updateById(node.records[0]['_fields'][0].identity.low, {
       isActive: false,
       isDeleted: true,
-      jointEndDate: moment().format('YYYY-MM-DD HH:mm:ss'),
     });
 
     return deletedNode.properties;
