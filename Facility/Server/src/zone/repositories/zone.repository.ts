@@ -25,6 +25,10 @@ export class ZoneRepository implements GeciciInterface<any> {
     }
     node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
 
+    node.root.children = node.root.children.filter(
+      (item: any) =>
+        item._type === 'Zones' || item._type === 'Floor' || item._type === 'Block' || item._type === 'Space',
+    );
     return node;
   }
 
@@ -78,7 +82,6 @@ export class ZoneRepository implements GeciciInterface<any> {
         throw new HttpException('Building must be same', HttpStatus.BAD_REQUEST);
       }
     });
-
 
     // ?????????????????????????????
     // await Promise.all(
