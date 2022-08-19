@@ -145,15 +145,21 @@ export class ClassificationRepository implements classificationInterface<Classif
   const root_id = root_node[0]['_fields'][0]['identity'].low;
   const firstNodes  = await this.neo4jService.findChildrensByIdOneLevel(root_id,{"isDeleted":false},[],{"isDeleted":false,"isActive":true},'PARENT_OF');
 
- let labels = firstNodes.map((item) => {
+ let lbls = firstNodes.map((item) => {
    if (item['_fields'][1]['labels'][0].endsWith('_'+language)) {
      return item['_fields'][1]['labels'][0];
    }
  });
+ lbls = lbls.filter((item) => {
+  if (item != undefined) {
+    return item;
+  }
+});
+let labels = [...new Set(lbls)];
  let root = {root:{ parent_of: [], root_id, ...root_node[0]['_fields'][0].properties }};
  for (let i = 0; i < labels.length; i++) {
    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
-     [labels[i]],{"realm":realm, "isDeleted":false},[],{"isDeleted":false,"isActive":true}
+     [labels[i].toString()],{"realm":realm, "isDeleted":false},[],{"isDeleted":false,"isActive":true}
    )
    root.root.parent_of.push(node['root']); 
  }
@@ -237,15 +243,21 @@ export class ClassificationRepository implements classificationInterface<Classif
      const firstNodes  = await this.neo4jService.findChildrensByIdOneLevel(root_id,{"isDeleted":false},[],{"isDeleted":false},'PARENT_OF');
     //const firstNodes  = await this.neo4jService.findChildrensByLabelsOneLevel(['Classification'],{'isDeleted':false,'realm':realm},[],{"isDeleted":false})
 
-    let labels = firstNodes.map((item) => {
+    let lbls = firstNodes.map((item) => {
       if (item['_fields'][1]['labels'][0].endsWith('_'+language)) {
         return item['_fields'][1]['labels'][0];
       }
     });
+    lbls = lbls.filter((item) => {
+      if (item != undefined) {
+        return item;
+      }
+    });
+    let labels = [...new Set(lbls)];
     let root = {root:{ parent_of: [], root_id, ...root_node[0]['_fields'][0].properties }};
     for (let i = 0; i < labels.length; i++) {
       let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
-        [labels[i]],{"realm":realm, "isDeleted":false},[],{"isDeleted":false}
+        [labels[i].toString()],{"realm":realm, "isDeleted":false},[],{"isDeleted":false}
       )
       root.root.parent_of.push(node['root']); 
     }
