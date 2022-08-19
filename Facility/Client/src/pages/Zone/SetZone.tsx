@@ -156,11 +156,12 @@ const SetZone = () => {
   const getClassificationStatus = async () => {
     await ClassificationsService.findAllActiveByLabel({
       realm: realm,
-      label: "FacilityStatus",
+      label: "FacilityZoneTypes",
       language: "en",
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodesClassification(temp);
+      temp[0].selectable = false
       setclassificationStatus(temp);
     });
   };
