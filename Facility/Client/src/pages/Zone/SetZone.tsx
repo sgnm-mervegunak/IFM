@@ -2,14 +2,14 @@ import React, { useEffect, useState } from "react";
 import { Tree, TreeSelectionKeys } from "primereact/tree";
 import { ContextMenu } from "primereact/contextmenu";
 import { Dialog } from "primereact/dialog";
-import { Chips } from 'primereact/chips';
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { Chips } from "primereact/chips";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-import { Checkbox } from 'primereact/checkbox';
+import { Checkbox } from "primereact/checkbox";
 import { TreeSelect } from "primereact/treeselect";
 import { Calendar } from "primereact/calendar";
-import { Dropdown } from 'primereact/dropdown';
+import { Dropdown } from "primereact/dropdown";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 
@@ -38,7 +38,7 @@ interface Node {
   _id: {
     low: string;
     high: string;
-  },
+  };
   icon?: string;
   label?: string;
   labels?: string[]; // for form type
@@ -48,6 +48,20 @@ interface Node {
   selectable?: boolean;
   nodeType?: string;
   isBlocked?: boolean;
+}
+
+interface ZoneInterface {
+  name: string;
+  category: string;
+  spaceNames: string;
+  code: string;
+  description: string;
+  credatedBy: string;
+  createdOn: string;
+  externalSystem: string;
+  externalObject: string;
+  tags: string[];
+  nodeKeys: string[];
 }
 
 interface FormNode {
@@ -67,22 +81,23 @@ interface FormNode {
   _id: {
     low: string;
     high: string;
-  },
+  };
   self_id: {
     low: string;
     high: string;
-  },
+  };
   labelclass: string;
   icon?: string;
 }
 
-const SetJointSpace = () => {
+const SetZone = () => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [selectedKeysName, setSelectedKeysName] = useState<string[]>([]);
   const [selectedNodeKey, setSelectedNodeKey] = useState<any>([]);
   const [deleteNodeKey, setDeleteNodeKey] = useState<any>("");
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
+  const [createZone,setCreateZone] = useState<ZoneInterface>({} as ZoneInterface)
   const [ArchitecturalName, setArchitecturalName] = useState<string>("");
   const [ArchitecturalCode, setArchitecturalCode] = useState<string>("");
   const [name, setName] = useState<string>("");
@@ -105,15 +120,21 @@ const SetJointSpace = () => {
   const [formDia, setFormDia] = useState<boolean>(false);
   const { toast } = useAppSelector((state) => state.toast);
   const cm: any = React.useRef(null);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<FormNode[]>([]);
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
   const [generateNodeKey, setGenerateNodeKey] = useState("");
-  const [generateFormTypeKey, setGenerateFormTypeKey] = useState<string | undefined>("");
-  const [generateNodeName, setGenerateNodeName] = useState<string | undefined>("");
+  const [generateFormTypeKey, setGenerateFormTypeKey] = useState<
+    string | undefined
+  >("");
+  const [generateNodeName, setGenerateNodeName] = useState<string | undefined>(
+    ""
+  );
   const [facilityType, setFacilityType] = useState<string[]>([]);
-  const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
+  const [selectedFacilityType, setSelectedFacilityType] = useState<
+    string | undefined
+  >("");
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const params = useParams();
@@ -130,7 +151,11 @@ const SetJointSpace = () => {
   };
 
   const getClassificationSpace = async () => {
-    await ClassificationsService.findAllActiveByLabel({ realm: realm, label: "OmniClass13", language: "en" }).then((res) => {
+    await ClassificationsService.findAllActiveByLabel({
+      realm: realm,
+      label: "OmniClass13",
+      language: "en",
+    }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodesClassification(temp);
       setClassificationSpace(temp);
@@ -138,7 +163,11 @@ const SetJointSpace = () => {
   };
 
   const getClassificationStatus = async () => {
-    await ClassificationsService.findAllActiveByLabel({ realm: realm, label: "FacilityStatus", language: "en" }).then((res) => {
+    await ClassificationsService.findAllActiveByLabel({
+      realm: realm,
+      label: "FacilityStatus",
+      language: "en",
+    }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodesClassification(temp);
       setclassificationStatus(temp);
@@ -169,7 +198,7 @@ const SetJointSpace = () => {
           life: 2000,
         });
       });
-  }
+  };
 
   const menu = [
     {
@@ -197,40 +226,43 @@ const SetJointSpace = () => {
     },
   ];
 
-  const getJointSpace = () => {
+  const getZone = () => {
     const key = params.id || "";
-    ZoneService.findBuildingWithKey(key, realm).then((res) => {
-      console.log(res.data)
-      if (!res.data.root.children) {
-        setData([res.data.root.properties] || []);
-        let temp = JSON.parse(JSON.stringify([res.data.root.properties] || []));
-        fixNodes(temp)
-        setData(temp)
-      }
-      else if (res.data.root.children) {
-        setData([res.data.root] || []);
-        let temp = JSON.parse(JSON.stringify([res.data.root] || []));
-        fixNodes(temp)
-        setData(temp)
-      }
-      setLoading(false);
-    }).catch(err => {
-      if (err.response.status === 500) {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: "Joint Space not found",
-          life: 3000,
-        });
-        setTimeout(() => {
-          navigate("/jointspace")
-        }, 3000)
-      }
-    })
-  }
+    ZoneService.findBuildingWithKey(key, realm)
+      .then((res) => {
+        console.log(res.data);
+        if (!res.data.root.children) {
+          setData([res.data.root.properties] || []);
+          let temp = JSON.parse(
+            JSON.stringify([res.data.root.properties] || [])
+          );
+          fixNodes(temp);
+          setData(temp);
+        } else if (res.data.root.children) {
+          setData([res.data.root] || []);
+          let temp = JSON.parse(JSON.stringify([res.data.root] || []));
+          fixNodes(temp);
+          setData(temp);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (err.response.status === 500) {
+          toast.current.show({
+            severity: "error",
+            summary: "Error",
+            detail: "Zone not found",
+            life: 3000,
+          });
+          setTimeout(() => {
+            navigate("/zone");
+          }, 3000);
+        }
+      });
+  };
 
   useEffect(() => {
-    getJointSpace();
+    getZone();
   }, []);
 
   const fixNodes = (nodes: Node[]) => {
@@ -238,15 +270,14 @@ const SetJointSpace = () => {
       return;
     }
     for (let i of nodes) {
-      fixNodes(i.children)
+      fixNodes(i.children);
       i.icon = "pi pi-fw pi-building";
       i.label = i.name || i.Name;
-      if ((i.nodeType === "Space")) {
+      if (i.nodeType === "Space") {
         i.selectable = true;
       } else {
         i.selectable = false;
       }
-
     }
   };
 
@@ -254,34 +285,28 @@ const SetJointSpace = () => {
     let newNode: any = {};
 
     newNode = {
-      ArchitecturalName: ArchitecturalName,
-      ArchitecturalCode: ArchitecturalCode,
-      name: name,  //selectedKeysName.toString().replaceAll(",", "-"),
-      code: code,
-      tag: tag,
-      m2: m2,
-      spaceType: spaceType,
-      status: status,
-      jointStartDate: jointStartDate,
-      jointEndDate: jointEndDate,
-      nodeKeys: selectedKeys
+      ...createZone,
+      spaceNames: `${selectedKeysName.toString().replaceAll(",", ", ")}`,
+      nodeKeys: selectedKeys,
+      credatedBy: "",
+      createdOn: ""
     };
-    console.log(newNode);
+    console.log(newNode)
 
-
-    JointSpaceService.createJointSpace(newNode)
+    ZoneService.createZone(newNode)
       .then((res) => {
         toast.current.show({
           severity: "success",
           summary: "Successful",
-          detail: "Joint Space Created",
+          detail: "Zone Created",
           life: 3000,
         });
 
-        getJointSpace();
         setSelectedNodeKey([]);
+        setCreateZone({} as ZoneInterface)
         setSelectedKeys([]);
-
+        setAddDia(false);
+        getZone();
       })
       .catch((err) => {
         toast.current.show({
@@ -291,18 +316,6 @@ const SetJointSpace = () => {
           life: 2000,
         });
       });
-
-    setArchitecturalName("");
-    setArchitecturalCode("");
-    setName("");
-    setCode("");
-    setTag([]);
-    setM2("");
-    setSpaceType(undefined);
-    setStatus(undefined);
-    setJointStartDate("");
-    setJointEndDate("");
-    setAddDia(false);
   };
 
   const editItem = (key: string) => {
@@ -325,7 +338,7 @@ const SetJointSpace = () => {
             isActive: isActive,
             description: "",
             formTypeId: formTypeId,
-          }
+          };
         }
 
         FacilityStructureService.update(responseStructure.data.id, updateNode)
@@ -336,7 +349,7 @@ const SetJointSpace = () => {
               detail: "Structure Updated",
               life: 3000,
             });
-            getJointSpace();
+            getZone();
           })
           .catch((err) => {
             toast.current.show({
@@ -360,6 +373,13 @@ const SetJointSpace = () => {
     setFormTypeId(undefined);
     setLabels([]);
     setEditDia(false);
+  };
+
+  const onChange = (e:any)=>{
+    setCreateZone(prev=>({
+      ...prev,
+      [e.target.name]: e.target.value
+    }))
   }
 
   const deleteItem = (key: string) => {
@@ -368,10 +388,10 @@ const SetJointSpace = () => {
         toast.current.show({
           severity: "success",
           summary: "Success",
-          detail: "Joint Space Deleted",
+          detail: "Zone Deleted",
           life: 2000,
         });
-        getJointSpace();
+        getZone();
         setSelectedNodeKey([]);
         setSelectedKeys([]);
       })
@@ -386,20 +406,16 @@ const SetJointSpace = () => {
   };
 
   const findKeyName = (data: any) => {
-
-    setSelectedKeysName([])
+    setSelectedKeysName([]);
 
     if (data.length > 0) {
       data.map((key: any) => {
-        FacilityStructureService.nodeInfo(key)
-          .then((res) => {
-            setSelectedKeysName(prev => [...prev, res.data.properties.name]);
-          })
-      }
-      )
+        FacilityStructureService.nodeInfo(key).then((res) => {
+          setSelectedKeysName((prev) => [...prev, res.data.properties.name]);
+        });
+      });
     }
   };
-
 
   const showSuccess = (detail: string) => {
     toast.current.show({
@@ -420,6 +436,7 @@ const SetJointSpace = () => {
             setAddDia(false);
             setName("");
             setFormTypeId(undefined);
+            setCreateZone({} as ZoneInterface)
             setLabels([]);
             setTag([]);
 
@@ -500,103 +517,81 @@ const SetJointSpace = () => {
           setTag([]);
           setFormTypeId(undefined);
           setLabels([]);
+          // setCreateZone({} as ZoneInterface)
           setAddDia(false);
 
           setSelectedFacilityType(undefined);
         }}
       >
         <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>ArchitecturalName</h5>
-          <InputText
-            value={ArchitecturalName}
-            onChange={(event) => setArchitecturalName(event.target.value)}
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>ArchitecturalCode</h5>
-          <InputText
-            value={ArchitecturalCode}
-            onChange={(event) => setArchitecturalCode(event.target.value)}
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field">
           <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
           <InputText
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
-          <InputText
-            value={code}
-            onChange={(event) => setCode(event.target.value)}
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field structureChips">
-          <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
-          <Chips
-            value={tag}
-            onChange={(e) => setTag(e.value)}
+            value={createZone.name}
+            name="name"
+            onChange={onChange}
             style={{ width: "100%" }}
           />
         </div>
+
+        {/* Type Ayarlanamalı */}
         <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>M2</h5>
-          <InputText
-            value={m2}
-            onChange={(event) => setM2(event.target.value)}
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Space Type</h5>
+          <h5 style={{ marginBottom: "0.5em" }}>Category</h5>
           <TreeSelect
-            value={spaceType}
-            options={classificationSpace}
-            onChange={(e) => {
-              setSpaceType(e.value);
-            }}
-            filter
-            placeholder="Select Type"
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Status</h5>
-          <TreeSelect
-            value={status}
+            value={createZone.category}
             options={classificationStatus}
-            onChange={(e) => {
-              setStatus(e.value);
-            }}
+            onChange={(e) => onChange({ target: { name: "category", value: e.value } })}
             filter
             placeholder="Select Type"
-            style={{ width: '100%' }}
+            style={{ width: "100%" }}
           />
         </div>
+
         <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Joint Start Date</h5>
-          <Calendar
-            dateFormat="dd/mm/yy"
-            value={jointStartDate}
-            onChange={(e) => setJointStartDate(e.value?.toString())}
-            showIcon
-            style={{ width: '100%' }}
+          <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
+          <InputText
+            value={createZone.code}
+            name="code"
+            onChange={onChange}
+            style={{ width: "100%" }}
           />
         </div>
+
         <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Joint End Date</h5>
-          <Calendar
-            dateFormat="dd/mm/yy"
-            value={jointEndDate}
-            onChange={(e) => setJointEndDate(e.value?.toString())}
-            showIcon
-            style={{ width: '100%' }}
+          <h5 style={{ marginBottom: "0.5em" }}>Description</h5>
+          <InputText
+            value={createZone.description}
+            name="description"
+            onChange={onChange}
+            style={{ width: "100%" }}
+          />
+        </div>
+
+        <div className="field structureChips">
+          <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
+          <Chips
+            value={createZone.tags}
+            onChange={(e) => onChange({ target: { name: "tags", value: e.value } })}
+            style={{ width: "100%" }}
+          />
+        </div>
+
+        <div className="field">
+          <h5 style={{ marginBottom: "0.5em" }}>External System</h5>
+          <InputText
+            value={createZone.externalSystem}
+            name="externalSystem"
+            onChange={onChange}
+            style={{ width: "100%" }}
+          />
+        </div>
+
+        <div className="field">
+          <h5 style={{ marginBottom: "0.5em" }}>External Object</h5>
+          <InputText
+            value={createZone.externalObject}
+            name="externalObject"
+            onChange={onChange}
+            style={{ width: "100%" }}
           />
         </div>
       </Dialog>
@@ -615,8 +610,7 @@ const SetJointSpace = () => {
 
           setSelectedFacilityType(undefined);
         }}
-      >
-      </Dialog>
+      ></Dialog>
 
       <Dialog
         // header="Form"
@@ -624,26 +618,35 @@ const SetJointSpace = () => {
         style={{ width: "40vw" }}
         // footer={renderFooterForm}
         onHide={() => {
-
           setFormDia(false);
         }}
       >
-        <FormGenerate nodeKey={generateNodeKey} formKey={generateFormTypeKey} nodeName={generateNodeName} setFormDia={setFormDia} />
-
+        <FormGenerate
+          nodeKey={generateNodeKey}
+          formKey={generateFormTypeKey}
+          nodeName={generateNodeName}
+          setFormDia={setFormDia}
+        />
       </Dialog>
-      <h3>Joint Space</h3>
+      <h3>Zone</h3>
       <div>
-        <span style={{ fontWeight: "bold", fontSize: "16px" }}>Selected Spaces:</span>
-        <span style={{ fontWeight: "bold", fontSize: "14px", color: "red" }}>{` ${selectedKeysName.toString().replaceAll(",", ", ")} `}</span>
-        
-        {selectedKeys.length > 1 &&
+        <span style={{ fontWeight: "bold", fontSize: "16px" }}>
+          Selected Spaces:
+        </span>
+        <span
+          style={{ fontWeight: "bold", fontSize: "14px", color: "red" }}
+        >{` ${selectedKeysName.toString().replaceAll(",", ", ")} `}</span>
+
+        {selectedKeys.length > 1 && (
           <div className="mt-4">
-
-            <Button label="Join" icon="pi pi-check" className="ml-2" onClick={() => setAddDia(true)} />
-
+            <Button
+              label="Create a Zone"
+              icon="pi pi-check"
+              className="ml-2"
+              onClick={() => setAddDia(true)}
+            />
           </div>
-        }
-
+        )}
       </div>
       <div className="field mt-4">
         <Tree
@@ -655,44 +658,43 @@ const SetJointSpace = () => {
           filterPlaceholder="Search"
           selectionMode="checkbox"
           onSelectionChange={(event: any) => {
-
             console.log(event);
 
             setSelectedNodeKey(event.value);
             setSelectedKeys(Object.keys(event.value));
             findKeyName(Object.keys(event.value));
             // selectedKeys?.map((key) =>{findKeyName(key)});
-          }
-          }
+          }}
           selectionKeys={selectedNodeKey}
           propagateSelectionUp={false}
           className="font-bold"
-          nodeTemplate={(data: Node, options) => <span className="flex align-items-center font-bold">{data.label} {
-            <>
-              <span className="ml-4 ">
-
-                {
-                  data.nodeType === "JointSpace" ? <Button
-                    icon="pi pi-trash" className="p-button-rounded p-button-secondary p-button-text" aria-label="Delete"
-                    onClick={() => {
-                      setDeleteNodeKey(data.key);
-                      setDelDia(true)
-                    }}
-                    title="Delete Item"
-                  />
-                    : null
-                }
-
-
-              </span>
-            </>
-          }
-          </span>}
+          nodeTemplate={(data: Node, options) => (
+            <span className="flex align-items-center font-bold">
+              {data.label}{" "}
+              {
+                <>
+                  <span className="ml-4 ">
+                    {data.nodeType === "JointSpace" ? (
+                      <Button
+                        icon="pi pi-trash"
+                        className="p-button-rounded p-button-secondary p-button-text"
+                        aria-label="Delete"
+                        onClick={() => {
+                          setDeleteNodeKey(data.key);
+                          setDelDia(true);
+                        }}
+                        title="Delete Item"
+                      />
+                    ) : null}
+                  </span>
+                </>
+              }
+            </span>
+          )}
         />
       </div>
-
     </div>
   );
 };
 
-export default SetJointSpace;
+export default SetZone;

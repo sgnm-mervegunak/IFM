@@ -2,15 +2,17 @@ import axios from "axios";
 
 const url = process.env.REACT_APP_API_URL + "zone/";
 
-interface JointSpaceInterface {
+interface ZoneInterface {
     name: string;
+    category: string;
+    spaceNames: string;
     code: string;
-    tag: string[];
-    m2: string;
-    spaceType: string;
-    status: string;
-    jointStartDate: string;
-    jointEndDate: string;
+    description: string;
+    credatedBy: string;
+    createdOn: string;
+    externalSystem: string;
+    externalObject: string;
+    tags: string[];
     nodeKeys: string[];
 }
 
@@ -18,8 +20,8 @@ const findBuildingWithKey = async (key: string,realm: string) => {
     return axios.get(url + key + "/" + realm);
 };
 
-const createJointSpace = async (jointData: JointSpaceInterface) => {
-    return axios.post(url, jointData);
+const createZone = async (createData: ZoneInterface) => {
+    return axios.post(url, createData);
 };
 
 const remove = async (key: string) => {
@@ -28,7 +30,7 @@ const remove = async (key: string) => {
 
 const service = {
     findBuildingWithKey,
-    createJointSpace,
+    createZone,
     remove
 };
 
