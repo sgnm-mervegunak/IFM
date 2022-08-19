@@ -25,6 +25,11 @@ export class JointSpaceRepository implements GeciciInterface<any> {
     }
     node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
 
+    node.root.children = node.root.children.filter(
+      (item: any) =>
+        item._type === 'JointSpaces' || item._type === 'Floor' || item._type === 'Block' || item._type === 'Space',
+    );
+
     return node;
   }
 

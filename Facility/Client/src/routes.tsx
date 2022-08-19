@@ -22,7 +22,9 @@ import { useAppSelector } from "./app/hook";
 import SetClassificationUser from "./pages/Classifications/SetClassificationUser";
 import SetFacilityStructure2 from "./pages/FacilityStructure/SetFacilityStructure2";
 import JointSpace from "./pages/JointSpace/JointSpace";
+import Zone from "./pages/Zone/Zone";
 import SetJointSpace from "./pages/JointSpace/SetJointSpace";
+import SetZone from "./pages/Zone/SetZone";
 import ClassificationFileImportWithoutCode from "./pages/Classifications/ClassificationFileImportWithoutCode";
 
 // import Main from './pages/Main';
@@ -41,6 +43,7 @@ export default function Router() {
         // { path: "classifications", element: <Classifications /> },
         { path: "classifications", element: auth.auth.type === "facility_client_role_admin" ? <SetClassificationAdmin /> : <SetClassificationUser /> },
         { path: "jointspace", element: <JointSpace /> },
+        { path: "zone", element: <Zone /> },
         { path: "facilitystructure", element: <SetFacilityStructure /> },
         // { path: "formgenerate", element: <FormGenerate />},
         { path: "contact", element: <Contact /> },
@@ -86,6 +89,11 @@ export default function Router() {
       path: "/jointspace",
       element: <AppLayout />,
       children: [{ path: ":id", element: <SetJointSpace /> }],
+    },
+    {
+      path: "/zone",
+      element: <AppLayout />,
+      children: [{ path: ":id", element: <SetZone /> }],
     },
     {
       path: "/404",
