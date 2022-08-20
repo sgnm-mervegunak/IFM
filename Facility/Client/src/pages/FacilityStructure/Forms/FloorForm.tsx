@@ -2,11 +2,14 @@ import React, { useState, useEffect, InputHTMLAttributes } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { InputText } from "primereact/inputtext";
 import { Chips } from 'primereact/chips';
+import { TreeSelect } from "primereact/treeselect";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useAppSelector } from "../../../app/hook";
-import FacilityStructureService from "../../../services/facilitystructure";
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
+
+import FacilityStructureService from "../../../services/facilitystructure";
+import ClassificationsService from "../../../services/classifications";
+import { useAppSelector } from "../../../app/hook";
 
 interface Params {
     selectedFacilityType: string | undefined;
@@ -46,7 +49,7 @@ interface Node {
 }
 
 const schema = yup.object({
-    
+
     elevation: yup.number().moreThan(-1).notRequired(),
     height: yup.number().moreThan(-1).notRequired(),
     name: yup.string().required("This area is required.").min(2, "This area is accept min 2 characters."),
@@ -68,7 +71,7 @@ const FloorForm = ({
     setIsUpdate,
     setSelectedFacilityType,
 
-    
+
 }: Params) => {
 
     const [name, setName] = useState<string>("");
@@ -77,19 +80,48 @@ const FloorForm = ({
     const [projectName, setProjectName] = useState<string>("");
     const [elevation, setElevation] = useState<string>("");
     const [height, setHeight] = useState<string>("");
+    const [classificationCategory, setClassificationCategory] = useState<Node[]>([]);
+    const auth = useAppSelector((state) => state.auth);
+    const [realm, setRealm] = useState(auth.auth.realm);
 
     const [data, setData] = useState<any>();
 
     const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
         defaultValues: {
-            elevation: 0,
-            height: 0,
+            // elevation: 0,
+            // height: 0,
             ...data
         },
         resolver: yupResolver(schema)
     });
 
     const { toast } = useAppSelector(state => state.toast);
+
+    const fixNodes = (nodes: Node[]) => {
+        if (!nodes || nodes.length === 0) {
+            return;
+        }
+        for (let i of nodes) {
+            fixNodes(i.children);
+            i.label = i.name;
+        }
+    };
+
+    const getClassificationCategory = async () => {
+        await ClassificationsService.findAllActiveByLabel({
+            realm: realm,
+            label: "FloorType",
+            language: "en",
+        }).then((res) => {
+            let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
+            fixNodes(temp);
+            setClassificationCategory(temp);
+        });
+    };
+
+    useEffect(() => {
+        getClassificationCategory();
+    }, []);
 
     useEffect(() => {
         if (submitted) {
@@ -132,7 +164,9 @@ const FloorForm = ({
                 description: data?.description,
                 projectName: data?.projectName,
                 nodeType: selectedFacilityType,
-
+                elevation: data?.elevation,
+                height: data?.height,
+                category: data?.category,
             };
 
             FacilityStructureService.createStructure(selectedNodeKey, newNode)
@@ -178,7 +212,9 @@ const FloorForm = ({
                 description: data?.description,
                 projectName: data?.projectName,
                 nodeType: selectedFacilityType,
-
+                elevation: data?.elevation,
+                height: data?.height,
+                category: data?.category,
             };
 
             FacilityStructureService.update(selectedNodeKey, updateNode)
@@ -225,11 +261,33 @@ const FloorForm = ({
             </div>
             <p style={{ color: "red" }}>{errors.name?.message}</p>
 
+            <div className="field">
+                <h5 style={{ marginBottom: "0.5em" }}>Category</h5>
+                <Controller
+
+                    defaultValue={data?.category || []}
+                    name="category"
+                    control={control}
+                    render={({ field }) => (
+                        <TreeSelect
+                            value={field.value}
+                            options={classificationCategory}
+                            onChange={(e) => {
+                                // console.log("field value: ", e.value);
+                                field.onChange(e.value)
+                            }}
+                            filter
+                            placeholder="Select Type"
+                            style={{ width: "100%" }}
+                        />
+                    )}
+                />
+            </div>
 
             <div className="field structureChips">
                 <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
                 <Controller
-                    
+
                     defaultValue={data?.tag || []}
                     name="tag"
                     control={control}
