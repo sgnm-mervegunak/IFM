@@ -189,55 +189,12 @@ const SetFacilityStructure = () => {
     setSpaceImportDia(true);
   }
 
-  const importInfoOfNode = {
-    Building: [
-      {
-        label: "Import Block",
-        icon: "pi pi-fw pi-upload",
-        command: () => {
-          importBlock()
-        },
-      },
-      {
-        label: "Import Floor",
-        icon: "pi pi-fw pi-upload",
-        command: () => {
-          importFloor()
-        },
-      },
-    ],
-    Floor: [
-      {
-        label: "Import Space",
-        icon: "pi pi-fw pi-upload",
-        command: () => {
-          importSpace()
-        },
-      },
-    ],
-    Block: [
-      {
-        label: "Import Floor",
-        icon: "pi pi-fw pi-upload",
-        command: () => {
-          importFloor()
-        },
-      },
-      {
-        label: "Import Space",
-        icon: "pi pi-fw pi-upload",
-        command: () => {
-          importSpace()
-        },
-      },
-    ],
-  };
-
-  const [menu, setMenu] = useState([
+  const menu = [
     {
       label: "Add Item",
       icon: "pi pi-plus",
       command: () => {
+        setSelectedFacilityType(undefined);
         setAddDia(true);
       },
     },
@@ -245,6 +202,10 @@ const SetFacilityStructure = () => {
       label: "Edit Item",
       icon: "pi pi-pencil",
       command: () => {
+        let key = selectedNodeKey;
+        console.log(key);
+        console.log("test");
+
         setIsUpdate(true);
         getNodeInfoAndEdit(selectedNodeKey);
         setEditDia(true);
@@ -265,24 +226,159 @@ const SetFacilityStructure = () => {
         setDisplayKey(selectedNodeKey);
       },
     },
-  ]);
+  ];
 
-  // React.useEffect(() => {
-  //   setMenu(prev=>{
-  //     prev.length = 4;
-  //     if (selectedNode.nodeType === "Building") {
-  //       for (let item of importInfoOfNode["Building"]) {
-  //         prev.push(item);
-  //       }
-  //     } else if (selectedNode.nodeType === "Floor") {
-  //       for (let item of importInfoOfNode["Floor"]) {
-  //         prev.push(item);
-  //       }
-  //     }
-  //     return prev
-  //   })
+  const menuBuilding = [
+    {
+      label: "Add Item",
+      icon: "pi pi-plus",
+      command: () => {
+        setSelectedFacilityType(undefined);
+        setAddDia(true);
+      },
+    },
+    {
+      label: "Edit Item",
+      icon: "pi pi-pencil",
+      command: () => {
+        let key = selectedNodeKey;
+        console.log(key);
+        console.log("test");
 
-  // }, [selectedNode.nodeType]);
+        setIsUpdate(true);
+        getNodeInfoAndEdit(selectedNodeKey);
+        setEditDia(true);
+      },
+    },
+    {
+      label: "Delete",
+      icon: "pi pi-trash",
+      command: () => {
+        setDelDia(true);
+      },
+    },
+    {
+      label: "Display",
+      icon: "pi pi-eye",
+      command: () => {
+        setDisplay(true);
+        setDisplayKey(selectedNodeKey);
+      },
+    },
+    {
+      label: "Import Block",
+      icon: "pi pi-fw pi-upload",
+      command: () => {
+        importBlock()
+      },
+    },
+    {
+      label: "Import Floor",
+      icon: "pi pi-fw pi-upload",
+      command: () => {
+        importFloor()
+      },
+    },
+  ];
+
+  const menuBlock = [
+    {
+      label: "Add Item",
+      icon: "pi pi-plus",
+      command: () => {
+        setSelectedFacilityType(undefined);
+        setAddDia(true);
+      },
+    },
+    {
+      label: "Edit Item",
+      icon: "pi pi-pencil",
+      command: () => {
+        let key = selectedNodeKey;
+        console.log(key);
+        console.log("test");
+
+        setIsUpdate(true);
+        getNodeInfoAndEdit(selectedNodeKey);
+        setEditDia(true);
+      },
+    },
+    {
+      label: "Delete",
+      icon: "pi pi-trash",
+      command: () => {
+        setDelDia(true);
+      },
+    },
+    {
+      label: "Display",
+      icon: "pi pi-eye",
+      command: () => {
+        setDisplay(true);
+        setDisplayKey(selectedNodeKey);
+      },
+    },
+    {
+      label: "Import Floor",
+      icon: "pi pi-fw pi-upload",
+      command: () => {
+        importFloor()
+      },
+    },
+    {
+      label: "Import Space",
+      icon: "pi pi-fw pi-upload",
+      command: () => {
+        importSpace()
+      },
+    },
+  ];
+
+  const menuFloor = [
+    {
+      label: "Add Item",
+      icon: "pi pi-plus",
+      command: () => {
+        setSelectedFacilityType(undefined);
+        setAddDia(true);
+      },
+    },
+    {
+      label: "Edit Item",
+      icon: "pi pi-pencil",
+      command: () => {
+        let key = selectedNodeKey;
+        console.log(key);
+        console.log("test");
+
+        setIsUpdate(true);
+        getNodeInfoAndEdit(selectedNodeKey);
+        setEditDia(true);
+      },
+    },
+    {
+      label: "Delete",
+      icon: "pi pi-trash",
+      command: () => {
+        setDelDia(true);
+      },
+    },
+    {
+      label: "Display",
+      icon: "pi pi-eye",
+      command: () => {
+        setDisplay(true);
+        setDisplayKey(selectedNodeKey);
+      },
+    },
+    {
+      label: "Import Space",
+      icon: "pi pi-fw pi-upload",
+      command: () => {
+        importSpace()
+      },
+    },
+  ];
 
   const getFacilityStructure = () => {
     FacilityStructureService.findOne(realm)
@@ -468,7 +564,41 @@ const SetFacilityStructure = () => {
 
   return (
     <div className="container">
-      <ContextMenu model={menu} ref={cm} />
+      {/* <ContextMenu model={menuBuilding} ref={cm} />
+      {
+        selectedFacilityType === "Building" && (
+          <ContextMenu model={menuBuilding} ref={cm} />)
+      }
+      {
+        selectedFacilityType === "Block" ? (
+          <ContextMenu model={menuBlock} ref={cm} />) : (
+          <ContextMenu model={menu} ref={cm} />)
+      }
+      {
+        selectedFacilityType === "Floor" ? (
+          <ContextMenu model={menuFloor} ref={cm} />) : (
+          <ContextMenu model={menu} ref={cm} />)
+      } */}
+
+      {(() => {
+        if (selectedFacilityType === "Building") {
+          return (
+            <ContextMenu model={menuBuilding} ref={cm} />
+          )
+        } else if (selectedFacilityType === "Block") {
+          return (
+            <ContextMenu model={menuBlock} ref={cm} />
+          )
+        } else if (selectedFacilityType === "Floor") {
+          return (
+            <ContextMenu model={menuFloor} ref={cm} />
+          )
+        } else {
+          return (
+            <ContextMenu model={menu} ref={cm} />
+          )
+        }
+      })()}
       <ConfirmDialog
         visible={delDia}
         onHide={() => setDelDia(false)}
@@ -758,7 +888,7 @@ const SetFacilityStructure = () => {
           setFloorImportDia(false);
         }}
       >
-        <FloorFileImport selectedNodeKey={selectedNodeKey}/>
+        <FloorFileImport selectedNodeKey={selectedNodeKey} />
       </Dialog>
       <Dialog
         header="Space Import"
@@ -769,7 +899,7 @@ const SetFacilityStructure = () => {
           setSpaceImportDia(false);
         }}
       >
-        <SpaceFileImport selectedNodeKey={selectedNodeKey}/>
+        <SpaceFileImport selectedNodeKey={selectedNodeKey} />
       </Dialog>
       <Dialog
         header="Structure Detail"
@@ -792,30 +922,13 @@ const SetFacilityStructure = () => {
           value={data}
           dragdropScope="-"
           contextMenuSelectionKey={selectedNodeKey ? selectedNodeKey : ""}
-          onContextMenuSelectionChange={(event: any) =>
+          onContextMenuSelectionChange={(event: any) => {
             setSelectedNodeKey(event.value)
           }
+          }
           onContextMenu={(event: any) => {
-            setSelectedNode(event.node as Node);
-            setMenu(prev => {
-              prev.length = 4;
-              if (event.node.nodeType === "Building") {
-                for (let item of importInfoOfNode["Building"]) {
-                  prev.push(item);
-                }
-              } else if (event.node.nodeType === "Floor") {
-                for (let item of importInfoOfNode["Floor"]) {
-                  prev.push(item);
-                }
-              }
-              else if (event.node.nodeType === "Block") {
-                for (let item of importInfoOfNode["Block"]) {
-                  prev.push(item);
-                }
-              }
-              return prev
-            })
-            cm.current.show(event.originalEvent);
+           setSelectedFacilityType(event.node.nodeType);
+           cm.current.show(event.originalEvent);
           }}
           onDragDrop={(event: any) => {
             console.log(event);
