@@ -84,7 +84,7 @@ const nodeInfo = async (key: string) => {
 };
 
 const getFacilityTypes = async (label: string, realm: string) => {
-    return axios.get(url + "/structuretypes/" + label + "/" + realm);
+    return axios.get(url + "/structuretypes/"+ "EN/" + label + "/" + realm);
 };
 
 const getFacilityTypeProperties = async (
