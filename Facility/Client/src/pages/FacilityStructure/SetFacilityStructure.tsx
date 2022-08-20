@@ -112,7 +112,7 @@ const SetFacilityStructure = () => {
   const { toast } = useAppSelector((state) => state.toast);
 
   useEffect(() => {
-    FacilityStructureService.getFacilityTypes("FacilityTypes_EN", realm)
+    FacilityStructureService.getFacilityTypes("FacilityTypes", realm)
       .then((res) => {
         setFacilityType(res.data.map((item: any) => item.name));
       })
