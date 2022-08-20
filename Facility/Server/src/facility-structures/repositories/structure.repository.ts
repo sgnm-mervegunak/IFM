@@ -9,7 +9,7 @@ import { FacilityStructure } from '../entities/facility-structure.entity';
 //import { CustomNeo4jError, Neo4jService } from 'sgnm-neo4j';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
 import { NestKafkaService, nodeHasChildException } from 'ifmcommon';
-import { Neo4jService, assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError } from 'sgnm-neo4j/dist';
+import { Neo4jService, assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError, dynamicLabelAdder, dynamicFilterPropertiesAdder, dynamicNotLabelAdder } from 'sgnm-neo4j/dist';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 import { RelationName } from 'src/common/const/relation.name.enum';
 import { BaseFormdataObject } from 'src/common/baseobject/base.formdata.object';
@@ -271,17 +271,28 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     return node;
   }
 
-  async findOneFirstLevelByRealm(label: string, realm: string) {
-    let node = await this.neo4jService.findByRealmWithTreeStructureOneLevel(label, realm);
+   //REVISED FOR NEW NEO4J 
+  async findOneFirstLevelByRealm(language: string, label: string, realm: string) {
+    let node = await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructureOneLevel(
+      [label+'_'+language], ['Virtual'], {"isDeleted":false, "realm":realm},
+         [], ['Virtual'], {"isDeleted":false, "canDisplay": true}  //parent ve child filter objelerde aynı 
+                                                                   //properti ler kullanılırsa değerleri aynı
+                                                                   // olmalıdır.  
+    )
+    //let node = await this.neo4jService.findByRealmWithTreeStructureOneLevel(label, realm);
+
     if (!node) {
       throw new FacilityStructureNotFountException(realm);
     }
     node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
-
     return node['root']['children'];
   }
+
+
   //findchildrensbylabelsOnelevel ve findchildrensbyIdOnelevel   ile fonsiyon yeniden oluşturulacak.
   async findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) {
+    let parent_node = await this.neo4jService.findChildrensByLabelsOneLevel(['FacilityTypes_' + language])
+
     let node = await this.neo4jService.findChildNodesOfFirstParentNodeByLabelsRealmAndName(
       'FacilityTypes_' + language,
       realm,

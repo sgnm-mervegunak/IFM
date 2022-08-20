@@ -34,8 +34,8 @@ export class StructureService {
     return await this.facilityStructureRepository.changeNodeBranch(id, target_parent_id);
   }
 
-  findOneFirstLevel(label: string, realm: string) {
-    return this.facilityStructureRepository.findOneFirstLevelByRealm(label, realm);
+  findOneFirstLevel(language: string, label: string, realm: string) {
+    return this.facilityStructureRepository.findOneFirstLevelByRealm(language, label, realm);
   }
 
   findChildrenByFacilityTypeNode(language: string,realm: string, typename:string) {

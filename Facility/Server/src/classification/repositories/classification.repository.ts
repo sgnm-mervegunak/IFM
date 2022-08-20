@@ -161,7 +161,12 @@ let labels = [...new Set(lbls)];
    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
      [labels[i].toString()],{"realm":realm, "isDeleted":false},[],{"isDeleted":false,"isActive":true}
    )
-   root.root.parent_of.push(node['root']); 
+   if (node['root']['properties'] != null) {
+    root.root.parent_of.push(node['root']['properties']); 
+   }
+   else {
+    root.root.parent_of.push(node['root']);
+   }
  }
  root = await this.neo4jService.changeObjectChildOfPropToChildren(root);
  return root;
@@ -259,7 +264,13 @@ let labels = [...new Set(lbls)];
       let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
         [labels[i].toString()],{"realm":realm, "isDeleted":false},[],{"isDeleted":false}
       )
-      root.root.parent_of.push(node['root']); 
+     if (node['root']['properties'] != null) {
+      root.root.parent_of.push(node['root']['properties']); 
+     }
+     else {
+      root.root.parent_of.push(node['root']);
+     }
+      
     }
     root = await this.neo4jService.changeObjectChildOfPropToChildren(root);
     return root;

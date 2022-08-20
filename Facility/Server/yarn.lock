@@ -8344,10 +8344,10 @@
   "resolved" "https://registry.npmjs.org/setprototypeof/-/setprototypeof-1.2.0.tgz"
   "version" "1.2.0"
 
-"sgnm-neo4j@^0.0.159":
-  "integrity" "sha512-shVf0P8P2VF9tdN/YuZYCEOsRMnhrNeW0dAHFpqkCOByRGqa9/l1WlUXXwBBqbyNOsRuT3w65sh2bHFH5ncjiA=="
-  "resolved" "https://registry.npmjs.org/sgnm-neo4j/-/sgnm-neo4j-0.0.159.tgz"
-  "version" "0.0.159"
+"sgnm-neo4j@^0.0.161":
+  "integrity" "sha512-8NOLbh9TnYKfC0QS4thiwnlHehLUD7XtjizG5+SJMssFoPfWGPcJeqgDhp3FJKqPyEWGB6bw74yovUCstVBB+A=="
+  "resolved" "https://registry.npmjs.org/sgnm-neo4j/-/sgnm-neo4j-0.0.161.tgz"
+  "version" "0.0.161"
   dependencies:
     "@nestjs/common" "^8.4.5"
     "@nestjs/config" "^2.0.0"
