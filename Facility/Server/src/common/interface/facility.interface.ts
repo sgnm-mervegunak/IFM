@@ -6,7 +6,7 @@ export interface FacilityInterface<T> {
   findOneNodeByKey(key: string): any;  
   delete(id: string): any;
   changeNodeBranch(id: string, target_parent_id: string): any;
-  findOneFirstLevelByRealm(label: string, realm: string): any;
+  findOneFirstLevelByRealm(language: string, label: string, realm: string): any;
   findChildrenByFacilityTypeNode(language: string,realm: string, typename:string) : any; 
 
   findOneByRealm(label: string, realm: string): any;

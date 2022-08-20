@@ -55,8 +55,8 @@ export class StructureController {
   @Get('/structuretypes/:label/:realm')
   @Unprotected()
   @NoCache()
-  findOneFirstLevel(@Param('label') label: string, @Param('realm') realm: string) {
-    return this.facilityStructuresService.findOneFirstLevel(label, realm);
+  findOneFirstLevel(@Param('language') language: string, @Param('label') label: string, @Param('realm') realm: string) {
+    return this.facilityStructuresService.findOneFirstLevel(language, label, realm);
   }
 
   @Get('/structuretypes/properties/:language/:realm/:typename')
