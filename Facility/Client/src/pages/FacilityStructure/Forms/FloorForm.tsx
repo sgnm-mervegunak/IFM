@@ -53,7 +53,6 @@ const schema = yup.object({
     elevation: yup.number().moreThan(-1).notRequired(),
     height: yup.number().moreThan(-1).notRequired(),
     name: yup.string().required("This area is required.").min(2, "This area is accept min 2 characters."),
-    projectName: yup.string().required("This area is required.")
 
 });
 
@@ -110,7 +109,7 @@ const FloorForm = ({
     const getClassificationCategory = async () => {
         await ClassificationsService.findAllActiveByLabel({
             realm: realm,
-            label: "FloorType",
+            label: "FacilityFloorTypes",
             language: "en",
         }).then((res) => {
             let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
@@ -162,12 +161,13 @@ const FloorForm = ({
                 name: data?.name,
                 tag: data?.tag,
                 description: data?.description,
-                projectName: data?.projectName,
                 nodeType: selectedFacilityType,
                 elevation: data?.elevation,
                 height: data?.height,
                 category: data?.category,
             };
+            console.log(newNode);
+            
 
             FacilityStructureService.createStructure(selectedNodeKey, newNode)
                 .then((res) => {
@@ -210,7 +210,6 @@ const FloorForm = ({
                 name: data?.name,
                 tag: data?.tag,
                 description: data?.description,
-                projectName: data?.projectName,
                 nodeType: selectedFacilityType,
                 elevation: data?.elevation,
                 height: data?.height,
@@ -334,23 +333,6 @@ const FloorForm = ({
                 />
             </div>
             <p style={{ color: "red" }}>{errors.height?.message}</p>
-
-            <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>Project Name</h5>
-                <InputText
-                    autoComplete="off"
-                    defaultValue={data?.projectName || ""}
-                    {...register("projectName",
-                        {
-                            required: "This area is required."
-                        }
-                    )}
-                    style={{ width: "100%" }}
-                />
-            </div>
-            <p style={{ color: "red" }}>{errors.projectName?.message}</p>
-
-
 
         </form>
     );
