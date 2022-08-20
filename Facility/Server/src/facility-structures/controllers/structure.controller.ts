@@ -52,7 +52,7 @@ export class StructureController {
   }
 
 
-  @Get('/structuretypes/:label/:realm')
+  @Get('/structuretypes/:language/:label/:realm')
   @Unprotected()
   @NoCache()
   findOneFirstLevel(@Param('language') language: string, @Param('label') label: string, @Param('realm') realm: string) {

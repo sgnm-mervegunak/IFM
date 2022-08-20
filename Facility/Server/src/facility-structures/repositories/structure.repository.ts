@@ -291,7 +291,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
 
   //findchildrensbylabelsOnelevel ve findchildrensbyIdOnelevel   ile fonsiyon yeniden oluşturulacak.
   async findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) {
-    let parent_node = await this.neo4jService.findChildrensByLabelsOneLevel(['FacilityTypes_' + language])
+    //let parent_node = await this.neo4jService.findChildrensByLabelsOneLevel(['FacilityTypes_' + language])
 
     let node = await this.neo4jService.findChildNodesOfFirstParentNodeByLabelsRealmAndName(
       'FacilityTypes_' + language,
