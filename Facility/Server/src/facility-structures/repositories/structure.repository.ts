@@ -9,7 +9,15 @@ import { FacilityStructure } from '../entities/facility-structure.entity';
 //import { CustomNeo4jError, Neo4jService } from 'sgnm-neo4j';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
 import { NestKafkaService, nodeHasChildException } from 'ifmcommon';
-import { Neo4jService, assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError, dynamicLabelAdder, dynamicFilterPropertiesAdder, dynamicNotLabelAdder } from 'sgnm-neo4j/dist';
+import {
+  Neo4jService,
+  assignDtoPropToEntity,
+  createDynamicCyperObject,
+  CustomNeo4jError,
+  dynamicLabelAdder,
+  dynamicFilterPropertiesAdder,
+  dynamicNotLabelAdder,
+} from 'sgnm-neo4j/dist';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 import { RelationName } from 'src/common/const/relation.name.enum';
 import { BaseFormdataObject } from 'src/common/baseobject/base.formdata.object';
@@ -271,14 +279,18 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     return node;
   }
 
-   //REVISED FOR NEW NEO4J 
+  //REVISED FOR NEW NEO4J
   async findOneFirstLevelByRealm(language: string, label: string, realm: string) {
     let node = await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructureOneLevel(
-      [label+'_'+language], ['Virtual'], {"isDeleted":false, "realm":realm},
-         [], ['Virtual'], {"isDeleted":false, "canDisplay": true}  //parent ve child filter objelerde aynı 
-                                                                   //properti ler kullanılırsa değerleri aynı
-                                                                   // olmalıdır.  
-    )
+      [label + '_' + language],
+      ['Virtual'],
+      { isDeleted: false, realm: realm },
+      [],
+      ['Virtual'],
+      { isDeleted: false, canDisplay: true }, //parent ve child filter objelerde aynı
+      //properti ler kullanılırsa değerleri aynı
+      // olmalıdır.
+    );
     if (!node) {
       throw new FacilityStructureNotFountException(realm);
     }
@@ -286,20 +298,32 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     return node['root']['children'];
   }
 
-
-  //REVISED FOR NEW NEO4J 
+  //REVISED FOR NEW NEO4J
   async findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) {
-
-    let parent_node = await this.neo4jService.findByLabelAndFilters(['FacilityTypes_' + language], {"isDeleted": false, "realm": realm}, []);
-    let type_node = await this.neo4jService.findChildrensByIdOneLevel(parent_node[0]["_fields"][0]["identity"].low,
-                     {"isDeleted":false},["FacilityType"],{"isDeleted":false, "name": typename}, 'PARENT_OF');
-    let node =  await this.neo4jService.findChildrensByIdOneLevel(type_node[0]["_fields"][1]["identity"].low,
-    {"isDeleted":false},["FacilityTypeProperty"],{"isDeleted":false, "isActive": true, "canDisplay": true}, 'PARENT_OF');
+    let parent_node = await this.neo4jService.findByLabelAndFilters(
+      ['FacilityTypes_' + language],
+      { isDeleted: false, realm: realm },
+      [],
+    );
+    let type_node = await this.neo4jService.findChildrensByIdOneLevel(
+      parent_node[0]['_fields'][0]['identity'].low,
+      { isDeleted: false },
+      ['FacilityType'],
+      { isDeleted: false, name: typename },
+      'PARENT_OF',
+    );
+    let node = await this.neo4jService.findChildrensByIdOneLevel(
+      type_node[0]['_fields'][1]['identity'].low,
+      { isDeleted: false },
+      ['FacilityTypeProperty'],
+      { isDeleted: false, isActive: true, canDisplay: true },
+      'PARENT_OF',
+    );
 
     if (!node) {
       throw new FacilityStructureNotFountException(realm); //DEĞİŞECEK
     }
-    if (node && node[0]) {  
+    if (node && node[0]) {
       let propertyList = [];
       for (let i = 0; i < node.length; i++) {
         let property = node[i];
@@ -312,8 +336,9 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
   }
 
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
-  async create(key: string, structureData: Object) {
+  async create(key: string, structureData: Object, realm: string) {
     //is there facility-structure parent node
+
     const node = await this.neo4jService.findOneNodeByKey(key);
     if (!node) {
       throw new FacilityStructureNotFountException(key);
@@ -325,6 +350,11 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     } else {
       structureRootNode = await this.neo4jService.findStructureRootNode(key, 'FacilityStructure');
       //structureRootNode=await this.findStructureRootNode(key, 'FacilityStructure');
+    }
+    //!!!!!!!!!!!!
+    //check if rootNode realm equal to keyclock token realm
+    if (structureRootNode.properties.realm !== realm) {
+      throw new HttpException({ message: 'You dont have permission' }, 403);
     }
 
     //const allowedStructureTypeNode = await this.neo4jService.read('match (n:FacilityTypes_EN {realm:$realm}) match(p {name:$name}) match(n)-[:PARENT_OF]->(p) return p', { realm: structureRootNode.properties.realm, name: node.labels[0] })
@@ -338,7 +368,6 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     );
 
     const isExist = allowedStructures.records.filter((allowedStructure) => {
-      console.log(allowedStructure['_fields']);
       if (allowedStructure['_fields'][0].properties.name === structureData['nodeType']) {
         return allowedStructure;
       }
@@ -421,7 +450,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     };
     return response;
   }
-  
+
   async findStructureFirstLevelNodes(label: string, realm: string) {
     let node = await this.neo4jService.findByRealmWithTreeStructureOneLevel(label, realm);
     if (!node) {
