@@ -138,7 +138,7 @@ export class ClassificationRepository implements classificationInterface<Classif
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
- //////////////////////////////////////////////////// Berkayın ekledikleri ve yeni sgnm neo4j ye göre revizeleri  ////////////////////
+ //////////////////////////////////////////////////// Berkayın eklediklerinin yeni sgnm neo4j ye göre revizeleri  ////////////////////
  //REVISED FOR NEW NEO4J
  async getClassificationByIsActiveStatus(realm: string, language: string) {
   const root_node = await this.neo4jService.findByLabelAndFilters(['Classification'],{"isDeleted":false, "realm": realm},[]);
@@ -171,83 +171,29 @@ let labels = [...new Set(lbls)];
  root = await this.neo4jService.changeObjectChildOfPropToChildren(root);
  return root;
 }
-
-  // async getClassificationByIsActiveStatus(realm: string, language: string) {
-  //   let cypher = `MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) MATCH path =(c)-[:PARENT_OF]->(n) WHERE (n.isActive=true and n.isDeleted=false) WITH DISTINCT labels(n) AS labels \
-  //     UNWIND labels AS label \
-  //     RETURN DISTINCT label\
-  //     `;
-
-  //   let data = await this.neo4jService.read(cypher);
-  //   let returnData = [];
-  //   for (let index = 0; index < data.records.length; index++) {
-  //     returnData.push(data.records[index]['_fields'][0]);
-  //   }
-
-  //   let cypher2 = `MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"})  RETURN c`;
-
-  //   let data2 = await this.neo4jService.read(cypher2);
-  //   let _id = data2.records[0]['_fields'][0].identity;
-  //   let root = { parent_of: [], _id, ...data2.records[0]['_fields'][0].properties };
-
-  //   let abc = [];
-  //   for (let index = 0; index < returnData.length; index++) {
-  //     if (returnData[index].endsWith('_' + language) == true) {
-  //       abc.push(returnData[index]);
-  //     }
-  //   }
-
-  //   for (let index = 0; index < abc.length; index++) {
-  //     let cypher2 = `MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${abc[index]} {realm:"${realm}"})  MATCH path = (b)-[:PARENT_OF*]->(m) where (b.isActive=true and b.isDeleted=false) and (m.isActive=true and m.isDeleted=false) \
-  //       WITH collect(path) AS paths\
-  //       CALL apoc.convert.toTree(paths)\
-  //       YIELD value\
-  //       RETURN value;`;
-
-  //     let data2 = await this.neo4jService.read(cypher2);
-  //     if (data2.records[0]['_fields'][0].parent_of?.length > 0) {
-  //       root.parent_of.push(data2.records[0]['_fields'][0]);
-  //     } else {
-  //       let cypher2 = `MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${abc[index]} {realm:"${realm}"}) where b.isDeleted=false RETURN b`;
-
-  //       let data3 = await this.neo4jService.read(cypher2);
-  //       let _id = data3.records[0]['_fields'][0].identity;
-  //       let data = { _id, ...data3.records[0]['_fields'][0].properties };
-  //       root.parent_of.push(data);
-  //     }
-  //   }
-
-  //   let rootObject = { root };
-  //   let result = await this.neo4jService.changeObjectChildOfPropToChildren(rootObject);
-  //   return result;
-  // }
-
+  
+  //REVISED FOR NEW NEO4J
   async setIsActiveTrueOfClassificationAndItsChild(id: string) {
-    let cypher = `MATCH (n) where id(n)=${Number(id)} SET n.isActive=true`;
-    await this.neo4jService.write(cypher);
-
-    let cypher2 = `MATCH (n) where id(n)=${Number(id)} MATCH (n)-[:PARENT_OF*]->(a) SET a.isActive=true `;
-    await this.neo4jService.write(cypher2);
+    await this.neo4jService.updateByIdAndFilter(Number(id),{"isDeleted":false},[],{"isActive":true})
+    await this.neo4jService.updateNodeChildrensByIdAndFilter(Number(id),{"isDeleted":false},[],{"isDeleted":false},"PARENT_OF",[], {"isActive":true})
   }
 
+  //REVISED FOR NEW NEO4J
   async setIsActiveFalseOfClassificationAndItsChild(id: string) {
-    let cypher = `MATCH (n) where id(n)=${Number(id)} SET n.isActive=false`;
-    await this.neo4jService.write(cypher);
-
-    let cypher2 = `MATCH (n) where id(n)=${Number(id)} MATCH (n)-[:PARENT_OF*]->(a) SET a.isActive=false`;
-    await this.neo4jService.write(cypher2);
+    await this.neo4jService.updateByIdAndFilter(Number(id),{"isDeleted":false},[],{"isActive":false})
+    await this.neo4jService.updateNodeChildrensByIdAndFilter(Number(id),{"isDeleted":false},[],{"isDeleted":false},"PARENT_OF",[], {"isActive":false})
   }
 
-  async findOneFirstLevelByRealm(label: string, realm: string) {
-    return null;
-  }
+   async findOneFirstLevelByRealm(label: string, realm: string) {
+     return null;
+   }
+
   //REVISED FOR NEW NEO4J
   async getClassificationsByLanguage(realm: string, language: string) {
      const root_node = await this.neo4jService.findByLabelAndFilters(['Classification'],{"isDeleted":false, "realm": realm},[]);
      const root_id = root_node[0]['_fields'][0]['identity'].low;
      const firstNodes  = await this.neo4jService.findChildrensByIdOneLevel(root_id,{"isDeleted":false},[],{"isDeleted":false},'PARENT_OF');
-    //const firstNodes  = await this.neo4jService.findChildrensByLabelsOneLevel(['Classification'],{'isDeleted':false,'realm':realm},[],{"isDeleted":false})
-
+   
     let lbls = firstNodes.map((item) => {
       if (item['_fields'][1]['labels'][0].endsWith('_'+language)) {
         return item['_fields'][1]['labels'][0];
@@ -270,63 +216,13 @@ let labels = [...new Set(lbls)];
      else {
       root.root.parent_of.push(node['root']);
      }
-      
     }
     root = await this.neo4jService.changeObjectChildOfPropToChildren(root);
     return root;
   }
 
 
-  // async getClassificationsByLanguage(realm: string, language: string) {
-  //   let cypher = `MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) MATCH path =(c)-[:PARENT_OF]->(n) where n.isDeleted=false WITH DISTINCT labels(n) AS labels \
-  //   UNWIND labels AS label \
-  //   RETURN DISTINCT label\
-  //   `;
-
-  //   let data = await this.neo4jService.read(cypher);
-  //   let returnData = [];
-  //   for (let index = 0; index < data.records.length; index++) {
-  //     returnData.push(data.records[index]['_fields'][0]);
-  //   }
-
-  //   let cypher2 = `MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) RETURN c`;
-
-  //   let data2 = await this.neo4jService.read(cypher2);
-  //   let _id = data2.records[0]['_fields'][0].identity;
-  //   let root = { parent_of: [], _id, ...data2.records[0]['_fields'][0].properties };
-
-  //   let abc = [];
-  //   for (let index = 0; index < returnData.length; index++) {
-  //     if (returnData[index].endsWith('_' + language) == true) {
-  //       abc.push(returnData[index]);
-  //     }
-  //   }
-
-  //   for (let index = 0; index < abc.length; index++) {
-  //     let cypher2 = `MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${abc[index]} {realm:"${realm}"})  MATCH path = (b)-[:PARENT_OF*]->(m) where m.isDeleted=false  \
-  //   WITH collect(path) AS paths\
-  //   CALL apoc.convert.toTree(paths)\
-  //   YIELD value\
-  //   RETURN value;`;
-
-  //     let data2 = await this.neo4jService.read(cypher2);
-  //     if (data2.records[0]['_fields'][0].parent_of?.length > 0) {
-  //       root.parent_of.push(data2.records[0]['_fields'][0]);
-  //     } else {
-  //       let cypher2 = `MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${abc[index]} {realm:"${realm}"}) RETURN b`;
-
-  //       let data3 = await this.neo4jService.read(cypher2);
-  //       let _id = data3.records[0]['_fields'][0].identity;
-  //       let data = { _id, ...data3.records[0]['_fields'][0].properties };
-  //       root.parent_of.push(data);
-  //     }
-  //   }
-
-  //   let rootObject = { root };
-  //   let result = await this.neo4jService.changeObjectChildOfPropToChildren(rootObject);
-  //   return result;
-  // }
-
+ 
   async findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) {
     return null;
   }
@@ -344,30 +240,7 @@ let labels = [...new Set(lbls)];
      return root;
  } 
 
-  // async getAClassificationByRealmAndLabelNameAndLanguage(realm: string, labelName: string, language: string) {
-  //   let cypher = `MATCH (c:Classification {realm:"${realm}"}) return c`;
-  //   let data = await this.neo4jService.read(cypher);
-
-  //   let root = { root: { parent_of: [], ...data.records[0]['_fields'][0].properties } };
-
-  //   let cypher2 = `MATCH (c:Classification {realm:"${realm}"})-[:PARENT_OF]->(b:${labelName}_${language} {realm:"${realm}"}) \
-  //   MATCH path = (b)-[:PARENT_OF*]->(m)  where b.isActive=true and b.isDeleted=false and m.isActive=true and m.isDeleted=false  \
-  //     WITH collect(path) AS paths\
-  //     CALL apoc.convert.toTree(paths)\
-  //     YIELD value\
-  //     RETURN value;`;
-
-  //   let data2 = await this.neo4jService.read(cypher2);
-  //   let p = data2.records[0]['_fields'][0];
-
-  //   root.root.parent_of.push(p);
-
-  //   let result = await this.neo4jService.changeObjectChildOfPropToChildren(root);
-  //   console.log(result);
-  //   return result;
-  // }
-
-
+  
 
   async addAClassificationFromExcel( file: Express.Multer.File, realm: string, language: string) {
 
@@ -385,7 +258,9 @@ let labels = [...new Set(lbls)];
   function key(){
     return uuidv4()
     }
-    let cypher=`MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) MERGE (n:${data[0]}_${language} {isRoot:true,isActive:true,name:"${data[0]}",isDeleted:false,key:"${key()}",canDelete:true,realm:"${realm}",canDisplay:true}) MERGE (c)-[:PARENT_OF]->(n)`
+    let cypher=`MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) MERGE (n:${data[0]}_${language} /
+     {isRoot:true,isActive:true,name:"${data[0]}",isDeleted:false,key:"${key()}",canDelete:true,realm:"${realm}",canDisplay:true}) /
+     MERGE (c)-[:PARENT_OF]->(n)`
    
   
     await this.neo4jService.write(cypher)

@@ -279,8 +279,6 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
                                                                    //properti ler kullanılırsa değerleri aynı
                                                                    // olmalıdır.  
     )
-    //let node = await this.neo4jService.findByRealmWithTreeStructureOneLevel(label, realm);
-
     if (!node) {
       throw new FacilityStructureNotFountException(realm);
     }
@@ -289,35 +287,30 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
   }
 
 
-  //findchildrensbylabelsOnelevel ve findchildrensbyIdOnelevel   ile fonsiyon yeniden oluşturulacak.
+  //REVISED FOR NEW NEO4J 
   async findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) {
-    //let parent_node = await this.neo4jService.findChildrensByLabelsOneLevel(['FacilityTypes_' + language])
 
-    let node = await this.neo4jService.findChildNodesOfFirstParentNodeByLabelsRealmAndName(
-      'FacilityTypes_' + language,
-      realm,
-      'FacilityType',
-      typename,
-      'FacilityTypeProperty',
-      RelationName.PARENT_OF,
-      RelationDirection.RIGHT,
-    );
+    let parent_node = await this.neo4jService.findByLabelAndFilters(['FacilityTypes_' + language], {"isDeleted": false, "realm": realm}, []);
+    let type_node = await this.neo4jService.findChildrensByIdOneLevel(parent_node[0]["_fields"][0]["identity"].low,
+                     {"isDeleted":false},["FacilityType"],{"isDeleted":false, "name": typename}, 'PARENT_OF');
+    let node =  await this.neo4jService.findChildrensByIdOneLevel(type_node[0]["_fields"][1]["identity"].low,
+    {"isDeleted":false},["FacilityTypeProperty"],{"isDeleted":false, "isActive": true, "canDisplay": true}, 'PARENT_OF');
 
     if (!node) {
       throw new FacilityStructureNotFountException(realm); //DEĞİŞECEK
     }
-    if (node['records'] && node['records'][0]) {
+    if (node && node[0]) {  
       let propertyList = [];
-      for (let i = 0; i < node['records'].length; i++) {
-        let property = node['records'][i];
-        property['_fields'][0]['properties']._id = property['_fields'][0]['identity']['low'];
-        propertyList.push(property['_fields'][0]['properties']);
+      for (let i = 0; i < node.length; i++) {
+        let property = node[i];
+        property['_fields'][1]['properties']._id = property['_fields'][1]['identity']['low'];
+        propertyList.push(property['_fields'][1]['properties']);
       }
       return propertyList;
     }
-
     return [];
   }
+
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
   async create(key: string, structureData: Object) {
     //is there facility-structure parent node
@@ -395,7 +388,6 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
         });
         if (i == 0) {
           throw new WrongFacilityStructurePropsExceptions(structureData['nodeType']);
-          //throw new HttpException('Yapıyı Bu şekilde oluşturamazsınız2',400)
         }
       }
     });
@@ -429,40 +421,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     };
     return response;
   }
-  //------------------------------------------
-  // async findStructureRootNode(key){
-  //  const structureRootNode=await this.neo4jService.read('match(n:FacilityStructure) match(p {key:$key}) match (n)-[:PARENT_OF*]->(p) return n',{key})
-  //   console.log(structureRootNode.records[0]['_fields'][0])
-
-  //  return structureRootNode.records[0]['_fields'][0]
-  // }
-
-  // async findStructureRootNode(key, label){
-
-  //   try {
-  //     if (!key) {
-  //       throw new HttpException('key olmalıdır', 400);
-  //     }
-
-  //     const cypher = `match(n:${label}) match(p {key:$key}) match (n)-[:PARENT_OF*]->(p) return n`;
-  //     const structureRootNode = await this.neo4jService.read(cypher, { key });
-  //     if (!structureRootNode || !structureRootNode["records"].length) {
-  //       throw new HttpException({code:'3000',message:'Hatalı işlem yaptınız'}, 400);
-  //     }
-  //     return structureRootNode.records[0]['_fields'][0];
-
-  //   } catch (error) {
-  //     if (error.response?.code) {
-  //       throw new HttpException(
-  //         { message: error.response?.message, code: error.response?.code },
-  //         error.status
-  //       );
-  //     } else {
-  //       throw new HttpException("500 hatası", 500);
-  //     }
-  //   }
-  // }
-
+  
   async findStructureFirstLevelNodes(label: string, realm: string) {
     let node = await this.neo4jService.findByRealmWithTreeStructureOneLevel(label, realm);
     if (!node) {
