@@ -215,8 +215,8 @@ let labels = [...new Set(lbls)];
      }
      else {
       root.root.parent_of.push(node['root']);
+      }
      }
-    }
     root = await this.neo4jService.changeObjectChildOfPropToChildren(root);
     return root;
   }
@@ -241,7 +241,7 @@ let labels = [...new Set(lbls)];
  } 
 
   
-
+ //REVISED FOR NEW NEO4J
   async addAClassificationFromExcel( file: Express.Multer.File, realm: string, language: string) {
 
     let data;
@@ -258,19 +258,37 @@ let labels = [...new Set(lbls)];
   function key(){
     return uuidv4()
     }
-    let cypher=`MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) MERGE (n:${data[0]}_${language} /
-     {isRoot:true,isActive:true,name:"${data[0]}",isDeleted:false,key:"${key()}",canDelete:true,realm:"${realm}",canDisplay:true}) /
-     MERGE (c)-[:PARENT_OF]->(n)`
-   
+
+    let params = {isRoot:true,isActive:true,name:"${data[0]}",isDeleted:false,key:"${key()}",canDelete:true,realm:"${realm}",canDisplay:true};
+    let labels = [data[0]+'_'+language];
+    let node = await this.neo4jService.createNode(params, labels);
+
+    let parent  = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(['Root'],{"idDeleted": false, "realm": realm},['Classification'],
+                                                                {"isDeleted": false, "realm": realm},'PARENT_OF', RelationDirection.RIGHT);
+    await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(parent['records'][0]["_fields"][1]["_identity"].low, node["identity"].low,
+                                                                         'PARENT_OF', RelationDirection.RIGHT);               
+
+                    
+    // let cypher=`MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) MERGE (n:${data[0]}_${language} /
+    //  {isRoot:true,isActive:true,name:"${data[0]}",isDeleted:false,key:"${key()}",canDelete:true,realm:"${realm}",canDisplay:true}) /
+    //  MERGE (c)-[:PARENT_OF]->(n)`
   
-    await this.neo4jService.write(cypher)
+    // await this.neo4jService.write(cypher)
 
   for (let i = 1; i < data.length; i++) {
     function key2(){
       return uuidv4()
       }
-    let cypher2=`MATCH (m:${data[0]}_${language})  MERGE (n {name:"${data[i]}",key:"${key2()}",isActive:true,isDeleted:false,canDelete:true,canDisplay:true}) MERGE (m)-[:PARENT_OF]->(n) `
-    await this.neo4jService.write(cypher2)
+
+      let params = {name:"${data[i]}",key:"${key2()}",isActive:true,isDeleted:false,canDelete:true,canDisplay:true};
+      let labels = [];
+      let node = await this.neo4jService.createNode(params, labels);
+      let parent  = await this.neo4jService.findByLabelAndFilters([data[0]+'_'+language],{"isDeleted":false},[]);
+      await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(parent['records'][0]["_fields"][1]["_identity"].low, node["identity"].low,
+                                                                           'PARENT_OF', RelationDirection.RIGHT);               
+  
+    // let cypher2=`MATCH (m:${data[0]}_${language})  MERGE (n {name:"${data[i]}",key:"${key2()}",isActive:true,isDeleted:false,canDelete:true,canDisplay:true}) MERGE (m)-[:PARENT_OF]->(n) `
+    // await this.neo4jService.write(cypher2)
    
   }
   }
