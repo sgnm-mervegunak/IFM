@@ -13,8 +13,8 @@ export class StructureService {
     @Inject(RepositoryEnums.FACILITY_STRUCTURE)
     private readonly facilityStructureRepository: FacilityInterface<any>,
   ) {}
-  async create(key:string, createFacilityStructureDto: Object) {
-    return await this.facilityStructureRepository.create(key, createFacilityStructureDto);
+  async create(key: string, createFacilityStructureDto: Object, realm: string) {
+    return await this.facilityStructureRepository.create(key, createFacilityStructureDto, realm);
   }
 
   update(key: string, updateFacilityStructureDto: Object) {
@@ -38,16 +38,14 @@ export class StructureService {
     return this.facilityStructureRepository.findOneFirstLevelByRealm(language, label, realm);
   }
 
-  findChildrenByFacilityTypeNode(language: string,realm: string, typename:string) {
-      return this.facilityStructureRepository.findChildrenByFacilityTypeNode(language,realm, typename);
-    }
+  findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) {
+    return this.facilityStructureRepository.findChildrenByFacilityTypeNode(language, realm, typename);
+  }
 
   findOne(label: string, realm: string) {
-      return this.facilityStructureRepository.findOneByRealm(label, realm);
-    }
+    return this.facilityStructureRepository.findOneByRealm(label, realm);
+  }
   findStructureFirstLevelNodes(label: string, realm: string) {
-      return this.facilityStructureRepository.findStructureFirstLevelNodes(label, realm);
-    }
-    
-   
+    return this.facilityStructureRepository.findStructureFirstLevelNodes(label, realm);
+  }
 }
