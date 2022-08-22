@@ -73,7 +73,6 @@ const BlockForm = ({
     const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
         defaultValues: {
             ...data,
-            tag: data?.tag
         },
         resolver: yupResolver(schema)
     });
@@ -95,10 +94,18 @@ const BlockForm = ({
         setIsUpdate(false);
     }, [isUpdate]);
 
+    useEffect(
+        () => {
+            console.log("useEffect'ten gelen data: ", data);
+
+        }
+        , [data])
     const getNodeInfoForUpdate = (selectedNodeKey: string) => {
         FacilityStructureService.nodeInfo(selectedNodeKey)
             .then((res) => {
                 setData(res.data.properties);
+                console.log("getNodeIndfo'dan gelen data:", res.data.properties);
+
             })
             .catch((err) => {
                 toast.current.show({
@@ -112,7 +119,7 @@ const BlockForm = ({
 
 
     const onSubmit = (data: any) => {
-        console.log("asasdasd", data);
+        console.log("onSubmit'ten gelen data", data);
         if (editDia === false) {
             let newNode: any = {};
 
@@ -124,7 +131,7 @@ const BlockForm = ({
                 nodeType: selectedFacilityType,
             };
 
-            console.log(newNode);
+            console.log("newNode",newNode);
 
 
             FacilityStructureService.createStructure(selectedNodeKey, newNode)
@@ -171,6 +178,7 @@ const BlockForm = ({
                 projectName: data?.projectName,
                 nodeType: selectedFacilityType,
             };
+            console.log("updateNode:", data);
 
             FacilityStructureService.update(selectedNodeKey, updateNode)
                 .then((res) => {
@@ -196,6 +204,10 @@ const BlockForm = ({
         }
     };
 
+    if (editDia && !data) {
+        return null;
+    }
+    
     return (
         <form>
             <div className="field">
@@ -214,14 +226,14 @@ const BlockForm = ({
             <div className="field structureChips">
                 <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
                 <Controller
-                    defaultValue={data?.tag || []}
+                    defaultValue={data?.tag }
                     name="tag"
                     control={control}
                     render={({ field }) => (
                         <Chips
                             value={field.value}
                             onChange={(e) => {
-                                // console.log("field value: ", e.value);
+                                console.log("field value: ", e.value);
                                 console.log("data tag:", data?.tag);
                                 field.onChange(e.value)
                             }}
