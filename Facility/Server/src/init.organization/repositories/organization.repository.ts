@@ -51,13 +51,13 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         canDelete: false,
         isDeleted: false,
         nodesCanDelete: false,
-        name: 'SpaceConfig',
+        name: 'JointSpaceConfig',
         realm: 'Signum',
         isRoot: true,
         canCopied: true,
         isActive: true,
       },
-      ['Space_Config'],
+      ['JointSpace_Config'],
     );
 
     const zoneConfigNode = await this.neo4jService.createNode(
@@ -71,7 +71,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         canCopied: true,
         isActive: true,
       },
-      ['Space_Config'],
+      ['Zone_Config'],
     );
     await this.neo4jService.addRelations(spaceConfigNode.identity.low, configNode.identity.low);
     await this.neo4jService.addRelations(zoneConfigNode.identity.low, configNode.identity.low);
