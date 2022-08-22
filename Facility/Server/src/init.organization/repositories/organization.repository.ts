@@ -1086,6 +1086,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     types.realm = realm;
     const contact = new Facility();
     contact.realm = realm;
+    const config = new Facility();
+    config.realm = realm;
 
     const typeInfo = {
       name: 'Type',
@@ -1094,12 +1096,16 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     const contactInfo = {
       name: 'Contact',
     };
+    const configInfo = {
+      name: 'Config',
+    };
 
     const finalOrganizationObject = assignDtoPropToEntity(facility, organizationInfo);
     const finalStructureObject = assignDtoPropToEntity(structure, structureInfo);
     const finalClassificationObject = assignDtoPropToEntity(classification, classificationInfo);
     const finalTypesObject = assignDtoPropToEntity(types, typeInfo);
     const finalContactObject = assignDtoPropToEntity(contact, contactInfo);
+    const finalConfigObject = assignDtoPropToEntity(config, configInfo);
 
     //create  node with multi or single label
     const organizationNode = await this.neo4jService.createNode(finalOrganizationObject, [Neo4jLabelEnum.ROOT]);
@@ -1109,11 +1115,13 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     ]);
     const typeNode = await this.neo4jService.createNode(finalTypesObject, [Neo4jLabelEnum.TYPES]);
     const contactNode = await this.neo4jService.createNode(finalContactObject, [Neo4jLabelEnum.CONTACT]);
+    const configNode = await this.neo4jService.createNode(finalConfigObject, [Neo4jLabelEnum.SYSTEM_CONFIG]);
 
     await this.neo4jService.addRelations(structureNode.identity.low, organizationNode.identity.low);
     await this.neo4jService.addRelations(classificationNode.identity.low, organizationNode.identity.low);
     await this.neo4jService.addRelations(typeNode.identity.low, organizationNode.identity.low);
     await this.neo4jService.addRelations(contactNode.identity.low, organizationNode.identity.low);
+    await this.neo4jService.addRelations(configNode.identity.low, organizationNode.identity.low);
 
     const infraFirstLevelChildren = await this.getFirstLvlChildren('Infra', 'Signum');
 
