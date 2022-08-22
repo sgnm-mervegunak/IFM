@@ -48,7 +48,9 @@ const schema = yup.object({
 
     // elevation: yup.number().moreThan(-1).notRequired(),
     // height: yup.number().moreThan(-1).notRequired(),
-    name: yup.string().required("This area is required.").min(2, "This area is accept min 2 characters."),
+    name: yup.string().required("This area is required.").min(2, "This area accepts min 2 characters."),
+    projectName: yup.string().required("This area is required.")
+
 
 });
 
@@ -71,12 +73,12 @@ const BlockForm = ({
     const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
         defaultValues: {
             ...data,
-            tag:data?.tag
+            tag: data?.tag
         },
         resolver: yupResolver(schema)
     });
 
-    const {toast} = useAppSelector(state => state.toast);
+    const { toast } = useAppSelector(state => state.toast);
 
     useEffect(() => {
         if (submitted) {
@@ -109,7 +111,7 @@ const BlockForm = ({
     }
 
 
-    const onSubmit = (data:any) => {
+    const onSubmit = (data: any) => {
         console.log("asasdasd", data);
         if (editDia === false) {
             let newNode: any = {};
