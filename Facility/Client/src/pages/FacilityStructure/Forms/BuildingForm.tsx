@@ -11,8 +11,6 @@ import { Chips } from "primereact/chips";
 import { TreeSelect } from "primereact/treeselect";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from "yup";
 
 import ClassificationsService from "../../../services/classifications";
 import FacilityStructureService from "../../../services/facilitystructure";
@@ -59,14 +57,6 @@ interface Node {
   className?: string;
 }
 
-const schema = yup.object({
-  name: yup.string().required("This area is required.").min(2, "This area accepts min 2 characters."),
-  buildingStructure: yup.string().required("This area is required"),
-  // status: yup.string().required("This area is required")
-
-});
-
-
 const BuildingForm = ({
   selectedFacilityType,
   submitted,
@@ -96,7 +86,8 @@ const BuildingForm = ({
   const [tag, setTag] = useState<string[]>([]);
   const [description, setDescription] = useState<string>("");
   const [projectName, setProjectName] = useState<string>("");
-  const [classificationCategory, setClassificationCategory] = useState<Node[]>([]
+  const [classificationCategory, setClassificationCategory] = useState<Node[]>(
+    []
   );
   const [classificationStatus, setclassificationStatus] = useState<Node[]>([]);
   const auth = useAppSelector((state) => state.auth);
@@ -105,16 +96,6 @@ const BuildingForm = ({
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
   const [uploadFiles, setUploadFiles] = useState<any>({});
   const { toast } = useAppSelector((state) => state.toast);
-
-
-  const [data, setData] = useState<any>();
-
-  const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
-    defaultValues: {
-      ...data
-    },
-    resolver: yupResolver(schema)
-  });
 
   const buildingStructures = [
     "Building-Floor-Block",
@@ -162,17 +143,9 @@ const BuildingForm = ({
     getClassificationStatus();
   }, []);
 
-  useEffect(
-    () => {
-      console.log("dataaaa: ", data);
-
-    }
-    , [data])
-
   useEffect(() => {
     if (submitted) {
-      handleSubmit(onSubmit)();
-
+      onSubmit();
     }
     setSubmitted(false);
   }, [submitted]);
@@ -188,28 +161,27 @@ const BuildingForm = ({
     FacilityStructureService.nodeInfo(selectedNodeKey)
       .then((res) => {
         console.log(res.data);
-        setData(res.data.properties);
 
-        // setName(res.data.properties.name || "");
-        // setCategory(res.data.properties.category);
-        // setAddress(res.data.properties.address || "");
-        // setBuildingStructure(res.data.properties.buildingStructure || "");
-        // setImages(res.data.properties.images || "");
-        // setStatus(res.data.properties.status);
-        // setOwner(res.data.properties.owner || "");
-        // setOperator(res.data.properties.operator || "");
-        // setContractor(res.data.properties.contractor || "");
-        // setHandoverDate(new Date(res.data.properties.handoverDate) || "");
-        // setOperationStartDate(
-        //   new Date(res.data.properties.operationStartDate) || ""
-        // );
-        // setWarrantyExpireDate(
-        //   new Date(res.data.properties.warrantyExpireDate) || ""
-        // );
-        // setDocuments(res.data.properties.documents || "");
-        // setTag(res.data.properties.tag || []);
-        // setDescription(res.data.properties.description || "");
-        // setProjectName(res.data.properties.projectName || "");
+        setName(res.data.properties.name || "");
+        setCategory(res.data.properties.category);
+        setAddress(res.data.properties.address || "");
+        setBuildingStructure(res.data.properties.buildingStructure || "");
+        setImages(res.data.properties.images || "");
+        setStatus(res.data.properties.status);
+        setOwner(res.data.properties.owner || "");
+        setOperator(res.data.properties.operator || "");
+        setContractor(res.data.properties.contractor || "");
+        setHandoverDate(new Date(res.data.properties.handoverDate) || "");
+        setOperationStartDate(
+          new Date(res.data.properties.operationStartDate) || ""
+        );
+        setWarrantyExpireDate(
+          new Date(res.data.properties.warrantyExpireDate) || ""
+        );
+        setDocuments(res.data.properties.documents || "");
+        setTag(res.data.properties.tag || []);
+        setDescription(res.data.properties.description || "");
+        setProjectName(res.data.properties.projectName || "");
       })
       .catch((err) => {
         toast.current.show({
@@ -237,27 +209,27 @@ const BuildingForm = ({
     return axios.delete(url, { data: { fileName, realmName } });
   };
 
-  const onSubmit = (data: any) => {
+  const onSubmit = () => {
     if (editDia === false) {
       let newNode: any = {};
 
       newNode = {
-        name: data?.name,
-        category: data?.category,
-        address: data?.address,
-        buildingStructure: data?.buildingStructure,
-        images: data?.images,
-        status: data?.status,
-        owner: data?.owner,
-        operator: data?.operator,
-        contractor: data?.contractor,
-        handoverDate: data?.handoverDate,
-        operationStartDate: data?.operationStartDate,
-        warrantyExpireDate: data?.warrantyExpireDate,
-        documents: data?.documents,
-        tag: data?.tag,
-        description: data?.description,
-        projectName: data?.projectName,
+        name: name,
+        category: category,
+        address: address,
+        buildingStructure: buildingStructure,
+        images: images,
+        status: status,
+        owner: owner,
+        operator: operator,
+        contractor: contractor,
+        handoverDate: handoverDate,
+        operationStartDate: operationStartDate,
+        warrantyExpireDate: warrantyExpireDate,
+        documents: documents,
+        tag: tag,
+        description: description,
+        projectName: projectName,
         nodeType: selectedFacilityType,
       };
       console.log(newNode);
@@ -326,22 +298,22 @@ const BuildingForm = ({
     } else {
       let updateNode: any = {};
       updateNode = {
-        name: data?.name,
-        category: data?.category,
-        address: data?.address,
-        buildingStructure: data?.buildingStructure,
-        images: data?.images,
-        status: data?.status,
-        owner: data?.owner,
-        operator: data?.operator,
-        contractor: data?.contractor,
-        handoverDate: data?.handoverDate,
-        operationStartDate: data?.operationStartDate,
-        warrantyExpireDate: data?.warrantyExpireDate,
-        documents: data?.documents,
-        tag: data?.tag,
-        description: data?.description,
-        projectName: data?.projectName,
+        name: name,
+        category: category,
+        address: address,
+        buildingStructure: buildingStructure,
+        images: images,
+        status: status,
+        owner: owner,
+        operator: operator,
+        contractor: contractor,
+        handoverDate: handoverDate,
+        operationStartDate: operationStartDate,
+        warrantyExpireDate: warrantyExpireDate,
+        documents: documents,
+        tag: tag,
+        description: description,
+        projectName: projectName,
         nodeType: selectedFacilityType,
       };
 
@@ -418,276 +390,163 @@ const BuildingForm = ({
     }
   };
 
-  if (editDia && !data) {
-    return null;
-  }
-
   return (
-    <form>
+    <div>
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
         <InputText
-          autoComplete="off"
-          {...register("name")}
-          style={{ width: '100%' }}
-          defaultValue={data?.name || ""}
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          style={{ width: "100%" }}
         />
       </div>
-      <p style={{ color: "red" }}>{errors.name?.message}</p>
-
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Category</h5>
-        <Controller
-          defaultValue={data?.category || []}
-          name="category"
-          control={control}
-          render={({ field }) => (
-            <TreeSelect
-              value={field.value}
-              options={classificationCategory}
-              onChange={(e) => {
-                // console.log("field value: ", e.value);
-                field.onChange(e.value)
-              }}
-              filter
-              placeholder="Select Type"
-              style={{ width: "100%" }}
-            />
-          )}
+        <TreeSelect
+          value={category}
+          options={classificationCategory}
+          onChange={(e) => {
+            setCategory(e.value);
+          }}
+          filter
+          placeholder="Select Type"
+          style={{ width: "100%" }}
         />
       </div>
-      <p style={{ color: "red" }}>{errors.category?.message}</p>
-
-
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Address</h5>
         <InputText
-          autoComplete="off"
-          {...register("address")}
-          style={{ width: '100%' }}
-          defaultValue={data?.address || ""}
+          value={address}
+          onChange={(event) => setAddress(event.target.value)}
+          style={{ width: "100%" }}
         />
       </div>
-      <p style={{ color: "red" }}>{errors.address?.message}</p>
-
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Building Structure</h5>
-        <Controller
-
-          defaultValue={data?.buildingStructure || []}
-          name="buildingStructure"
-          control={control}
-          render={({ field }) => (
-            <Dropdown
-              value={field.value}
-              options={buildingStructures}
-              onChange={(e) => field.onChange(e.value)}
-              placeholder="Select Building Structure"
-              style={{ width: "100%" }}
-            />
-          )}
+        <Dropdown
+          value={buildingStructure}
+          options={buildingStructures}
+          onChange={(e) => setBuildingStructure(e.value)}
+          placeholder="Select Building Structure"
+          style={{ width: "100%" }}
         />
       </div>
-      <p style={{ color: "red" }}>{errors.buildingStructure?.message}</p>
-
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Status</h5>
-        <Controller
-          defaultValue={data?.status || []}
-          name="status"
-          control={control}
-          render={({ field }) => (
-            <TreeSelect
-              value={field.value}
-              options={classificationStatus}
-              onChange={(e) => { field.onChange(e.value) }}
-              filter
-              placeholder="Select Type"
-              style={{ width: "100%" }}
-            />
-          )}
+        <TreeSelect
+          value={status}
+          options={classificationStatus}
+          onChange={(e) => {
+            setStatus(e.value);
+          }}
+          filter
+          placeholder="Select Type"
+          style={{ width: "100%" }}
         />
       </div>
-      <p style={{ color: "red" }}>{errors.status?.message}</p>
-
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Owner</h5>
         <InputText
-          autoComplete="off"
-          {...register("owner")}
+          value={owner}
+          onChange={(event) => setOwner(event.target.value)}
           style={{ width: "100%" }}
-          defaultValue={data?.owner || ""}
         />
       </div>
-      <p style={{ color: "red" }}>{errors.owner?.message}</p>
-
-
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Operator</h5>
         <InputText
-          autoComplete="off"
-          {...register("operator")}
+          value={operator}
+          onChange={(event) => setOperator(event.target.value)}
           style={{ width: "100%" }}
-          defaultValue={data?.operator || ""}
         />
       </div>
-      <p style={{ color: "red" }}>{errors.operator?.message}</p>
-
-
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Contractor</h5>
         <InputText
-          autoComplete="off"
-          {...register("contractor")}
+          value={contractor}
+          onChange={(event) => setContractor(event.target.value)}
           style={{ width: "100%" }}
-          defaultValue={data?.contractor}
         />
       </div>
-      <p style={{ color: "red" }}>{errors.contractor?.message}</p>
-
-
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Handover Date</h5>
-        <Controller
-          defaultValue={data?.handoverDate}
-          name="handoverDate"
-          control={control}
-          render={({ field }) => (
-            <Calendar
-              dateFormat="dd/mm/yy"
-              value={field.value}
-              showIcon
-              style={{ width: "100%" }}
-            />
-          )}
+        <Calendar
+          dateFormat="dd/mm/yy"
+          value={handoverDate}
+          onChange={(e) => setHandoverDate(e.value?.toString())}
+          showIcon
+          style={{ width: "100%" }}
         />
       </div>
-      <p style={{ color: "red" }}>{errors.handoverDate?.message}</p>
-
-
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Operation Start Date</h5>
-        <Controller
-          defaultValue={data?.operationStartDate}
-          name="operationStartDate"
-          control={control}
-          render={({ field }) => (
-            <Calendar
-              dateFormat="dd/mm/yy"
-              value={field.value}
-              showIcon
-              style={{ width: "100%" }}
-            />
-          )}
+        <Calendar
+          dateFormat="dd/mm/yy"
+          value={operationStartDate}
+          onChange={(e) => setOperationStartDate(e.value?.toString())}
+          showIcon
+          style={{ width: "100%" }}
         />
       </div>
-      <p style={{ color: "red" }}>{errors.operationStartDate?.message}</p>
-
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Warranty Expire Date</h5>
-        <Controller
-          defaultValue={data?.warrantyExpireDate}
-          name="warrantyExpireDate"
-          control={control}
-          render={({ field }) => (
-            <Calendar
-              dateFormat="dd/mm/yy"
-              value={field.value}
-              showIcon
-              style={{ width: "100%" }}
-            />
-          )}
+        <Calendar
+          dateFormat="dd/mm/yy"
+          value={warrantyExpireDate}
+          onChange={(e) => setWarrantyExpireDate(e.value?.toString())}
+          showIcon
+          style={{ width: "100%" }}
         />
       </div>
-      <p style={{ color: "red" }}>{errors.warrantyExpireDate?.message}</p>
-
       <div className="field structureChips">
         <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
-        <Controller
-
-          defaultValue={data?.tag || []}
-          name="tag"
-          control={control}
-          render={({ field }) => (
-            <Chips
-              value={field.value}
-              onChange={(e) => {
-                // console.log("field value: ", e.value);
-                field.onChange(e.value)
-              }}
-              style={{ width: "100%" }}
-            />
-          )}
+        <Chips
+          value={tag}
+          onChange={(e) => setTag(e.value)}
+          style={{ width: "100%" }}
         />
       </div>
-      <p style={{ color: "red" }}>{errors.tag?.message}</p>
-
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Description</h5>
         <InputText
-          autoComplete="off"
-          {...register("description")}
-          style={{ width: '100%' }}
-          defaultValue={data?.description || ""}
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
+          style={{ width: "100%" }}
         />
       </div>
-      <p style={{ color: "red" }}>{errors.description?.message}</p>
-
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Project Name</h5>
         <InputText
-          autoComplete="off"
-          {...register("projectName")}
-          style={{ width: '100%' }}
-          defaultValue={data?.projectName || ""}
+          value={projectName}
+          onChange={(event) => setProjectName(event.target.value)}
+          style={{ width: "100%" }}
         />
       </div>
-      <p style={{ color: "red" }}>{errors.projectName?.message}</p>
-
-
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Images</h5>
-        <Controller
-          defaultValue={data?.images || []}
-          name="images"
-          control={control}
-          render={({ field }) => (
-            <ImageUploadComponent
-              label={"images"}
-              value={field.value}
-              onChange={() => console.log(field.value)}
-              deleteFiles={deleteFiles}
-              setDeleteFiles={setDeleteFiles}
-              uploadFiles={uploadFiles}
-              setUploadFiles={setUploadFiles}
-            />
-          )}
+        <ImageUploadComponent
+          label={"images"}
+          value={images}
+          onChange={setImages}
+          deleteFiles={deleteFiles}
+          setDeleteFiles={setDeleteFiles}
+          uploadFiles={uploadFiles}
+          setUploadFiles={setUploadFiles}
         />
       </div>
-      <p style={{ color: "red" }}>{errors.images?.message}</p>
-
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Documents</h5>
-        <Controller
-          defaultValue={data?.documents || []}
-          name="documents"
-          control={control}
-          render={({ field }) => (
-            <DocumentUploadComponent
-              label={"documents"}
-              value={field.value}
-              onChange={setDocuments}
-              deleteFiles={deleteFiles}
-              setDeleteFiles={setDeleteFiles}
-              uploadFiles={uploadFiles}
-              setUploadFiles={setUploadFiles}
-            />
-          )}
+        <DocumentUploadComponent
+          label={"documents"}
+          value={documents}
+          onChange={setDocuments}
+          deleteFiles={deleteFiles}
+          setDeleteFiles={setDeleteFiles}
+          uploadFiles={uploadFiles}
+          setUploadFiles={setUploadFiles}
         />
       </div>
-      <p style={{ color: "red" }}>{errors.documents?.message}</p>
-
-    </form>
+    </div>
   );
 };
 
