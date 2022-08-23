@@ -50,9 +50,9 @@ interface Node {
 
 const schema = yup.object({
 
-    elevation: yup.number().moreThan(-1).notRequired(),
-    height: yup.number().moreThan(-1).notRequired(),
-    name: yup.string().required("This area is required.").min(2, "This area is accept min 2 characters."),
+    elevation: yup.number().moreThan(-1).notRequired().nullable(),
+    height: yup.number().moreThan(-1).notRequired().nullable(),
+    name: yup.string().required("This area is required.").min(2, "This area accepts min 2 characters."),
 
 });
 
@@ -73,12 +73,6 @@ const FloorForm = ({
 
 }: Params) => {
 
-    const [name, setName] = useState<string>("");
-    const [tag, setTag] = useState<string[]>([]);
-    const [description, setDescription] = useState<string>("");
-    const [projectName, setProjectName] = useState<string>("");
-    const [elevation, setElevation] = useState<string>("");
-    const [height, setHeight] = useState<string>("");
     const [classificationCategory, setClassificationCategory] = useState<Node[]>([]);
     const auth = useAppSelector((state) => state.auth);
     const [realm, setRealm] = useState(auth.auth.realm);
@@ -87,8 +81,8 @@ const FloorForm = ({
 
     const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
         defaultValues: {
-            // elevation: 0,
-            // height: 0,
+            elevation: null,
+            height: null,
             ...data
         },
         resolver: yupResolver(schema)
@@ -162,8 +156,8 @@ const FloorForm = ({
                 tag: data?.tag,
                 description: data?.description,
                 nodeType: selectedFacilityType,
-                elevation: data?.elevation,
-                height: data?.height,
+                elevation: data?.elevation || "",
+                height: data?.height ||"",
                 category: data?.category,
             };
             console.log(newNode);
@@ -211,8 +205,8 @@ const FloorForm = ({
                 tag: data?.tag,
                 description: data?.description,
                 nodeType: selectedFacilityType,
-                elevation: data?.elevation,
-                height: data?.height,
+                elevation: data?.elevation || "",
+                height: data?.height || "",
                 category: data?.category,
             };
 
@@ -272,7 +266,6 @@ const FloorForm = ({
                             value={field.value}
                             options={classificationCategory}
                             onChange={(e) => {
-                                // console.log("field value: ", e.value);
                                 field.onChange(e.value)
                             }}
                             filter
@@ -294,7 +287,6 @@ const FloorForm = ({
                         <Chips
                             value={field.value}
                             onChange={(e) => {
-                                // console.log("field value: ", e.value);
                                 field.onChange(e.value)
                             }}
                             style={{ width: "100%" }}
@@ -317,6 +309,7 @@ const FloorForm = ({
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Elevation (cm)</h5>
                 <InputText
+                    autoComplete={"off"}
                     defaultValue={data?.elevation || ""}
                     {...register("elevation")}
                     style={{ width: "100%" }}
@@ -327,9 +320,11 @@ const FloorForm = ({
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>Height (cm)</h5>
                 <InputText
+                    autoComplete={"off"}
                     defaultValue={data?.height || ""}
                     {...register("height")}
                     style={{ width: "100%" }}
+                    
                 />
             </div>
             <p style={{ color: "red" }}>{errors.height?.message}</p>

@@ -12,6 +12,10 @@ import { TreeSelect } from "primereact/treeselect";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAppSelector } from "../../../app/hook";
 import axios from "axios";
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from "yup";
+import ClassificationService from "../../../services/classifications";
+
 
 import ClassificationsService from "../../../services/classifications";
 import FacilityStructureService from "../../../services/facilitystructure";
@@ -55,6 +59,15 @@ interface Node {
   className?: string;
 }
 
+const schema = yup.object({
+  name: yup.string().required("This area is required."),
+  code: yup.string().required("This area is required."),
+  usage: yup.string().required("This area is required."),
+  status: yup.string().required("This area is required")
+
+});
+
+
 const SpaceForm = ({
   selectedFacilityType,
   submitted,
@@ -85,7 +98,17 @@ const SpaceForm = ({
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
   const [uploadFiles, setUploadFiles] = useState<any>({});
 
-  const {toast} = useAppSelector(state => state.toast);
+  const { toast } = useAppSelector(state => state.toast);
+
+  const [data, setData] = useState<any>();
+
+  const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
+    defaultValues: {
+      status: "In used",
+      ...data
+    },
+    resolver: yupResolver(schema)
+  });
 
   const fixNodes = (nodes: Node[]) => {
     if (!nodes || nodes.length === 0) {
@@ -122,6 +145,13 @@ const SpaceForm = ({
     });
   };
 
+  useEffect(
+    () => {
+      console.log("dataaaa: ", data);
+
+    }
+    , [data])
+
   useEffect(() => {
     getClassificationSpace();
     getClassificationStatus();
@@ -129,7 +159,7 @@ const SpaceForm = ({
 
   useEffect(() => {
     if (submitted) {
-      onSubmit();
+      handleSubmit(onSubmit)();
     }
     setSubmitted(false);
   }, [submitted]);
@@ -144,15 +174,8 @@ const SpaceForm = ({
   const getNodeInfoForUpdate = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
       .then((res) => {
-        setCode(res.data.properties.code || "");
-        setName(res.data.properties.name || "");
-        setArchitecturalName(res.data.properties.architecturalName || "");
-        setSpaceType(res.data.properties.category);
-        setM2(res.data.properties.m2 || "");
-        setUsage(res.data.properties.usage);
-        setTag(res.data.properties.tag || []);
-        setImages(res.data.properties.images || "");
-        setStatus(res.data.properties.status);
+        setData(res.data.properties);
+
       })
       .catch((err) => {
         toast.current.show({
@@ -180,25 +203,25 @@ const SpaceForm = ({
     return axios.delete(url, { data: { fileName, realmName } });
   };
 
-  const onSubmit = () => {
+  const onSubmit = (data: any) => {
     if (editDia === false) {
       let newNode: any = {};
 
       newNode = {
-        code: code,
-        name: name,
-        architecturalName: architecturalName,
-        spaceType: spaceType,
-        m2: m2,
-        usage: usage,
-        tag: tag,
-        images: images,
-        status: status,
+        code: data?.code,
+        name: data?.name,
+        architecturalName: data?.architecturalName,
+        spaceType: data?.spaceType,
+        m2: data?.m2,
+        usage: data?.usage,
+        tag: data?.tag,
+        images: data?.images,
+        status: data?.status,
         nodeType: selectedFacilityType,
       };
 
       FacilityStructureService.createStructure(selectedNodeKey, newNode)
-        .then(async(res) => {
+        .then(async (res) => {
           toast.current.show({
             severity: "success",
             summary: "Successful",
@@ -229,7 +252,7 @@ const SpaceForm = ({
                   file.file
                 );
                 delete resFile.data.message;
-                temp[item].push({...resFile.data, type: file.type});
+                temp[item].push({ ...resFile.data, type: file.type });
               }
             }
           }
@@ -260,20 +283,20 @@ const SpaceForm = ({
     } else {
       let updateNode: any = {};
       updateNode = {
-        code: code,
-        name: name,
-        architecturalName: architecturalName,
-        spaceType: spaceType,
-        m2: m2,
-        usage: usage,
-        tag: tag,
-        images: images,
-        status: status,
+        code: data?.code,
+        name: data?.name,
+        architecturalName: data?.architecturalName,
+        spaceType: data?.spaceType,
+        m2: data?.m2,
+        usage: data?.usage,
+        tag: data?.tag,
+        images: data?.images,
+        status: data?.status,
         nodeType: selectedFacilityType,
       };
 
       FacilityStructureService.update(selectedNodeKey, updateNode)
-        .then(async(res) => {
+        .then(async (res) => {
           toast.current.show({
             severity: "success",
             summary: "Successful",
@@ -299,30 +322,30 @@ const SpaceForm = ({
                 );
                 delete resFile.data.message;
                 console.log(resFile)
-                temp[item].push({...resFile.data, type: file.type});
+                temp[item].push({ ...resFile.data, type: file.type });
               }
             }
           }
-          for(let item in temp){
+          for (let item in temp) {
             try {
-              temp[item] = [...JSON.parse(updateNode[item]),...temp[item]]
+              temp[item] = [...JSON.parse(updateNode[item]), ...temp[item]]
             }
-            catch(err) {
+            catch (err) {
             }
             temp[item] = JSON.stringify(temp[item])
           }
 
           // delete files
-          for(let item of deleteFiles) {
+          for (let item of deleteFiles) {
             let temp = item.image_url.split("/")
-            let urlIndex = temp.findIndex((item:any) => item === "172.30.99.120:9000")
-            let temp2 = temp.slice(urlIndex+1)
+            let urlIndex = temp.findIndex((item: any) => item === "172.30.99.120:9000")
+            let temp2 = temp.slice(urlIndex + 1)
 
-            await DeleteAnyFile(temp2[0],temp2.slice(1).join("/"))
+            await DeleteAnyFile(temp2[0], temp2.slice(1).join("/"))
           }
 
           // update node
-          FacilityStructureService.update(res.data.properties.key, {...updateNode,...temp})
+          FacilityStructureService.update(res.data.properties.key, { ...updateNode, ...temp })
           getFacilityStructure();
           setUploadFiles({})
           setDeleteFiles([])
@@ -343,96 +366,157 @@ const SpaceForm = ({
     }
   };
 
+  if (editDia && !data) {
+    return null;
+  }
+
+
   return (
-    <div>
+    <form>
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
         <InputText
-          value={code}
-          onChange={(event) => setCode(event.target.value)}
-          style={{ width: "100%" }}
+          autoComplete="off"
+          {...register("code")}
+          style={{ width: '100%' }}
+          defaultValue={data?.code || ""}
         />
       </div>
+      <p style={{ color: "red" }}>{errors.code?.message}</p>
+
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
         <InputText
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          style={{ width: "100%" }}
+          autoComplete="off"
+          {...register("name")}
+          style={{ width: '100%' }}
+          defaultValue={data?.name || ""}
         />
       </div>
+      <p style={{ color: "red" }}>{errors.name?.message}</p>
+
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Architectural Name</h5>
         <InputText
-          value={architecturalName}
-          onChange={(event) => setArchitecturalName(event.target.value)}
-          style={{ width: "100%" }}
+          autoComplete="off"
+          {...register("architecturalName")}
+          style={{ width: '100%' }}
+          defaultValue={data?.architecturalName || ""}
         />
       </div>
+      <p style={{ color: "red" }}>{errors.architecturalName?.message}</p>
+
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Space Type</h5>
-        <TreeSelect
-          value={spaceType}
-          options={classificationSpace}
-          onChange={(e) => {
-            setSpaceType(e.value);
-          }}
-          filter
-          placeholder="Select Type"
-          style={{ width: "100%" }}
+        <Controller
+          defaultValue={data?.spaceType || []}
+          name="spaceType"
+          control={control}
+          render={({ field }) => (
+            <TreeSelect
+              value={field.value}
+              options={classificationSpace}
+              onChange={(e) => {
+                field.onChange(e.value)
+              }}
+              filter
+              placeholder="Select Type"
+              style={{ width: "100%" }}
+            />
+          )}
         />
       </div>
+      <p style={{ color: "red" }}>{errors.spaceType?.message}</p>
+
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>M2</h5>
         <InputText
-          value={m2}
-          onChange={(event) => setM2(event.target.value)}
-          style={{ width: "100%" }}
+          autoComplete="off"
+          {...register("m2")}
+          style={{ width: '100%' }}
+          defaultValue={data?.m2 || ""}
         />
       </div>
+      <p style={{ color: "red" }}>{errors.m2?.message}</p>
+
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Usage</h5>
         <InputText
-          value={usage}
-          onChange={(event) => setUsage(event.target.value)}
-          style={{ width: "100%" }}
+          autoComplete="off"
+          {...register("usage")}
+          style={{ width: '100%' }}
+          defaultValue={data?.usage || ""}
         />
       </div>
+      <p style={{ color: "red" }}>{errors.usage?.message}</p>
+
       <div className="field structureChips">
         <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
-        <Chips
-          value={tag}
-          onChange={(e) => setTag(e.value)}
-          style={{ width: "100%" }}
+        <Controller
+
+          defaultValue={data?.tag || []}
+          name="tag"
+          control={control}
+          render={({ field }) => (
+            <Chips
+              value={field.value}
+              onChange={(e) => {
+                field.onChange(e.value)
+              }}
+              style={{ width: "100%" }}
+            />
+          )}
         />
       </div>
+      <p style={{ color: "red" }}>{errors.tag?.message}</p>
 
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Status</h5>
-        <TreeSelect
-          value={status}
-          options={classificationStatus}
-          onChange={(e) => {
-            setStatus(e.value);
-          }}
-          filter
-          placeholder="Select Type"
-          style={{ width: "100%" }}
+        <Controller
+          defaultValue={data?.status || "In used"}
+          name="status"
+          control={control}
+          render={({ field }) => (
+            <TreeSelect
+              value={field.value}
+              options={classificationStatus}
+              onChange={(e) => {
+                field.onChange(e.value)
+              }}
+              placeholder={"Select Type"}
+              style={{ width: "100%" }}
+            />
+          )}
         />
       </div>
+      <p style={{ color: "red" }}>{errors.status?.message}</p>
+
       <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Images</h5>
-        <ImageUploadComponent
-          label={"images"}
-          value={images}
-          onChange={setImages}
-          deleteFiles={deleteFiles}
-          setDeleteFiles={setDeleteFiles}
-          uploadFiles={uploadFiles}
-          setUploadFiles={setUploadFiles}
+        <Controller
+          defaultValue={data?.images || []}
+          name="images"
+          control={control}
+          render={({ field }) => (
+            <ImageUploadComponent
+              label={"images"}
+              value={field.value}
+              onChange={(e: any) => {
+                console.log(field.value)
+                field.onChange(e.value)
+              }}
+              deleteFiles={deleteFiles}
+              setDeleteFiles={setDeleteFiles}
+              uploadFiles={uploadFiles}
+              setUploadFiles={setUploadFiles}
+
+            />
+          )}
         />
       </div>
-    </div>
+      <p style={{ color: "red" }}>{errors.images?.message}</p>
+
+    </form>
   );
 };
 
