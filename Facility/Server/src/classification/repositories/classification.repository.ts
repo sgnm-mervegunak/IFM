@@ -7,10 +7,13 @@ import { UpdateClassificationDto } from '../dto/update-classification.dto';
 import { Classification } from '../entities/classification.entity';
 import { ClassificationNotFountException, FacilityStructureNotFountException } from 'src/common/notFoundExceptions/not.found.exception';
 import { CustomTreeError } from 'src/common/const/custom.error.enum';
-import { createDynamicCyperObject, Neo4jService , dynamicLabelAdder, dynamicFilterPropertiesAdder, dynamicNotLabelAdder} from 'sgnm-neo4j/dist';
+import { createDynamicCyperObject, Neo4jService , dynamicLabelAdder, dynamicFilterPropertiesAdder, dynamicNotLabelAdder, dynamicUpdatePropertyAdder,  node_not_found, create_node__must_entered_error, createDynamicCyperCreateQuery, create_node__node_not_created_error} from 'sgnm-neo4j/dist';
 import { classificationInterface } from 'src/common/interface/classification.interface';
-import { I18NEnums } from 'ifmcommon/dist';
+
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
+import { QueryResult } from 'neo4j-driver-core';
+import { has_children_error } from 'src/common/const/custom.error.object';
+import { I18NEnums } from 'src/common/const/i18n.enum';
 const exceljs = require('exceljs');
 const { v4: uuidv4 } = require('uuid');
 
@@ -32,6 +35,7 @@ export class ClassificationRepository implements classificationInterface<Classif
     // return node;
   }
 
+   //REVISED FOR NEW NEO4J
   async create(createClassificationDto: CreateClassificationDto) {
     function assignDtoPropToEntity(entity, dto) {
       Object.keys(dto).forEach((element) => {
@@ -39,13 +43,11 @@ export class ClassificationRepository implements classificationInterface<Classif
           entity[element] = dto[element];
         }
       });
-
       return entity;
     }
     const classification = new Classification();
     const classificationObject = assignDtoPropToEntity(classification, createClassificationDto);
     let value;
-    console.log(classificationObject);
 
     if (classificationObject['labels']) {
       value = await this.neo4jService.createNode(classificationObject, classificationObject['labels']);
@@ -55,12 +57,18 @@ export class ClassificationRepository implements classificationInterface<Classif
     value['properties']['id'] = value['identity'].low;
     const result = { id: value['identity'].low, labels: value['labels'], properties: value['properties'] };
     if (createClassificationDto['parentId']) {
-      await this.neo4jService.addRelations(result['id'], createClassificationDto['parentId']);
+      await this.neo4jService.addParentRelationByIdAndFilters(
+        result['id'],
+        {"isDeleted": false},
+        Number(createClassificationDto['parentId']),
+        {"isDeleted": false}
+      ) 
     }
-
     return result;
   }
 
+
+  //REVISED FOR NEW NEO4J
   async update(_id: string, updateClassificationto: UpdateClassificationDto) {
     const updateClassificationDtoWithoutLabelsAndParentId = {};
 
@@ -70,62 +78,75 @@ export class ClassificationRepository implements classificationInterface<Classif
       }
     });
 
-    const dynamicObject = createDynamicCyperObject(updateClassificationto);
-
-    const updatedNode = await this.neo4jService.updateById(_id, dynamicObject);
-    if (!updatedNode) {
-      throw new ClassificationNotFountException(_id);
-    }
+    const updatedNode = await this.neo4jService.updateByIdAndFilter(
+      Number(_id),
+      {"isDeleted": false},
+      updateClassificationto.labels,
+      updateClassificationDtoWithoutLabelsAndParentId
+    );
     const result = {
-      id: updatedNode['identity'].low,
-      labels: updatedNode['labels'],
-      properties: updatedNode['properties'],
-    };
-    if (updateClassificationto['labels'] && updateClassificationto['labels'].length > 0) {
-      await this.neo4jService.removeLabel(_id, result['labels']);
-      await this.neo4jService.updateLabel(_id, updateClassificationto['labels']);
-    }
+        id: updatedNode['identity'].low,
+        labels: updatedNode['labels'],
+        properties: updatedNode['properties'],
+      };
+
+    // const dynamicObject = createDynamicCyperObject(updateClassificationto);
+
+    // const updatedNode = await this.neo4jService.updateById(_id, dynamicObject);
+    // if (!updatedNode) {
+    //   throw new ClassificationNotFountException(_id);
+    // }
+    // const result = {
+    //   id: updatedNode['identity'].low,
+    //   labels: updatedNode['labels'],
+    //   properties: updatedNode['properties'],
+    // };
+    // if (updateClassificationto['labels'] && updateClassificationto['labels'].length > 0) {
+    //   await this.neo4jService.removeLabel(_id, result['labels']);
+    //   await this.neo4jService.updateLabel(_id, updateClassificationto['labels']);
+    // }
     return result;
   }
+
+  //REVISED FOR NEW NEO4J
   async delete(_id: string) {
     try {
-      let deletedNode;
-      // const hasChildren = await this.neo4jService.findChildrenById(_id);
-      // if (hasChildren['records'].length == 0) {
-      //   deletedNode = await this.neo4jService.delete(_id);
-      // } else {
-      //   throw new HttpException(has_children_error, 400);
-      // }
-      deletedNode = await this.neo4jService.delete(_id);
-      return deletedNode;
+      const children = await this.neo4jService.findChildrensByIdOneLevel(
+          Number(_id), {}, [], {"isDeleted":false}, 'PARENT_OF')
+      if (children && children.length==0) {
+        let deletedNode = await this.neo4jService.updateByIdAndFilter(+_id,{"isDeleted":false, "canDelete": true},[],{"isDeleted":true})
+      }
+      else {
+        throw new HttpException(has_children_error, 400);
+      }
     } catch (error) {
       if (error.response?.code == CustomTreeError.HAS_CHILDREN) {
         throw new HttpException({ key: I18NEnums.NODE_HAS_CHILD, args: { name: _id } }, HttpStatus.BAD_REQUEST);
       } else {
-        throw new HttpException({ message: error.response?.message, code: 400 }, 400);
+        throw new HttpException({ key: I18NEnums.NODE_NOT_FOUND, args: { name: _id } }, HttpStatus.BAD_REQUEST);
       }
     }
   }
-
+ 
+  //REVISED FOR NEW NEO4J
   async changeNodeBranch(_id: string, target_parent_id: string) {
     try {
-      await this.neo4jService.deleteRelations(_id);
-      await this.neo4jService.addRelations(_id, target_parent_id);
+      
+      const old_parent = await this.neo4jService.getParentByIdAndFilters(+_id, {"isDeleted":false}, {"isDeleted":false});
+      if (old_parent != undefined) {
+        
+        await this.neo4jService.deleteRelationByIdAndRelationNameWithFilters(old_parent['_fields'][0]['identity'].low,{},+_id, {}, 'PARENT_OF', RelationDirection.RIGHT);
+      }
+      await this.neo4jService.addRelationByIdAndRelationNameWithFilters(+target_parent_id,{"isDeleted":false, "isActive":true},
+         +_id, {"isDeleted":false,}, 'PARENT_OF', RelationDirection.RIGHT);
+    
     } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
-  async deleteRelations(_id: string) {
-    await this.neo4jService.deleteRelations(_id);
-  }
-  async addRelations(_id: string, target_parent_id: string) {
-    try {
-      await this.neo4jService.addRelations(_id, target_parent_id);
-    } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
+      
+        throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
 
+    }
+  }
+  
   async findOneNodeByKey(key: string) {
     try {
       const node = await this.neo4jService.findOneNodeByKey(key);
@@ -171,17 +192,37 @@ let labels = [...new Set(lbls)];
  root = await this.neo4jService.changeObjectChildOfPropToChildren(root);
  return root;
 }
-  
   //REVISED FOR NEW NEO4J
   async setIsActiveTrueOfClassificationAndItsChild(id: string) {
     await this.neo4jService.updateByIdAndFilter(Number(id),{"isDeleted":false},[],{"isActive":true})
-    await this.neo4jService.updateNodeChildrensByIdAndFilter(Number(id),{"isDeleted":false},[],{"isDeleted":false},"PARENT_OF",[], {"isActive":true})
+
+    const children = await this.neo4jService.findChildrensByIdOneLevel(
+      Number(id),
+      {"isDeleted":false},
+      [],
+      {"isDeleted":false},
+      'PARENT_OF'
+    );
+    if (children && children.length>0) {
+      await this.neo4jService.updateNodeChildrensByIdAndFilter(Number(id),{"isDeleted":false},[],{"isDeleted":false},"PARENT_OF",[], {"isActive":true})
+    }
+
+   
   }
 
   //REVISED FOR NEW NEO4J
   async setIsActiveFalseOfClassificationAndItsChild(id: string) {
     await this.neo4jService.updateByIdAndFilter(Number(id),{"isDeleted":false},[],{"isActive":false})
+    const children = await this.neo4jService.findChildrensByIdOneLevel(
+      Number(id),
+      {"isDeleted":false},
+      [],
+      {"isDeleted":false},
+      'PARENT_OF'
+    )
+    if (children && children.length>0) {
     await this.neo4jService.updateNodeChildrensByIdAndFilter(Number(id),{"isDeleted":false},[],{"isDeleted":false},"PARENT_OF",[], {"isActive":false})
+    }
   }
 
    async findOneFirstLevelByRealm(label: string, realm: string) {
@@ -239,7 +280,6 @@ let labels = [...new Set(lbls)];
      root = await this.neo4jService.changeObjectChildOfPropToChildren(root);
      return root;
  } 
-
   
  //REVISED FOR NEW NEO4J
   async addAClassificationFromExcel( file: Express.Multer.File, realm: string, language: string) {
@@ -258,21 +298,17 @@ let labels = [...new Set(lbls)];
   function key(){
     return uuidv4()
     }
-
-    let params = {isRoot:true,isActive:true,name:"${data[0]}",isDeleted:false,key:"${key()}",canDelete:true,realm:"${realm}",canDisplay:true};
+    let params = {"isRoot":true,"isActive":true,"name":data[0],"isDeleted":false,"key":key(),"canDelete":true,"realm":realm,"canDisplay":true};
     let labels = [data[0]+'_'+language];
     let node = await this.neo4jService.createNode(params, labels);
 
-    let parent  = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(['Root'],{"idDeleted": false, "realm": realm},['Classification'],
+    let parent  = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(['Root'],{"isDeleted": false, "realm": realm},['Classification'],
                                                                 {"isDeleted": false, "realm": realm},'PARENT_OF', RelationDirection.RIGHT);
-    await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(parent['records'][0]["_fields"][1]["_identity"].low, node["identity"].low,
-                                                                         'PARENT_OF', RelationDirection.RIGHT);               
-
-                    
+    await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(parent[0]["_fields"][1]["identity"].low, node["identity"].low,
+                                                                         'PARENT_OF', RelationDirection.RIGHT);                        
     // let cypher=`MATCH (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) MERGE (n:${data[0]}_${language} /
     //  {isRoot:true,isActive:true,name:"${data[0]}",isDeleted:false,key:"${key()}",canDelete:true,realm:"${realm}",canDisplay:true}) /
     //  MERGE (c)-[:PARENT_OF]->(n)`
-  
     // await this.neo4jService.write(cypher)
 
   for (let i = 1; i < data.length; i++) {
@@ -280,21 +316,18 @@ let labels = [...new Set(lbls)];
       return uuidv4()
       }
 
-      let params = {name:"${data[i]}",key:"${key2()}",isActive:true,isDeleted:false,canDelete:true,canDisplay:true};
+      let params = {"name":data[i],"key":key2(),"isActive":true,"isDeleted":false,"canDelete":true,"canDisplay":true};
       let labels = [];
       let node = await this.neo4jService.createNode(params, labels);
       let parent  = await this.neo4jService.findByLabelAndFilters([data[0]+'_'+language],{"isDeleted":false},[]);
-      await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(parent['records'][0]["_fields"][1]["_identity"].low, node["identity"].low,
+      await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(parent[0]["_fields"][0]["identity"].low, node["identity"].low,
                                                                            'PARENT_OF', RelationDirection.RIGHT);               
-  
     // let cypher2=`MATCH (m:${data[0]}_${language})  MERGE (n {name:"${data[i]}",key:"${key2()}",isActive:true,isDeleted:false,canDelete:true,canDisplay:true}) MERGE (m)-[:PARENT_OF]->(n) `
     // await this.neo4jService.write(cypher2)
-   
   }
   }
 
-
-
+  //REVISED FOR NEW NEO4J
   async addAClassificationWithCodeFromExcel(file: Express.Multer.File, realm: string,language: string) {
 
     let data=[];
@@ -307,15 +340,8 @@ let labels = [...new Set(lbls)];
       const firstSheet =  book.getWorksheet(1);
        
          data=firstSheet.getColumn(1).values.filter((e)=>(e!=null));
-       
-      
-   
    })
-   
-   
-   
      let deneme=[];
-   
      for (let index = 1; index < data.length; index++) {
        const element = data[index].split(new RegExp(/\s{1,}|:\s{1,}|:/g));
       
@@ -324,31 +350,24 @@ let labels = [...new Set(lbls)];
      for(let i=0;i<deneme.length;i++){
        deneme[i][0]=deneme[i][0].replace(/ /g, '-');
      }
-   
      let collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
    
          deneme.sort(collator.compare[0]);
-   
      let newClassification=[]
-     let codearray=[]
-   
-   
+     let codearray=[]; 
      function uuidReturn(){
        return uuidv4()
       }
       await data[0].replaceAll(" ","_")
    for (let q = 0; q < deneme.length; q++) {
-     
      let parentcode = "";   
      var z = 0;
      codearray= await deneme[q][0].split("-");
-   
      for (let j=0; j < codearray.length; j++) {
        if (codearray[j] == "00") {
          z=z+1;
        }
      }
-   
      if (z == 0) {
        for (let i=0; i<codearray.length-1; i++ ) {
          if (parentcode == "") {
@@ -357,7 +376,6 @@ let labels = [...new Set(lbls)];
          else {
            parentcode = parentcode + "-" + codearray[i];
          }
-         
        }
        if (codearray.length == 4) {
          parentcode = parentcode + "-" +  "00";
@@ -400,10 +418,8 @@ let labels = [...new Set(lbls)];
          } 
          else {
            parentcode = parentcode + "-" + "00-00-00-00"; 
-         }
-           
+         }   
        }
-   
        else if (z == 4) {
          for (let i=0; i<codearray.length-5; i++ ) {
            if (parentcode == "") {
@@ -418,11 +434,9 @@ let labels = [...new Set(lbls)];
          } 
          else {
            parentcode = parentcode + "-" + "00-00-00-00-00"; 
-         }
-           
+         } 
        }
      } 
-   
      var codestr = "";
      for (let t=0; t < codearray.length; t++) {
        if (codestr == "") {
@@ -431,10 +445,7 @@ let labels = [...new Set(lbls)];
        else {
          codestr = codestr + "-" + codearray[t]; 
        }
-       
      }
-     
-      
      let dto = {
        code: codestr,
        parentCode: parentcode.length<codestr.length ? parentcode +"-00" : parentcode,
@@ -444,33 +455,44 @@ let labels = [...new Set(lbls)];
        isActive:true,
        canDelete:true,
        canDisplay:true
-     };
-   
-   
-     
+     };     
      newClassification.push(dto);
-   
    }
-   
    ///////// the process start here
    function uuidReturn3(){
    return uuidv4()
-   
    }
-     let cypher= `Match (a:Root {realm:"${realm}"})-[:PARENT_OF]->(n:Classification {realm:"${realm}"}) MERGE (b:${data[0]}_${language} {code:"${newClassification[0].parentCode}",name:"${data[0]}",isDeleted:false,canCopied:true,canDelete:false,realm:"${realm}",isRoot:true,canDisplay:true,key:"${uuidReturn3()}",isActive:true}) MERGE (n)-[:PARENT_OF]->(b)`;
-   await this.neo4jService.write(cypher);
-   
-     
-   
+
+   let params = {"code":newClassification[0].parentCode,"name":data[0],"isDeleted":false,"canCopied":true,"canDelete":false,"realm":realm 
+                ,"isRoot":true,"canDisplay":true,"key":uuidReturn3(),"isActive":true};
+   let labels = [data[0]+'_'+language];
+   let node = await this.neo4jService.createNode(params, labels);
+   let parent  = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(['Root'],{"isDeleted": false, "realm": realm},['Classification'],
+                                                               {"isDeleted": false, "realm": realm},'PARENT_OF', RelationDirection.RIGHT);
+   await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(parent[0]["_fields"][1]["identity"].low, node["identity"].low,
+                                                                        'PARENT_OF', RelationDirection.RIGHT);               
+
+  //    let cypher= `Match (r:Root {realm:"${realm}"})-[:PARENT_OF]->(c:Classification {realm:"${realm}"}) MERGE (n:${data[0]}_${language} \
+  //     {code:"${newClassification[0].parentCode}",name:"${data[0]}",isDeleted:false,canCopied:true,canDelete:false,realm:"${realm}"\
+  //     ,isRoot:true,canDisplay:true,key:"${uuidReturn3()}",isActive:true}) MERGE (c)-[:PARENT_OF]->(n)`;
+  //  await this.neo4jService.write(cypher);
+
      for(let i=0;i<newClassification.length;i++){
-   
-      let cypher2= `MATCH (n) where n.code="${newClassification[i].parentCode}" MERGE (b {code:"${newClassification[i].code}",parentCode:"${newClassification[i].parentCode}",name:"${newClassification[i].name}",isDeleted:${newClassification[i].isDeleted},isActive:${newClassification[i].isActive},canDelete:${newClassification[i].canDelete},key:"${uuidReturn3()}",canDisplay:${newClassification[i].canDisplay}}) MERGE (n)-[:PARENT_OF]->(b)`;
-      await this.neo4jService.write(cypher2)
+
+      let params = {"code":newClassification[i].code,"parentCode":newClassification[i].parentCode
+        ,"name":newClassification[i].name,"isDeleted":newClassification[i].isDeleted,"isActive":newClassification[i].isActive
+        ,"canDelete":newClassification[i].canDelete,"key":uuidReturn3(),"canDisplay":newClassification[i].canDisplay};
+      
+      let labels = [];
+      let node = await this.neo4jService.createNode(params, labels);
+      let parent  = await this.neo4jService.findByLabelAndFilters([],{"isDeleted":false, "code":newClassification[i].parentCode},[]);
+      await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(parent[0]["_fields"][0]["identity"].low, node["identity"].low,
+                                                                           'PARENT_OF', RelationDirection.RIGHT); 
+      // let cypher2= `MATCH (n) where n.code="${newClassification[i].parentCode}" \
+      //  MERGE (b {code:"${newClassification[i].code}",parentCode:"${newClassification[i].parentCode}"\
+      //  ,name:"${newClassification[i].name}",isDeleted:${newClassification[i].isDeleted},isActive:${newClassification[i].isActive}\
+      //  ,canDelete:${newClassification[i].canDelete},key:"${uuidReturn3()}",canDisplay:${newClassification[i].canDisplay}}) MERGE (n)-[:PARENT_OF]->(b)`;
+      // await this.neo4jService.write(cypher2)
      }
-    
   }
-
-
-
-  
 }
