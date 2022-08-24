@@ -16,3 +16,6 @@ export function FacilityStructureCanNotDeleteExceptions(node1) {
 export function WrongFacilityStructurePropsRulesExceptions(prop, rule) {
   throw new HttpException({ key: I18NEnums.WRONG_FACILITY_STRUCTURE_PROPS_RULES, args: { prop: prop, rule: rule} }, HttpStatus.BAD_REQUEST);
 }
+export function WrongClassificationParentExceptions(node1, node2) {
+  throw new HttpException({ key: I18NEnums.WRONG_CLASSIFICATION_PARENT, args: {node1:node1, node2:node2 } }, HttpStatus.BAD_REQUEST);
+}
