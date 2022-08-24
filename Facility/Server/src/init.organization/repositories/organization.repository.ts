@@ -1315,9 +1315,8 @@ RETURN input, output, error`;
       ...others
     ] = data;
 
-    let firstThree = [ApprovalBy, AreaUnit, AssetType];
-    //let classifications =[category_facility,category_space,category_product,category_role];
-    let classifications = [category_facility, category_space];
+    //let firstThree = [ApprovalBy, AreaUnit, AssetType];
+    let classifications = [category_facility,category_space,category_element,category_product,category_role];
 
     /////////// classifications ////////////////////////////////
     for (let i = 0; i < classifications.length; i++) {
@@ -1335,6 +1334,78 @@ RETURN input, output, error`;
       let collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
 
       deneme.sort(collator.compare[0]);
+
+         ////// add digits to codes /////
+   for (let index = 0; index < deneme.length; index++) {
+    deneme[index][0] = deneme[index][0].replaceAll("-","");
+  }
+  let long =await Math.max(...(deneme.map(val => val[0].length)));
+
+  for (let index = 0; index < deneme.length; index++) {
+
+    if(deneme[index][0].length == 4){
+      deneme[index][0] = deneme[index][0].match(/.{2}/g)
+      for (let i=0; i < (long-4)/2; i++){
+        deneme[index][0].push(["00"])
+      }
+      deneme[index][0] = deneme[index][0].join("-");
+      
+    }
+    else if(deneme[index][0].length == 6){
+  
+      deneme[index][0] = deneme[index][0].match(/.{2}/g)
+      for (let i=0; i < (long-6)/2; i++){
+        deneme[index][0].push(["00"])
+      }
+      deneme[index][0] = deneme[index][0].join("-");
+    }
+    
+    else if(deneme[index][0].length == 8){
+  
+      deneme[index][0] = deneme[index][0].match(/.{2}/g)
+      for (let i=0; i < (long-8)/2; i++){
+        deneme[index][0].push(["00"])
+      }
+      deneme[index][0] = deneme[index][0].join("-");
+    }
+    
+    else if(deneme[index][0].length == 10){
+  
+      deneme[index][0] = deneme[index][0].match(/.{2}/g)
+      for (let i=0; i < (long-10)/2; i++){
+        deneme[index][0].push(["00"])
+      }
+      deneme[index][0] = deneme[index][0].join("-");
+    }
+  
+  
+    else if(deneme[index][0].length == 12){
+  
+      deneme[index][0] = deneme[index][0].match(/.{2}/g)
+      for (let i=0; i < (long-12)/2; i++){
+        deneme[index][0].push(["00"])
+      }
+      deneme[index][0] = deneme[index][0].join("-");
+    }
+  
+    else if(deneme[index][0].length == 14){
+  
+      deneme[index][0] = deneme[index][0].match(/.{2}/g)
+      for (let i=0; i < (long-14)/2; i++){
+        deneme[index][0].push(["00"])
+      }
+      deneme[index][0] = deneme[index][0].join("-");
+    }
+  
+    else if(deneme[index][0].length == 16){
+  
+      deneme[index][0] = deneme[index][0].match(/.{2}/g)
+      for (let i=0; i < (long-16)/2; i++){
+        deneme[index][0].push(["00"])
+      }
+      deneme[index][0] = deneme[index][0].join("-");
+    }
+     }
       let classificationName2 = `OmniClass${deneme[0][0].slice(0, 2)}`;
 
       let newClassification = [];
@@ -1408,6 +1479,42 @@ RETURN input, output, error`;
               parentcode = parentcode + '-' + '00-00-00-00-00';
             }
           }
+
+          else if (z == 5) {
+            for (let i=0; i<codearray.length-6; i++ ) {
+              if (parentcode == "") {
+                parentcode = codearray[i];
+              } 
+              else {
+                parentcode =  await parentcode + "-" + codearray[i];
+              }
+            }
+            if (parentcode == "") {
+              parentcode = "00-00-00-00-00-00";
+            } 
+            else {
+              parentcode = await parentcode + "-" + "00-00-00-00-00-00"; 
+            }
+              
+          }
+          
+          else if (z == 6) {
+            for (let i=0; i<codearray.length-7; i++ ) {
+              if (parentcode == "") {
+                parentcode = codearray[i];
+              } 
+              else {
+                parentcode =  await parentcode + "-" + codearray[i];
+              }
+            }
+            if (parentcode == "") {
+              parentcode = "00-00-00-00-00-00-00";
+            } 
+            else {
+              parentcode = await parentcode + "-" + "00-00-00-00-00-00-00"; 
+            }
+              
+          }
         }
 
         var codestr = '';
@@ -1421,7 +1528,7 @@ RETURN input, output, error`;
 
         let dto = {
           code: codestr,
-          parentCode: parentcode,
+          parentCode: parentcode.length<codestr.length ? parentcode+"-00":parentcode,
           name: deneme[q][1],
           key: generateUuid(),
           isDeleted: false,
@@ -1432,17 +1539,17 @@ RETURN input, output, error`;
 
         newClassification.push(dto);
       }
+
+
       const realmName = 'Signum';
       ///////// the process start here
 
       let cypher = `Match (a:Infra {realm:"${realmName}"})-[:PARENT_OF]->(n:Classification {realm:"${realmName}"}) MERGE (b:${classificationName2}_${language} {code:"${newClassification[0].parentCode}",isActive: true,name:"${classificationName2}",isDeleted:${newClassification[i].isDeleted},canCopied:true,canDelete:false,realm:"${realmName}",isRoot:true,canDisplay:true}) MERGE (n)-[:PARENT_OF]->(b)`;
       let data = await this.neo4jService.write(cypher);
-      console.log(data);
 
       for (let i = 0; i < newClassification.length; i++) {
         let cypher2 = `MATCH (n) where n.code="${newClassification[i].parentCode}" MERGE (b {code:"${newClassification[i].code}",parentCode:"${newClassification[i].parentCode}",name:"${newClassification[i].name}",isDeleted:${newClassification[i].isDeleted},isActive:${newClassification[i].isActive},canDelete:${newClassification[i].canDelete},canDisplay:${newClassification[i].canDisplay}}) MERGE (n)-[:PARENT_OF]->(b)`;
         let data2 = await this.neo4jService.write(cypher2);
-        //console.log(data2);
       }
     }
     ////////////////////////////category element//////////////////////////////////////
