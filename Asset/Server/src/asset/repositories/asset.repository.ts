@@ -15,18 +15,22 @@ export class AssetRepository implements GeciciInterface<Asset> {
   constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) {}
   async findByKey(key: string) {
     try {
-      const node = await this.neo4jService.findOneNodeByKey(key);
-      if (!node) {
+      const nodes = await this.neo4jService.findByLabelAndFilters(['Asset'], { key });
+      if (!nodes.length) {
         throw new AssetNotFoundException(key);
       }
-      return node;
+      return nodes[0]['_fields'][0];
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   async findOneByRealm(label: string, realm: string) {
-    let node = await this.neo4jService.findByRealmWithTreeStructure(label, realm);
+    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure([label], {
+      realm,
+      isDeleted: false,
+      isActive: true,
+    });
     if (!node) {
       throw new FacilityStructureNotFountException(realm);
     }
@@ -61,7 +65,12 @@ export class AssetRepository implements GeciciInterface<Asset> {
       }
     });
     const dynamicObject = createDynamicCyperObject(updateAssetDtoWithoutLabelsAndParentId);
-    const updatedNode = await this.neo4jService.updateById(_id, dynamicObject);
+    const updatedNode = await this.neo4jService.updateByIdAndFilter(
+      +_id,
+      { isDeleted: false, isActive: true },
+      [],
+      dynamicObject,
+    );
 
     if (!updatedNode) {
       throw new FacilityStructureNotFountException(_id);

@@ -29,7 +29,7 @@ export class AssetListenerController {
       throw new HttpException('facility already exist', 400);
     }
 
-    const assetInfo = { name: 'Asset', realm: facilityInfo.realm };
+    const assetInfo = { name: 'AssetRoot', realm: facilityInfo.realm };
 
     const facility = new Facility();
     const asset = new Facility();
