@@ -54,6 +54,7 @@ const create = async (structure: StructureInterface) => {
 };
 
 const createStructure = async (key: string, structure: any) => {
+
     return axios.post(url + "/" + key, structure);
 };
 
@@ -84,7 +85,7 @@ const nodeInfo = async (key: string) => {
 };
 
 const getFacilityTypes = async (label: string, realm: string) => {
-    return axios.get(url + "/structuretypes/"+ "EN/" + label + "/" + realm);
+    return axios.get(url + "/structuretypes/" + "EN/" + label + "/" + realm);
 };
 
 const getFacilityTypeProperties = async (

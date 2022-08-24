@@ -5,6 +5,7 @@ import { Chart } from "primereact/chart";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Menu } from "primereact/menu";
+import { useTranslation } from "react-i18next";
 
 import FacilityStructureService from "../../../services/facilitystructure";
 import JointSpaceService from "../../../services/jointSpace";
@@ -39,6 +40,7 @@ const Dashboard = () => {
   const auth = useAppSelector((state) => state.auth);
   const { toast } = useAppSelector((state) => state.toast);
   const [realm, setRealm] = useState(auth.auth.realm);
+  const { t } = useTranslation(["common"]);
 
   const fixNodes = (nodes) => {
     if (!nodes || nodes.length === 0) {
@@ -150,11 +152,11 @@ const Dashboard = () => {
             <span className="overview-icon">
               <i className="pi pi-building"></i>
             </span>
-            <span className="overview-title">Buildings</span>
+            <span className="overview-title">{t("Buildings")}</span>
             <div className="grid overview-detail">
               <div className="col-12">
                 <div className="overview-number">{buildingCounts}</div>
-                <div className="overview-subtext">Buildings</div>
+                <div className="overview-subtext">{t("Building")}</div>
               </div>
             </div>
           </div>
@@ -164,11 +166,11 @@ const Dashboard = () => {
             <span className="overview-icon">
               <i className="pi pi-building"></i>
             </span>
-            <span className="overview-title">Blocks</span>
+            <span className="overview-title">{t("Blocks")}</span>
             <div className="grid overview-detail">
               <div className="col-12">
                 <div className="overview-number">{blockCounts}</div>
-                <div className="overview-subtext">Blocks</div>
+                <div className="overview-subtext">{t("Block")}</div>
               </div>
             </div>
           </div>
@@ -178,11 +180,11 @@ const Dashboard = () => {
             <span className="overview-icon">
               <i className="pi pi-building"></i>
             </span>
-            <span className="overview-title">Floors</span>
+            <span className="overview-title">{t("Floors")}</span>
             <div className="grid overview-detail">
               <div className="col-12">
                 <div className="overview-number">{floorCounts}</div>
-                <div className="overview-subtext">Floors</div>
+                <div className="overview-subtext">{t("Floor")}</div>
               </div>
             </div>
           </div>
@@ -192,23 +194,23 @@ const Dashboard = () => {
             <span className="overview-icon">
               <i className="pi pi-building"></i>
             </span>
-            <span className="overview-title">Spaces</span>
+            <span className="overview-title">{t("Spaces")}</span>
             <div className="grid overview-detail">
               <div className="col-12">
                 <div className="overview-number">{spaceCounts}</div>
-                <div className="overview-subtext">Spaces</div>
+                <div className="overview-subtext">{t("Space")}</div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid flex">
+        <div className="col-12 lg:col-6">
           {buildingNames?.map((building,index) => (
             
-            <div key={index} className="col-12 lg:col-6">
+            <div key={index}>
               <div className="card revenue">
                 <h4>{building}</h4>
-                <p>Comparison of your revenue sources.</p>
+                {/* <p>Comparison of your revenue sources.</p> */}
                 <div className="revenue-chart-container">
                   <div className="flex justify-content-center">
                     <Chart

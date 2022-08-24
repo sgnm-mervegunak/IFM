@@ -1,28 +1,59 @@
-import React from 'react';
-import { classNames } from 'primereact/utils';
-import { Button } from 'primereact/button';
-import { Link } from 'react-router-dom';
-import AppBreadcrumb from './AppBreadcrumb';
-import keycloak from '../../keycloak';
-import AppMenu from './AppMenu';
+import React, { useEffect, useState } from "react";
+import { classNames } from "primereact/utils";
+import { Button } from "primereact/button";
+import { Link } from "react-router-dom";
+import { Dropdown } from "primereact/dropdown";
+import { useTranslation } from "react-i18next";
+import i18next from "i18next";
+import { setLanguage } from "../../features/language/languageSlice";
+import axios from "axios";
+
+import AppBreadcrumb from "./AppBreadcrumb";
+import keycloak from "../../keycloak";
+import AppMenu from "./AppMenu";
+import { useAppDispatch } from "../../app/hook";
 import { useAppSelector } from "../../app/hook";
 
 const AppTopbar = (props) => {
-  const auth = useAppSelector(state => state.auth)
+  const dispatch = useAppDispatch();
+  const auth = useAppSelector((state) => state.auth);
 
   const Login = () => {
-    keycloak.login()
-  }
+    keycloak.login();
+  };
 
   const Logout = () => {
-    keycloak.logout()
-  }
+    keycloak.logout();
+  };
 
-  const notificationsItemClassName = classNames('notifications-item', {
-    'active-menuitem': props.topbarNotificationMenuActive,
+  const { i18n, t } = useTranslation(["common"]);
+
+  useEffect(() => {
+    // if (!localStorage.getItem("i18nextLng")) {
+    //   localStorage.setItem("i18nextLng", "EN");
+    // }
+    if (localStorage.getItem("i18nextLng")?.length > 2) {
+      i18next.changeLanguage("EN");
+    } else {
+      // localStorage.setItem("i18nextLng","EN");
+      onLanguageChange({ value: localStorage.getItem("i18nextLng") });
+    }
+  }, []);
+
+  const languages = ["EN", "TR", "AR"];
+
+  const onLanguageChange = (e) => {
+    i18n.changeLanguage(e.value);
+    dispatch(setLanguage(e.value));
+    delete axios.defaults.headers.common["language"];
+    axios.defaults.headers.common["language"] = e.value;
+  };
+
+  const notificationsItemClassName = classNames("notifications-item", {
+    "active-menuitem": props.topbarNotificationMenuActive,
   });
-  const profileItemClassName = classNames('profile-item', {
-    'active-menuitem fadeInDown': props.topbarUserMenuActive,
+  const profileItemClassName = classNames("profile-item", {
+    "active-menuitem fadeInDown": props.topbarUserMenuActive,
   });
 
   return (
@@ -40,7 +71,9 @@ const AppTopbar = (props) => {
           <img
             id="logo-horizontal"
             className="horizontal-logo"
-            src={process.env.PUBLIC_URL+"/assets/layout/images/logo-white.svg"}
+            src={
+              process.env.PUBLIC_URL + "/assets/layout/images/logo-white.svg"
+            }
             alt="diamond-layout"
           />
         </Link>
@@ -49,7 +82,7 @@ const AppTopbar = (props) => {
 
         <div
           className="layout-breadcrumb viewname"
-          style={{ textTransform: 'uppercase' }}
+          style={{ textTransform: "uppercase" }}
         >
           <AppBreadcrumb routers={props.routers} />
         </div>
@@ -57,7 +90,7 @@ const AppTopbar = (props) => {
         <img
           id="logo-mobile"
           className="mobile-logo"
-          src={process.env.PUBLIC_URL+"/assets/layout/images/logo-dark.svg"}
+          src={process.env.PUBLIC_URL + "/assets/layout/images/logo-dark.svg"}
           alt="diamond-layout"
         />
       </div>
@@ -86,6 +119,16 @@ const AppTopbar = (props) => {
                 >
                   <i className="pi pi-search"></i>
                 </button>
+              </li>
+              <li className="language-item">
+                <Dropdown
+                  value={localStorage.getItem("i18nextLng")}
+                  options={languages}
+                  onChange={onLanguageChange}
+                  dropdownIcon="pi pi-globe"
+                >
+                  <i class="pi pi-globe"></i>
+                </Dropdown>
               </li>
               <li className={notificationsItemClassName}>
                 <button
@@ -168,7 +211,10 @@ const AppTopbar = (props) => {
                   onClick={props.onTopbarUserMenu}
                 >
                   <img
-                    src={process.env.PUBLIC_URL+"/assets/demo/images/avatar/profile.jpg"}
+                    src={
+                      process.env.PUBLIC_URL +
+                      "/assets/demo/images/avatar/profile.jpg"
+                    }
                     alt="diamond-layout"
                     className="profile-image"
                   />
@@ -176,7 +222,11 @@ const AppTopbar = (props) => {
                 </button>
                 <ul className="profile-menu fade-in-up">
                   <li>
-                    <button type="button" className="p-link" onClick={()=>keycloak.accountManagement()}>
+                    <button
+                      type="button"
+                      className="p-link"
+                      onClick={() => keycloak.accountManagement()}
+                    >
                       <i className="pi pi-user"></i>
                       <span>Profile</span>
                     </button>
@@ -200,11 +250,7 @@ const AppTopbar = (props) => {
                     </button>
                   </li>
                   <li>
-                    <button
-                      type="button"
-                      className="p-link"
-                      onClick={Logout}
-                    >
+                    <button type="button" className="p-link" onClick={Logout}>
                       <i className="pi pi-power-off"></i>
                       <span>Logout</span>
                     </button>

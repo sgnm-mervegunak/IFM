@@ -1,21 +1,25 @@
 import React, { useRef, useState } from 'react';
 import { Toast } from 'primereact/toast';
 import { FileUpload } from 'primereact/fileupload';
-import { Tooltip } from 'primereact/tooltip';
-import { useAppSelector } from "../../app/hook";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from "react-i18next";
+
+import { useAppSelector } from "../../app/hook";
 
 const ClassificationFileImportWithCode: React.FC = () => {
     const toast = useRef<any>();
     const refUpload = useRef<any>(null);
     const auth = useAppSelector((state) => state.auth);
+    const [realm, setRealm] = useState(auth.auth.realm);
     const [token, setToken] = useState(auth.auth.token);
+    const language = useAppSelector((state) => state.language.language);
+    const { t } = useTranslation(["common"]);
     const history = useNavigate();
 
     const uploadCSV = (e: any) => {
         const file = e.files[0];
-        const url = 'http://localhost:3010/classification/addAClassificationWithCodeFromExcel/IFM/EN';
+        const url = `http://localhost:3010/classification/addAClassificationWithCodeFromExcel/${realm}/${language}`;
         const formData = new FormData();
 
         formData.append('file', file);
@@ -26,11 +30,20 @@ const ClassificationFileImportWithCode: React.FC = () => {
             },
         };
         axios.post(url, formData, config).then((response) => {
-            console.log(response.data);
-            toast.current.show({ severity: 'success', summary: 'File uploaded', life: 3000 });
+            toast.current.show({
+                severity: "success",
+                summary: t("Successful"),
+                detail: t("File uploaded"),
+                life: 4000
+            });
         })
-            .catch(error => {
-                toast.current.show({ severity: 'error', summary: 'File not uploaded', life: 3000 });
+            .catch(err => {
+                toast.current.show({
+                    severity: "error",
+                    summary: t("Error"),
+                    detail: err.response ? err.response.data.message : err.message,
+                    life: 4000
+                });
             })
 
         refUpload.current.clear();
@@ -38,7 +51,7 @@ const ClassificationFileImportWithCode: React.FC = () => {
             history('/classifications');
         }
 
-        setTimeout(backToClassification, 1200);
+        setTimeout(backToClassification, 1000);
 
     }
     return (
@@ -46,12 +59,21 @@ const ClassificationFileImportWithCode: React.FC = () => {
             <Toast ref={toast}></Toast>
 
             <div className="card">
-                <h5>Classification File Import With Code</h5>
+                <h5>{t("Classification File Import With Code")}</h5>
+                <p
+                    className="mt-4 cursor-pointer"
+                    onClick={() => window.location.href = "http://localhost:3000/documents/classification-sample-data-with-code.xlsx"}
+                >
+                    Click to download sample classification file
+                </p>
                 <FileUpload
                     name="upfile[]"
                     accept="/*"
+                    className="mt-4"
                     maxFileSize={1000000}
-                    chooseLabel="Select File"
+                    chooseLabel={t("Select File")}
+                    uploadLabel={t("Upload")}
+                    cancelLabel={t("Cancel")}
                     customUpload={true}
                     uploadHandler={uploadCSV}
                     ref={refUpload}
