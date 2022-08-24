@@ -10,8 +10,8 @@ import { InputText } from "primereact/inputtext";
 import { Checkbox } from 'primereact/checkbox';
 import { Toolbar } from "primereact/toolbar";
 import { Menu } from 'primereact/menu';
-import { FileUpload } from 'primereact/fileupload';
 import { v4 as uuidv4 } from "uuid";
+import { useTranslation } from "react-i18next";
 
 import ClassificationsService from "../../services/classifications";
 import { useAppSelector } from "../../app/hook";
@@ -56,26 +56,24 @@ const SetClassificationAdmin = () => {
   const [realm, setRealm] = useState(auth.auth.realm);
   const [labels, setLabels] = useState<string[]>([]);
   const [codeShow, setCodeShow] = useState(false);
-  const menu2 = useRef({current:{toggle:()=>{}}} as any);
-  // console.log(auth);
-
+  const menu2 = useRef({ current: { toggle: () => { } } } as any);
+  const { t } = useTranslation(["common"]);
+  const language = useAppSelector((state) => state.language.language);
 
   const menu = [
     {
-      label: "Add Item",
+      label: t("Add Item"),
       icon: "pi pi-plus",
       command: () => {
         setAddDia(true);
       },
     },
     {
-      label: "Edit Item",
+      label: t("Edit Item"),
       icon: "pi pi-pencil",
       command: () => {
         ClassificationsService.nodeInfo(selectedNodeKey)
           .then((res) => {
-            console.log(res);
-
             if (res.data.properties.code !== undefined) {
               setCodeShow(true);
             }
@@ -87,16 +85,16 @@ const SetClassificationAdmin = () => {
           .catch((err) => {
             toast.current.show({
               severity: "error",
-              summary: "Error",
+              summary: t("Error"),
               detail: err.response ? err.response.data.message : err.message,
-              life: 2000,
+              life: 4000,
             });
           });
         setEditDia(true);
       },
     },
     {
-      label: "Delete",
+      label: t("Delete"),
       icon: "pi pi-trash",
       command: () => {
         setDelDia(true);
@@ -126,7 +124,7 @@ const SetClassificationAdmin = () => {
         toast.current.show({
           severity: "error",
           summary: "Error",
-          detail: "Classification not found",
+          detail: t("Classification not found"),
           life: 3000,
         });
         setTimeout(() => {
@@ -154,10 +152,7 @@ const SetClassificationAdmin = () => {
     let newNode: any = {};
     ClassificationsService.nodeInfo(key)
       .then((res) => {
-        console.log(res.data);
-
         if (res.data.labels[0] === "Classification") {
-          console.log("Classification");
 
           newNode = {
             key: uuidv4(),
@@ -166,7 +161,7 @@ const SetClassificationAdmin = () => {
             code: code,
             tag: tag,
             description: "",
-            labels: [`${name}_EN`],
+            labels: [`${name}_${language}`],
             realm: realm,
             isRoot: true,
           }
@@ -180,55 +175,32 @@ const SetClassificationAdmin = () => {
             description: "",
           }
         }
-        console.log(newNode);
-
-
-        // if (labels.length > 0) {
-        //   newNode = {
-        //     key: uuidv4(),
-        //     parentId: res.data.id,
-        //     name: name,
-        //     code: code,
-        //     tag: tag,
-        //     description: "",
-        //     labels: [`${name}_EN`],
-        //   }
-        // } else {
-        //   newNode = {
-        //     key: uuidv4(),
-        //     parentId: res.data.id,
-        //     name: name,
-        //     code: code,
-        //     tag: tag,
-        //     description: "",
-        //   }
-        // }
 
         ClassificationsService.create(newNode)
           .then((res) => {
             toast.current.show({
               severity: "success",
-              summary: "Successful",
-              detail: "Classification Created",
-              life: 3000,
+              summary: t("Successful"),
+              detail: t("Classification Created"),
+              life: 4000,
             });
             getClassification();
           })
           .catch((err) => {
             toast.current.show({
               severity: "error",
-              summary: "Error",
+              summary: t("Error"),
               detail: err.response ? err.response.data.message : err.message,
-              life: 2000,
+              life: 4000,
             });
           });
       })
       .catch((err) => {
         toast.current.show({
           severity: "error",
-          summary: "Error",
+          summary: t("Error"),
           detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
+          life: 4000,
         });
       });
 
@@ -242,61 +214,45 @@ const SetClassificationAdmin = () => {
     let updateNode: any = {};
     ClassificationsService.nodeInfo(key)
       .then((res) => {
-        console.log(res.data);
-
-
-        if (labels.length > 0) {
-          updateNode = {
-            name: name,
-            tag: tag,
-            description: "",
-            labels: labels,
-            isActive: isActive,
-          };
-        } else {
-          updateNode = {
-            name: name,
-            tag: tag,
-            description: "",
-            isActive: isActive,
-          };
-        }
-        console.log(res.data.id, updateNode);
+        updateNode = {
+          name: name,
+          tag: tag,
+          description: "",
+          isActive: isActive,
+          labels: [`${name}_${language}`],
+        };
 
         ClassificationsService.update(res.data.id, updateNode)
           .then(async (res) => {
-            console.log("deneme2");
             toast.current.show({
               severity: "success",
-              summary: "Successful",
-              detail: "Classification Updated",
-              life: 3000,
+              summary: t("Successful"),
+              detail: t("Classification Updated"),
+              life: 4000,
             });
-            console.log(res.data);
-
 
             if (res.data.properties.isActive === true) {
               await ClassificationsService.setActive(res.data.id)
             } else {
               await ClassificationsService.setPassive(res.data.id)
             }
-            await getClassification();
+            getClassification();
           })
           .catch((err) => {
             toast.current.show({
               severity: "error",
-              summary: "Error",
+              summary: t("Error"),
               detail: err.response ? err.response.data.message : err.message,
-              life: 2000,
+              life: 4000,
             });
           });
       })
       .catch((err) => {
         toast.current.show({
           severity: "error",
-          summary: "Error",
+          summary: t("Error"),
           detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
+          life: 4000,
         });
       });
 
@@ -313,27 +269,27 @@ const SetClassificationAdmin = () => {
           .then(() => {
             toast.current.show({
               severity: "success",
-              summary: "Success",
-              detail: "Classification Deleted",
-              life: 2000,
+              summary: t("Successful"),
+              detail: t("Classification Deleted"),
+              life: 4000,
             });
             getClassification();
           })
           .catch((err) => {
             toast.current.show({
               severity: "error",
-              summary: "Error",
+              summary: t("Error"),
               detail: err.response ? err.response.data.message : err.message,
-              life: 2000,
+              life: 4000,
             });
           });
       })
       .catch((err) => {
         toast.current.show({
           severity: "error",
-          summary: "Error",
+          summary: t("Error"),
           detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
+          life: 4000,
         });
       });
   };
@@ -341,24 +297,27 @@ const SetClassificationAdmin = () => {
   const dragDropUpdate = (dragId: string, dropId: string) => {
     ClassificationsService.relation(dragId, dropId)
       .then((res) => {
-        showSuccess("Updated");
+        showSuccess(t("Classification Updated"));
         getClassification();
       })
       .catch((err) => {
         toast.current.show({
           severity: "error",
-          summary: "Error",
+          summary: t("Error"),
           detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
+          life: 4000,
         });
+        setLoading(false);
       });
   };
 
   const dragConfirm = (dragId: string, dropId: string) => {
     confirmDialog({
-      message: 'Are you sure you want to move?',
-      header: 'Confirmation',
+      message: t("Are you sure you want to move?"),
+      header: t("Move Confirmation"),
       icon: 'pi pi-exclamation-triangle',
+      acceptLabel: t("Yes"),
+      rejectLabel: t("No"),
       accept: () => { setLoading(true); dragDropUpdate(dragId, dropId) },
       reject: () => { setLoading(true); getClassification() }
     });
@@ -367,9 +326,9 @@ const SetClassificationAdmin = () => {
   const showSuccess = (detail: string) => {
     toast.current.show({
       severity: "success",
-      summary: "Success Message",
+      summary: t("Successful"),
       detail: detail,
-      life: 3000,
+      life: 4000,
     });
   };
 
@@ -377,7 +336,7 @@ const SetClassificationAdmin = () => {
     return (
       <div>
         <Button
-          label="Cancel"
+          label={t("Cancel")}
           icon="pi pi-times"
           onClick={() => {
             setAddDia(false);
@@ -388,7 +347,7 @@ const SetClassificationAdmin = () => {
           className="p-button-text"
         />
         <Button
-          label="Add"
+          label={t("Add")}
           icon="pi pi-check"
           onClick={() => addItem(selectedNodeKey)}
           autoFocus
@@ -401,7 +360,7 @@ const SetClassificationAdmin = () => {
     return (
       <div>
         <Button
-          label="Cancel"
+          label={t("Cancel")}
           icon="pi pi-times"
           onClick={() => {
             setEditDia(false);
@@ -413,7 +372,7 @@ const SetClassificationAdmin = () => {
           className="p-button-text"
         />
         <Button
-          label="Save"
+          label={t("Save")}
           icon="pi pi-check"
           onClick={() => {
             editItem(selectedNodeKey);
@@ -429,35 +388,35 @@ const SetClassificationAdmin = () => {
     return (
       <React.Fragment>
         <Menu model={items} popup ref={menu2} id="popup_menu" />
-        <Button className="mr-2" label="Import" icon="pi pi-upload" onClick={(event) => menu2.current.toggle(event)} aria-controls="popup_menu" aria-haspopup />
+        <Button className="mr-2" label={t("Import")} icon="pi pi-upload" onClick={(event) => menu2.current.toggle(event)} aria-controls="popup_menu" aria-haspopup />
       </React.Fragment>
     );
   };
 
   const items = [
     {
-      label: 'Download Sample File With Code',
+      label: t("Download Sample File With Code"),
       icon: 'pi pi-download',
       command: () => {
         window.location.href = 'http://localhost:3000/documents/classification-sample-data-with-code.xlsx'
       }
     },
     {
-      label: 'Download Sample File Without Code',
+      label: t("Download Sample File Without Code"),
       icon: 'pi pi-download',
       command: () => {
         window.location.href = 'http://localhost:3000/documents/classification-sample-data-without-code.xlsx'
       }
     },
     {
-      label: 'Upload File With Code',
+      label: t("Upload File With Code"),
       icon: 'pi pi-upload',
       command: () => {
         navigate("/classifications/fileimportwithcode");
       }
     },
     {
-      label: 'Upload File Without Code',
+      label: t("Upload File Without Code"),
       icon: 'pi pi-upload',
       command: () => {
         navigate("/classifications/fileimportwithoutcode");
@@ -474,13 +433,15 @@ const SetClassificationAdmin = () => {
       <ConfirmDialog
         visible={delDia}
         onHide={() => setDelDia(false)}
-        message="Do you want to delete?"
-        header="Delete Confirmation"
+        message={t("Do you want to delete?")}
+        header={t("Delete Confirmation")}
         icon="pi pi-exclamation-triangle"
+        acceptLabel={t("Yes")}
+        rejectLabel={t("No")}
         accept={() => deleteItem(selectedNodeKey)}
       />
       <Dialog
-        header="Add New Item"
+        header={t("Add New Item")}
         visible={addDia}
         style={{ width: "25vw" }}
         footer={renderFooterAdd}
@@ -492,7 +453,7 @@ const SetClassificationAdmin = () => {
         }}
       >
         <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
+          <h5 style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
           <InputText
             value={code}
             onChange={(event) => setCode(event.target.value)}
@@ -500,7 +461,7 @@ const SetClassificationAdmin = () => {
           />
         </div>
         <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
+          <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
           <InputText
             value={name}
             onChange={(event) => setName(event.target.value)}
@@ -508,12 +469,12 @@ const SetClassificationAdmin = () => {
           />
         </div>
         <div className="field structureChips">
-          <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
+          <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
           <Chips value={tag} onChange={(e) => setTag(e.value)} style={{ width: '100%' }} />
         </div>
       </Dialog>
       <Dialog
-        header="Edit Item"
+        header={t("Edit Item")}
         visible={editDia}
         style={{ width: "25vw" }}
         footer={renderFooterEdit}
@@ -527,7 +488,7 @@ const SetClassificationAdmin = () => {
       >
         {codeShow && (
           <div className="field">
-            <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
+            <h5 style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
             <InputText
               value={code}
               onChange={(event) => setCode(event.target.value)}
@@ -536,7 +497,7 @@ const SetClassificationAdmin = () => {
             />
           </div>)}
         <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
+          <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
           <InputText
             value={name}
             onChange={(event) => setName(event.target.value)}
@@ -544,15 +505,15 @@ const SetClassificationAdmin = () => {
           />
         </div>
         <div className="field structureChips">
-          <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
+          <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
           <Chips value={tag} onChange={(e) => setTag(e.value)} style={{ width: '100%' }} />
         </div>
         <div className="field flex">
-          <h5 style={{ marginBottom: "0.5em" }}>Is Active</h5>
+          <h5 style={{ marginBottom: "0.5em" }}>{t("Is Active")}</h5>
           <Checkbox className="ml-3" onChange={e => setIsActive(e.checked)} checked={isActive}></Checkbox>
         </div>
       </Dialog>
-      <h1>Edit Classification</h1>
+      <h1>{t("Edit Classification")}</h1>
       <div className="field">
         <Tree
 
@@ -568,17 +529,19 @@ const SetClassificationAdmin = () => {
             if (event.value.length > 1) {
               toast.current.show({
                 severity: "error",
-                summary: "Error",
-                detail: "You can't drag here.",
-                life: 1000,
+                summary: t("Error"),
+                detail: t("You can't drag here"),
+                life: 3000,
               });
               return
             }
+            console.log(event);
+
             dragConfirm(event.dragNode._id.low, event.dropNode._id.low)
           }}
           filter
           filterBy="name,code"
-          filterPlaceholder="Search"
+          filterPlaceholder={t("Search")}
           className="font-bold"
 
           nodeTemplate={(data: Node, options) => <span className="flex align-items-center font-bold">{data.code ? data.code + " / " : ""}{data.label} {
@@ -588,9 +551,9 @@ const SetClassificationAdmin = () => {
                 {
                   data.isActive === true ?
 
-                    <span style={{ backgroundColor: "green" }} className="green-400 text-white font-bold border-round m-3">Active</span>
+                    <span style={{ backgroundColor: "green" }} className="green-400 text-white font-bold border-round m-3">{t("Active")}</span>
                     :
-                    <span style={{ backgroundColor: "red" }} className="red-400 text-white font-bold border-round m-3">Passive</span>
+                    <span style={{ backgroundColor: "red" }} className="red-400 text-white font-bold border-round m-3">{t("Passive")}</span>
                 }
 
               </span>

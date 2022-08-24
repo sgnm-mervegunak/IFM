@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import keycloak from "./keycloak";
 import { useAppDispatch } from "./app/hook";
 import { login } from "./features/auth/authSlice";
@@ -14,9 +14,9 @@ function App() {
   const dispatch = useAppDispatch();
   const toast = React.useRef(null);
 
-  React.useEffect(()=>{
+  React.useEffect(() => {
     dispatch(setToast(toast));
-  },[])
+  }, [])
   keycloak
     .init({ onLoad: "login-required" })
     .success((auth) => {
@@ -71,7 +71,9 @@ function App() {
     <>
       <Toast ref={toast} position="top-right" baseZIndex={99999} />
       <ScrollToTop />
-      <Router />
+      <Suspense fallback={null} >
+        <Router />
+      </Suspense>
     </>
   );
 }

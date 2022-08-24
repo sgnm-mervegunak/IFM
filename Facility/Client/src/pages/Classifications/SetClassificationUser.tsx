@@ -7,7 +7,6 @@ import { Chips } from 'primereact/chips';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-import { Checkbox } from 'primereact/checkbox';
 import { v4 as uuidv4 } from "uuid";
 
 import ClassificationsService from "../../services/classifications";
@@ -70,7 +69,6 @@ const SetClassificationUser = () => {
             setName(res.data.properties.name || "");
             setCode(res.data.properties.code || "");
             setTag(res.data.properties.tag || []);
-            setIsActive(res.data.properties.isActive);
           })
           .catch((err) => {
             toast.current.show({
