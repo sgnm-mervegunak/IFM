@@ -120,15 +120,15 @@ const SetClassificationAdmin = () => {
       setLoading(false);
     }).catch(err => {
       console.log(err.response);
-      if (err.response.status === 500) {
+      if (err.response.status === 404) {
         toast.current.show({
           severity: "error",
-          summary: "Error",
+          summary: t("Error"),
           detail: t("Classification not found"),
           life: 3000,
         });
         setTimeout(() => {
-          navigate("/facility")
+          navigate("/")
         }, 3000)
       }
     })

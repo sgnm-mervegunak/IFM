@@ -358,7 +358,7 @@ let labels = [...new Set(lbls)];
      function uuidReturn(){
        return uuidv4()
       }
-      await data[0].replaceAll(" ","_")
+        let label=await data[0].replaceAll(" ","_")
    for (let q = 0; q < deneme.length; q++) {
      let parentcode = "";   
      var z = 0;
@@ -465,7 +465,7 @@ let labels = [...new Set(lbls)];
 
    let params = {"code":newClassification[0].parentCode,"name":data[0],"isDeleted":false,"canCopied":true,"canDelete":false,"realm":realm 
                 ,"isRoot":true,"canDisplay":true,"key":uuidReturn3(),"isActive":true};
-   let labels = [data[0]+'_'+language];
+   let labels = [label+'_'+language];
    let node = await this.neo4jService.createNode(params, labels);
    let parent  = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(['Root'],{"isDeleted": false, "realm": realm},['Classification'],
                                                                {"isDeleted": false, "realm": realm},'PARENT_OF', RelationDirection.RIGHT);

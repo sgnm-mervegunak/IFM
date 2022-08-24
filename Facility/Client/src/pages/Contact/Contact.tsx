@@ -232,11 +232,11 @@ const Contact = () => {
         toast.current.show({
           severity: "error",
           summary: "Error",
-          detail: "Facility Structure not found",
+          detail: "Contact not found",
           life: 3000,
         });
         setTimeout(() => {
-          navigate("/facility")
+          navigate("/")
         }, 3000)
       }
     })
