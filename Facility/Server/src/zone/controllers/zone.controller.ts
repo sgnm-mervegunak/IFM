@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { Unprotected } from 'nest-keycloak-connect';
-import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NoCache } from 'ifmcommon';
 import { ZoneService } from '../services/zone.service';
 import { CreateZoneDto } from '../dto/create.zone.dto';
 import { UpdateZoneDto } from '../dto/update.zone.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 @ApiTags('Zone')
 @ApiBearerAuth('JWT-auth')
 @Controller('Zone')
@@ -50,5 +51,26 @@ export class ZoneController {
   @NoCache()
   findOne(@Param('key') label: string, @Param('realm') realm: string) {
     return this.zoneService.findOne(label, realm);
+  }
+
+  @Post('addZoneswithCobie/:realm/:buildingKey/:language')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        }
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({
+    summary: 'Upload all zones with excel file',
+  })
+  @ApiConsumes('multipart/form-data')
+  async addZonesToBuilding(@UploadedFile() file: Express.Multer.File, @Param('realm') realm: string,@Param('buildingKey') buildingKey: string,@Param('language') language: string){
+    return this.zoneService.addZonesToBuilding(file, realm, buildingKey, language);
   }
 }

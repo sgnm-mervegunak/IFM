@@ -3,13 +3,15 @@ import { FacilityStructureNotFountException } from '../../common/notFoundExcepti
 import { NestKafkaService } from 'ifmcommon';
 import { Neo4jService, assignDtoPropToEntity, createDynamicCyperObject } from 'sgnm-neo4j/dist';
 import { RelationName } from 'src/common/const/relation.name.enum';
-import { GeciciInterface } from 'src/common/interface/gecici.interface';
 import { CreateZoneDto } from '../dto/create.zone.dto';
 import { Zone } from '../entities/zone.entity';
 import * as moment from 'moment';
+import { ZoneInterface } from 'src/common/interface/zone.interface';
+const exceljs =require("exceljs")
+import { generateUuid } from 'src/common/baseobject/base.virtual.node.object';
 
 @Injectable()
-export class ZoneRepository implements GeciciInterface<any> {
+export class ZoneRepository implements ZoneInterface<any> {
   constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) {}
   changeNodeBranch(id: string, target_parent_id: string) {
     throw new Error('Method not implemented.');
@@ -263,6 +265,47 @@ export class ZoneRepository implements GeciciInterface<any> {
       }
     }
   }
+
+  async addZonesToBuilding( file: Express.Multer.File, realm: string,buildingKey: string,language: string){
+
+    let data=[]
+    let buffer = new Uint8Array(file.buffer);
+    const workbook = new exceljs.Workbook();
+  
+  
+  await workbook.xlsx.load(buffer).then(function async(book) {
+      const firstSheet =  book.getWorksheet(6);
+      firstSheet.eachRow({ includeEmpty: false }, function(row) {
+        data.push(row.values);
+      });
+   })
+  console.log(data.length)
+   for (let i = 1; i < data.length; i++) {
+    
+    let cypherCategory=`MATCH (cl:FacilityZoneTypes_${language} {realm:"${realm}"})-[:PARENT_OF]->(c {name:"${data[i][4]}"}) return c`
+  let data2 =await this.neo4jService.read(cypherCategory)
+  let key =await data2.records[0]["_fields"][0].properties.key
+  
+  
+    let cypher =`MATCH (b:Building {key:"${buildingKey}"})-[:PARENT_OF]->(z:Zones {name:"Zones"})\
+    MATCH (c:Space {name:"${data[i][5]}"})\
+    MATCH (p {email:"${data[i][2]}"})\
+    MATCH (zt {key:"${key}"})\
+    MERGE (zz:Zone {name:"${data[i][1]}",createdOn:"${data[i][3]}",externalSystem:"${data[i][6]}", externalObject:"${data[i][7]}", externalIdentifier:"${data[i][8]}", description:"${data[i][9]}", tag:[],\
+    nodeKeys:[], nodeType:"Zone", key:"${generateUuid()}", canDisplay:true, isActive:true, isDeleted:false, canDelete:true})\
+    MERGE (z)-[:PARENT_OF]->(zz)  \
+    MERGE (c)-[:MERGEDZN]->(zz)  \
+    MERGE (zt)-[:CLASSIFICATION_OF]->(zz)\
+    MERGE (zt)-[:CREATED_BY]->(p)`
+    let data3 =await this.neo4jService.write(cypher)
+    console.log(data3)
+    
+  }
+  
+   }
+  
+
+
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
 
   //------------------------------------------
