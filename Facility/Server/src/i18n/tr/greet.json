@@ -26,5 +26,6 @@
   "WRONG_FACILITY_STRUCTURE_DELETE": "{node1}, başka yapılar içerdiğinden silinemez.",
   "PARENT_FACILITY_STRUCTURE_NOT_FOUND":"{node1} no lu yapının bağlı olduğu yapı bulunamadı",
   "WRONG_FACILITY_STRUCTURE_CAN_NOT_DELETE":"{node1} no lu yapı silinemez özelliktedir.",
-  "WRONG_FACILITY_STRUCTURE_PROPS_RULES":"{prop} {rule} olmalıdır."
+  "WRONG_FACILITY_STRUCTURE_PROPS_RULES":"{prop} {rule} olmalıdır.",
+  "NODE_NOT_FOUND": "Uygun düğüm bulunamadı "
 }
