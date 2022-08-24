@@ -49,7 +49,9 @@
 	"Active": "نشيط",
 	"Passive": "سلبي",
 	"File uploaded":"ملف مرفوع",
-	"Classification File Import With Code":"استيراد ملف التصنيف مع التعليمات البرمجية",
+	"Classification File Import With Code":"استيراد ملف تصنيف مشفر",
 	"Select File":"حدد ملف",
-	"Upload":"حمل"
+	"Upload":"حمل",
+	"Click to download sample classification file":"انقر لتنزيل ملف تصنيف العينة",
+	"Classification File Import Without Code":"استيراد ملف التصنيف غير المشفر"
 }

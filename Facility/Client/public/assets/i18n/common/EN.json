@@ -51,7 +51,9 @@
 	"File uploaded":"File uploaded",
 	"Classification File Import With Code":"Classification File Import With Code",
 	"Select File":"Select File",
-	"Upload":"Upload"
+	"Upload":"Upload",
+	"Click to download sample classification file":"Click to download sample classification file",
+	"Classification File Import Without Code":"Classification File Import Without Code"
 }
 
 
