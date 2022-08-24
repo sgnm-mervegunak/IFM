@@ -112,28 +112,30 @@ const SetFacilityStructure = () => {
   const { toast } = useAppSelector((state) => state.toast);
 
   useEffect(() => {
-    FacilityStructureService.getFacilityTypes("FacilityTypes", realm)
-      .then((res) => {
-        setFacilityType(res.data.map((item: any) => item.name));
-      })
-      .catch((err) => {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: err.response ? err.response.data.message : err.message,
-          life: 4000,
+    if (data.length > 0) {
+      FacilityStructureService.getFacilityTypes("FacilityTypes", realm)
+        .then((res) => {
+          setFacilityType(res.data.map((item: any) => item.name));
+        })
+        .catch((err) => {
+          toast.current.show({
+            severity: "error",
+            summary: "Error",
+            detail: err.response ? err.response.data.message : err.message,
+            life: 4000,
+          });
         });
+      ClassificationsService.findAllActiveByLabel({
+        realm: auth.auth.realm,
+        label: "FacilityDocTypes",
+        language: "en",
+      }).then((res) => {
+        let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
+        fixNodes(temp);
+        temp[0].selectable = false;
+        setDocTypes(temp);
       });
-    ClassificationsService.findAllActiveByLabel({
-      realm: auth.auth.realm,
-      label: "FacilityDocTypes",
-      language: "en",
-    }).then((res) => {
-      let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
-      fixNodes(temp);
-      temp[0].selectable = false;
-      setDocTypes(temp);
-    });
+    }
   }, []);
 
   const getForms = async () => {
@@ -399,7 +401,7 @@ const SetFacilityStructure = () => {
         setLoading(false);
       })
       .catch((err) => {
-        if (err.response.status === 500) {
+        if (err.response.status === 404) {
           toast.current.show({
             severity: "error",
             summary: "Error",
@@ -407,7 +409,7 @@ const SetFacilityStructure = () => {
             life: 4000,
           });
           setTimeout(() => {
-            navigate("/facility");
+            navigate("/");
           }, 3000);
         }
       });
@@ -927,8 +929,8 @@ const SetFacilityStructure = () => {
           }
           }
           onContextMenu={(event: any) => {
-           setSelectedFacilityType(event.node.nodeType);
-           cm.current.show(event.originalEvent);
+            setSelectedFacilityType(event.node.nodeType);
+            cm.current.show(event.originalEvent);
           }}
           onDragDrop={(event: any) => {
             console.log(event);
