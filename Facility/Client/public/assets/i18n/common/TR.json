@@ -49,7 +49,9 @@
 	"Active": "Aktif",
 	"Passive": "Pasif",
 	"File uploaded":"Dosya yüklendi",
-	"Classification File Import With Code":"Sınıflandırma Dosyasını Kodla İçe Aktarma",
+	"Classification File Import With Code":"Kodlu Sınıflandırma Dosyasını İçeri Aktarma",
 	"Select File":"Dosya Seç",
-	"Upload":"Yükle"
+	"Upload":"Yükle",
+	"Click to download sample classification file":"Örnek sınıflandırma dosyasını indirmek için tıklayın",
+	"Classification File Import Without Code":"Kodsuz Sınıflandırma Dosyasını İçeri Aktarma"
 }

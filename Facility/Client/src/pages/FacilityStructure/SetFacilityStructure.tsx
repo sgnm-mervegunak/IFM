@@ -112,30 +112,28 @@ const SetFacilityStructure = () => {
   const { toast } = useAppSelector((state) => state.toast);
 
   useEffect(() => {
-    if (data.length > 0) {
-      FacilityStructureService.getFacilityTypes("FacilityTypes", realm)
-        .then((res) => {
-          setFacilityType(res.data.map((item: any) => item.name));
-        })
-        .catch((err) => {
-          toast.current.show({
-            severity: "error",
-            summary: "Error",
-            detail: err.response ? err.response.data.message : err.message,
-            life: 4000,
-          });
+    FacilityStructureService.getFacilityTypes("FacilityTypes", realm)
+      .then((res) => {
+        setFacilityType(res.data.map((item: any) => item.name));
+      })
+      .catch((err) => {
+        toast.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: err.response ? err.response.data.message : err.message,
+          life: 4000,
         });
-      ClassificationsService.findAllActiveByLabel({
-        realm: auth.auth.realm,
-        label: "FacilityDocTypes",
-        language: "en",
-      }).then((res) => {
-        let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
-        fixNodes(temp);
-        temp[0].selectable = false;
-        setDocTypes(temp);
       });
-    }
+    ClassificationsService.findAllActiveByLabel({
+      realm: auth.auth.realm,
+      label: "FacilityDocTypes",
+      language: "en",
+    }).then((res) => {
+      let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
+      fixNodes(temp);
+      temp[0].selectable = false;
+      setDocTypes(temp);
+    });
   }, []);
 
   const getForms = async () => {
