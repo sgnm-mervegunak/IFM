@@ -56,7 +56,7 @@ const SetClassificationAdmin = () => {
   const [realm, setRealm] = useState(auth.auth.realm);
   const [labels, setLabels] = useState<string[]>([]);
   const [codeShow, setCodeShow] = useState(false);
-  const menu2 = useRef({ current: { toggle: () => { } } } as any);
+  const menuImport = useRef({ current: { toggle: () => { } } } as any);
   const { t } = useTranslation(["common"]);
   const language = useAppSelector((state) => state.language.language);
 
@@ -89,6 +89,8 @@ const SetClassificationAdmin = () => {
               detail: err.response ? err.response.data.message : err.message,
               life: 4000,
             });
+            getClassification();
+            setEditDia(false);
           });
         setEditDia(true);
       },
@@ -184,7 +186,7 @@ const SetClassificationAdmin = () => {
               detail: t("Classification Created"),
               life: 4000,
             });
-            getClassification();
+
           })
           .catch((err) => {
             toast.current.show({
@@ -194,6 +196,7 @@ const SetClassificationAdmin = () => {
               life: 4000,
             });
           });
+        getClassification();
       })
       .catch((err) => {
         toast.current.show({
@@ -202,6 +205,7 @@ const SetClassificationAdmin = () => {
           detail: err.response ? err.response.data.message : err.message,
           life: 4000,
         });
+        getClassification();
       });
 
     setName("");
@@ -236,7 +240,7 @@ const SetClassificationAdmin = () => {
             } else {
               await ClassificationsService.setPassive(res.data.id)
             }
-            getClassification();
+
           })
           .catch((err) => {
             toast.current.show({
@@ -246,6 +250,7 @@ const SetClassificationAdmin = () => {
               life: 4000,
             });
           });
+        getClassification();
       })
       .catch((err) => {
         toast.current.show({
@@ -273,7 +278,7 @@ const SetClassificationAdmin = () => {
               detail: t("Classification Deleted"),
               life: 4000,
             });
-            getClassification();
+
           })
           .catch((err) => {
             toast.current.show({
@@ -283,6 +288,7 @@ const SetClassificationAdmin = () => {
               life: 4000,
             });
           });
+        getClassification();
       })
       .catch((err) => {
         toast.current.show({
@@ -291,6 +297,7 @@ const SetClassificationAdmin = () => {
           detail: err.response ? err.response.data.message : err.message,
           life: 4000,
         });
+        getClassification();
       });
   };
 
@@ -387,27 +394,13 @@ const SetClassificationAdmin = () => {
   const rightToolbarTemplate = () => {
     return (
       <React.Fragment>
-        <Menu model={items} popup ref={menu2} id="popup_menu" />
-        <Button className="mr-2" label={t("Import")} icon="pi pi-upload" onClick={(event) => menu2.current.toggle(event)} aria-controls="popup_menu" aria-haspopup />
+        <Menu model={items} popup ref={menuImport} id="popup_menu" />
+        <Button className="mr-2" label={t("Import")} icon="pi pi-upload" onClick={(event) => menuImport.current.toggle(event)} aria-controls="popup_menu" aria-haspopup />
       </React.Fragment>
     );
   };
 
   const items = [
-    {
-      label: t("Download Sample File With Code"),
-      icon: 'pi pi-download',
-      command: () => {
-        window.location.href = 'http://localhost:3000/documents/classification-sample-data-with-code.xlsx'
-      }
-    },
-    {
-      label: t("Download Sample File Without Code"),
-      icon: 'pi pi-download',
-      command: () => {
-        window.location.href = 'http://localhost:3000/documents/classification-sample-data-without-code.xlsx'
-      }
-    },
     {
       label: t("Upload File With Code"),
       icon: 'pi pi-upload',
@@ -513,7 +506,7 @@ const SetClassificationAdmin = () => {
           <Checkbox className="ml-3" onChange={e => setIsActive(e.checked)} checked={isActive}></Checkbox>
         </div>
       </Dialog>
-      <h1>{t("Edit Classification")}</h1>
+      <h1>{t("Classification Editing")}</h1>
       <div className="field">
         <Tree
 
