@@ -67,5 +67,22 @@
 	"Facility Type":"نوع المنشأة",
 	"Structure Detail":"تفاصيل الهيكل",
 	"Facility Structure Editing": "تحرير هيكل المنشأة",
-	"Edit Form":"تحرير النموذج"
+	"Edit Form":"تحرير النموذج",
+	"Building Created":"تم إنشاء المبنى",
+	"Block Created":"تم إنشاء الكتلة",
+	"Floor Created":"تم إنشاء الأرضية",
+	"Space Created":"خلق الفضاء",
+	"Building Updated":"تم تحديث المبنى",
+	"Block Updated":"تم تحديث الكتلة",
+	"Floor Updated":"تم تحديث الكلمة",
+	"Space Updated":"تم تحديث الفضاء",
+	"Category":"فئة",
+	"Description": "وصف",
+	"Elevation": "ارتفاع",
+	"Height": "ارتفاع",
+	"Architectural Name":"الاسم المعماري",
+	"Space Type": "نوع الفضاء",
+	"Usage": "إستعمال",
+	"Status": "حالة",
+	"Images": "الصور"
 }

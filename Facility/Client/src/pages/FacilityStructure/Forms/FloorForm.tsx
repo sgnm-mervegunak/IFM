@@ -6,6 +6,7 @@ import { TreeSelect } from "primereact/treeselect";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
+import { useTranslation } from "react-i18next";
 
 import FacilityStructureService from "../../../services/facilitystructure";
 import ClassificationsService from "../../../services/classifications";
@@ -76,8 +77,8 @@ const FloorForm = ({
     const [classificationCategory, setClassificationCategory] = useState<Node[]>([]);
     const auth = useAppSelector((state) => state.auth);
     const [realm, setRealm] = useState(auth.auth.realm);
-
     const [data, setData] = useState<any>();
+    const { t } = useTranslation(["common"]);
 
     const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
         defaultValues: {
@@ -140,7 +141,7 @@ const FloorForm = ({
             .catch((err) => {
                 toast.current.show({
                     severity: "error",
-                    summary: "Error",
+                    summary: t("Error"),
                     detail: err.response ? err.response.data.message : err.message,
                     life: 4000,
                 });
@@ -167,8 +168,8 @@ const FloorForm = ({
                 .then((res) => {
                     toast.current.show({
                         severity: "success",
-                        summary: "Successful",
-                        detail: "Floor Created",
+                        summary: t("Successful"),
+                        detail: t("Floor Created"),
                         life: 4000,
                     });
                     // let newForm: any = {};
@@ -184,7 +185,7 @@ const FloorForm = ({
                 .catch((err) => {
                     toast.current.show({
                         severity: "error",
-                        summary: "Error",
+                        summary: t("Error"),
                         detail: err.response ? err.response.data.message : err.message,
                         life: 4000,
                     });
@@ -214,8 +215,8 @@ const FloorForm = ({
                 .then((res) => {
                     toast.current.show({
                         severity: "success",
-                        summary: "Successful",
-                        detail: "Floor Updated",
+                        summary: t("Successful"),
+                        detail: t("Floor Updated"),
                         life: 4000,
                     });
                     getFacilityStructure();
@@ -223,7 +224,7 @@ const FloorForm = ({
                 .catch((err) => {
                     toast.current.show({
                         severity: "error",
-                        summary: "Error",
+                        summary: t("Error"),
                         detail: err.response ? err.response.data.message : err.message,
                         life: 4000,
                     });
@@ -244,7 +245,7 @@ const FloorForm = ({
         >
 
             <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
+                <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
                 <InputText
                     autoComplete="off"
                     {...register("name")}
@@ -255,7 +256,7 @@ const FloorForm = ({
             <p style={{ color: "red" }}>{errors.name?.message}</p>
 
             <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>Category</h5>
+                <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
                 <Controller
 
                     defaultValue={data?.category || []}
@@ -277,7 +278,7 @@ const FloorForm = ({
             </div>
 
             <div className="field structureChips">
-                <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
+                <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
                 <Controller
 
                     defaultValue={data?.tag || []}
@@ -296,7 +297,7 @@ const FloorForm = ({
             </div>
 
             <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>Description</h5>
+                <h5 style={{ marginBottom: "0.5em" }}>{t("Description")}</h5>
                 <InputText
                     autoComplete="off"
                     defaultValue={data?.description || ""}
@@ -307,7 +308,7 @@ const FloorForm = ({
             <p style={{ color: "red" }}>{errors.description?.message}</p>
 
             <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>Elevation (cm)</h5>
+                <h5 style={{ marginBottom: "0.5em" }}>{t("Elevation")} (cm)</h5>
                 <InputText
                     autoComplete={"off"}
                     defaultValue={data?.elevation || ""}
@@ -318,7 +319,7 @@ const FloorForm = ({
             <p style={{ color: "red" }}>{errors.elevation?.message}</p>
 
             <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>Height (cm)</h5>
+                <h5 style={{ marginBottom: "0.5em" }}>{t("Height")} (cm)</h5>
                 <InputText
                     autoComplete={"off"}
                     defaultValue={data?.height || ""}

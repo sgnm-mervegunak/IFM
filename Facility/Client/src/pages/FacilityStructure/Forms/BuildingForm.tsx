@@ -13,6 +13,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
+import { useTranslation } from "react-i18next";
 
 import ClassificationsService from "../../../services/classifications";
 import FacilityStructureService from "../../../services/facilitystructure";
@@ -88,6 +89,7 @@ const BuildingForm = ({
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
   const [uploadFiles, setUploadFiles] = useState<any>({});
   const { toast } = useAppSelector((state) => state.toast);
+  const { t } = useTranslation(["common"]);
 
   const [data, setData] = useState<any>();
 
@@ -179,7 +181,7 @@ const BuildingForm = ({
       .catch((err) => {
         toast.current.show({
           severity: "error",
-          summary: "Error",
+          summary: t("Error"),
           detail: err.response ? err.response.data.message : err.message,
           life: 4000,
         });
@@ -232,8 +234,8 @@ const BuildingForm = ({
         .then(async (res) => {
           toast.current.show({
             severity: "success",
-            summary: "Successful",
-            detail: "Building Created",
+            summary: t("Successful"),
+            detail: t("Building Created"),
             life: 4000,
           });
           // let newForm: any = {};
@@ -277,7 +279,7 @@ const BuildingForm = ({
         .catch((err) => {
           toast.current.show({
             severity: "error",
-            summary: "Error",
+            summary: t("Error"),
             detail: err.response ? err.response.data.message : err.message,
             life: 4000,
           });
@@ -314,8 +316,8 @@ const BuildingForm = ({
         .then(async (res) => {
           toast.current.show({
             severity: "success",
-            summary: "Successful",
-            detail: "Building Updated",
+            summary: t("Successful"),
+            detail: t("Building Updated"),
             life: 4000,
           });
           // upload files
@@ -370,7 +372,7 @@ const BuildingForm = ({
         .catch((err) => {
           toast.current.show({
             severity: "error",
-            summary: "Error",
+            summary: t("Error"),
             detail: err.response ? err.response.data.message : err.message,
             life: 4000,
           });

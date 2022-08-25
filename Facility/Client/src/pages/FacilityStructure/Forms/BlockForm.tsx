@@ -6,6 +6,8 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAppSelector } from '../../../app/hook';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
+import { useTranslation } from "react-i18next";
+
 import FacilityStructureService from "../../../services/facilitystructure";
 
 interface Params {
@@ -70,6 +72,7 @@ const BlockForm = ({
 }: Params) => {
 
     const [data, setData] = useState<any>();
+    const { t } = useTranslation(["common"]);
     const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
         defaultValues: {
             ...data,
@@ -110,7 +113,7 @@ const BlockForm = ({
             .catch((err) => {
                 toast.current.show({
                     severity: "error",
-                    summary: "Error",
+                    summary: t("Error"),
                     detail: err.response ? err.response.data.message : err.message,
                     life: 4000,
                 });
@@ -138,8 +141,8 @@ const BlockForm = ({
                 .then((res) => {
                     toast.current.show({
                         severity: "success",
-                        summary: "Successful",
-                        detail: "Block Created",
+                        summary: t("Successful"),
+                        detail: t("Block Created"),
                         life: 4000,
                     });
                     // let newForm: any = {};
@@ -155,7 +158,7 @@ const BlockForm = ({
                 .catch((err) => {
                     toast.current.show({
                         severity: "error",
-                        summary: "Error",
+                        summary: t("Error"),
                         detail: err.response ? err.response.data.message : err.message,
                         life: 4000,
                     });
@@ -184,8 +187,8 @@ const BlockForm = ({
                 .then((res) => {
                     toast.current.show({
                         severity: "success",
-                        summary: "Successful",
-                        detail: "Structure Updated",
+                        summary: t("Successful"),
+                        detail: t("Block Updated"),
                         life: 4000,
                     });
                     getFacilityStructure();
@@ -193,7 +196,7 @@ const BlockForm = ({
                 .catch((err) => {
                     toast.current.show({
                         severity: "error",
-                        summary: "Error",
+                        summary: t("Error"),
                         detail: err.response ? err.response.data.message : err.message,
                         life: 4000,
                     });
@@ -211,7 +214,7 @@ const BlockForm = ({
     return (
         <form>
             <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
+                <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
                 <InputText
                     // value={name}
                     // onChange={(event) => setName(event.target.value)}
@@ -224,7 +227,7 @@ const BlockForm = ({
             <p style={{ color: "red" }}>{errors.name?.message}</p>
 
             <div className="field structureChips">
-                <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
+                <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
                 <Controller
                     defaultValue={data?.tag }
                     name="tag"
@@ -259,7 +262,7 @@ const BlockForm = ({
                 />
             </div> */}
             <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>Description</h5>
+                <h5 style={{ marginBottom: "0.5em" }}>{t("Description")}</h5>
                 <InputText
                     autoComplete="off"
                     defaultValue={data?.description || ""}

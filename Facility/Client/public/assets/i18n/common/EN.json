@@ -67,7 +67,24 @@
 	"Facility Type":"Facility Type",
 	"Structure Detail":"Structure Detail",
 	"Facility Structure Editing": "Facility Structure Editing",
-	"Edit Form":"Edit Form"
+	"Edit Form":"Edit Form",
+	"Building Created":"Building Created",
+	"Block Created":"Block Created",
+	"Floor Created":"Floor Created",
+	"Space Created":"Space Created",
+	"Building Updated":"Building Updated",
+	"Block Updated":"Block Updated",
+	"Floor Updated":"Floor Updated",
+	"Space Updated":"Space Updated",
+	"Category":"Category",
+	"Description": "Description",
+	"Elevation": "Elevation",
+	"Height": "Height",
+	"Architectural Name":"Architectural Name",
+	"Space Type": "Space Type",
+	"Usage": "Usage",
+	"Status": "Status",
+	"Images": "Images"
 }
 
 
