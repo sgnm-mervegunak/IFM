@@ -14,8 +14,7 @@ import { useAppSelector } from "../../../app/hook";
 import axios from "axios";
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
-import ClassificationService from "../../../services/classifications";
-
+import { useTranslation } from "react-i18next";
 
 import ClassificationsService from "../../../services/classifications";
 import FacilityStructureService from "../../../services/facilitystructure";
@@ -101,6 +100,7 @@ const SpaceForm = ({
   const { toast } = useAppSelector(state => state.toast);
 
   const [data, setData] = useState<any>();
+  const { t } = useTranslation(["common"]);
 
   const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
     defaultValues: {
@@ -224,8 +224,8 @@ const SpaceForm = ({
         .then(async (res) => {
           toast.current.show({
             severity: "success",
-            summary: "Successful",
-            detail: "Space Created",
+            summary: t("Successful"),
+            detail: t("Space Created"),
             life: 4000,
           });
           // let newForm: any = {};
@@ -269,7 +269,7 @@ const SpaceForm = ({
         .catch((err) => {
           toast.current.show({
             severity: "error",
-            summary: "Error",
+            summary:  t("Error"),
             detail: err.response ? err.response.data.message : err.message,
             life: 4000,
           });
@@ -299,8 +299,8 @@ const SpaceForm = ({
         .then(async (res) => {
           toast.current.show({
             severity: "success",
-            summary: "Successful",
-            detail: "Space Updated",
+            summary: t("Successful"),
+            detail: t("Space Updated"),
             life: 4000,
           });
           // upload files
@@ -353,7 +353,7 @@ const SpaceForm = ({
         .catch((err) => {
           toast.current.show({
             severity: "error",
-            summary: "Error",
+            summary: t("Error"),
             detail: err.response ? err.response.data.message : err.message,
             life: 4000,
           });
@@ -374,7 +374,7 @@ const SpaceForm = ({
   return (
     <form>
       <div className="field">
-        <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
+        <h5 style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
         <InputText
           autoComplete="off"
           {...register("code")}
@@ -385,7 +385,7 @@ const SpaceForm = ({
       <p style={{ color: "red" }}>{errors.code?.message}</p>
 
       <div className="field">
-        <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
+        <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
         <InputText
           autoComplete="off"
           {...register("name")}
@@ -396,7 +396,7 @@ const SpaceForm = ({
       <p style={{ color: "red" }}>{errors.name?.message}</p>
 
       <div className="field">
-        <h5 style={{ marginBottom: "0.5em" }}>Architectural Name</h5>
+        <h5 style={{ marginBottom: "0.5em" }}>{t("Architectural Name")}</h5>
         <InputText
           autoComplete="off"
           {...register("architecturalName")}
@@ -407,7 +407,7 @@ const SpaceForm = ({
       <p style={{ color: "red" }}>{errors.architecturalName?.message}</p>
 
       <div className="field">
-        <h5 style={{ marginBottom: "0.5em" }}>Space Type</h5>
+        <h5 style={{ marginBottom: "0.5em" }}>{t("Space Type")}</h5>
         <Controller
           defaultValue={data?.spaceType || []}
           name="spaceType"
@@ -440,7 +440,7 @@ const SpaceForm = ({
       <p style={{ color: "red" }}>{errors.m2?.message}</p>
 
       <div className="field">
-        <h5 style={{ marginBottom: "0.5em" }}>Usage</h5>
+        <h5 style={{ marginBottom: "0.5em" }}>{t("Usage")}</h5>
         <InputText
           autoComplete="off"
           {...register("usage")}
@@ -451,7 +451,7 @@ const SpaceForm = ({
       <p style={{ color: "red" }}>{errors.usage?.message}</p>
 
       <div className="field structureChips">
-        <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
+        <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
         <Controller
 
           defaultValue={data?.tag || []}
@@ -471,7 +471,7 @@ const SpaceForm = ({
       <p style={{ color: "red" }}>{errors.tag?.message}</p>
 
       <div className="field">
-        <h5 style={{ marginBottom: "0.5em" }}>Status</h5>
+        <h5 style={{ marginBottom: "0.5em" }}>{t("Status")}</h5>
         <Controller
           defaultValue={data?.status || "In used"}
           name="status"
@@ -492,7 +492,7 @@ const SpaceForm = ({
       <p style={{ color: "red" }}>{errors.status?.message}</p>
 
       <div className="field">
-        <h5 style={{ marginBottom: "0.5em" }}>Images</h5>
+        <h5 style={{ marginBottom: "0.5em" }}>{t("Images")}</h5>
         <Controller
           defaultValue={data?.images || []}
           name="images"
@@ -502,8 +502,7 @@ const SpaceForm = ({
               label={"images"}
               value={field.value}
               onChange={(e: any) => {
-                console.log(field.value)
-                field.onChange(e.value)
+                field.onChange(e)
               }}
               deleteFiles={deleteFiles}
               setDeleteFiles={setDeleteFiles}

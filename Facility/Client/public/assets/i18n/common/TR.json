@@ -67,5 +67,22 @@
 	"Facility Type":"Tesis Tipi",
 	"Structure Detail":"Yapı Detayı",
 	"Facility Structure Editing": "Tesis Yapısı Düzenleme",
-	"Edit Form":"Formu Düzenle"
+	"Edit Form":"Formu Düzenle",
+	"Building Created":"Bina Oluşturuldu",
+	"Block Created":"Blok Oluşturuldu",
+	"Floor Created":"Kat Oluşturuldu",
+	"Space Created":"Alan Oluşturuldu",
+	"Building Updated":"Bina Güncellendi",
+	"Block Updated":"Blok Güncellendi",
+	"Floor Updated":"Kat Güncellendi",
+	"Space Updated":"Alan Güncellendi",
+	"Category":"Kategori",
+	"Description": "Açıklama",
+	"Elevation": "Yükseklik(Elevation)",
+	"Height": "Yükseklik(Height)",
+	"Architectural Name":"Mimari Ad",
+	"Space Type": "Alan Tipi",
+	"Usage": "Kullanım",
+	"Status": "Durum",
+	"Images": "Resimler"
 }

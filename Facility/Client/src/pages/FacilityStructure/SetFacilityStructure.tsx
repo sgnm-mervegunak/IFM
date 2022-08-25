@@ -434,7 +434,7 @@ const SetFacilityStructure = () => {
     FacilityStructureService.nodeInfo(key)
       .then((res) => {
         console.log(res.data);
-        
+
         FacilityStructureService.remove(res.data.id)
           .then(() => {
             toast.current.show({
