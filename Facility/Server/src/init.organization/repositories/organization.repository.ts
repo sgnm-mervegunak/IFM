@@ -17,10 +17,11 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
   constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) {}
 
   async findOneByRealm(realm: string): Promise<any> {
-    const x = await this.neo4jService.beginTransaction();
-    const arr = [
+    const neo4Transaction = await this.neo4jService.beginTransaction();
+    const constraintArr = [
       'CREATE CONSTRAINT IF NOT EXISTS ON (node:Infra) ASSERT  (node.realm) IS UNIQUE',
       'CREATE CONSTRAINT IF NOT EXISTS ON (node:Root) ASSERT  (node.realm) IS UNIQUE',
+      'CREATE CONSTRAINT IF NOT EXISTS ON (node:Classification) ASSERT  (node.realm) IS UNIQUE',
       'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityStructure) ASSERT (node.realm) IS UNIQUE',
       'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityStructure) ASSERT (node.key) IS UNIQUE',
       'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityDocTypes) ASSERT (node.realm) IS UNIQUE',
@@ -28,18 +29,20 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityTypes) ASSERT (node.realm) IS UNIQUE',
     ];
 
-    arr.forEach((element) => {
-      x.run(element)
+    constraintArr.forEach((element) => {
+      neo4Transaction
+        .run(element)
         .then((res) => {
           console.log(res);
         })
         .catch((err) => {
           console.log(err);
-          x.rollback();
+
+          neo4Transaction.rollback();
         });
     });
-    x.commit();
-    x.close();
+    neo4Transaction.commit();
+    neo4Transaction.close();
 
     /* without transaction
     arr.forEach(async (element) => {
