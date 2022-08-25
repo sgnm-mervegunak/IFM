@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 //import { CustomNeo4jError, Neo4jService } from 'sgnm-neo4j';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
-import { has_children_error } from 'src/common/const/custom.error.object';
 import { CustomTreeError } from 'src/common/const/custom.error.enum';
 import { Contact } from '../entities/contact.entity';
 import { CreateContactDto } from '../dto/create-contact.dto';
@@ -10,6 +9,7 @@ import { UpdateContactDto } from '../dto/update-contact.dto';
 import { ContactNotFoundException } from 'src/common/notFoundExceptions/not.found.exception';
 import { assignDtoPropToEntity, createDynamicCyperObject, Neo4jService } from 'sgnm-neo4j/dist';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
+import { has_children_error } from 'src/common/const/custom.error.object';
 
 @Injectable()
 export class ContactRepository implements GeciciInterface<Contact> {
@@ -123,12 +123,12 @@ export class ContactRepository implements GeciciInterface<Contact> {
       if (hasChildren['records'].length == 0) {
         deletedNode = await this.neo4jService.delete(_id);
       } else {
-        throw new HttpException(has_children_error, 400);
+        throw new HttpException(has_children_error({}), 400);
       }
       return deletedNode;
     } catch (error) {
       if (error.response?.code == CustomTreeError.HAS_CHILDREN) {
-        throw new HttpException(has_children_error, 400);
+        throw new HttpException(has_children_error({}), 400);
       } else {
         throw new HttpException(error.response?.message, error.response?.code);
       }

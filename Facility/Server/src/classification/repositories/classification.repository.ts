@@ -7,14 +7,16 @@ import { UpdateClassificationDto } from '../dto/update-classification.dto';
 import { Classification } from '../entities/classification.entity';
 import { ClassificationNotFountException, FacilityStructureNotFountException } from 'src/common/notFoundExceptions/not.found.exception';
 import { CustomTreeError } from 'src/common/const/custom.error.enum';
-import { createDynamicCyperObject, Neo4jService , dynamicLabelAdder, dynamicFilterPropertiesAdder, dynamicNotLabelAdder, dynamicUpdatePropertyAdder,  node_not_found, create_node__must_entered_error, createDynamicCyperCreateQuery, create_node__node_not_created_error, filterArrayForEmptyString, find_with_children_by_realm_as_tree__find_by_realm_error, find_with_children_by_realm_as_tree_error, library_server_error, tree_structure_not_found_by_realm_name_error} from 'sgnm-neo4j/dist';
+import { createDynamicCyperObject, Neo4jService , dynamicLabelAdder, dynamicFilterPropertiesAdder, dynamicNotLabelAdder, dynamicUpdatePropertyAdder,  node_not_found, create_node__must_entered_error, createDynamicCyperCreateQuery, create_node__node_not_created_error, filterArrayForEmptyString, find_with_children_by_realm_as_tree__find_by_realm_error, find_with_children_by_realm_as_tree_error, library_server_error, tree_structure_not_found_by_realm_name_error, CustomNeo4jError} from 'sgnm-neo4j/dist';
 import { classificationInterface } from 'src/common/interface/classification.interface';
 
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 import { QueryResult } from 'neo4j-driver-core';
-import { has_children_error } from 'src/common/const/custom.error.object';
 import { I18NEnums } from 'src/common/const/i18n.enum';
 import { WrongClassificationParentExceptions } from 'src/common/badRequestExceptions/bad.request.exception';
+import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
+import { has_children_error, wrong_parent_error } from 'src/common/const/custom.error.object';
+
 const exceljs = require('exceljs');
 const { v4: uuidv4 } = require('uuid');
 
@@ -116,7 +118,7 @@ export class ClassificationRepository implements classificationInterface<Classif
  
   //REVISED FOR NEW NEO4J
   async changeNodeBranch(_id: string, target_parent_id: string) {
-    //try {
+    try {
       
       const new_parent = await this.neo4jService.findByIdAndFilters(
         +target_parent_id,{"isDeleted":false},[]);
@@ -129,15 +131,15 @@ export class ClassificationRepository implements classificationInterface<Classif
             {}
           )    
       if (parent_of_new_parent && parent_of_new_parent["_fields"][0]["identity"].low == _id) {
-        throw new  WrongClassificationParentExceptions(_id,target_parent_id);
+        throw new HttpException(wrong_parent_error({node1:_id, node2: target_parent_id}), 400);
       }
-
 
       if (new_parent['labels'] && new_parent['labels'][0] == 'Classification' ) {
         
-          if (node['labels'] && node['labels'].length == 0) { 
-        throw new  WrongClassificationParentExceptions(node["identity"].low,new_parent["identity"].low);
-          }
+       if (node['labels'] && node['labels'].length == 0) { 
+        throw new HttpException(wrong_parent_error({node1: node["identity"].low, node2: new_parent["identity"].low}), 400);
+        
+        }
       }  
 
       const old_parent = await this.neo4jService.getParentByIdAndFilters(+_id, {"isDeleted":false}, {"isDeleted":false});
@@ -148,13 +150,31 @@ export class ClassificationRepository implements classificationInterface<Classif
       await this.neo4jService.addRelationByIdAndRelationNameWithFilters(+target_parent_id,{"isDeleted":false, "isActive":true},
          +_id, {"isDeleted":false,}, 'PARENT_OF', RelationDirection.RIGHT);
     
-    // } catch (error) {
-      
-    //   throw new  WrongClassificationParentExceptions("","");
+    } catch (error) {
+      let code = error.response?.code;
+        if (code >= 1000 && code<=1999) {
+          if (error.response?.code == CustomIfmCommonError.EXAMPLE1) {
 
-    // }
+          }
+        }
+        else if (code >= 5000 && code<=5999) {
+          if (error.response?.code == CustomNeo4jError.ADD_CHILDREN_RELATION_BY_ID_ERROR) {  // örnek değişecek
+            throw new  WrongClassificationParentExceptions(_id,target_parent_id)
+          }
+        }
+        else if (code >= 9000 && code<=9999) {
+          if (error.response?.code == CustomTreeError.WRONG_PARENT) {
+            throw new  WrongClassificationParentExceptions(error.response?.params['node1'],error.response?.params['node2'])
+          }
+        }
+        else {
+          throw new HttpException("", 500);
+        }
+         
+      
+     
   }
-  
+} 
   //REVISED FOR NEW NEO4J
   async findOneNodeByKey(key: string) {
     try {
