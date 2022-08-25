@@ -8,6 +8,9 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { TreeSelect } from "primereact/treeselect";
 import { useNavigate, useParams } from "react-router-dom";
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from "yup";
+import { useForm, Controller } from "react-hook-form";
 
 import FacilityStructureService from "../../services/facilitystructure";
 import ClassificationsService from "../../services/classifications";
@@ -81,6 +84,13 @@ interface FormNode {
   icon?: string;
 }
 
+const schema = yup.object({
+  name: yup.string().required("This area is required."),
+  code: yup.string().required("This area is required."),
+
+
+});
+
 const SetZone = () => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [selectedKeysName, setSelectedKeysName] = useState<string[]>([]);
@@ -88,7 +98,7 @@ const SetZone = () => {
   const [deleteNodeKey, setDeleteNodeKey] = useState<any>("");
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
-  const [createZone,setCreateZone] = useState<ZoneInterface>({} as ZoneInterface)
+  const [createZone, setCreateZone] = useState<ZoneInterface>({} as ZoneInterface)
   const [ArchitecturalName, setArchitecturalName] = useState<string>("");
   const [ArchitecturalCode, setArchitecturalCode] = useState<string>("");
   const [name, setName] = useState<string>("");
@@ -112,7 +122,7 @@ const SetZone = () => {
   const { toast } = useAppSelector((state) => state.toast);
   const cm: any = React.useRef(null);
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<FormNode[]>([]);
+  // const [formData, setFormData] = useState<FormNode[]>([]);
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
   const [generateNodeKey, setGenerateNodeKey] = useState("");
@@ -170,6 +180,8 @@ const SetZone = () => {
     getClassificationSpace();
     getClassificationStatus();
   }, []);
+
+
 
   const getNodeInfoAndEdit = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
@@ -257,6 +269,35 @@ const SetZone = () => {
     getZone();
   }, []);
 
+  const [formData, setFormData] = useState<any>();
+
+  const { register, handleSubmit, watch, formState: { errors }, control, reset, formState, formState: { isSubmitSuccessful } } = useForm<ZoneInterface>({
+    resolver: yupResolver(schema)
+  })
+  // const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
+  //   defaultValues: {
+  //     ...formData
+  //   },
+  //   resolver: yupResolver(schema)
+  // });
+  // useEffect(
+  //   () => {
+  //     console.log("dataaaa: ", createZone);
+
+  //   }
+  //   , [createZone])
+
+  useEffect(() => {
+    watch((value, { name, type }) => console.log(value, name, type));
+  }, [watch])
+
+
+  useEffect(() => {
+    if (formState.isSubmitSuccessful) {
+      reset({...createZone});
+    }
+  }, [formState, createZone, reset]);
+
   const fixNodes = (nodes: Node[]) => {
     if (!nodes || nodes.length === 0) {
       return;
@@ -273,13 +314,13 @@ const SetZone = () => {
     }
   };
 
-  const addItem = () => {
+  const addItem = (createZone:any) => {
     let newNode: any = {};
-
+    console.log("-------",createZone);
     newNode = {
       ...createZone,
-      spaceNames: `${selectedKeysName.toString().replaceAll(",", ", ")}`,
-      nodeKeys: selectedKeys,
+      spaceNames: `${selectedKeysName.toString().replaceAll(",", ", ")}` || "",
+      nodeKeys: selectedKeys || [],
       credatedBy: "",
       createdOn: ""
     };
@@ -367,11 +408,16 @@ const SetZone = () => {
     setEditDia(false);
   };
 
-  const onChange = (e:any)=>{
-    setCreateZone(prev=>({
-      ...prev,
-      [e.target.name]: e.target.value
-    }))
+  const onChange = (e: any) => {
+    try {
+      
+      setCreateZone(prev => ({
+        ...prev,
+        [e.target?.name]: e.target.value
+      }))
+    } catch (e) {
+      alert(e);
+    }
   }
 
   const deleteItem = (key: string) => {
@@ -439,7 +485,8 @@ const SetZone = () => {
         <Button
           label="Add"
           icon="pi pi-check"
-          onClick={() => addItem()}
+          // onClick={() => addItem()}
+          onClick={() => handleSubmit(addItem)()}
           autoFocus
         />
       </div>
@@ -511,81 +558,122 @@ const SetZone = () => {
           setLabels([]);
           // setCreateZone({} as ZoneInterface)
           setAddDia(false);
+          setCreateZone({} as ZoneInterface);
 
           setSelectedFacilityType(undefined);
+          reset({ ...createZone })
         }}
       >
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
-          <InputText
-            value={createZone.name}
-            name="name"
-            onChange={onChange}
-            style={{ width: "100%" }}
-          />
-        </div>
+        <form>
 
-        {/* Type Ayarlanamalı */}
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Category</h5>
-          <TreeSelect
-            value={createZone.category}
-            options={classificationStatus}
-            onChange={(e) => onChange({ target: { name: "category", value: e.value } })}
-            filter
-            placeholder="Select Type"
-            style={{ width: "100%" }}
-          />
-        </div>
+          <div className="field">
+            <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
+            <InputText
+              // value={createZone.name}
+              autoComplete="off"
+              {...register("name")}
+              style={{ width: '100%' }}
+              // defaultValue={editDia ? createZone?.name || "" : ""}
+            />
+          </div>
+          <p style={{ color: "red" }}>{errors.name?.message}</p>
 
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
-          <InputText
-            value={createZone.code}
-            name="code"
-            onChange={onChange}
-            style={{ width: "100%" }}
-          />
-        </div>
 
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Description</h5>
-          <InputText
-            value={createZone.description}
-            name="description"
-            onChange={onChange}
-            style={{ width: "100%" }}
-          />
-        </div>
+          {/* Type Ayarlanamalı */}
+          <div className="field">
+            <h5 style={{ marginBottom: "0.5em" }}>Category</h5>
+            <Controller
+              defaultValue={createZone?.category}
+              name="category"
+              control={control}
+              render={({ field }) => (
+                <TreeSelect
+                  // value={createZone.category}
+                  value={field.value}
+                  options={classificationStatus}
+                  onChange={(e) => {
+                    field.onChange({ target: { name: "category", value: e.value } })
+                  }}
+                  filter
+                  placeholder="Select Type"
+                  style={{ width: "100%" }}
+                />
+              )}
+            />
+          </div>
 
-        <div className="field structureChips">
-          <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
-          <Chips
-            value={createZone.tags}
-            onChange={(e) => onChange({ target: { name: "tags", value: e.value } })}
-            style={{ width: "100%" }}
-          />
-        </div>
 
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>External System</h5>
-          <InputText
-            value={createZone.externalSystem}
-            name="externalSystem"
-            onChange={onChange}
-            style={{ width: "100%" }}
-          />
-        </div>
+          <div className="field">
+            <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
+            <InputText
+              // value={createZone.code}
+              autoComplete="off"
+              {...register("code")}
+              style={{ width: '100%' }}
+              defaultValue={createZone?.code || ""}
+            />
+          </div>
+          <p style={{ color: "red" }}>{errors.code?.message}</p>
 
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>External Object</h5>
-          <InputText
-            value={createZone.externalObject}
-            name="externalObject"
-            onChange={onChange}
-            style={{ width: "100%" }}
-          />
-        </div>
+
+          <div className="field">
+            <h5 style={{ marginBottom: "0.5em" }}>Description</h5>
+            <InputText
+              // value={createZone.description}
+              autoComplete="off"
+              {...register("description")}
+              style={{ width: '100%' }}
+              defaultValue={createZone?.description || ""}
+            />
+          </div>
+
+
+          <div className="field structureChips">
+            <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
+            <Controller
+
+              defaultValue={formData?.tags || []}
+              name="tags"
+              control={control}
+              render={({ field }) => (
+                <Chips
+                  // value={createZone.tags}
+                  value={field.value}
+                  onChange={(e) => {
+                    field.onChange({ target: { name: "tags", value: e.value } })
+                  }}
+                  style={{ width: "100%" }}
+                />
+              )}
+            />
+
+          </div>
+
+
+          <div className="field">
+            <h5 style={{ marginBottom: "0.5em" }}>External System</h5>
+            <InputText
+              // value={createZone.externalSystem}
+              autoComplete="off"
+              {...register("externalSystem")}
+              style={{ width: '100%' }}
+              defaultValue={formData?.externalSystem || ""}
+            />
+          </div>
+
+
+          <div className="field">
+            <h5 style={{ marginBottom: "0.5em" }}>External Object</h5>
+            <InputText
+              // value={createZone.externalObject}
+              autoComplete="off"
+              {...register("externalObject")}
+              style={{ width: '100%' }}
+              defaultValue={formData?.externalObject || ""}
+            />
+          </div>
+
+        </form>
       </Dialog>
 
       <Dialog
