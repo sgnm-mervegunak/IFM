@@ -21,11 +21,10 @@ export class AssetListenerController {
   @EventPattern('createFacility')
   async createFacilityListener(@Payload() message) {
     const facilityInfo = message.value;
-    const facilityExist = await this.neo4jService.read('match (n:Root) where n.realm=$realm return n', {
-      realm: facilityInfo.realm,
-    });
 
-    if (facilityExist.records?.length > 0) {
+    const facilityExist = await this.neo4jService.findByLabelAndFilters(['Root'], { realm: facilityInfo.realm });
+
+    if (!facilityExist.length) {
       throw new HttpException('facility already exist', 400);
     }
 
@@ -42,6 +41,7 @@ export class AssetListenerController {
 
     await this.neo4jService.addRelations(assetNode.identity.low, facilityNode.identity.low);
   }
+
   @EventPattern('createStructureAssetRelation')
   async createAssetListener(@Payload() message) {
     if (!message.value?.referenceKey || !message.value?.parentKey) {

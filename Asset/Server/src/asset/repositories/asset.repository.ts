@@ -41,14 +41,8 @@ export class AssetRepository implements GeciciInterface<Asset> {
   async create(createAssetDto: CreateAssetDto) {
     const asset = new Asset();
     const assetObject = assignDtoPropToEntity(asset, createAssetDto);
-    let value;
+    const value = await this.neo4jService.createNode(assetObject, ['Asset']);
 
-    if (createAssetDto['labels']) {
-      createAssetDto.labels.push('Asset');
-      value = await this.neo4jService.createNode(assetObject, createAssetDto.labels);
-    } else {
-      value = await this.neo4jService.createNode(assetObject, ['Asset']);
-    }
     value['properties']['id'] = value['identity'].low;
     const result = { id: value['identity'].low, labels: value['labels'], properties: value['properties'] };
     if (createAssetDto['parentId']) {
