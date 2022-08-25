@@ -23,7 +23,6 @@ import { Neo4jModule } from 'sgnm-neo4j/dist';
 import { OrganizationModule } from './init.organization/organization.module';
 import { JointSpaceModule } from './jointspace/jointspace.module';
 import { ZoneModule } from './zone/zone.module';
-import { LazyLoadingModule } from './lazyLoading/lazyLoading.module';
 
 @Module({
   imports: [
@@ -117,8 +116,6 @@ import { LazyLoadingModule } from './lazyLoading/lazyLoading.module';
     JointSpaceModule,
 
     ZoneModule,
-    
-    LazyLoadingModule,
   ],
   providers: [
     //to cache all get request

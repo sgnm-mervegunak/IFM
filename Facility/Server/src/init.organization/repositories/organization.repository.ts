@@ -19,13 +19,17 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
   async findOneByRealm(realm: string): Promise<any> {
     const x = await this.neo4jService.beginTransaction();
     const arr = [
-      'CREATE CONSTRAINT IF NOT EXISTS  ON (node:Infra) ASSERT  (node.realm) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS  ON (node:Root) ASSERT  (node.realm) IS UNIQUE',
+      'CREATE CONSTRAINT IF NOT EXISTS ON (node:Infra) ASSERT  (node.realm) IS UNIQUE',
+      'CREATE CONSTRAINT IF NOT EXISTS ON (node:Root) ASSERT  (node.realm) IS UNIQUE',
+      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityStructure) ASSERT (node.realm) IS UNIQUE',
+      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityStructure) ASSERT (node.key) IS UNIQUE',
+      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityDocTypes) ASSERT (node.realm) IS UNIQUE',
+      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityDocTypes) ASSERT (node.key) IS UNIQUE',
+      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityTypes) ASSERT (node.realm) IS UNIQUE',
     ];
 
-    arr.forEach(async (element) => {
-      await x
-        .run(element)
+    arr.forEach((element) => {
+      x.run(element)
         .then((res) => {
           console.log(res);
         })
@@ -1174,31 +1178,6 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
 
     await this.kafkaService.producerSendMessage('createFacility', JSON.stringify(organizationNode.properties));
 
-    const x = await this.neo4jService.beginTransaction();
-    const arr = [
-      'CREATE CONSTRAINT IF NOT EXISTS  ON (node:Infra) ASSERT  (node.realm) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS  ON (node:Root) ASSERT  (node.realm) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityStructure) ASSERT (node.realm) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityStructure) ASSERT (node.key) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityDocTypes) ASSERT (node.realm) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityDocTypes) ASSERT (node.key) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityTypes) ASSERT (node.realm) IS UNIQUE',
-    ];
-
-    arr.forEach(async (element) => {
-      await x
-        .run(element)
-        .then((res) => {
-          console.log(res);
-        })
-        .catch((err) => {
-          console.log(err);
-          x.rollback();
-        });
-    });
-    x.commit();
-    x.close();
-
     return organizationNode;
   }
   async update(_id: string, updateFacilityDto: UpdateOrganizationDto) {
@@ -1357,7 +1336,7 @@ RETURN input, output, error`;
     ] = data;
 
     //let firstThree = [ApprovalBy, AreaUnit, AssetType];
-    let classifications = [category_facility,category_space,category_element,category_product,category_role];
+    let classifications = [category_facility, category_space, category_element, category_product, category_role];
 
     /////////// classifications ////////////////////////////////
     for (let i = 0; i < classifications.length; i++) {
@@ -1376,77 +1355,57 @@ RETURN input, output, error`;
 
       deneme.sort(collator.compare[0]);
 
-         ////// add digits to codes /////
-   for (let index = 0; index < deneme.length; index++) {
-    deneme[index][0] = deneme[index][0].replaceAll("-","");
-  }
-  let long =await Math.max(...(deneme.map(val => val[0].length)));
+      ////// add digits to codes /////
+      for (let index = 0; index < deneme.length; index++) {
+        deneme[index][0] = deneme[index][0].replaceAll('-', '');
+      }
+      let long = await Math.max(...deneme.map((val) => val[0].length));
 
-  for (let index = 0; index < deneme.length; index++) {
-
-    if(deneme[index][0].length == 4){
-      deneme[index][0] = deneme[index][0].match(/.{2}/g)
-      for (let i=0; i < (long-4)/2; i++){
-        deneme[index][0].push(["00"])
+      for (let index = 0; index < deneme.length; index++) {
+        if (deneme[index][0].length == 4) {
+          deneme[index][0] = deneme[index][0].match(/.{2}/g);
+          for (let i = 0; i < (long - 4) / 2; i++) {
+            deneme[index][0].push(['00']);
+          }
+          deneme[index][0] = deneme[index][0].join('-');
+        } else if (deneme[index][0].length == 6) {
+          deneme[index][0] = deneme[index][0].match(/.{2}/g);
+          for (let i = 0; i < (long - 6) / 2; i++) {
+            deneme[index][0].push(['00']);
+          }
+          deneme[index][0] = deneme[index][0].join('-');
+        } else if (deneme[index][0].length == 8) {
+          deneme[index][0] = deneme[index][0].match(/.{2}/g);
+          for (let i = 0; i < (long - 8) / 2; i++) {
+            deneme[index][0].push(['00']);
+          }
+          deneme[index][0] = deneme[index][0].join('-');
+        } else if (deneme[index][0].length == 10) {
+          deneme[index][0] = deneme[index][0].match(/.{2}/g);
+          for (let i = 0; i < (long - 10) / 2; i++) {
+            deneme[index][0].push(['00']);
+          }
+          deneme[index][0] = deneme[index][0].join('-');
+        } else if (deneme[index][0].length == 12) {
+          deneme[index][0] = deneme[index][0].match(/.{2}/g);
+          for (let i = 0; i < (long - 12) / 2; i++) {
+            deneme[index][0].push(['00']);
+          }
+          deneme[index][0] = deneme[index][0].join('-');
+        } else if (deneme[index][0].length == 14) {
+          deneme[index][0] = deneme[index][0].match(/.{2}/g);
+          for (let i = 0; i < (long - 14) / 2; i++) {
+            deneme[index][0].push(['00']);
+          }
+          deneme[index][0] = deneme[index][0].join('-');
+        } else if (deneme[index][0].length == 16) {
+          deneme[index][0] = deneme[index][0].match(/.{2}/g);
+          for (let i = 0; i < (long - 16) / 2; i++) {
+            deneme[index][0].push(['00']);
+          }
+          deneme[index][0] = deneme[index][0].join('-');
+        }
       }
-      deneme[index][0] = deneme[index][0].join("-");
-      
-    }
-    else if(deneme[index][0].length == 6){
-  
-      deneme[index][0] = deneme[index][0].match(/.{2}/g)
-      for (let i=0; i < (long-6)/2; i++){
-        deneme[index][0].push(["00"])
-      }
-      deneme[index][0] = deneme[index][0].join("-");
-    }
-    
-    else if(deneme[index][0].length == 8){
-  
-      deneme[index][0] = deneme[index][0].match(/.{2}/g)
-      for (let i=0; i < (long-8)/2; i++){
-        deneme[index][0].push(["00"])
-      }
-      deneme[index][0] = deneme[index][0].join("-");
-    }
-    
-    else if(deneme[index][0].length == 10){
-  
-      deneme[index][0] = deneme[index][0].match(/.{2}/g)
-      for (let i=0; i < (long-10)/2; i++){
-        deneme[index][0].push(["00"])
-      }
-      deneme[index][0] = deneme[index][0].join("-");
-    }
-  
-  
-    else if(deneme[index][0].length == 12){
-  
-      deneme[index][0] = deneme[index][0].match(/.{2}/g)
-      for (let i=0; i < (long-12)/2; i++){
-        deneme[index][0].push(["00"])
-      }
-      deneme[index][0] = deneme[index][0].join("-");
-    }
-  
-    else if(deneme[index][0].length == 14){
-  
-      deneme[index][0] = deneme[index][0].match(/.{2}/g)
-      for (let i=0; i < (long-14)/2; i++){
-        deneme[index][0].push(["00"])
-      }
-      deneme[index][0] = deneme[index][0].join("-");
-    }
-  
-    else if(deneme[index][0].length == 16){
-  
-      deneme[index][0] = deneme[index][0].match(/.{2}/g)
-      for (let i=0; i < (long-16)/2; i++){
-        deneme[index][0].push(["00"])
-      }
-      deneme[index][0] = deneme[index][0].join("-");
-    }
-     }
       let classificationName2 = `OmniClass${deneme[0][0].slice(0, 2)}`;
 
       let newClassification = [];
@@ -1519,42 +1478,32 @@ RETURN input, output, error`;
             } else {
               parentcode = parentcode + '-' + '00-00-00-00-00';
             }
-          }
-
-          else if (z == 5) {
-            for (let i=0; i<codearray.length-6; i++ ) {
-              if (parentcode == "") {
+          } else if (z == 5) {
+            for (let i = 0; i < codearray.length - 6; i++) {
+              if (parentcode == '') {
                 parentcode = codearray[i];
-              } 
-              else {
-                parentcode =  await parentcode + "-" + codearray[i];
+              } else {
+                parentcode = (await parentcode) + '-' + codearray[i];
               }
             }
-            if (parentcode == "") {
-              parentcode = "00-00-00-00-00-00";
-            } 
-            else {
-              parentcode = await parentcode + "-" + "00-00-00-00-00-00"; 
+            if (parentcode == '') {
+              parentcode = '00-00-00-00-00-00';
+            } else {
+              parentcode = (await parentcode) + '-' + '00-00-00-00-00-00';
             }
-              
-          }
-          
-          else if (z == 6) {
-            for (let i=0; i<codearray.length-7; i++ ) {
-              if (parentcode == "") {
+          } else if (z == 6) {
+            for (let i = 0; i < codearray.length - 7; i++) {
+              if (parentcode == '') {
                 parentcode = codearray[i];
-              } 
-              else {
-                parentcode =  await parentcode + "-" + codearray[i];
+              } else {
+                parentcode = (await parentcode) + '-' + codearray[i];
               }
             }
-            if (parentcode == "") {
-              parentcode = "00-00-00-00-00-00-00";
-            } 
-            else {
-              parentcode = await parentcode + "-" + "00-00-00-00-00-00-00"; 
+            if (parentcode == '') {
+              parentcode = '00-00-00-00-00-00-00';
+            } else {
+              parentcode = (await parentcode) + '-' + '00-00-00-00-00-00-00';
             }
-              
           }
         }
 
@@ -1569,7 +1518,7 @@ RETURN input, output, error`;
 
         let dto = {
           code: codestr,
-          parentCode: parentcode.length<codestr.length ? parentcode+"-00":parentcode,
+          parentCode: parentcode.length < codestr.length ? parentcode + '-00' : parentcode,
           name: deneme[q][1],
           key: generateUuid(),
           isDeleted: false,
@@ -1580,7 +1529,6 @@ RETURN input, output, error`;
 
         newClassification.push(dto);
       }
-
 
       const realmName = 'Signum';
       ///////// the process start here
