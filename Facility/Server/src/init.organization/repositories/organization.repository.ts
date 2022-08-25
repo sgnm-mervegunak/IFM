@@ -53,7 +53,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         });
     });
     */
-    return 'asdas';
+    return 'constraints succesfully created';
   }
 
   async findOneByRealmAndLabel(label: string, realm: string) {
