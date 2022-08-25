@@ -116,13 +116,25 @@ export class ClassificationRepository implements classificationInterface<Classif
  
   //REVISED FOR NEW NEO4J
   async changeNodeBranch(_id: string, target_parent_id: string) {
-    try {
+    //try {
       
       const new_parent = await this.neo4jService.findByIdAndFilters(
         +target_parent_id,{"isDeleted":false},[]);
+      const node = await this.neo4jService.findByIdAndFilters(
+          +_id,{"isDeleted":false},[]);  
+      
+      const parent_of_new_parent = await this.neo4jService.getParentByIdAndFilters(
+            new_parent['identity'] && new_parent['identity'].low,
+            {"isDeleted":false},
+            {}
+          )    
+      if (parent_of_new_parent && parent_of_new_parent["_fields"][0]["identity"].low == _id) {
+        throw new  WrongClassificationParentExceptions(_id,target_parent_id);
+      }
+
+
       if (new_parent['labels'] && new_parent['labels'][0] == 'Classification' ) {
-        const node = await this.neo4jService.findByIdAndFilters(
-          +_id,{"isDeleted":false},[]);
+        
           if (node['labels'] && node['labels'].length == 0) { 
         throw new  WrongClassificationParentExceptions(node["identity"].low,new_parent["identity"].low);
           }
@@ -136,11 +148,11 @@ export class ClassificationRepository implements classificationInterface<Classif
       await this.neo4jService.addRelationByIdAndRelationNameWithFilters(+target_parent_id,{"isDeleted":false, "isActive":true},
          +_id, {"isDeleted":false,}, 'PARENT_OF', RelationDirection.RIGHT);
     
-    } catch (error) {
+    // } catch (error) {
       
-      throw new  WrongClassificationParentExceptions("","");
+    //   throw new  WrongClassificationParentExceptions("","");
 
-    }
+    // }
   }
   
   //REVISED FOR NEW NEO4J
