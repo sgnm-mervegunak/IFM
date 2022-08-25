@@ -80,17 +80,14 @@ const BuildingForm = ({
   setIsUpdate,
   setSelectedFacilityType,
 }: Params) => {
-  
-  const [classificationCategory, setClassificationCategory] = useState<Node[]>([]
-  );
+
+  const [classificationCategory, setClassificationCategory] = useState<Node[]>([]);
   const [classificationStatus, setclassificationStatus] = useState<Node[]>([]);
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
-
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
   const [uploadFiles, setUploadFiles] = useState<any>({});
   const { toast } = useAppSelector((state) => state.toast);
-
 
   const [data, setData] = useState<any>();
 
@@ -414,6 +411,8 @@ const BuildingForm = ({
               value={field.value}
               options={classificationCategory}
               onChange={(e) => {
+                console.log(e);
+
                 field.onChange(e.value)
               }}
               filter
@@ -631,8 +630,7 @@ const BuildingForm = ({
               label={"images"}
               value={field.value}
               onChange={(e: any) => {
-                console.log(field.value)
-                field.onChange(e.value)
+                field.onChange(e)
               }}
               deleteFiles={deleteFiles}
               setDeleteFiles={setDeleteFiles}
@@ -656,8 +654,7 @@ const BuildingForm = ({
               label={"documents"}
               value={field.value}
               onChange={(e: any) => {
-                console.log(field.value)
-                field.onChange(e.value)
+                field.onChange(e)
               }}
               deleteFiles={deleteFiles}
               setDeleteFiles={setDeleteFiles}
