@@ -26,7 +26,7 @@ export class OrganizationController {
   })
   @Get('/:realm')
   @NoCache()
-  @Roles({ roles: [UserRoles.ADMIN] })
+  @Unprotected()
   getFacilityByRealm(@Param('realm') realm: string): Promise<Facility> {
     return this.organizationService.findOneByRealm(realm);
   }

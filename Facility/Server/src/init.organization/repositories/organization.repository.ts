@@ -16,12 +16,28 @@ const exceljs = require('exceljs');
 export class OrganizationRepository implements OrganizationInterface<Facility> {
   constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) {}
 
-  async findOneByRealm(realm: string): Promise<Facility> {
-    const facility = await this.neo4jService.read(`match (n:Root ) where n.realm=$realm return n`, { realm });
-    if (!facility['records'][0]) {
-      throw FacilityNotFountException(realm);
-    }
-    return facility['records'][0]['_fields'][0];
+  async findOneByRealm(realm: string): Promise<any> {
+    const x = await this.neo4jService.beginTransaction();
+    const arr = [
+      'CREATE CONSTRAINT IF NOT EXISTS  ON (node:Infra) ASSERT  (node.realm) IS UNIQUE',
+      'CREATE CONSTRAINT IF NOT EXISTS  ON (node:Root) ASSERT  (node.realm) IS UNIQUE',
+    ];
+
+    arr.forEach(async (element) => {
+      await x
+        .run(element)
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.log(err);
+          x.rollback();
+        });
+    });
+    x.commit();
+    x.close();
+
+    return 'asdas';
   }
 
   async findOneByRealmAndLabel(label: string, realm: string) {
@@ -1157,6 +1173,31 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     });
 
     await this.kafkaService.producerSendMessage('createFacility', JSON.stringify(organizationNode.properties));
+
+    const x = await this.neo4jService.beginTransaction();
+    const arr = [
+      'CREATE CONSTRAINT IF NOT EXISTS  ON (node:Infra) ASSERT  (node.realm) IS UNIQUE',
+      'CREATE CONSTRAINT IF NOT EXISTS  ON (node:Root) ASSERT  (node.realm) IS UNIQUE',
+      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityStructure) ASSERT (node.realm) IS UNIQUE',
+      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityStructure) ASSERT (node.key) IS UNIQUE',
+      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityDocTypes) ASSERT (node.realm) IS UNIQUE',
+      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityDocTypes) ASSERT (node.key) IS UNIQUE',
+      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityTypes) ASSERT (node.realm) IS UNIQUE',
+    ];
+
+    arr.forEach(async (element) => {
+      await x
+        .run(element)
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.log(err);
+          x.rollback();
+        });
+    });
+    x.commit();
+    x.close();
 
     return organizationNode;
   }
