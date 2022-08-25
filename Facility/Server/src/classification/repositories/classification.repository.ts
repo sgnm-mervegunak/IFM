@@ -501,4 +501,15 @@ let labels = [...new Set(lbls)];
      
      }
   }
+
+
+  async getNodeByClassificationLanguageRealmAndCode( classificationName:string, language:string,realm:string,code:string){
+    
+    const cypher=`match (n:${classificationName}_${language} {realm:"${realm}"})-[:PARENT_OF*]->(m {code:"${code}"}) return m`
+
+    let data = await this.neo4jService.read(cypher);
+  
+    return data.records[0]["_fields"][0].properties;
+  }
+
 }

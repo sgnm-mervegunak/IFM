@@ -95,4 +95,10 @@ export class ClassificationService {
   async addAClassificationWithCodeFromExcel(file: Express.Multer.File, realm: string, language: string){
     return await this.classificationRepository.addAClassificationWithCodeFromExcel(file, realm, language);
   }
+
+  @Span('get a classification with these fields')
+  @OtelMethodCounter()
+  async getNodeByClassificationLanguageRealmAndCode( classificationName:string, language:string,realm:string,code:string){
+    return await this.classificationRepository.getNodeByClassificationLanguageRealmAndCode( classificationName, language,realm,code);
+  }
 }

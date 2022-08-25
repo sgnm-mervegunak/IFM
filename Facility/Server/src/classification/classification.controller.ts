@@ -133,4 +133,12 @@ export class ClassificationController {
  async addAClassificationWithCodeFromExcel(@UploadedFile() file: Express.Multer.File, @Param('realm') realm: string, @Param('language') language: string){
   return this.classificationService.addAClassificationWithCodeFromExcel(file, realm, language);
  }
+
+ @Unprotected()
+ @NoCache()
+ @Get('getAClassificationNode/:realm/:classificationName/:language/:code')
+ async getNodeByClassificationLanguageRealmAndCode(@Param('classificationName') classificationName:string, @Param('language') language:string, @Param('realm') realm:string, @Param('code') code:string){
+  return this.classificationService.getNodeByClassificationLanguageRealmAndCode(classificationName, language,realm, code);
+
+ }
 }
