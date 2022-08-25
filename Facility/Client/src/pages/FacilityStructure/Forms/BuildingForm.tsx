@@ -90,8 +90,10 @@ const BuildingForm = ({
   const [uploadFiles, setUploadFiles] = useState<any>({});
   const { toast } = useAppSelector((state) => state.toast);
   const { t } = useTranslation(["common"]);
+  const [code,setCode] = useState("");
 
   const [data, setData] = useState<any>();
+  const language = useAppSelector((state) => state.language.language);
 
   const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
     defaultValues: {
@@ -123,8 +125,8 @@ const BuildingForm = ({
   const getClassificationCategory = async () => {
     await ClassificationsService.findAllActiveByLabel({
       realm: realm,
-      label: "OmniClass11",
-      language: "en",
+      label: "Classification_Test3",
+      language,
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodes(temp);
@@ -174,9 +176,21 @@ const BuildingForm = ({
 
   const getNodeInfoForUpdate = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
-      .then((res) => {
-        console.log(res.data);
-        setData(res.data.properties);
+      .then(async (res) => {
+        ClassificationsService.findClassificationByCodeAndLanguage(realm, "OmniClass11", language, res.data.properties.category).then(clsf=>{
+          res.data.properties.category = clsf.data.key
+          setData(res.data.properties);
+        })
+        .catch((err)=>{
+          setData(res.data.properties);
+          toast.current.show({
+            severity: "error",
+            summary: t("Error"),
+            detail: err.response ? err.response.data.message : err.message,
+            life: 4000,
+          });
+        })
+        
       })
       .catch((err) => {
         toast.current.show({
@@ -210,7 +224,7 @@ const BuildingForm = ({
 
       newNode = {
         name: data?.name,
-        category: data?.category,
+        category: code,
         address: data?.address,
         buildingStructure: data?.buildingStructure,
         images: data?.images,
@@ -413,9 +427,14 @@ const BuildingForm = ({
               value={field.value}
               options={classificationCategory}
               onChange={(e) => {
-                console.log(e);
-
-                field.onChange(e.value)
+                // console.log(e);
+                // field.onChange(e.value)
+                ClassificationsService.nodeInfo(e.value as string)
+                  .then((res) => {
+                    field.onChange(e.value)
+                    setCode(res.data.properties.code || "");
+                  })
+                 
               }}
               filter
               placeholder="Select Type"
