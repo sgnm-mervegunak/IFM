@@ -11,6 +11,7 @@ import { TreeSelect } from "primereact/treeselect";
 import { Dropdown } from "primereact/dropdown";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
+import { useTranslation } from "react-i18next";
 
 import FacilityStructureService from "../../services/facilitystructure";
 import ClassificationsService from "../../services/classifications";
@@ -110,6 +111,7 @@ const SetFacilityStructure = () => {
   const [displayKey, setDisplayKey] = useState("");
   const [docTypes, setDocTypes] = React.useState([]);
   const { toast } = useAppSelector((state) => state.toast);
+  const { t } = useTranslation(["common"]);
 
   useEffect(() => {
     FacilityStructureService.getFacilityTypes("FacilityTypes", realm)
@@ -191,7 +193,7 @@ const SetFacilityStructure = () => {
 
   const menu = [
     {
-      label: "Add Item",
+      label: t("Add Item"),
       icon: "pi pi-plus",
       command: () => {
         setSelectedFacilityType(undefined);
@@ -199,7 +201,7 @@ const SetFacilityStructure = () => {
       },
     },
     {
-      label: "Edit Item",
+      label: t("Edit Item"),
       icon: "pi pi-pencil",
       command: () => {
         let key = selectedNodeKey;
@@ -212,14 +214,14 @@ const SetFacilityStructure = () => {
       },
     },
     {
-      label: "Delete",
+      label: t("Delete"),
       icon: "pi pi-trash",
       command: () => {
         setDelDia(true);
       },
     },
     {
-      label: "Display",
+      label: t("View Data"),
       icon: "pi pi-eye",
       command: () => {
         setDisplay(true);
@@ -230,7 +232,7 @@ const SetFacilityStructure = () => {
 
   const menuBuilding = [
     {
-      label: "Add Item",
+      label: t("Add Item"),
       icon: "pi pi-plus",
       command: () => {
         setSelectedFacilityType(undefined);
@@ -238,7 +240,7 @@ const SetFacilityStructure = () => {
       },
     },
     {
-      label: "Edit Item",
+      label: t("Edit Item"),
       icon: "pi pi-pencil",
       command: () => {
         let key = selectedNodeKey;
@@ -251,14 +253,14 @@ const SetFacilityStructure = () => {
       },
     },
     {
-      label: "Delete",
+      label: t("Delete"),
       icon: "pi pi-trash",
       command: () => {
         setDelDia(true);
       },
     },
     {
-      label: "Display",
+      label: t("View Data"),
       icon: "pi pi-eye",
       command: () => {
         setDisplay(true);
@@ -266,14 +268,14 @@ const SetFacilityStructure = () => {
       },
     },
     {
-      label: "Import Block",
+      label: t("Import Block"),
       icon: "pi pi-fw pi-upload",
       command: () => {
         importBlock()
       },
     },
     {
-      label: "Import Floor",
+      label: t("Import Floor"),
       icon: "pi pi-fw pi-upload",
       command: () => {
         importFloor()
@@ -283,7 +285,7 @@ const SetFacilityStructure = () => {
 
   const menuBlock = [
     {
-      label: "Add Item",
+      label: t("Add Item"),
       icon: "pi pi-plus",
       command: () => {
         setSelectedFacilityType(undefined);
@@ -291,7 +293,7 @@ const SetFacilityStructure = () => {
       },
     },
     {
-      label: "Edit Item",
+      label: t("Edit Item"),
       icon: "pi pi-pencil",
       command: () => {
         let key = selectedNodeKey;
@@ -304,14 +306,14 @@ const SetFacilityStructure = () => {
       },
     },
     {
-      label: "Delete",
+      label: t("Delete"),
       icon: "pi pi-trash",
       command: () => {
         setDelDia(true);
       },
     },
     {
-      label: "Display",
+      label: t("View Data"),
       icon: "pi pi-eye",
       command: () => {
         setDisplay(true);
@@ -319,7 +321,7 @@ const SetFacilityStructure = () => {
       },
     },
     {
-      label: "Import Floor",
+      label: t("Import Floor"),
       icon: "pi pi-fw pi-upload",
       command: () => {
         importFloor()
@@ -336,7 +338,7 @@ const SetFacilityStructure = () => {
 
   const menuFloor = [
     {
-      label: "Add Item",
+      label: t("Add Item"),
       icon: "pi pi-plus",
       command: () => {
         setSelectedFacilityType(undefined);
@@ -344,7 +346,7 @@ const SetFacilityStructure = () => {
       },
     },
     {
-      label: "Edit Item",
+      label: t("Edit Item"),
       icon: "pi pi-pencil",
       command: () => {
         let key = selectedNodeKey;
@@ -357,14 +359,14 @@ const SetFacilityStructure = () => {
       },
     },
     {
-      label: "Delete",
+      label: t("Delete"),
       icon: "pi pi-trash",
       command: () => {
         setDelDia(true);
       },
     },
     {
-      label: "Display",
+      label: t("View Data"),
       icon: "pi pi-eye",
       command: () => {
         setDisplay(true);
@@ -372,7 +374,7 @@ const SetFacilityStructure = () => {
       },
     },
     {
-      label: "Import Space",
+      label: t("Import Space"),
       icon: "pi pi-fw pi-upload",
       command: () => {
         importSpace()
@@ -402,8 +404,8 @@ const SetFacilityStructure = () => {
         if (err.response.status === 404) {
           toast.current.show({
             severity: "error",
-            summary: "Error",
-            detail: "Facility Structure not found",
+            summary: t("Error"),
+            detail: t("Facility Structure not found"),
             life: 4000,
           });
           setTimeout(() => {
@@ -431,12 +433,14 @@ const SetFacilityStructure = () => {
   const deleteItem = (key: string) => {
     FacilityStructureService.nodeInfo(key)
       .then((res) => {
+        console.log(res.data);
+        
         FacilityStructureService.remove(res.data.id)
           .then(() => {
             toast.current.show({
               severity: "success",
-              summary: "Success",
-              detail: "Structure Deleted",
+              summary: t("Successful"),
+              detail: t(`${res.data.properties.nodeType} Deleted`),
               life: 4000,
             });
             getFacilityStructure();
@@ -444,7 +448,7 @@ const SetFacilityStructure = () => {
           .catch((err) => {
             toast.current.show({
               severity: "error",
-              summary: "Error",
+              summary: t("Error"),
               detail: err.response ? err.response.data.message : err.message,
               life: 4000,
             });
@@ -453,7 +457,7 @@ const SetFacilityStructure = () => {
       .catch((err) => {
         toast.current.show({
           severity: "error",
-          summary: "Error",
+          summary: t("Error"),
           detail: err.response ? err.response.data.message : err.message,
           life: 4000,
         });
@@ -469,7 +473,7 @@ const SetFacilityStructure = () => {
       .catch((err) => {
         toast.current.show({
           severity: "error",
-          summary: "Error",
+          summary: t("Error"),
           detail: err.response ? err.response.data.message : err.message,
           life: 4000,
         });
@@ -478,8 +482,8 @@ const SetFacilityStructure = () => {
 
   const dragConfirm = (dragId: string, dropId: string) => {
     confirmDialog({
-      message: "Are you sure you want to move?",
-      header: "Confirmation",
+      message: t("Are you sure you want to move?"),
+      header: t("Move Confirmation"),
       icon: "pi pi-exclamation-triangle",
       accept: () => {
         setLoading(true);
@@ -495,8 +499,8 @@ const SetFacilityStructure = () => {
   const showSuccess = (detail: string) => {
     toast.current.show({
       severity: "success",
-      summary: "Success Message",
-      detail: detail,
+      summary: t("Successful"),
+      detail: t(detail),
       life: 4000,
     });
   };
@@ -505,7 +509,7 @@ const SetFacilityStructure = () => {
     return (
       <div>
         <Button
-          label="Cancel"
+          label={t("Cancel")}
           icon="pi pi-times"
           onClick={() => {
             setAddDia(false);
@@ -515,7 +519,7 @@ const SetFacilityStructure = () => {
           className="p-button-text"
         />
         <Button
-          label="Add"
+          label={t("Add")}
           icon="pi pi-check"
           onClick={() => setSubmitted(true)}
           autoFocus
@@ -528,7 +532,7 @@ const SetFacilityStructure = () => {
     return (
       <div>
         <Button
-          label="Cancel"
+          label={t("Cancel")}
           icon="pi pi-times"
           onClick={() => {
             setEditDia(false);
@@ -538,7 +542,7 @@ const SetFacilityStructure = () => {
           className="p-button-text"
         />
         <Button
-          label="Save"
+          label={t("Save")}
           icon="pi pi-check"
           onClick={() => setSubmitted(true)}
           autoFocus
@@ -602,13 +606,15 @@ const SetFacilityStructure = () => {
       <ConfirmDialog
         visible={delDia}
         onHide={() => setDelDia(false)}
-        message="Do you want to delete?"
-        header="Delete Confirmation"
+        message={t("Do you want to delete?")}
+        header={t("Delete Confirmation")}
         icon="pi pi-exclamation-triangle"
+        acceptLabel={t("Yes")}
+        rejectLabel={t("No")}
         accept={() => deleteItem(selectedNodeKey)}
       />
       <Dialog
-        header="Add New Item"
+        header={t("Add New Item")}
         visible={addDia}
         style={{ width: "40vw" }}
         footer={renderFooterAdd}
@@ -618,7 +624,7 @@ const SetFacilityStructure = () => {
         }}
       >
         <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Facility Type</h5>
+          <h5 style={{ marginBottom: "0.5em" }}>{t("Facility Type")}</h5>
           <Dropdown
             value={selectedFacilityType}
             options={facilityType}
@@ -729,7 +735,7 @@ const SetFacilityStructure = () => {
         </div> */}
       </Dialog>
       <Dialog
-        header="Edit Item"
+        header={t("Edit Item")}
         visible={editDia}
         style={{ width: "40vw" }}
         footer={renderFooterEdit}
@@ -739,7 +745,7 @@ const SetFacilityStructure = () => {
         }}
       >
         <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Facility Type</h5>
+          <h5 style={{ marginBottom: "0.5em" }}>{t("Facility Type")}</h5>
           <Dropdown
             value={selectedFacilityType}
             options={[selectedFacilityType]}
@@ -869,7 +875,7 @@ const SetFacilityStructure = () => {
         />
       </Dialog>
       <Dialog
-        header="Block Import"
+        header={t("Import Block")}
         visible={blockImportDia}
         style={{ width: "25vw" }}
         // footer={renderFooterForm}
@@ -880,7 +886,7 @@ const SetFacilityStructure = () => {
         <BlockFileImport selectedNodeKey={selectedNodeKey} />
       </Dialog>
       <Dialog
-        header="Floor Import"
+        header={t("Import Floor")}
         visible={floorImportDia}
         style={{ width: "25vw" }}
         // footer={renderFooterForm}
@@ -891,7 +897,7 @@ const SetFacilityStructure = () => {
         <FloorFileImport selectedNodeKey={selectedNodeKey} />
       </Dialog>
       <Dialog
-        header="Space Import"
+        header={t("Import Space")}
         visible={spaceImportDia}
         style={{ width: "25vw" }}
         // footer={renderFooterForm}
@@ -902,7 +908,7 @@ const SetFacilityStructure = () => {
         <SpaceFileImport selectedNodeKey={selectedNodeKey} />
       </Dialog>
       <Dialog
-        header="Structure Detail"
+        header={t("Structure Detail")}
         visible={display}
         position={"right"}
         modal={false}
@@ -915,7 +921,7 @@ const SetFacilityStructure = () => {
       >
         <DisplayNode displayKey={displayKey} docTypes={docTypes} />
       </Dialog>
-      <h1>Edit Facility Structure</h1>
+      <h1>{t("Facility Structure Editing")}</h1>
       <div className="field">
         <Tree
           loading={loading}
@@ -962,7 +968,7 @@ const SetFacilityStructure = () => {
                         setSelectedNodeKey(data.key);
                         setAddDia(true);
                       }}
-                      title="Add Item"
+                      title={t("Add Item")}
                     />
                     <Button
                       icon="pi pi-pencil"
@@ -975,7 +981,7 @@ const SetFacilityStructure = () => {
                         getNodeInfoAndEdit(dataKey);
                         setEditDia(true);
                       }}
-                      title="Edit Item"
+                      title={t("Edit Item")}
                     />
                     <Button
                       icon="pi pi-trash"
@@ -985,7 +991,7 @@ const SetFacilityStructure = () => {
                         setSelectedNodeKey(data.key);
                         setDelDia(true);
                       }}
-                      title="Delete Item"
+                      title={t("Delete")}
                     />
                     {/* {
                   data.hasType &&  */}
@@ -1010,7 +1016,7 @@ const SetFacilityStructure = () => {
                         setGenerateNodeName(data.label);
                         setFormDia(true);
                       }}
-                      title="Edit Form"
+                      title={t("Edit Form")}
                     />
                     <Button
                       icon="pi pi-eye"
@@ -1021,7 +1027,7 @@ const SetFacilityStructure = () => {
                         setDisplay(true);
                         setDisplayKey(data.key);
                       }}
-                      title="View Data"
+                      title={t("View Data")}
                     />
                     {/* <Button
                   icon="pi pi-book" className="p-button-rounded p-button-secondary p-button-text" aria-label="Edit Form"

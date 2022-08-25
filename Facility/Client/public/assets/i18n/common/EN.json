@@ -15,7 +15,7 @@
 	"Block": "Block",
     "Floor": "Floor",
 	"Space": "Space",
-	"Edit Classification": "Edit Classification",
+	"Classification Editing": "Classification Editing",
 	"Add New Item": "Add New Item",
 	"Edit Item": "Edit Item",
 	"Code": "Code",
@@ -24,6 +24,7 @@
 	"Is Active": "Is Active",
 	"Add Item":"Add Item",
 	"Delete":"Delete",
+	"View Data":"View Data",
 	"Import": "Import",
 	"Download Sample File With Code":"Download Sample File With Code",
 	"Download Sample File Without Code":"Download Sample File Without Code",
@@ -53,7 +54,20 @@
 	"Select File":"Select File",
 	"Upload":"Upload",
 	"Click to download sample classification file":"Click to download sample classification file",
-	"Classification File Import Without Code":"Classification File Import Without Code"
+	"Classification File Import Without Code":"Classification File Import Without Code",
+	"Import Block":"Import Block",
+	"Import Floor":"Import Floor",
+	"Import Space":"Import Space",
+	"Facility Structure not found":"Facility Structure not found",
+	"Building Deleted":"Building Deleted",
+	"Block Deleted":"Block Deleted",
+	"Floor Deleted":"Floor Deleted",
+	"Space Deleted":"Space Deleted",
+	"Structure Updated":"Structure Updated",
+	"Facility Type":"Facility Type",
+	"Structure Detail":"Structure Detail",
+	"Facility Structure Editing": "Facility Structure Editing",
+	"Edit Form":"Edit Form"
 }
 
 
