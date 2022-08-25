@@ -41,6 +41,18 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     x.commit();
     x.close();
 
+    /* without transaction
+    arr.forEach(async (element) => {
+      await this.neo4jService
+        .write(element)
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    });
+    */
     return 'asdas';
   }
 
