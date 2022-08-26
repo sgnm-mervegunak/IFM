@@ -9,10 +9,7 @@ export class BaseFacilityObject {
   isDeleted = false;
   canDelete = true;
   canDisplay = true;
-  tag:  [string]; 
-  externalSystem: string; 
-  externalObject: object;
-  externalIdentifier: string;
+ 
 }
 
 function generateUuid() {
