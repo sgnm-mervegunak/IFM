@@ -353,6 +353,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     }
     //!!!!!!!!!!!!
     //check if rootNode realm equal to keyclock token realm
+
     if (structureRootNode.properties.realm !== realm) {
       throw new HttpException({ message: 'You dont have permission' }, 403);
     }

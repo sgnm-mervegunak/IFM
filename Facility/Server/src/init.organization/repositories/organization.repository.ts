@@ -939,9 +939,77 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       },
       ['FacilityTypeProperty'],
     );
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
+  const facilityTypesNode1property29 = await this.neo4jService.createNode(
+    {
+      canDelete: true,
+      canDisplay: true,
+      isDeleted: false,
+      isActive: true,
+      label: 'tag',
+      type: 'array',
+      dataType: 'string',
+      defaultValue: [],
+      rules: [],
+      options: [],
+      placeHolder: 'Tag',
+      index: 28,
+    },
+    ['FacilityTypeProperty'],
+  );
+  const facilityTypesNode1property30 = await this.neo4jService.createNode(
+    {
+      canDelete: true,
+      canDisplay: true,
+      isDeleted: false,
+      isActive: true,
+      label: 'external System',
+      type: 'text',
+      dataType: 'string',
+      defaultValue: '',
+      rules: [],
+      options: [],
+      placeHolder: 'External System',
+      index: 29,
+    },
+    ['FacilityTypeProperty'],
+  );
     
+  const facilityTypesNode1property31 = await this.neo4jService.createNode(
+    {
+      canDelete: true,
+      canDisplay: true,
+      isDeleted: false,
+      isActive: true,
+      label: 'external Object',
+      type: 'text',
+      dataType: 'string',
+      defaultValue: '',
+      rules: [],
+      options: [],
+      placeHolder: 'External Object',
+      index: 30,
+    },
+    ['FacilityTypeProperty'],
+  );
+  const facilityTypesNode1property32 = await this.neo4jService.createNode(
+    {
+      canDelete: true,
+      canDisplay: true,
+      isDeleted: false,
+      isActive: true,
+      label: 'external Identifier',
+      type: 'text',
+      dataType: 'string',
+      defaultValue: '',
+      rules: [],
+      options: [],
+      placeHolder: 'External Identifier',
+      index: 31,
+    },
+    ['FacilityTypeProperty'],
+  );
     
 
     await this.neo4jService.addRelations(facilityTypesNode1property1.identity.low, facilityTypesNode1.identity.low);
