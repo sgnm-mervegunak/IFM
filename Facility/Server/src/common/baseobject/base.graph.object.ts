@@ -12,7 +12,7 @@ export abstract class BaseGraphObject {
   name: string;
   tag: string[] = [];
   formTypeId: string;
-  canDisplay= true;
+  canDisplay:boolean= true;
 }
 
 function generateUuid() {

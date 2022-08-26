@@ -29,4 +29,6 @@ export class Zone extends BaseGraphObject {
   nodeKeys: [];
 
   nodeType: string = Zone.name;
+
+  canDisplay=false
 }
