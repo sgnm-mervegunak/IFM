@@ -174,6 +174,23 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       ) {
         canDelete = true;
       }
+      else if (
+        node['properties']['nodeType'] == 'Building' &&
+        hasChildren['records'].length == 1 &&
+        hasChildren['records'][0]['_fields'][0]['labels'][0] == 'Zones'
+      ) {
+        canDelete = true;
+      }
+      else if (
+        node['properties']['nodeType'] == 'Building' &&
+        hasChildren['records'].length == 2 &&
+        (hasChildren['records'][0]['_fields'][0]['labels'][0] == 'JointSpaces' || hasChildren['records'][0]['_fields'][0]['labels'][0] == 'Zones') &&
+        (hasChildren['records'][1]['_fields'][0]['labels'][0] == 'JointSpaces' || hasChildren['records'][1]['_fields'][0]['labels'][0] == 'Zones')  
+      ) {
+        canDelete = true;
+      }
+
+     
       if (!canDelete) {
         throw new HttpException(has_children_error, 400);
       } else {
@@ -208,47 +225,6 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       }
     }
   }
-
-  // async deleteX(id: string) {
-  //   try {
-  //     if (!id) {
-  //       //throw new HttpException(delete__must_entered_error, 400);
-  //     }
-  //     //children count query
-  //     const node = await this.neo4jService.findById(id);
-
-  //     if (!node) {
-  //       //throw new HttpException(node_not_found, 404);
-  //     }
-  //     const childrenCount = await this.neo4jService.getChildrenCount(id);
-  //     if (childrenCount > 0) {
-  //       throw new HttpException(has_children_error, 400);
-  //     } else {
-  //       const parent = await this.neo4jService.getParentById(id);
-
-  //       if (!parent) {
-  //         //throw new HttpException(delete__get_parent_by_id_error, 404);
-  //       }
-  //       if (node['properties']['canDelete'] == undefined || node['properties']['canDelete'] == null ||  node['properties']['canDelete'] == true ) {
-  //         const deletedNode = await this.neo4jService.updateIsDeletedProp(id, true);
-  //         if (!deletedNode) {
-  //             //throw new HttpException(delete__update_is_deleted_prop_error, 400);
-  //         }
-  //         return deletedNode;
-  //       }
-  //       throw new HttpException({message:"can not display", code:5080}, 400);
-  //     }
-  //   } catch (error) {
-  //     if (error.response?.code) {
-  //       throw new HttpException(
-  //         { message: error.response?.message, code: error.response?.code },
-  //         error.status
-  //       );
-  //     } else {
-  //       throw new HttpException(error, HttpStatus.NOT_ACCEPTABLE);
-  //     }
-  //   }
-  // }
 
   async changeNodeBranch(_id: string, _target_parent_id: string) {
     try {
