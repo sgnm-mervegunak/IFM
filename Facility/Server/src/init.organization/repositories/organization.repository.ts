@@ -1386,8 +1386,10 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         const createdNodes = await this.neo4jService.createNode(replicableNode.properties, replicableNode.labels);
 
         await this.neo4jService.addRelations(createdNodes.identity.low, targetRealmNode.identity.low);
-
-        await this.copySubGrapFromOneNodetOaNOTHER(replicableNode.labels[0], realm, replicableNode.properties.name);
+        const root=await this.neo4jService.findByLabelAndFilters([replicableNode.labels[0]],{realm:'Signum'})
+        const targetRoot=await this.neo4jService.findByLabelAndFilters([replicableNode.labels[0]],{realm})
+ 
+        await this.neo4jService.copySubGrapFromOneNodeToAnotherById(root[0].get('n').identity.low, targetRoot[0].get('n').identity.low,'PARENT_OF');
 
         const replicableNodesChilds = await this.neo4jService.read(
           `match(n:${createdNodes.labels[0]} {realm:$realm} ) match (p ) MATCH(n)-[:PARENT_OF*]->(p) return p`,
@@ -1489,32 +1491,6 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     }
   }
 
-  async copySubGrapFromOneNodetOaNOTHER(
-    mainLabel: string,
-    realm: string,
-    name,
-    databaseOrTransaction?: string | Transaction,
-  ) {
-    try {
-      const cypher = `MATCH  (rootA:${mainLabel}{name:$name,realm:'Signum'}),
-      (rootB:${mainLabel}{name:$name,realm:$realm})
-MATCH path = (rootA)-[:PARENT_OF*]->(node)
-WITH rootA, rootB, collect(path) as paths
-CALL apoc.refactor.cloneSubgraphFromPaths(paths, {
-   standinNodes:[[rootA, rootB]]
-})
-YIELD input, output, error
-RETURN input, output, error`;
-
-      const result = await this.neo4jService.write(cypher, { realm, name });
-    } catch (error) {
-      if (error.response?.code) {
-        throw new HttpException({ message: error.response?.message, code: error.response?.code }, error.status);
-      } else {
-        throw new HttpException(error, 500);
-      }
-    }
-  }
 
   async importClassificationFromExcel(file: Express.Multer.File, language: string) {
     let data = [];
