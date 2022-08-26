@@ -1041,7 +1041,11 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     await this.neo4jService.addRelations(facilityTypesNode1property26.identity.low, facilityTypesNode1.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode1property27.identity.low, facilityTypesNode1.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode1property28.identity.low, facilityTypesNode1.identity.low);
-    
+    await this.neo4jService.addRelations(facilityTypesNode1property29.identity.low, facilityTypesNode1.identity.low);
+    await this.neo4jService.addRelations(facilityTypesNode1property30.identity.low, facilityTypesNode1.identity.low);
+    await this.neo4jService.addRelations(facilityTypesNode1property31.identity.low, facilityTypesNode1.identity.low);
+    await this.neo4jService.addRelations(facilityTypesNode1property32.identity.low, facilityTypesNode1.identity.low);
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //Floor
     const facilityTypesNode2property1 = await this.neo4jService.createNode(
       {
