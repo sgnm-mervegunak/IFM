@@ -125,7 +125,7 @@ const BuildingForm = ({
   const getClassificationCategory = async () => {
     await ClassificationsService.findAllActiveByLabel({
       realm: realm,
-      label: "Classification_Test3",
+      label: "ClassificationTest",
       language,
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
@@ -177,7 +177,7 @@ const BuildingForm = ({
   const getNodeInfoForUpdate = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
-        ClassificationsService.findClassificationByCodeAndLanguage(realm, "OmniClass11", language, res.data.properties.category).then(clsf=>{
+        ClassificationsService.findClassificationByCodeAndLanguage(realm, "ClassificationTest", language, res.data.properties.category).then(clsf=>{
           res.data.properties.category = clsf.data.key
           setData(res.data.properties);
         })
@@ -308,7 +308,7 @@ const BuildingForm = ({
       let updateNode: any = {};
       updateNode = {
         name: data?.name,
-        category: data?.category,
+        category: code,
         address: data?.address,
         buildingStructure: data?.buildingStructure,
         images: data?.images,
