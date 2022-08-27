@@ -17,6 +17,10 @@ import {
   dynamicLabelAdder,
   dynamicFilterPropertiesAdder,
   dynamicNotLabelAdder,
+  required_fields_must_entered,
+  filterArrayForEmptyString,
+  find_with_children_by_realm_as_tree__find_by_realm_error,
+  Transaction,
 } from 'sgnm-neo4j/dist';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 import { RelationName } from 'src/common/const/relation.name.enum';
@@ -59,51 +63,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
 
     return node;
   }
-  /////////////////////////// Static DTO ////////////////////////////////////////////////////////////////////
-  // async create(createFacilityStructureDto: CreateFacilityStructureDto) {
-  //   const facilityStructure = new FacilityStructure();
-  //   const facilityStructureObject = assignDtoPropToEntity(facilityStructure, createFacilityStructureDto);
-
-  //   let value;
-  //   if (createFacilityStructureDto['labels']) {
-  //     createFacilityStructureDto.labels.push('FacilityStructure');
-  //     value = await this.neo4jService.createNode(facilityStructureObject, createFacilityStructureDto.labels);
-  //   } else {
-  //     value = await this.neo4jService.createNode(facilityStructureObject, ['FacilityStructure']);
-  //   }
-  //   value['properties']['id'] = value['identity'].low;
-  //   const result = { id: value['identity'].low, labels: value['labels'], properties: value['properties'] };
-  //   if (createFacilityStructureDto['parentId']) {
-  //     await this.neo4jService.addRelations(result['id'], createFacilityStructureDto['parentId']);
-  //   }
-  //   return result;
-  // }
-  /////////////////////////// Static DTO ////////////////////////////////////////////////////////////////////
-  // async update(_id: string, updateFacilityStructureDto: UpdateFacilityStructureDto) {
-  //   const updateFacilityStructureDtoWithoutLabelsAndParentId = {};
-  //   Object.keys(updateFacilityStructureDto).forEach((element) => {
-  //     if (element != 'labels' && element != 'parentId') {
-  //       updateFacilityStructureDtoWithoutLabelsAndParentId[element] = updateFacilityStructureDto[element];
-  //     }
-  //   });
-  //   const dynamicObject = createDynamicCyperObject(updateFacilityStructureDtoWithoutLabelsAndParentId);
-  //   const updatedNode = await this.neo4jService.updateById(_id, dynamicObject);
-
-  //   if (!updatedNode) {
-  //     throw new FacilityStructureNotFountException(_id);
-  //   }
-  //   const result = {
-  //     id: updatedNode['identity'].low,
-  //     labels: updatedNode['labels'],
-  //     properties: updatedNode['properties'],
-  //   };
-  //   if (updateFacilityStructureDto['labels'] && updateFacilityStructureDto['labels'].length > 0) {
-  //     await this.neo4jService.removeLabel(_id, result['labels']);
-  //     await this.neo4jService.updateLabel(_id, updateFacilityStructureDto['labels']);
-  //   }
-  //   return result;
-  // }
-
+  
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
   async update(key: string, structureData: Object) {
     //is there facility-structure node
@@ -159,54 +119,73 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     return response;
   }
 
+   //REVISED FOR NEW NEO4J
   async delete(_id: string) {
     try {
-      const node = await this.neo4jService.findByIdWithoutVirtualNode(_id);
-      await this.neo4jService.getParentById(_id);
-      const hasChildren = await this.neo4jService.findChildrenById(_id);
+      const node = await this.neo4jService.findByIdAndFilters(
+        +_id,
+        {"isDeleted": false},
+        ['Virtual']
+      )
+      await this.neo4jService.getParentByIdAndFilters(
+        +_id,
+        {"isDeleted": false},
+        {"isDeleted": false}
+      )
+      const hasChildren = await this.neo4jService.findChildrensByIdOneLevel(
+        +_id,
+        {"isDeleted": false},
+        [],
+        {"isDeleted": false},
+        'PARENT_OF'
+      )
       let canDelete = false;
-      if (hasChildren['records'].length == 0) {
+      if (hasChildren.length == 0) {
         canDelete = true;
       } else if (
         node['properties']['nodeType'] == 'Building' &&
-        hasChildren['records'].length == 1 &&
-        hasChildren['records'][0]['_fields'][0]['labels'][0] == 'JointSpaces'
+        hasChildren.length == 1 &&
+        hasChildren[0]['_fields'][1]['labels'][0] == 'JointSpaces'
       ) {
         canDelete = true;
       }
       else if (
         node['properties']['nodeType'] == 'Building' &&
-        hasChildren['records'].length == 1 &&
-        hasChildren['records'][0]['_fields'][0]['labels'][0] == 'Zones'
+        hasChildren.length == 1 &&
+        hasChildren[0]['_fields'][1]['labels'][0] == 'Zones'
       ) {
         canDelete = true;
       }
       else if (
         node['properties']['nodeType'] == 'Building' &&
-        hasChildren['records'].length == 2 &&
-        (hasChildren['records'][0]['_fields'][0]['labels'][0] == 'JointSpaces' || hasChildren['records'][0]['_fields'][0]['labels'][0] == 'Zones') &&
-        (hasChildren['records'][1]['_fields'][0]['labels'][0] == 'JointSpaces' || hasChildren['records'][1]['_fields'][0]['labels'][0] == 'Zones')  
+        hasChildren.length == 2 &&
+        (hasChildren[0]['_fields'][1]['labels'][0] == 'JointSpaces' || hasChildren[0]['_fields'][1]['labels'][0] == 'Zones') &&
+        (hasChildren[1]['_fields'][1]['labels'][0] == 'JointSpaces' || hasChildren[1]['_fields'][1]['labels'][0] == 'Zones')  
       ) {
         canDelete = true;
       }
-
-     
       if (!canDelete) {
         throw new HttpException(has_children_error, 400);
       } else {
-        let deletedNode;
-        deletedNode = await this.neo4jService.deleteUnconditionally(_id);
+        let deletedNode = await this.neo4jService.updateByIdAndFilter(+_id,{"isDeleted":false, "canDelete": true},[],{"isDeleted":true})
         if (!deletedNode) {
           throw new FacilityStructureNotFountException(_id);
         }
-        const hasAssetRelation = await this.neo4jService.findNodesWithRelationNameById(_id, 'HAS');
-        if (hasAssetRelation.length > 0) {
-          await this.kafkaService.producerSendMessage(
+
+        const hasAssetRelation = await this.neo4jService.findChildrensByIdOneLevel(
+          +_id,
+          {"isDeleted": true},  // yukarıda silindi
+          [],
+          {"isDeleted": false},
+          'HAS'
+        )
+        
+          if (hasAssetRelation.length > 0) {
+            await this.kafkaService.producerSendMessage(
             'deleteStructure',
-            //JSON.stringify({ referenceKey: node.records[0]['_fields'][0].properties.key }),
             JSON.stringify({ referenceKey: node.properties.key }),
           );
-        }
+         }
 
         return deletedNode;
       }
@@ -225,7 +204,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       }
     }
   }
-
+  
   async changeNodeBranch(_id: string, _target_parent_id: string) {
     try {
       await this.neo4jService.deleteRelations(_id);

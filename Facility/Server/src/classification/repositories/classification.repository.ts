@@ -501,8 +501,8 @@ let labels = [...new Set(lbls)];
 
    let params = {"code":newClassification[0].parentCode,"name":data[0],"isDeleted":false,"canCopied":true,"canDelete":false,"realm":realm 
                 ,"isRoot":true,"canDisplay":true,"key":uuidReturn3(),"isActive":true};
-   let labels = [label+'_'+language];
-   let node = await this.neo4jService.createNode(params, labels);
+   let lbls = [label+'_'+language];
+   let node = await this.neo4jService.createNode(params, lbls);
    let parent  = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(['Root'],{"isDeleted": false, "realm": realm},['Classification'],
                                                                {"isDeleted": false, "realm": realm},'PARENT_OF', RelationDirection.RIGHT);
    await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(parent[0]["_fields"][1]["identity"].low, node["identity"].low,
@@ -513,16 +513,17 @@ let labels = [...new Set(lbls)];
         ,"name":newClassification[i].name,"isDeleted":newClassification[i].isDeleted,"isActive":newClassification[i].isActive
         ,"canDelete":newClassification[i].canDelete,"key":uuidReturn3(),"canDisplay":newClassification[i].canDisplay};
       
-      let labels = [];
-      let node = await this.neo4jService.createNode(params, labels);
-      let parent  = await this.neo4jService.findByLabelAndFilters([],{"isDeleted":false, "code":newClassification[i].parentCode},[]);
+    
+      let node = await this.neo4jService.createNode(params, lbls);
+      let parent  = await this.neo4jService.findByLabelAndFilters(lbls,{"isDeleted":false, "code":newClassification[i].parentCode},[]);
+
       await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(parent[0]["_fields"][0]["identity"].low, node["identity"].low,
                                                                            'PARENT_OF', RelationDirection.RIGHT); 
      
      }
   }
 
-
+  
   async getNodeByClassificationLanguageRealmAndCode( classificationName:string, language:string,realm:string,code:string){
     
     const cypher=`match (n:${classificationName}_${language} {realm:"${realm}"})-[:PARENT_OF*]->(m {code:"${code}"}) return m`
