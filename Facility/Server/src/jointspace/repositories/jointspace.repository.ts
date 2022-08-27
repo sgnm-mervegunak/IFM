@@ -107,6 +107,16 @@ export class JointSpaceRepository implements GeciciInterface<any> {
       `match(p:Building {key:$key,isDeleted:false})  match(n:JointSpaces {isDeleted:false}) match(p)-[:PARENT_OF]->(n)  return n`,
       { key: parentNodes[0].properties.key },
     );
+    let jointSpaceTitle=''
+
+    spaceNodes.forEach((element,index) => {
+      if(index+1===spaceNodes.length){
+        jointSpaceTitle=jointSpace+element.name
+      }else{
+        jointSpaceTitle=jointSpace+element.name+','
+      }
+    });
+    createJointSpaceDto['jointSpaceTitle']=jointSpaceTitle
 
     //create new JointSpace node and add relations to relating JointSpaces node and space nodes
     const jointSpaceEntity = new JointSpace();
