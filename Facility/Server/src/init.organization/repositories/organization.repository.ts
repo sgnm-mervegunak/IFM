@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateOrganizationDto } from '../dtos/create.organization.dto';
 import { UpdateOrganizationDto } from '../dtos/update.organization.dto';
 import { BaseInterfaceRepository } from 'src/common/interface/base.facility.interface';
@@ -7,9 +7,10 @@ import { Facility } from '../entities/facility.entity';
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
 import { FacilityNotFountException } from 'src/common/notFoundExceptions/not.found.exception';
 import { NestKafkaService } from 'ifmcommon';
-import { Neo4jService, assignDtoPropToEntity, Transaction } from 'sgnm-neo4j/dist';
+import { Neo4jService, assignDtoPropToEntity, Transaction, dynamicFilterPropertiesAdder, dynamicLabelAdder, filterArrayForEmptyString, find_with_children_by_realm_as_tree_error, find_with_children_by_realm_as_tree__find_by_realm_error, invalid_direction_error, required_fields_must_entered } from 'sgnm-neo4j/dist';
 import { generateUuid } from 'src/common/baseobject/base.virtual.node.object';
 import { OrganizationInterface } from 'src/common/interface/organization.interface';
+import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 const exceljs = require('exceljs');
 
 @Injectable()
@@ -1442,36 +1443,34 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     await this.neo4jService.addRelations(contactNode.identity.low, organizationNode.identity.low);
     await this.neo4jService.addRelations(configNode.identity.low, organizationNode.identity.low);
 
-    const infraFirstLevelChildren = await this.getFirstLvlChildren('Infra', 'Signum');
+    //const infraFirstLevelChildren = await this.getFirstLvlChildren('Infra', 'Signum');
+  
+    const infraFirstLevelChildren = await this.neo4jService.findChildrensByLabelsOneLevel(['Infra'],{realm:'Signum'},[],{}) 
 
     infraFirstLevelChildren.map(async (node) => {
       //from lvl 1 to lvl 2 which nodes are replicable
-      const replicableNodes = await this.getReplicableNodesFromFirstLvlNode(node.identity.low);
+      const replicableNodes = await this.neo4jService.findChildrensByIdOneLevel(node.get('children').identity.low,{},[],{canCopied:true,isRoot:true},'PARENT_OF')
 
       //target realm node(Classification,Types)
-      const targetRealmNode = await this.findByRealm(node.labels[0], realm);
+      const targetRealmNode = await this.neo4jService.findByLabelAndFilters(node.get('children').labels,{realm})   
 
       replicableNodes.map(async (replicableNode) => {
-        replicableNode.properties.realm = realm;
+  
+        replicableNode.get('children').properties.realm = realm;
         const key = generateUuid();
-        replicableNode.properties.key = key;
-        const createdNodes = await this.neo4jService.createNode(replicableNode.properties, replicableNode.labels);
-
-        await this.neo4jService.addRelations(createdNodes.identity.low, targetRealmNode.identity.low);
-        const root=await this.neo4jService.findByLabelAndFilters([replicableNode.labels[0]],{realm:'Signum'})
-        const targetRoot=await this.neo4jService.findByLabelAndFilters([replicableNode.labels[0]],{realm})
- 
+        replicableNode.get('children').properties.key = key;
+        const createdNodes = await this.neo4jService.createNode(replicableNode.get('children').properties, replicableNode.get('children').labels);
+        await this.neo4jService.addRelations(createdNodes.identity.low, targetRealmNode[0].get('n').identity.low);
+        const root=await this.neo4jService.findByLabelAndFilters(replicableNode.get('children').labels,{realm:'Signum'})
+        const targetRoot=await this.neo4jService.findByLabelAndFilters(replicableNode.get('children').labels,{realm})
+       
         await this.neo4jService.copySubGrapFromOneNodeToAnotherById(root[0].get('n').identity.low, targetRoot[0].get('n').identity.low,'PARENT_OF');
 
-        const replicableNodesChilds = await this.neo4jService.read(
-          `match(n:${createdNodes.labels[0]} {realm:$realm} ) match (p ) MATCH(n)-[:PARENT_OF*]->(p) return p`,
-          { realm },
-        );
-
-        if (replicableNodesChilds.records?.length) {
-          replicableNodesChilds.records.map(async (node) => {
+          const replicableNodesChilds= await this.neo4jService.findChildrenNodesByLabelsAndRelationName(createdNodes.labels,{realm},[],{},'PARENT_OF')
+        if (replicableNodesChilds.length) {
+          replicableNodesChilds.map(async (node) => {
             const key = generateUuid();
-            await this.neo4jService.updateById(node['_fields'][0].identity?.low, { key });
+            await this.neo4jService.updateByIdAndFilter(node.get('children').identity.low,{},[],{key}) 
           });
         }
       });
@@ -1489,7 +1488,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     }
     return updatedFacility;
   }
-
+  
   //FacilityInfra yı label ve realm ile bulan fonksiyon
   //match(n:FacilityInfra {realm:'Signum'} ) return n
 
