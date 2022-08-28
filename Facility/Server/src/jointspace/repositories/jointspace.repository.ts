@@ -42,45 +42,54 @@ export class JointSpaceRepository implements GeciciInterface<any> {
 
     //get all nodes by key and their parent building node
     await Promise.all(
-      nodeKeys.map(async (element) => {
-        const node = await this.neo4jService.read(
-          `match(n{isDeleted:false,key:$key,isActive:true }) where n:Space or n:JointSpace return n`,
-          {
-            key: element,
-          },
-        );
-        if (!node.records.length) {
+      nodeKeys.map(async (key) => {
+        // const node = await this.neo4jService.read(
+        //   `match(n{isDeleted:false,key:$key,isActive:true }) where n:Space or n:JointSpace return n`,
+        //   {
+        //     key: element,
+        //   },
+        // );
+         const node = await this.neo4jService.findByOrLabelsAndFilters(['Space','JointSpace'],{isDeleted:false,key,isActive:true })
+        if (!node.length) {
           throw new HttpException('Node not found', HttpStatus.NOT_FOUND);
         }
         //checkt type and has active merged relationship
-        if (node.records[0]['_fields'][0].labels[0] === 'Space') {
-          const hasMergedRelation = await this.neo4jService.read(
-            `match(n{key:$key}) match(p:JointSpace {isActive:true}) match(n)-[:MERGED]->(p) return p`,
-            { key: node.records[0]['_fields'][0].properties.key },
-          );
-          if (hasMergedRelation.records.length) {
+        if (node[0].get('n').labels[0] === 'Space') {
+          // const hasMergedRelation = await this.neo4jService.read(
+          //   `match(n{key:$key}) match(p:JointSpace {isActive:true}) match(n)-[:MERGED]->(p) return p`,
+          //   { key: node.records[0].get('n').properties.key },
+          // );
+          // const hasMergedRelation1=await  this.neo4jService.findChildrenNodesByLabelsAndRelationName([],{key: node.records[0].get('n').properties.key},['JointSpace'],{isActive:true},'MERGED')
+          // if (hasMergedRelation.records.length) {
+          //   throw new HttpException('Node is already in joint space', HttpStatus.BAD_REQUEST);
+          // } else {
+          //   spaceNodes.push(node.records[0]['_fields'][0]);
+          // }
+
+          if ( node[0].get('n').properties.isBlocked===true) {
             throw new HttpException('Node is already in joint space', HttpStatus.BAD_REQUEST);
           } else {
-            spaceNodes.push(node.records[0]['_fields'][0]);
+            spaceNodes.push(node[0].get('n'));
           }
         }
         //check type and has active merged relationship and updateJointSpace property
-        if (node.records[0]['_fields'][0].labels[0] === 'JointSpace') {
-          jointSpaceNodes.push(node.records[0]['_fields'][0]);
-          const mergedNodes = await this.neo4jService.read(
-            `match(n {key:$key}) match(p {isActive:true,isDeleted:false}) match(p)-[:MERGED]->(n) return p`,
-            { key: node.records[0]['_fields'][0].properties.key },
-          );
-
-          mergedNodes.records.map((mergedNode) => {
-            spaceNodes.push(mergedNode['_fields'][0]);
+        if (node[0].get('n').labels[0] === 'JointSpace') {
+          jointSpaceNodes.push(node[0].get('n'));
+          // const mergedNodes = await this.neo4jService.read(
+          //   `match(n {key:$key}) match(p {isActive:true,isDeleted:false}) match(p)-[:MERGED]->(n) return p`,
+          //   { key: node[0]['_fields'][0].properties.key },
+          // );
+          const mergedNodes=await  this.neo4jService.findChildrenNodesByLabelsAndRelationName(['JointSpace'],{key},['Space'],{isActive:true,isDeleted:false},'MERGED')
+          mergedNodes.map((mergedNode) => {
+            spaceNodes.push(mergedNode.get('children'));
           });
         }
-        const parentStructure = await this.neo4jService.read(
-          `match (n:Building) match(p {key:$key}) match(n)-[r:PARENT_OF*]->(p) return n`,
-          { key: element },
-        );
-        parentNodes.push(parentStructure.records[0]['_fields'][0]);
+        // const parentStructure = await this.neo4jService.read(
+        //   `match (n:Building) match(p {key:$key}) match(n)-[r:PARENT_OF*]->(p) return n`,
+        //   { key: element },
+        // );
+        const parentStructure=await this.neo4jService.findChildrenNodesByLabelsAndRelationName(['Building'],{isDeleted:false},[],{key:key},'PARENT_OF')
+        parentNodes.push(parentStructure[0].get('parent'));
         //   const isInJointSpace = await this.neo4jService.read(`match(n{isDeleted:false,key:$key }) where n:JointSpace return n`, {})
       }),
     );
@@ -94,7 +103,7 @@ export class JointSpaceRepository implements GeciciInterface<any> {
 
     await Promise.all(
       jointSpaceNodes.map(async (element) => {
-        await this.neo4jService.updateById(element.identity.low, {
+        await this.neo4jService.updateByIdAndFilter(element.identity.low, {
           isActive: false,
           isDeleted: true,
           jointEndDate: moment().format('YYYY-MM-DD HH:mm:ss'),
@@ -103,10 +112,11 @@ export class JointSpaceRepository implements GeciciInterface<any> {
     );
 
     //get building node Jointspaces
-    const jointSpacesNode = await this.neo4jService.read(
-      `match(p:Building {key:$key,isDeleted:false})  match(n:JointSpaces {isDeleted:false}) match(p)-[:PARENT_OF]->(n)  return n`,
-      { key: parentNodes[0].properties.key },
-    );
+    // const jointSpacesNode = await this.neo4jService.read(
+    //   `match(p:Building {key:$key,isDeleted:false})  match(n:JointSpaces {isDeleted:false}) match(p)-[:PARENT_OF]->(n)  return n`,
+    //   { key: parentNodes[0].properties.key },
+    // );
+    const jointSpacesNode=await this.neo4jService.findChildrensByLabelsOneLevel(['Building'],{key:parentNodes[0].properties.key,isDeleted:false},['JointSpaces'],{isActive:true,isDeleted:false},'PARENT_OF')
     let jointSpaceTitle=''
 
     spaceNodes.forEach((element,index) => {
@@ -125,10 +135,10 @@ export class JointSpaceRepository implements GeciciInterface<any> {
     const jointSpace = await this.neo4jService.createNode(jointSpaceObject, ['JointSpace']);
     await this.neo4jService.addRelations(
       jointSpace.identity.low,
-      jointSpacesNode.records[0]['_fields'][0].identity.low,
+      jointSpacesNode[0].get('children').identity.low,
     );
     spaceNodes.map(async (element) => {
-      await this.neo4jService.updateById(element.identity.low, { isBlocked: true });
+      await this.neo4jService.updateByIdAndFilter(element.identity.low, { isBlocked: true });
       await this.neo4jService.addRelationWithRelationName(
         element.identity.low,
         jointSpace.identity.low,
