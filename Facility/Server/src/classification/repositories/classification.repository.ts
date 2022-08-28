@@ -340,7 +340,7 @@ let labels = [...new Set(lbls)];
   function key(){
     return uuidv4()
     }
-    let params = {"isRoot":true,"isActive":true,"name":data[0],"isDeleted":false,"key":key(),"canDelete":true,"realm":realm,"canDisplay":true};
+    let params = {"isRoot":true,"isActive":true,"name":data[0],"isDeleted":false,"key":key(),"canDelete":true,"realm":realm,"canDisplay":true, "language":language};
     let labels = [data[0]+'_'+language];
     let node = await this.neo4jService.createNode(params, labels);
 
@@ -354,7 +354,7 @@ let labels = [...new Set(lbls)];
       return uuidv4()
       }
 
-      let params = {"name":data[i],"key":key2(),"isActive":true,"isDeleted":false,"canDelete":true,"canDisplay":true};
+      let params = {"name":data[i],"key":key2(),"isActive":true,"isDeleted":false,"canDelete":true,"canDisplay":true, "language": language};
       let labels = [];
       let node = await this.neo4jService.createNode(params, labels);
       let parent  = await this.neo4jService.findByLabelAndFilters([data[0]+'_'+language],{"isDeleted":false},[]);
@@ -500,7 +500,7 @@ let labels = [...new Set(lbls)];
    }
 
    let params = {"code":newClassification[0].parentCode,"name":data[0],"isDeleted":false,"canCopied":true,"canDelete":false,"realm":realm 
-                ,"isRoot":true,"canDisplay":true,"key":uuidReturn3(),"isActive":true};
+                ,"isRoot":true,"canDisplay":true,"key":uuidReturn3(),"isActive":true, "language":language};
    let lbls = [label+'_'+language];
    let node = await this.neo4jService.createNode(params, lbls);
    let parent  = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(['Root'],{"isDeleted": false, "realm": realm},['Classification'],
@@ -511,11 +511,11 @@ let labels = [...new Set(lbls)];
 
       let params = {"code":newClassification[i].code,"parentCode":newClassification[i].parentCode
         ,"name":newClassification[i].name,"isDeleted":newClassification[i].isDeleted,"isActive":newClassification[i].isActive
-        ,"canDelete":newClassification[i].canDelete,"key":uuidReturn3(),"canDisplay":newClassification[i].canDisplay};
+        ,"canDelete":newClassification[i].canDelete,"key":uuidReturn3(),"canDisplay":newClassification[i].canDisplay,"language": language};
       
-    
-      let node = await this.neo4jService.createNode(params, lbls);
-      let parent  = await this.neo4jService.findByLabelAndFilters(lbls,{"isDeleted":false, "code":newClassification[i].parentCode},[]);
+      let labels = [];
+      let node = await this.neo4jService.createNode(params, labels);
+      let parent  = await this.neo4jService.findByLabelAndFilters([],{"isDeleted":false, "code":newClassification[i].parentCode, "language":language},[]);
 
       await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(parent[0]["_fields"][0]["identity"].low, node["identity"].low,
                                                                            'PARENT_OF', RelationDirection.RIGHT); 
