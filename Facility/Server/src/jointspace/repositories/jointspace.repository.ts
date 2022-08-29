@@ -141,7 +141,6 @@ export class JointSpaceRepository implements GeciciInterface<any> {
       jointSpacesNode[0].get('children').identity.low,
     );
     spaceNodes.map(async (element) => {
-      console.log(element)
       await this.neo4jService.updateByIdAndFilter(element.identity.low, { isDeleted:false},[],{ isBlocked: true });
       await this.neo4jService.addRelationWithRelationName(
         element.identity.low,
@@ -188,28 +187,20 @@ export class JointSpaceRepository implements GeciciInterface<any> {
   }
 
   async delete(key: string) {
-    const node = await this.neo4jService.read(
-      `match(n{isDeleted:false,key:$key,isActive:true }) where n:JointSpace return n`,
-      {
-        key,
-      },
-    );
-    if (!node.records.length) {
+
+    const node = await this.neo4jService.findByLabelAndFilters(['JointSpace'],{isDeleted:false,key,isActive:true })
+    if (!node.length) {
       throw new HttpException('Node not found', HttpStatus.NOT_FOUND);
     }
 
-    const mergedNodes = await this.neo4jService.read(
-      `match(n {key:$key,isDeleted:false,isActive:true}) match(p {isActive:true,isDeleted:false,isBlocked:true}) match(p)-[:MERGED]->(n) return p`,
-      { key: node.records[0]['_fields'][0].properties.key },
-    );
-
-    mergedNodes.records.map(async (mergedNode) => {
-      await this.neo4jService.updateById(mergedNode['_fields'][0].identity.low, { isBlocked: false });
+    const mergedNodes=await  this.neo4jService.findChildrenNodesByLabelsAndRelationName(['JointSpace'],{key},['Space'],{isActive:true,isDeleted:false},'MERGEDJS')
+    mergedNodes.map(async (mergedNode) => {
+      await this.neo4jService.updateById(mergedNode.get('children').identity.low, { isBlocked: false });
     });
-
+  
     //check type and has active merged relationship and updateJointSpace property
 
-    const deletedNode = await this.neo4jService.updateById(node.records[0]['_fields'][0].identity.low, {
+    const deletedNode = await this.neo4jService.updateById(node[0].get('n').identity.low, {
       isActive: false,
       isDeleted: true,
       jointEndDate: moment().format('YYYY-MM-DD HH:mm:ss'),
