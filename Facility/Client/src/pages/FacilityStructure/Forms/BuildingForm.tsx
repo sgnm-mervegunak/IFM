@@ -90,7 +90,8 @@ const BuildingForm = ({
   const [uploadFiles, setUploadFiles] = useState<any>({});
   const { toast } = useAppSelector((state) => state.toast);
   const { t } = useTranslation(["common"]);
-  const [code,setCode] = useState("");
+  const [codeCategory, setCodeCategory] = useState("");
+  const [codeStatus, setCodeStatus] = useState("");
 
   const [data, setData] = useState<any>();
   const language = useAppSelector((state) => state.language.language);
@@ -125,7 +126,7 @@ const BuildingForm = ({
   const getClassificationCategory = async () => {
     await ClassificationsService.findAllActiveByLabel({
       realm: realm,
-      label: "ClassificationTest",
+      label: "Countries",
       language,
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
@@ -138,7 +139,7 @@ const BuildingForm = ({
     await ClassificationsService.findAllActiveByLabel({
       realm: realm,
       label: "FacilityStatus",
-      language: "en",
+      language,
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodes(temp);
@@ -177,20 +178,33 @@ const BuildingForm = ({
   const getNodeInfoForUpdate = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
-        ClassificationsService.findClassificationByCodeAndLanguage(realm, "ClassificationTest", language, res.data.properties.category).then(clsf=>{
+        ClassificationsService.findClassificationByCodeAndLanguage(realm, "Countries", language, res.data.properties.category).then(clsf => {
           res.data.properties.category = clsf.data.key
           setData(res.data.properties);
         })
-        .catch((err)=>{
+          .catch((err) => {
+            setData(res.data.properties);
+            toast.current.show({
+              severity: "error",
+              summary: t("Error"),
+              detail: err.response ? err.response.data.message : err.message,
+              life: 4000,
+            });
+          })
+        ClassificationsService.findClassificationByCodeAndLanguage(realm, "FacilityStatus", language, res.data.properties.category).then(clsf => {
+          res.data.properties.status = clsf.data.key
           setData(res.data.properties);
-          toast.current.show({
-            severity: "error",
-            summary: t("Error"),
-            detail: err.response ? err.response.data.message : err.message,
-            life: 4000,
-          });
         })
-        
+          .catch((err) => {
+            setData(res.data.properties);
+            toast.current.show({
+              severity: "error",
+              summary: t("Error"),
+              detail: err.response ? err.response.data.message : err.message,
+              life: 4000,
+            });
+          })
+
       })
       .catch((err) => {
         toast.current.show({
@@ -224,11 +238,11 @@ const BuildingForm = ({
 
       newNode = {
         name: data?.name,
-        category: code,
+        category: codeCategory,
         address: data?.address,
         buildingStructure: data?.buildingStructure,
         images: data?.images,
-        status: data?.status,
+        status: codeStatus,
         owner: data?.owner,
         operator: data?.operator,
         contractor: data?.contractor,
@@ -308,11 +322,11 @@ const BuildingForm = ({
       let updateNode: any = {};
       updateNode = {
         name: data?.name,
-        category: code,
+        category: codeCategory,
         address: data?.address,
         buildingStructure: data?.buildingStructure,
         images: data?.images,
-        status: data?.status,
+        status: codeStatus,
         owner: data?.owner,
         operator: data?.operator,
         contractor: data?.contractor,
@@ -427,14 +441,11 @@ const BuildingForm = ({
               value={field.value}
               options={classificationCategory}
               onChange={(e) => {
-                // console.log(e);
-                // field.onChange(e.value)
                 ClassificationsService.nodeInfo(e.value as string)
                   .then((res) => {
                     field.onChange(e.value)
-                    setCode(res.data.properties.code || "");
+                    setCodeCategory(res.data.properties.code || "");
                   })
-                 
               }}
               filter
               placeholder="Select Type"
@@ -487,7 +498,13 @@ const BuildingForm = ({
             <TreeSelect
               value={field.value}
               options={classificationStatus}
-              onChange={(e) => { field.onChange(e.value) }}
+              onChange={(e) => {
+                ClassificationsService.nodeInfo(e.value as string)
+                  .then((res) => {
+                    field.onChange(e.value)
+                    setCodeStatus(res.data.properties.code || "");
+                  })
+              }}
               filter
               placeholder="Select Type"
               style={{ width: "100%" }}
