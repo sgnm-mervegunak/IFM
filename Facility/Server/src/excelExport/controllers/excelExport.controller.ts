@@ -10,39 +10,32 @@ import { ExportExcelDto } from '../dto/excel.export.dto';
 export class ExcelExportController {
   constructor(private readonly excelExportService: ExcelExportService) {}
 
-  @Post('exportSpaces')
+  @Unprotected()
   @ApiBody({
     type: ExportExcelDto,
     description: 'export spaces',
   })
-  @Unprotected()
-  getSpacesAnExcelFile(@Body() body:ExportExcelDto ){
-  //console.log(body,"DATAAAA");
-  let data ={
-    buildingKeys: [
-      "a4eb027b-c62c-4af7-9a6f-5a755bfe22fd","bdc577c2-8505-4626-8db2-2ab9254388dc"
-    ],
-    realm: "IFM"
+  @Post('exportSpaces')
+  getSpacesAnExcelFile(@Body() exportExcelDto: ExportExcelDto) {
+    return exportExcelDto;
+    return this.excelExportService.getSpacesAnExcelFile(exportExcelDto);
   }
-  return this.excelExportService.getSpacesAnExcelFile(data);
-}  
 
+  // @Patch('exportJointSpaces')
+  // @ApiBody({
+  //   type: ExportExcelDto,
+  //   description: 'export jointspaces',
+  // })
+  // async getJointSpacesAnExcelFile(@Body() body:ExportExcelDto ){
+  //   return this.excelExportService.getJointSpacesAnExcelFile(body);
+  // }
 
-// @Patch('exportJointSpaces')
-// @ApiBody({
-//   type: ExportExcelDto,
-//   description: 'export jointspaces',
-// })
-// async getJointSpacesAnExcelFile(@Body() body:ExportExcelDto ){
-//   return this.excelExportService.getJointSpacesAnExcelFile(body);
-// }  
-
-// @Patch('exportZones')
-// @ApiBody({
-//   type: ExportExcelDto,
-//   description: 'export zones',
-// })
-// async getZonesAnExcelFile(@Body() body:ExportExcelDto ){
-//   return this.excelExportService.getZonesAnExcelFile(body);
-// }  
+  // @Patch('exportZones')
+  // @ApiBody({
+  //   type: ExportExcelDto,
+  //   description: 'export zones',
+  // })
+  // async getZonesAnExcelFile(@Body() body:ExportExcelDto ){
+  //   return this.excelExportService.getZonesAnExcelFile(body);
+  // }
 }
