@@ -15,23 +15,23 @@ export class ExcelExportController {
     type: ExportExcelDto,
     description: 'export spaces',
   })
-  
   @Post('exportSpaces')
   getSpacesAnExcelFile(@Body() exportExcelDto: ExportExcelDto) {
     return this.excelExportService.getSpacesAnExcelFile(exportExcelDto);
   }
 
-  // @Patch('exportJointSpaces')
-  // @ApiBody({
-  //   type: ExportExcelDto,
-  //   description: 'export jointspaces',
-  // })
-  // async getJointSpacesAnExcelFile(@Body() body:ExportExcelDto ){
-  //   return this.excelExportService.getJointSpacesAnExcelFile(body);
-  // }
+  @Unprotected()
+  @Post('exportJointSpaces')
+  @ApiBody({
+    type: ExportExcelDto,
+    description: 'export jointspaces',
+  })
+  async getJointSpacesAnExcelFile(@Body() body:ExportExcelDto ){
+    return this.excelExportService.getJointSpacesAnExcelFile(body);
+  }
 
   @Unprotected()
-  @Patch('exportZones')
+  @Post('exportZones')
   @ApiBody({
     type: ExportExcelDto,
     description: 'export zones',
