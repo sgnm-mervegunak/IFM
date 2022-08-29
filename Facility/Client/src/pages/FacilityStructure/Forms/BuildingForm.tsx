@@ -178,8 +178,8 @@ const BuildingForm = ({
   const getNodeInfoForUpdate = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
-        ClassificationsService.findClassificationByCodeAndLanguage(realm, "Countries", language, res.data.properties.category).then(clsf => {
-          res.data.properties.category = clsf.data.key
+        ClassificationsService.findClassificationByCodeAndLanguage(realm, "Countries", language, res.data.properties.category).then(clsf1 => {
+          res.data.properties.category = clsf1.data.key
           setData(res.data.properties);
         })
           .catch((err) => {
@@ -191,8 +191,9 @@ const BuildingForm = ({
               life: 4000,
             });
           })
-        ClassificationsService.findClassificationByCodeAndLanguage(realm, "FacilityStatus", language, res.data.properties.category).then(clsf => {
-          res.data.properties.status = clsf.data.key
+
+        ClassificationsService.findClassificationByCodeAndLanguage(realm, "FacilityStatus", language, res.data.properties.status).then(clsf2 => {
+          res.data.properties.status = clsf2.data.key
           setData(res.data.properties);
         })
           .catch((err) => {
@@ -501,6 +502,8 @@ const BuildingForm = ({
               onChange={(e) => {
                 ClassificationsService.nodeInfo(e.value as string)
                   .then((res) => {
+                    console.log(res.data);
+                    
                     field.onChange(e.value)
                     setCodeStatus(res.data.properties.code || "");
                   })
