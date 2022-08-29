@@ -1449,12 +1449,30 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       },
       ['FacilityTypeProperty'],
     );
+    const facilityTypesNode2property7 = await this.neo4jService.createNode(
+      {
+        canDelete: true,
+        canDisplay: true,
+        isDeleted: false,
+        isActive: true,
+        label: 'tag',
+        type: 'array',
+        dataType: 'string',
+        defaultValue: [],
+        rules: [],
+        options: [],
+        placeHolder: 'Tag',
+        index: 6,
+      },
+      ['FacilityTypeProperty'],
+    );
 
     await this.neo4jService.addRelations(facilityTypesNode2property1.identity.low, facilityTypesNode2.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode2property3.identity.low, facilityTypesNode2.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode2property4.identity.low, facilityTypesNode2.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode2property5.identity.low, facilityTypesNode2.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode2property6.identity.low, facilityTypesNode2.identity.low);
+    await this.neo4jService.addRelations(facilityTypesNode2property7.identity.low, facilityTypesNode2.identity.low);
 
     const facilityTypesNode3property1 = await this.neo4jService.createNode(
       {
