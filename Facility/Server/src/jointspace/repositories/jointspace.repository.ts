@@ -87,12 +87,13 @@ export class JointSpaceRepository implements GeciciInterface<any> {
             spaceNodes.push(mergedNode.get('children'));
           });
         }
-        // const parentStructure = await this.neo4jService.read(
-        //   `match (n:Building) match(p {key:$key}) match(n)-[r:PARENT_OF*]->(p) return n`,
-        //   { key: element },
-        // );
-        const parentStructure=await this.neo4jService.findChildrenNodesByLabelsAndRelationName(['Building'],{isDeleted:false},[],{key:key},'PARENT_OF')
-        parentNodes.push(parentStructure[0].get('parent'));
+         const parentStructure = await this.neo4jService.read(
+           `match (n:Building) match(p {key:$key}) match(n)-[r:PARENT_OF*]->(p) return n`,
+           { key },
+         );
+       // const parentStructure=await this.neo4jService.findChildrenNodesByLabelsAndRelationName(['Building'],{isDeleted:false},[],{key},'PARENT_OF')
+       console.log( parentStructure)
+        parentNodes.push(parentStructure.records[0].get('n'));
         //   const isInJointSpace = await this.neo4jService.read(`match(n{isDeleted:false,key:$key }) where n:JointSpace return n`, {})
       }),
       
