@@ -105,7 +105,7 @@ const SetClassificationAdmin = () => {
   ];
 
   const getClassification = () => {
-    ClassificationsService.findAll({ realm, language: "en" }).then((res) => {
+    ClassificationsService.findAll({ realm, language: language }).then((res) => {
 
       if (!res.data.root.children) {
         setData([res.data.root.properties] || []);
@@ -138,7 +138,7 @@ const SetClassificationAdmin = () => {
 
   useEffect(() => {
     getClassification();
-  }, []);
+  }, [language]);
 
   const fixNodes = (nodes: Node[]) => {
     if (!nodes || nodes.length === 0) {
