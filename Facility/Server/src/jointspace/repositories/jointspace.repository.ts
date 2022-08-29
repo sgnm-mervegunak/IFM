@@ -79,7 +79,7 @@ export class JointSpaceRepository implements GeciciInterface<any> {
           //   `match(n {key:$key}) match(p {isActive:true,isDeleted:false}) match(p)-[:MERGED]->(n) return p`,
           //   { key: node[0]['_fields'][0].properties.key },
           // );
-          const mergedNodes=await  this.neo4jService.findChildrenNodesByLabelsAndRelationName(['JointSpace'],{key},['Space'],{isActive:true,isDeleted:false},'MERGED')
+          const mergedNodes=await  this.neo4jService.findChildrenNodesByLabelsAndRelationName(['JointSpace'],{key},['Space'],{isActive:true,isDeleted:false},'MERGEDJS')
           mergedNodes.map((mergedNode) => {
             spaceNodes.push(mergedNode.get('children'));
           });
@@ -93,7 +93,6 @@ export class JointSpaceRepository implements GeciciInterface<any> {
         //   const isInJointSpace = await this.neo4jService.read(`match(n{isDeleted:false,key:$key }) where n:JointSpace return n`, {})
       }),
     );
-
     //check every node's building parent is same
     parentNodes.map((element) => {
       if (parentNodes[0].properties.Name !== element.properties.Name) {
@@ -116,14 +115,14 @@ export class JointSpaceRepository implements GeciciInterface<any> {
     //   `match(p:Building {key:$key,isDeleted:false})  match(n:JointSpaces {isDeleted:false}) match(p)-[:PARENT_OF]->(n)  return n`,
     //   { key: parentNodes[0].properties.key },
     // );
-    const jointSpacesNode=await this.neo4jService.findChildrensByLabelsOneLevel(['Building'],{key:parentNodes[0].properties.key,isDeleted:false},['JointSpaces'],{isActive:true,isDeleted:false},'PARENT_OF')
+    const jointSpacesNode=await this.neo4jService.findChildrensByLabelsOneLevel(['Building'],{key:parentNodes[0].properties.key,isDeleted:false},['JointSpaces'],{isActive:true,isDeleted:false})
     let jointSpaceTitle=''
 
     spaceNodes.forEach((element,index) => {
       if(index+1===spaceNodes.length){
-        jointSpaceTitle=jointSpace+element.name
+        jointSpaceTitle=jointSpaceTitle+element.name
       }else{
-        jointSpaceTitle=jointSpace+element.name+','
+        jointSpaceTitle=jointSpaceTitle+element.name+','
       }
     });
     createJointSpaceDto['jointSpaceTitle']=jointSpaceTitle
@@ -138,11 +137,12 @@ export class JointSpaceRepository implements GeciciInterface<any> {
       jointSpacesNode[0].get('children').identity.low,
     );
     spaceNodes.map(async (element) => {
-      await this.neo4jService.updateByIdAndFilter(element.identity.low, { isBlocked: true });
+      console.log(element)
+      await this.neo4jService.updateByIdAndFilter(element.identity.low, { isDeleted:false},[],{ isBlocked: true });
       await this.neo4jService.addRelationWithRelationName(
         element.identity.low,
         jointSpace.identity.low,
-        RelationName.MERGED,
+        RelationName.MERGEDJS,
       );
       //   const isInJointSpace = await this.neo4jService.read(`match(n{isDeleted:false,key:$key }) where n:JointSpace return n`, {})
     });
