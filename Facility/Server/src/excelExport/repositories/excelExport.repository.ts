@@ -86,10 +86,10 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
           
           for (let a = 0; a < data.value.parent_of[index].parent_of[i].parent_of?.length; a++) {
             
-            jsonData.push({building:data.value.name,
-              block:data.value.parent_of[index].name,
-              floor:data.value.parent_of[index].parent_of[i].name,
-                space:data.value.parent_of[index].parent_of[i].parent_of[a].name})
+            jsonData.push({BuildingName:data.value.name,
+              BlockName:data.value.parent_of[index].name,
+              FloorName:data.value.parent_of[index].parent_of[i].name,
+                SpaceName:data.value.parent_of[index].parent_of[i].parent_of[a].name})
             
           }
           
@@ -117,75 +117,25 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
       await this.neo4jService.write(cypher);
       
       //call the file using below code
-      // let cypher2=`CALL apoc.load.json("test121.json")`
+      let cypher2=`CALL apoc.load.json("test121.json")`;
+      let returnData =await this.neo4jService.read(cypher2)
+      data=await returnData.records[0]["_fields"][0]
       
-      // let returnData =await this.neo4jService.read(cypher2)
-      // data=await returnData.records[0]["_fields"][0]
-      
-      // if(data.value.parent_of[0]?.parent_of[0]?.parent_of==undefined){
-      //   for (let index = 0; index < data.value.parent_of?.length; index++) {
-      
-      //     for (let i = 0; i < data.value.parent_of[index].parent_of?.length; i++) {
-      //      buildingType.push({i:data.value.nodeType,
-      //        2:data.value.parent_of[index].nodeType,
-      //        3:data.value.parent_of[index].parent_of[i].nodeType})
-           
-      //     }}
-      // }else{
-      //   for (let index = 0; index < data.value.parent_of?.length; index++) {
-      //     for (let i = 0; i < data.value.parent_of[index].parent_of?.length; i++) {
-         
-      //      for (let a = 0; a < data.value.parent_of[index].parent_of[i].parent_of?.length; a++) {
-           
-      //        buildingType.push({1:data.value.nodeType,
-      //          2:data.value.parent_of[index].nodeType,
-      //          3:data.value.parent_of[index].parent_of[i].nodeType,
-      //            4:data.value.parent_of[index].parent_of[i].parent_of[a].nodeType})
-             
-      //      }
-           
-      //    }}
-      // }
-      
-      // let typeList=await Object.values(buildingType[0])
-      // console.log(typeList)
-      
-      
-      
-      //  if(!typeList.includes("Block")){
-      //   for (let index = 0; index < data.value.parent_of?.length; index++) {
-      
-      //     for (let i = 0; i < data.value.parent_of[index].parent_of?.length; i++) {
-            
-      //         jsonData.push({building:data.value.name,
-      //           block:"-",
-      //           floor:data.value.parent_of[index].name,
-      //             space:data.value.parent_of[index].parent_of[i].name})
-      //     }
-      //   }
-      
-      
-      //  } else {
-      //   for (let index = 0; index < data.value.parent_of?.length; index++) {
-      
-      //     for (let i = 0; i < data.value.parent_of[index].parent_of?.length; i++) {
-            
-      //       for (let a = 0; a < data.value.parent_of[index].parent_of[i].parent_of?.length; a++) {
-              
-      //         jsonData.push({building:data.value.name,
-      //           block:data.value.parent_of[index].name,
-      //           floor:data.value.parent_of[index].parent_of[i].name,
-      //             space:data.value.parent_of[index].parent_of[i].parent_of[a].name})
-              
-      //       }
-            
-      //     }
-      //   }
-      // }
-      
-      
-      return jsonData;
-      
+      for (let index = 0; index < data.value.parent_of?.length; index++) {
+        
+        for (let i = 0; i < data.value.parent_of[index].parent_of?.length; i++) {
+          
+          jsonData.push({BuildingName:data.value.name,
+            JointSpaces:data.value.parent_of[index].name,
+            JointSpaceName:data.value.parent_of[index].parent_of[i].name,
+            SpaceNames:data.value.parent_of[index].parent_of[i].spaceNames ? data.value.parent_of[index].parent_of[i].spaceNames: "--"})
+        }
+      }
+    
+
+    console.log(jsonData)
+    return jsonData;
+    
       
       }
     
@@ -216,10 +166,11 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
         
             for (let i = 0; i < data.value.parent_of[index].parent_of?.length; i++) {
               
-                jsonData.push({Building:data.value.name,
-                    Zones:data.value.parent_of[index].name,
-                    ZoneName:data.value.parent_of[index].parent_of[i].name,
-                    SpacesName:data.value.parent_of[index].parent_of[i].spaceNames})
+              jsonData.push({BuildingName:data.value.name,
+                Zones:data.value.parent_of[index].name,
+                ZoneName:data.value.parent_of[index].parent_of[i].name,
+                SpaceNames:data.value.parent_of[index].parent_of[i].spaceNames})
+               
             }
           }
         

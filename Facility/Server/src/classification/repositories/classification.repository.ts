@@ -171,41 +171,43 @@ export class ClassificationRepository implements classificationInterface<Classif
       const new_parent = await this.neo4jService.findByIdAndFilters(
         +target_parent_id,{"isDeleted":false},[]);
       const node = await this.neo4jService.findByIdAndFilters(
-          +_id,{"isDeleted":false},[]);  
-      
+          +_id,{"isDeleted":false},[]); 
+      const nodeChilds = await this.findChildrensByIdAndFilters(
+            +_id,
+            {"isDeleted":false},
+            [],
+            {"isDeleted":false},
+            "PARENT_OF"
+          )  ;   
       const parent_of_new_parent = await this.neo4jService.getParentByIdAndFilters(
             new_parent['identity'].low,
             {"isDeleted":false},
             {}
-          )   
-      const old_parent = await this.neo4jService.getParentByIdAndFilters(+_id, {"isDeleted":false}, {"isDeleted":false});
-      
-      const childNodes = this.findChildrensByIdAndFilters(
-        old_parent['_fields'][0]['identity'].low,
-        {"isDeleted":false},
-        [],
-        {"isDeleted":false},
-        "PARENT_OF"
-      )    
-      for (let i=0; i < childNodes['length']; i++) {
-        if (parent_of_new_parent && parent_of_new_parent["_fields"][0]["identity"].low == childNodes[i]["_fields"][1]["identity"].low) {
-          throw new HttpException(wrong_parent_error({node1:_id, node2: target_parent_id}), 400);
-        }
-      }
-          
-      // if (parent_of_new_parent && parent_of_new_parent["_fields"][0]["identity"].low == _id) {
-      //   throw new HttpException(wrong_parent_error({node1:_id, node2: target_parent_id}), 400);
-      // }
+          );
 
+
+      if (parent_of_new_parent && parent_of_new_parent["_fields"][0]["identity"].low == _id) {
+            throw new HttpException(wrong_parent_error({node1:node["properties"].name, 
+                                                         node2: new_parent["properties"].name}), 400);
+          }    
+       for (let i=0; i < nodeChilds['length']; i++) {
+         if (parent_of_new_parent && parent_of_new_parent["_fields"][0]["identity"].low == nodeChilds[i]["_fields"][1]["identity"].low) {
+           throw new HttpException(wrong_parent_error({node1:node["properties"].name, 
+                                                        node2: new_parent["properties"].name}), 400);
+         }
+       }
+      
+      
       if (new_parent['labels'] && new_parent['labels'][0] == 'Classification' ) {
         
        if (node['labels'] && node['labels'].length == 0) { 
-        throw new HttpException(wrong_parent_error({node1: node["identity"].low, node2: new_parent["identity"].low}), 400);
+        throw new HttpException(wrong_parent_error({node1:node["properties"].name, 
+                                                      node2: new_parent["properties"].name}), 400);
         
         }
       }  
 
-      // const old_parent = await this.neo4jService.getParentByIdAndFilters(+_id, {"isDeleted":false}, {"isDeleted":false});
+       const old_parent = await this.neo4jService.getParentByIdAndFilters(+_id, {"isDeleted":false}, {"isDeleted":false});
       if (old_parent != undefined) {
         
         await this.neo4jService.deleteRelationByIdAndRelationNameWithFilters(old_parent['_fields'][0]['identity'].low,{},+_id, {}, 'PARENT_OF', RelationDirection.RIGHT);
