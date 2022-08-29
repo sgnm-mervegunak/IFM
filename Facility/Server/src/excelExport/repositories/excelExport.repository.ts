@@ -102,11 +102,10 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
     
     }
     
-    async getJointSpacesByBuilding(realm:string,buildingKey:string ){
+  async getJointSpacesByBuilding(realm:string,buildingKey:string ){
       let data:any
       let jsonData=[]
-      let buildingType=[]
-      let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m) where m.isDeleted=false  and not (m:Spaces OR m:Space OR m:Zones OR m:Zone) 
+      let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m) where m.isDeleted=false  and not (m:Space OR m:Zone OR m:Zones OR m:Floor OR m:Block)
       WITH collect(path) AS paths
       CALL apoc.convert.toTree(paths)
       YIELD value
@@ -191,11 +190,10 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
       }
     
     
-      async getZonesByBuilding(realm:string,buildingKey:string ){
+  async getZonesByBuilding(realm:string,buildingKey:string ){
         let data:any
         let jsonData=[]
-        let buildingType=[]
-        let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m) where m.isDeleted=false  and not (m:Spaces OR m:Space OR m:JointSpaces OR m:JointSpace) 
+        let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m) where m.isDeleted=false  and not (m:Space OR m:JointSpaces OR m:JointSpace OR m:Floor OR m:Block)
         WITH collect(path) AS paths
         CALL apoc.convert.toTree(paths)
         YIELD value
@@ -212,84 +210,27 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
         let returnData =await this.neo4jService.read(cypher2)
         data=await returnData.records[0]["_fields"][0]
         
-        if(data.value.parent_of[0]?.parent_of[0]?.parent_of==undefined){
-          for (let index = 0; index < data.value.parent_of?.length; index++) {
-        
-            for (let i = 0; i < data.value.parent_of[index].parent_of?.length; i++) {
-             buildingType.push({i:data.value.nodeType,
-               2:data.value.parent_of[index].nodeType,
-               3:data.value.parent_of[index].parent_of[i].nodeType})
-             
-            }}
-        }else{
-          for (let index = 0; index < data.value.parent_of?.length; index++) {
-            for (let i = 0; i < data.value.parent_of[index].parent_of?.length; i++) {
-           
-             for (let a = 0; a < data.value.parent_of[index].parent_of[i].parent_of?.length; a++) {
-             
-               buildingType.push({1:data.value.nodeType,
-                 2:data.value.parent_of[index].nodeType,
-                 3:data.value.parent_of[index].parent_of[i].nodeType,
-                   4:data.value.parent_of[index].parent_of[i].parent_of[a].nodeType})
-               
-             }
-             
-           }}
-        }
-        
-        let typeList=await Object.values(buildingType[0])
-        console.log(typeList)
-        
-        
-        
-         if(!typeList.includes("Block")){
+      
+         
           for (let index = 0; index < data.value.parent_of?.length; index++) {
         
             for (let i = 0; i < data.value.parent_of[index].parent_of?.length; i++) {
               
-                jsonData.push({building:data.value.name,
-                  block:"-",
-                  floor:data.value.parent_of[index].name,
-                    space:data.value.parent_of[index].parent_of[i].name})
+                jsonData.push({Building:data.value.name,
+                    Zones:data.value.parent_of[index].name,
+                    ZoneName:data.value.parent_of[index].parent_of[i].name,
+                    SpacesName:data.value.parent_of[index].parent_of[i].spaceNames})
             }
           }
         
-        
-         } else {
-          for (let index = 0; index < data.value.parent_of?.length; index++) {
-        
-            for (let i = 0; i < data.value.parent_of[index].parent_of?.length; i++) {
-              
-              for (let a = 0; a < data.value.parent_of[index].parent_of[i].parent_of?.length; a++) {
-                
-                jsonData.push({building:data.value.name,
-                  block:data.value.parent_of[index].name,
-                  floor:data.value.parent_of[index].parent_of[i].name,
-                    space:data.value.parent_of[index].parent_of[i].parent_of[a].name})
-                
-              }
-              
-            }
-          }
-        }
-        
-        
+
         console.log(jsonData)
-        
-        // const workSheet=await xlsx.utils.json_to_sheet(jsonData)
-        // const workbook=await xlsx.utils.book_new()
-        // xlsx.utils.book_append_sheet(workbook,workSheet,"deneme")
-        // let deneme =xlsx.write(workbook,{bookType:'xlsx',type:'buffer'})
-        
-        // console.log(workbook)
-        // return deneme;
-        
         return jsonData;
         
         
-        }
+}
 
-    async getSpacesAnExcelFile( body:ExportExcelDto ){
+  async getSpacesAnExcelFile( body:ExportExcelDto ){
           let data = []
           for(let item of body.buildingKeys){
             console.log(item);
@@ -303,7 +244,7 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
         }
 
 
-        async getZonesAnExcelFile( {buildingKeys,realm}:ExportExcelDto ){
+  async getZonesAnExcelFile( {buildingKeys,realm}:ExportExcelDto ){
           let data = []
           for(let item of buildingKeys){
             console.log(item);
@@ -316,7 +257,7 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
       
         }
 
-        async getJointSpacesAnExcelFile( {buildingKeys,realm}:ExportExcelDto ){
+  async getJointSpacesAnExcelFile( {buildingKeys,realm}:ExportExcelDto ){
           let data = []
           for(let item of buildingKeys){
             console.log(item);
@@ -327,5 +268,5 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
           return data;
         
       
-        }
+ }
 }

@@ -15,9 +15,9 @@ export class ExcelExportController {
     type: ExportExcelDto,
     description: 'export spaces',
   })
+  
   @Post('exportSpaces')
   getSpacesAnExcelFile(@Body() exportExcelDto: ExportExcelDto) {
-    return exportExcelDto;
     return this.excelExportService.getSpacesAnExcelFile(exportExcelDto);
   }
 
@@ -30,12 +30,12 @@ export class ExcelExportController {
   //   return this.excelExportService.getJointSpacesAnExcelFile(body);
   // }
 
-  // @Patch('exportZones')
-  // @ApiBody({
-  //   type: ExportExcelDto,
-  //   description: 'export zones',
-  // })
-  // async getZonesAnExcelFile(@Body() body:ExportExcelDto ){
-  //   return this.excelExportService.getZonesAnExcelFile(body);
-  // }
+  @Patch('exportZones')
+  @ApiBody({
+    type: ExportExcelDto,
+    description: 'export zones',
+  })
+  async getZonesAnExcelFile(@Body() body:ExportExcelDto ){
+    return this.excelExportService.getZonesAnExcelFile(body);
+  }
 }
