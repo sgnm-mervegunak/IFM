@@ -17,7 +17,6 @@ export class ExcelExportController {
   })
   @Post('exportSpaces')
   getSpacesAnExcelFile(@Body() exportExcelDto: ExportExcelDto) {
-    return exportExcelDto;
     return this.excelExportService.getSpacesAnExcelFile(exportExcelDto);
   }
 
