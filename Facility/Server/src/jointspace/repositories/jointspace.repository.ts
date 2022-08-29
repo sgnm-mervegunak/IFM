@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { FacilityStructureNotFountException } from '../../common/notFoundExceptions/not.found.exception';
 import { NestKafkaService } from 'ifmcommon';
-import { Neo4jService, assignDtoPropToEntity, createDynamicCyperObject } from 'sgnm-neo4j/dist';
+import { Neo4jService, assignDtoPropToEntity, createDynamicCyperObject, node_not_found } from 'sgnm-neo4j/dist';
 import { RelationName } from 'src/common/const/relation.name.enum';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
 import { CreateJointSpaceDto } from '../dto/create.jointspace.dto';
@@ -34,6 +34,9 @@ export class JointSpaceRepository implements GeciciInterface<any> {
   }
 
   async create(createJointSpaceDto: CreateJointSpaceDto) {
+    try {
+      
+   
     const { nodeKeys } = createJointSpaceDto;
 
     const spaceNodes = [];
@@ -51,7 +54,7 @@ export class JointSpaceRepository implements GeciciInterface<any> {
         // );
          const node = await this.neo4jService.findByOrLabelsAndFilters(['Space','JointSpace'],{isDeleted:false,key,isActive:true })
         if (!node.length) {
-          throw new HttpException('Node not found', HttpStatus.NOT_FOUND);
+          throw new HttpException(node_not_found, HttpStatus.NOT_FOUND);
         }
         //checkt type and has active merged relationship
         if (node[0].get('n').labels[0] === 'Space') {
@@ -92,6 +95,7 @@ export class JointSpaceRepository implements GeciciInterface<any> {
         parentNodes.push(parentStructure[0].get('parent'));
         //   const isInJointSpace = await this.neo4jService.read(`match(n{isDeleted:false,key:$key }) where n:JointSpace return n`, {})
       }),
+      
     );
     //check every node's building parent is same
     parentNodes.map((element) => {
@@ -148,6 +152,15 @@ export class JointSpaceRepository implements GeciciInterface<any> {
     });
 
     return jointSpace.properties;
+  }
+    catch(error){
+      if (error.response?.code) {
+        throw new HttpException({ message: error.response?.message, code: error.response?.code }, HttpStatus.NOT_FOUND);
+      }
+      else {
+        throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
   }
   ///////////////////////// Static DTO ////////////////////////////////////////////////////////////////////
   async update(_id: string, updateFacilityStructureDto) {
