@@ -23,6 +23,7 @@ import { Neo4jModule } from 'sgnm-neo4j/dist';
 import { OrganizationModule } from './init.organization/organization.module';
 import { JointSpaceModule } from './jointspace/jointspace.module';
 import { ZoneModule } from './zone/zone.module';
+import { ExcelExportModule } from './excelExport/excelExport.module';
 
 @Module({
   imports: [
@@ -116,6 +117,8 @@ import { ZoneModule } from './zone/zone.module';
     JointSpaceModule,
 
     ZoneModule,
+
+    ExcelExportModule
   ],
   providers: [
     //to cache all get request
