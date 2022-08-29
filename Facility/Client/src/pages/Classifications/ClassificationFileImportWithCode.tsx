@@ -36,7 +36,9 @@ const ClassificationFileImportWithCode: React.FC = () => {
                 detail: t("File uploaded"),
                 life: 4000
             });
+            setTimeout(backToClassification, 1000);
         })
+
             .catch(err => {
                 toast.current.show({
                     severity: "error",
@@ -51,7 +53,7 @@ const ClassificationFileImportWithCode: React.FC = () => {
             history('/classifications');
         }
 
-        setTimeout(backToClassification, 1000);
+
 
     }
     return (
@@ -62,7 +64,7 @@ const ClassificationFileImportWithCode: React.FC = () => {
                 <h5>{t("Classification File Import With Code")}</h5>
                 <p
                     className="mt-4 cursor-pointer"
-                    style={{color: "red"}}
+                    style={{ color: "red" }}
                     onClick={() => window.location.href = "http://localhost:3000/documents/classification-sample-data-without-code.xlsx"}
                 >
                     {t("Click to download sample classification file")}

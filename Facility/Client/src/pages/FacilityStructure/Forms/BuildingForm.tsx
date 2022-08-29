@@ -126,7 +126,7 @@ const BuildingForm = ({
   const getClassificationCategory = async () => {
     await ClassificationsService.findAllActiveByLabel({
       realm: realm,
-      label: "Countries",
+      label: "OmniClass11",
       language,
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
@@ -178,9 +178,11 @@ const BuildingForm = ({
   const getNodeInfoForUpdate = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
-        ClassificationsService.findClassificationByCodeAndLanguage(realm, "Countries", language, res.data.properties.category).then(clsf1 => {
+        let temp = {};
+        await ClassificationsService.findClassificationByCodeAndLanguage(realm, "OmniClass11", language, res.data.properties.category).then(clsf1 => {
           res.data.properties.category = clsf1.data.key
-          setData(res.data.properties);
+          temp = res.data.properties;
+          // setData(res.data.properties);
         })
           .catch((err) => {
             setData(res.data.properties);
@@ -192,9 +194,12 @@ const BuildingForm = ({
             });
           })
 
-        ClassificationsService.findClassificationByCodeAndLanguage(realm, "FacilityStatus", language, res.data.properties.status).then(clsf2 => {
-          res.data.properties.status = clsf2.data.key
-          setData(res.data.properties);
+        await ClassificationsService.findClassificationByCodeAndLanguage(realm, "FacilityStatus", language, res.data.properties.status).then(async clsf2 => {
+          console.log(clsf2.data);
+
+          res.data.properties.status = await clsf2.data.key
+          temp = res.data.properties;
+          // setData(res.data.properties);
         })
           .catch((err) => {
             setData(res.data.properties);
@@ -205,7 +210,7 @@ const BuildingForm = ({
               life: 4000,
             });
           })
-
+        setData(temp);
       })
       .catch((err) => {
         toast.current.show({
@@ -503,7 +508,7 @@ const BuildingForm = ({
                 ClassificationsService.nodeInfo(e.value as string)
                   .then((res) => {
                     console.log(res.data);
-                    
+
                     field.onChange(e.value)
                     setCodeStatus(res.data.properties.code || "");
                   })
