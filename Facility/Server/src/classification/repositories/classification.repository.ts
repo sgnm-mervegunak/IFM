@@ -7,7 +7,7 @@ import { UpdateClassificationDto } from '../dto/update-classification.dto';
 import { Classification } from '../entities/classification.entity';
 import { ClassificationNotFountException, FacilityStructureNotFountException } from 'src/common/notFoundExceptions/not.found.exception';
 import { CustomTreeError } from 'src/common/const/custom.error.enum';
-import { createDynamicCyperObject, Neo4jService , dynamicLabelAdder, dynamicFilterPropertiesAdder, dynamicNotLabelAdder, dynamicUpdatePropertyAdder,  node_not_found, create_node__must_entered_error, createDynamicCyperCreateQuery, create_node__node_not_created_error, filterArrayForEmptyString, find_with_children_by_realm_as_tree__find_by_realm_error, find_with_children_by_realm_as_tree_error, library_server_error, tree_structure_not_found_by_realm_name_error, CustomNeo4jError} from 'sgnm-neo4j/dist';
+import { createDynamicCyperObject, Neo4jService , dynamicLabelAdder, dynamicFilterPropertiesAdder, dynamicNotLabelAdder, dynamicUpdatePropertyAdder,  node_not_found, create_node__must_entered_error, createDynamicCyperCreateQuery, create_node__node_not_created_error, filterArrayForEmptyString, find_with_children_by_realm_as_tree__find_by_realm_error, find_with_children_by_realm_as_tree_error, library_server_error, tree_structure_not_found_by_realm_name_error, CustomNeo4jError, required_fields_must_entered} from 'sgnm-neo4j/dist';
 import { classificationInterface } from 'src/common/interface/classification.interface';
 
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
@@ -115,7 +115,55 @@ export class ClassificationRepository implements classificationInterface<Classif
       }
     }
   }
- 
+  //////////////////////////////////////////////////////////////////////////////////
+  async findChildrensByIdAndFilters(
+    root_id: number,
+    root_filters: object = {},
+    children_labels: Array<string> = [],
+    children_filters: object = {},
+    relation_name: string,
+    databaseOrTransaction?: string
+  ) {
+    try {
+      if (!relation_name) {
+        throw new HttpException(required_fields_must_entered, 404);
+      }
+      const childrenLabelsWithoutEmptyString =
+        filterArrayForEmptyString(children_labels);
+      const rootNode = await this.neo4jService.findByIdAndFilters(root_id, root_filters);
+      if (!rootNode) {
+        throw new HttpException(
+          find_with_children_by_realm_as_tree__find_by_realm_error,
+          404
+        );
+      }
+      const rootId = rootNode.identity.low;
+      const parameters = { rootId, ...children_filters };
+      let cypher;
+      let response;
+
+      cypher =
+        `MATCH p=(n)-[:${relation_name}*]->(m` +
+        dynamicLabelAdder(childrenLabelsWithoutEmptyString) +
+        dynamicFilterPropertiesAdder(children_filters) +
+        `  WHERE  id(n) = $rootId  RETURN n as parent,m as children`;
+      children_filters["rootId"] = rootId;
+      response = await this.neo4jService.write(cypher, parameters,databaseOrTransaction);
+
+      return response["records"];
+    } catch (error) {
+      if (error.response?.code) {
+        throw new HttpException(
+          { message: error.response?.message, code: error.response?.code },
+          error.status
+        );
+      } else {
+        throw new HttpException(error, 500);
+      }
+    }
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////////
   //REVISED FOR NEW NEO4J
   async changeNodeBranch(_id: string, target_parent_id: string) {
     try {
@@ -126,13 +174,28 @@ export class ClassificationRepository implements classificationInterface<Classif
           +_id,{"isDeleted":false},[]);  
       
       const parent_of_new_parent = await this.neo4jService.getParentByIdAndFilters(
-            new_parent['identity'] && new_parent['identity'].low,
+            new_parent['identity'].low,
             {"isDeleted":false},
             {}
-          )    
-      if (parent_of_new_parent && parent_of_new_parent["_fields"][0]["identity"].low == _id) {
-        throw new HttpException(wrong_parent_error({node1:_id, node2: target_parent_id}), 400);
+          )   
+      const old_parent = await this.neo4jService.getParentByIdAndFilters(+_id, {"isDeleted":false}, {"isDeleted":false});
+      
+      const childNodes = this.findChildrensByIdAndFilters(
+        old_parent['_fields'][0]['identity'].low,
+        {"isDeleted":false},
+        [],
+        {"isDeleted":false},
+        "PARENT_OF"
+      )    
+      for (let i=0; i < childNodes['length']; i++) {
+        if (parent_of_new_parent && parent_of_new_parent["_fields"][0]["identity"].low == childNodes[i]["_fields"][1]["identity"].low) {
+          throw new HttpException(wrong_parent_error({node1:_id, node2: target_parent_id}), 400);
+        }
       }
+          
+      // if (parent_of_new_parent && parent_of_new_parent["_fields"][0]["identity"].low == _id) {
+      //   throw new HttpException(wrong_parent_error({node1:_id, node2: target_parent_id}), 400);
+      // }
 
       if (new_parent['labels'] && new_parent['labels'][0] == 'Classification' ) {
         
@@ -142,7 +205,7 @@ export class ClassificationRepository implements classificationInterface<Classif
         }
       }  
 
-      const old_parent = await this.neo4jService.getParentByIdAndFilters(+_id, {"isDeleted":false}, {"isDeleted":false});
+      // const old_parent = await this.neo4jService.getParentByIdAndFilters(+_id, {"isDeleted":false}, {"isDeleted":false});
       if (old_parent != undefined) {
         
         await this.neo4jService.deleteRelationByIdAndRelationNameWithFilters(old_parent['_fields'][0]['identity'].low,{},+_id, {}, 'PARENT_OF', RelationDirection.RIGHT);
