@@ -30,6 +30,7 @@ export class ExcelExportController {
   //   return this.excelExportService.getJointSpacesAnExcelFile(body);
   // }
 
+  @Unprotected()
   @Patch('exportZones')
   @ApiBody({
     type: ExportExcelDto,
