@@ -27,6 +27,8 @@ import DisplayNode from "./Display/DisplayNode";
 import FloorFileImport from "./ImportPages/FloorFileImport";
 import BlockFileImport from "./ImportPages/BlockFileImport";
 import SpaceFileImport from "./ImportPages/SpaceFileImport";
+import Export from "./Export/Export";
+import { Toolbar } from "primereact/toolbar";
 
 interface Node {
   cantDeleted: boolean;
@@ -89,6 +91,7 @@ const SetFacilityStructure = () => {
   const [tag, setTag] = useState<string[]>([]);
   const [isActive, setIsActive] = useState<boolean>(true);
   const [addDia, setAddDia] = useState(false);
+  const [exportDia, setExportDia] = useState(false);
   const [editDia, setEditDia] = useState(false);
   const [delDia, setDelDia] = useState<boolean>(false);
   const [formDia, setFormDia] = useState<boolean>(false);
@@ -101,10 +104,16 @@ const SetFacilityStructure = () => {
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
   const [generateNodeKey, setGenerateNodeKey] = useState("");
-  const [generateFormTypeKey, setGenerateFormTypeKey] = useState<string | undefined>("");
-  const [generateNodeName, setGenerateNodeName] = useState<string | undefined>("");
+  const [generateFormTypeKey, setGenerateFormTypeKey] = useState<
+    string | undefined
+  >("");
+  const [generateNodeName, setGenerateNodeName] = useState<string | undefined>(
+    ""
+  );
   const [facilityType, setFacilityType] = useState<string[]>([]);
-  const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
+  const [selectedFacilityType, setSelectedFacilityType] = useState<
+    string | undefined
+  >("");
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const [display, setDisplay] = useState(false);
@@ -183,13 +192,13 @@ const SetFacilityStructure = () => {
 
   const importFloor = () => {
     setFloorImportDia(true);
-  }
+  };
   const importBlock = () => {
     setBlockImportDia(true);
-  }
+  };
   const importSpace = () => {
     setSpaceImportDia(true);
-  }
+  };
 
   const menu = [
     {
@@ -271,14 +280,14 @@ const SetFacilityStructure = () => {
       label: t("Import Block"),
       icon: "pi pi-fw pi-upload",
       command: () => {
-        importBlock()
+        importBlock();
       },
     },
     {
       label: t("Import Floor"),
       icon: "pi pi-fw pi-upload",
       command: () => {
-        importFloor()
+        importFloor();
       },
     },
   ];
@@ -324,14 +333,14 @@ const SetFacilityStructure = () => {
       label: t("Import Floor"),
       icon: "pi pi-fw pi-upload",
       command: () => {
-        importFloor()
+        importFloor();
       },
     },
     {
       label: "Import Space",
       icon: "pi pi-fw pi-upload",
       command: () => {
-        importSpace()
+        importSpace();
       },
     },
   ];
@@ -377,7 +386,7 @@ const SetFacilityStructure = () => {
       label: t("Import Space"),
       icon: "pi pi-fw pi-upload",
       command: () => {
-        importSpace()
+        importSpace();
       },
     },
   ];
@@ -586,21 +595,13 @@ const SetFacilityStructure = () => {
 
       {(() => {
         if (selectedFacilityType === "Building") {
-          return (
-            <ContextMenu model={menuBuilding} ref={cm} />
-          )
+          return <ContextMenu model={menuBuilding} ref={cm} />;
         } else if (selectedFacilityType === "Block") {
-          return (
-            <ContextMenu model={menuBlock} ref={cm} />
-          )
+          return <ContextMenu model={menuBlock} ref={cm} />;
         } else if (selectedFacilityType === "Floor") {
-          return (
-            <ContextMenu model={menuFloor} ref={cm} />
-          )
+          return <ContextMenu model={menuFloor} ref={cm} />;
         } else {
-          return (
-            <ContextMenu model={menu} ref={cm} />
-          )
+          return <ContextMenu model={menu} ref={cm} />;
         }
       })()}
       <ConfirmDialog
@@ -613,6 +614,50 @@ const SetFacilityStructure = () => {
         rejectLabel={t("No")}
         accept={() => deleteItem(selectedNodeKey)}
       />
+
+      <Toolbar
+        className="mb-4"
+        right={() => (
+          <React.Fragment>
+            <Button
+              label="Export"
+              icon="pi pi-download"
+              className="p-button"
+              onClick={() => setExportDia(true)}
+            />
+          </React.Fragment>
+        )}
+      ></Toolbar>
+
+      <Dialog
+        header={t("Export")}
+        visible={exportDia}
+        style={{ width: "40vw" }}
+        footer={() => (
+          <div>
+            <Button
+              label={t("Cancel")}
+              icon="pi pi-times"
+              onClick={() => {
+                setExportDia(false);
+              }}
+              className="p-button-text"
+            />
+            <Button
+              label={t("Export")}
+              icon="pi pi-check"
+              onClick={() => setSubmitted(true)}
+              autoFocus
+            />
+          </div>
+        )}
+        onHide={() => {
+          setExportDia(false);
+        }}
+      >
+        <Export submitted={submitted} setSubmitted={setSubmitted} setExportDia={setExportDia} />
+      </Dialog>
+
       <Dialog
         header={t("Add New Item")}
         visible={addDia}
@@ -929,9 +974,8 @@ const SetFacilityStructure = () => {
           dragdropScope="-"
           contextMenuSelectionKey={selectedNodeKey ? selectedNodeKey : ""}
           onContextMenuSelectionChange={(event: any) => {
-            setSelectedNodeKey(event.value)
-          }
-          }
+            setSelectedNodeKey(event.value);
+          }}
           onContextMenu={(event: any) => {
             setSelectedFacilityType(event.node.nodeType);
             cm.current.show(event.originalEvent);
