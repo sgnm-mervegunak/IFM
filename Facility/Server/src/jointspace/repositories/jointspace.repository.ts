@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { FacilityStructureNotFountException } from '../../common/notFoundExceptions/not.found.exception';
 import { NestKafkaService } from 'ifmcommon';
-import { Neo4jService, assignDtoPropToEntity, createDynamicCyperObject } from 'sgnm-neo4j/dist';
+import { Neo4jService, assignDtoPropToEntity, createDynamicCyperObject, node_not_found } from 'sgnm-neo4j/dist';
 import { RelationName } from 'src/common/const/relation.name.enum';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
 import { CreateJointSpaceDto } from '../dto/create.jointspace.dto';
@@ -34,6 +34,9 @@ export class JointSpaceRepository implements GeciciInterface<any> {
   }
 
   async create(createJointSpaceDto: CreateJointSpaceDto) {
+    try {
+      
+   
     const { nodeKeys } = createJointSpaceDto;
 
     const spaceNodes = [];
@@ -51,7 +54,7 @@ export class JointSpaceRepository implements GeciciInterface<any> {
         // );
          const node = await this.neo4jService.findByOrLabelsAndFilters(['Space','JointSpace'],{isDeleted:false,key,isActive:true })
         if (!node.length) {
-          throw new HttpException('Node not found', HttpStatus.NOT_FOUND);
+          throw new HttpException(node_not_found, HttpStatus.NOT_FOUND);
         }
         //checkt type and has active merged relationship
         if (node[0].get('n').labels[0] === 'Space') {
@@ -79,7 +82,7 @@ export class JointSpaceRepository implements GeciciInterface<any> {
           //   `match(n {key:$key}) match(p {isActive:true,isDeleted:false}) match(p)-[:MERGED]->(n) return p`,
           //   { key: node[0]['_fields'][0].properties.key },
           // );
-          const mergedNodes=await  this.neo4jService.findChildrenNodesByLabelsAndRelationName(['JointSpace'],{key},['Space'],{isActive:true,isDeleted:false},'MERGED')
+          const mergedNodes=await  this.neo4jService.findChildrenNodesByLabelsAndRelationName(['JointSpace'],{key},['Space'],{isActive:true,isDeleted:false},'MERGEDJS')
           mergedNodes.map((mergedNode) => {
             spaceNodes.push(mergedNode.get('children'));
           });
@@ -92,8 +95,8 @@ export class JointSpaceRepository implements GeciciInterface<any> {
         parentNodes.push(parentStructure[0].get('parent'));
         //   const isInJointSpace = await this.neo4jService.read(`match(n{isDeleted:false,key:$key }) where n:JointSpace return n`, {})
       }),
+      
     );
-
     //check every node's building parent is same
     parentNodes.map((element) => {
       if (parentNodes[0].properties.Name !== element.properties.Name) {
@@ -116,14 +119,14 @@ export class JointSpaceRepository implements GeciciInterface<any> {
     //   `match(p:Building {key:$key,isDeleted:false})  match(n:JointSpaces {isDeleted:false}) match(p)-[:PARENT_OF]->(n)  return n`,
     //   { key: parentNodes[0].properties.key },
     // );
-    const jointSpacesNode=await this.neo4jService.findChildrensByLabelsOneLevel(['Building'],{key:parentNodes[0].properties.key,isDeleted:false},['JointSpaces'],{isActive:true,isDeleted:false},'PARENT_OF')
+    const jointSpacesNode=await this.neo4jService.findChildrensByLabelsOneLevel(['Building'],{key:parentNodes[0].properties.key,isDeleted:false},['JointSpaces'],{isActive:true,isDeleted:false})
     let jointSpaceTitle=''
 
     spaceNodes.forEach((element,index) => {
       if(index+1===spaceNodes.length){
-        jointSpaceTitle=jointSpace+element.name
+        jointSpaceTitle=jointSpaceTitle+element.name
       }else{
-        jointSpaceTitle=jointSpace+element.name+','
+        jointSpaceTitle=jointSpaceTitle+element.name+','
       }
     });
     createJointSpaceDto['jointSpaceTitle']=jointSpaceTitle
@@ -138,16 +141,26 @@ export class JointSpaceRepository implements GeciciInterface<any> {
       jointSpacesNode[0].get('children').identity.low,
     );
     spaceNodes.map(async (element) => {
-      await this.neo4jService.updateByIdAndFilter(element.identity.low, { isBlocked: true });
+      console.log(element)
+      await this.neo4jService.updateByIdAndFilter(element.identity.low, { isDeleted:false},[],{ isBlocked: true });
       await this.neo4jService.addRelationWithRelationName(
         element.identity.low,
         jointSpace.identity.low,
-        RelationName.MERGED,
+        RelationName.MERGEDJS,
       );
       //   const isInJointSpace = await this.neo4jService.read(`match(n{isDeleted:false,key:$key }) where n:JointSpace return n`, {})
     });
 
     return jointSpace.properties;
+  }
+    catch(error){
+      if (error.response?.code) {
+        throw new HttpException({ message: error.response?.message, code: error.response?.code }, HttpStatus.NOT_FOUND);
+      }
+      else {
+        throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
   }
   ///////////////////////// Static DTO ////////////////////////////////////////////////////////////////////
   async update(_id: string, updateFacilityStructureDto) {
