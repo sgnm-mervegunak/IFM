@@ -371,7 +371,7 @@ let labels = [...new Set(lbls)];
       return uuidv4()
       }
 
-      let params = {"name":data[i],"key":key2(),"isActive":true,"isDeleted":false,"canDelete":true,"canDisplay":true, "language": language};
+      let params = {"name":data[i],"key":key2(),"isActive":true,"isDeleted":false,"canDelete":true,"canDisplay":true, "language": language, "code":data[0]+i};
       let labels = [];
       let node = await this.neo4jService.createNode(params, labels);
       let parent  = await this.neo4jService.findByLabelAndFilters([data[0]+'_'+language],{"isDeleted":false},[]);
