@@ -19,3 +19,7 @@ export function WrongFacilityStructurePropsRulesExceptions(prop, rule) {
 export function WrongClassificationParentExceptions(node1, node2) {
   throw new HttpException({ key: I18NEnums.WRONG_CLASSIFICATION_PARENT, args: {node1:node1, node2:node2 } }, HttpStatus.BAD_REQUEST);
 }
+export function FacilityNodeNotFoundException() {
+  throw new HttpException({ key: I18NEnums.NODE_NOT_FOUND, args: {} }, HttpStatus.NOT_FOUND);
+
+}

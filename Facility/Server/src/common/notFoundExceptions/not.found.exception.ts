@@ -40,3 +40,7 @@ export function RelationNotFoundException(id) {
 export function ParentFacilityStructureNotFountException(id) {
   throw new HttpException({ key: I18NEnums.PARENT_FACILITY_STRUCTURE_NOT_FOUND, args: { id: id } }, HttpStatus.NOT_FOUND);
 }
+
+export function FindWithChildrenByRealmAsTreeException(realm, label) {
+  throw new HttpException({ key: I18NEnums.FIND_WITH_CHILDREN_BY_REALM_AS_TREE_ERROR, args: {realm:realm, label:label } }, HttpStatus.NOT_FOUND);
+}

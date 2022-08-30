@@ -36,7 +36,8 @@ export class StructureController {
     return this.facilityStructuresService.update(key, updateFacilityStructureDto);
   }
 
-  @Roles({ roles: [UserRoles.ADMIN] })
+ // @Roles({ roles: [UserRoles.ADMIN] })
+  @Unprotected()
   @Get('/:key')
   @NoCache()
   findOneNode(@Param('key') key: string) {
@@ -83,6 +84,7 @@ export class StructureController {
 
   @Get('/structurefirstlevel/nodes/:label/:realm')
   @Roles({ roles: [UserRoles.ADMIN] })
+  //@Unprotected()
   @NoCache()
   findStructureFirstLevelNodes(@Param('label') label: string, @Param('realm') realm: string) {
     return this.facilityStructuresService.findStructureFirstLevelNodes(label, realm);

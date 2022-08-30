@@ -15,3 +15,11 @@ export function wrong_parent_error(params) {
   params: params,
   }
 };
+
+export function node_not_found(params) {
+  return {
+  message: 'Node not found',
+  code: CustomTreeError.NODE_NOT_FOUND,
+  params: params,
+  }
+};
