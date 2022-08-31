@@ -9,6 +9,7 @@ import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Chips } from "primereact/chips";
 import { TreeSelect } from "primereact/treeselect";
+import { TabView, TabPanel } from 'primereact/tabview';
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -92,6 +93,10 @@ const BuildingForm = ({
   const { t } = useTranslation(["common"]);
   const [codeCategory, setCodeCategory] = useState("");
   const [codeStatus, setCodeStatus] = useState("");
+  const [codeLinearUnit, setCodeLinearUnit] = useState("");
+  const [codeAreaUnit, setCodeAreaUnit] = useState("");
+  const [codeVolumeUnit, setCodeVolumeUnit] = useState("");
+  const [codeCurrencyUnit, setCodeCurrencyUnit] = useState("");
 
   const [data, setData] = useState<any>();
   const language = useAppSelector((state) => state.language.language);
@@ -245,6 +250,7 @@ const BuildingForm = ({
       newNode = {
         name: data?.name,
         category: codeCategory,
+        areaMeasurument: data?.areaMeasurument,
         address: data?.address,
         buildingStructure: data?.buildingStructure,
         images: data?.images,
@@ -260,6 +266,13 @@ const BuildingForm = ({
         description: data?.description,
         projectName: data?.projectName,
         nodeType: selectedFacilityType,
+        phase: data?.phase,
+        linearUnit: data?.linearUnit,
+        areaUnit: data?.areaUnit,
+        volumeUnit: data?.volumeUnit,
+        currencyUnit: data?.currencyUnit,
+        projectDescription: data?.projectDescription,
+        siteDescription: data?.siteDescription,
       };
       console.log(newNode);
 
@@ -329,6 +342,7 @@ const BuildingForm = ({
       updateNode = {
         name: data?.name,
         category: codeCategory,
+        areaMeasurument: data?.areaMeasurument,
         address: data?.address,
         buildingStructure: data?.buildingStructure,
         images: data?.images,
@@ -344,6 +358,13 @@ const BuildingForm = ({
         description: data?.description,
         projectName: data?.projectName,
         nodeType: selectedFacilityType,
+        phase: data?.phase,
+        linearUnit: data?.linearUnit,
+        areaUnit: data?.areaUnit,
+        volumeUnit: data?.volumeUnit,
+        currencyUnit: data?.currencyUnit,
+        projectDescription: data?.projectDescription,
+        siteDescription: data?.siteDescription,
       };
 
       FacilityStructureService.update(selectedNodeKey, updateNode)
@@ -425,7 +446,883 @@ const BuildingForm = ({
 
   return (
     <form>
-      <div className="field">
+
+      {/* <div className="formgrid grid">
+        <div className="field col-12 md:col-6">
+          <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
+          <InputText
+            autoComplete="off"
+            {...register("name")}
+            style={{ width: '100%' }}
+            defaultValue={data?.name || ""}
+          />
+          <p style={{ color: "red" }}>{errors.name?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-6">
+          <h5 style={{ marginBottom: "0.5em" }}>Project Name</h5>
+          <InputText
+            autoComplete="off"
+            {...register("projectName")}
+            style={{ width: '100%' }}
+            defaultValue={data?.projectName || ""}
+          />
+          <p style={{ color: "red" }}>{errors.projectName?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-6">
+          <h5 style={{ marginBottom: "0.5em" }}>Category</h5>
+          <Controller
+            defaultValue={data?.category || []}
+            name="category"
+            control={control}
+            render={({ field }) => (
+              <TreeSelect
+                value={field.value}
+                options={classificationCategory}
+                onChange={(e) => {
+                  ClassificationsService.nodeInfo(e.value as string)
+                    .then((res) => {
+                      field.onChange(e.value)
+                      setCodeCategory(res.data.properties.code || "");
+                    })
+                }}
+                filter
+                placeholder="Select Type"
+                style={{ width: "100%" }}
+              />
+            )}
+          />
+          <p style={{ color: "red" }}>{errors.category?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-6">
+          <h5 style={{ marginBottom: "0.5em" }}>Status</h5>
+          <Controller
+            defaultValue={data?.status || []}
+            name="status"
+            control={control}
+            render={({ field }) => (
+              <TreeSelect
+                value={field.value}
+                options={classificationStatus}
+                onChange={(e) => {
+                  ClassificationsService.nodeInfo(e.value as string)
+                    .then((res) => {
+                      console.log(res.data);
+
+                      field.onChange(e.value)
+                      setCodeStatus(res.data.properties.code || "");
+                    })
+                }}
+                filter
+                placeholder="Select Type"
+                style={{ width: "100%" }}
+              />
+            )}
+          />
+          <p style={{ color: "red" }}>{errors.status?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-3">
+          <h5 style={{ marginBottom: "0.5em" }}>Owner</h5>
+          <InputText
+            autoComplete="off"
+            {...register("owner")}
+            style={{ width: "100%" }}
+            defaultValue={data?.owner || ""}
+          />
+          <p style={{ color: "red" }}>{errors.owner?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-3">
+          <h5 style={{ marginBottom: "0.5em" }}>Operator</h5>
+          <InputText
+            autoComplete="off"
+            {...register("operator")}
+            style={{ width: "100%" }}
+            defaultValue={data?.operator || ""}
+          />
+          <p style={{ color: "red" }}>{errors.owner?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-3">
+          <h5 style={{ marginBottom: "0.5em" }}>Contractor</h5>
+          <InputText
+            autoComplete="off"
+            {...register("contractor")}
+            style={{ width: "100%" }}
+            defaultValue={data?.contractor}
+          />
+          <p style={{ color: "red" }}>{errors.contractor?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-3">
+          <h5 style={{ marginBottom: "0.5em" }}>Area Measurement</h5>
+          <InputText
+            autoComplete="off"
+            {...register("areaMeasurement")}
+            style={{ width: "100%" }}
+            defaultValue={data?.areaMeasurement}
+          />
+          <p style={{ color: "red" }}>{errors.areaMeasurement?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-3">
+          <h5 style={{ marginBottom: "0.5em" }}>Handover Date</h5>
+          <Controller
+            defaultValue={new Date(data?.handoverDate)}
+            name="handoverDate"
+            control={control}
+            render={({ field }) => (
+              <Calendar
+                dateFormat="dd/mm/yy"
+                value={field.value}
+                showIcon
+                style={{ width: "100%" }}
+                onChange={(e) => {
+                  field.onChange(e.value)
+                }}
+              />
+            )}
+          />
+          <p style={{ color: "red" }}>{errors.handoverDate?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-3">
+          <h5 style={{ marginBottom: "0.5em" }}>Operation Start Date</h5>
+          <Controller
+            defaultValue={new Date(data?.operationStartDate)}
+            name="operationStartDate"
+            control={control}
+            render={({ field }) => (
+              <Calendar
+                dateFormat="dd/mm/yy"
+                value={field.value}
+                showIcon
+                style={{ width: "100%" }}
+                onChange={(e) => {
+                  field.onChange(e.value)
+                }}
+              />
+            )}
+          />
+          <p style={{ color: "red" }}>{errors.operationStartDate?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-3">
+          <h5 style={{ marginBottom: "0.5em" }}>Warranty Expire Date</h5>
+          <Controller
+            defaultValue={new Date(data?.warrantyExpireDate)}
+            name="warrantyExpireDate"
+            control={control}
+            render={({ field }) => (
+              <Calendar
+                dateFormat="dd/mm/yy"
+                value={field.value}
+                showIcon
+                style={{ width: "100%" }}
+                onChange={(e) => {
+                  field.onChange(e.value)
+                }}
+              />
+            )}
+          />
+          <p style={{ color: "red" }}>{errors.warrantyExpireDate?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-3">
+          <h5 style={{ marginBottom: "0.5em" }}>Phase</h5>
+          <InputText
+            autoComplete="off"
+            {...register("phase")}
+            style={{ width: "100%" }}
+            defaultValue={data?.phase || ""}
+          />
+          <p style={{ color: "red" }}>{errors.phase?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-3">
+          <h5 style={{ marginBottom: "0.5em" }}>Linear Units</h5>
+          <Controller
+            defaultValue={data?.linearUnit || []}
+            name="linearUnit"
+            control={control}
+            render={({ field }) => (
+              <TreeSelect
+                value={field.value}
+                options={classificationCategory}
+                onChange={(e) => {
+                  ClassificationsService.nodeInfo(e.value as string)
+                    .then((res) => {
+                      field.onChange(e.value)
+                      setCodeLinearUnit(res.data.properties.code || "");
+                    })
+                }}
+                filter
+                placeholder="Select"
+                style={{ width: "100%" }}
+              />
+            )}
+          />
+          <p style={{ color: "red" }}>{errors.linearUnit?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-3">
+          <h5 style={{ marginBottom: "0.5em" }}>Area Units</h5>
+          <Controller
+            defaultValue={data?.areaUnit || []}
+            name="areaUnit"
+            control={control}
+            render={({ field }) => (
+              <TreeSelect
+                value={field.value}
+                options={classificationCategory}
+                onChange={(e) => {
+                  ClassificationsService.nodeInfo(e.value as string)
+                    .then((res) => {
+                      field.onChange(e.value)
+                      setCodeAreaUnit(res.data.properties.code || "");
+                    })
+                }}
+                filter
+                placeholder="Select"
+                style={{ width: "100%" }}
+              />
+            )}
+          />
+          <p style={{ color: "red" }}>{errors.areaUnit?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-3">
+          <h5 style={{ marginBottom: "0.5em" }}>Volume Units</h5>
+          <Controller
+            defaultValue={data?.volumeUnit || []}
+            name="volumeUnit"
+            control={control}
+            render={({ field }) => (
+              <TreeSelect
+                value={field.value}
+                options={classificationCategory}
+                onChange={(e) => {
+                  ClassificationsService.nodeInfo(e.value as string)
+                    .then((res) => {
+                      field.onChange(e.value)
+                      setCodeVolumeUnit(res.data.properties.code || "");
+                    })
+                }}
+                filter
+                placeholder="Select"
+                style={{ width: "100%" }}
+              />
+            )}
+          />
+          <p style={{ color: "red" }}>{errors.volumeUnit?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-3">
+          <h5 style={{ marginBottom: "0.5em" }}>Currency Unit</h5>
+          <Controller
+            defaultValue={data?.currencyUnit || []}
+            name="currencyUnit"
+            control={control}
+            render={({ field }) => (
+              <TreeSelect
+                value={field.value}
+                options={classificationCategory}
+                onChange={(e) => {
+                  ClassificationsService.nodeInfo(e.value as string)
+                    .then((res) => {
+                      field.onChange(e.value)
+                      setCodeCurrencyUnit(res.data.properties.code || "");
+                    })
+                }}
+                filter
+                placeholder="Select"
+                style={{ width: "100%" }}
+              />
+            )}
+          />
+          <p style={{ color: "red" }}>{errors.currencyUnit?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-6">
+          <h5 style={{ marginBottom: "0.5em" }}>Address</h5>
+          <InputText
+            autoComplete="off"
+            {...register("address")}
+            style={{ width: '100%' }}
+            defaultValue={data?.address || ""}
+          />
+          <p style={{ color: "red" }}>{errors.address?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-6 structureChips">
+          <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
+          <Controller
+
+            defaultValue={data?.tag || []}
+            name="tag"
+            control={control}
+            render={({ field }) => (
+              <Chips
+                value={field.value}
+                onChange={(e) => {
+                  field.onChange(e.value)
+                }}
+                style={{ width: "100%" }}
+              />
+            )}
+          />
+          <p style={{ color: "red" }}>{errors.tag?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-6">
+          <h5 style={{ marginBottom: "0.5em" }}>Description</h5>
+          <InputText
+            autoComplete="off"
+            {...register("description")}
+            style={{ width: '100%' }}
+            defaultValue={data?.description || ""}
+          />
+          <p style={{ color: "red" }}>{errors.description?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-6">
+          <h5 style={{ marginBottom: "0.5em" }}>Building Structure</h5>
+          <Controller
+            defaultValue={data?.buildingStructure || []}
+            name="buildingStructure"
+            control={control}
+            render={({ field }) => (
+              <Dropdown
+                value={field.value}
+                options={buildingStructures}
+                onChange={(e) => field.onChange(e.value)}
+                placeholder="Select Building Structure"
+                style={{ width: "100%" }}
+              />
+            )}
+          />
+          <p style={{ color: "red" }}>{errors.buildingStructure?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-6">
+          <h5 style={{ marginBottom: "0.5em" }}>Project Description</h5>
+          <InputText
+            autoComplete="off"
+            {...register("projectDescription")}
+            style={{ width: '100%' }}
+            defaultValue={data?.projectDescription || ""}
+          />
+          <p style={{ color: "red" }}>{errors.projectDescription?.message}</p>
+        </div>
+
+        <div className="field col-12 md:col-6">
+          <h5 style={{ marginBottom: "0.5em" }}>Site Description</h5>
+          <InputText
+            autoComplete="off"
+            {...register("siteDescription")}
+            style={{ width: '100%' }}
+            defaultValue={data?.siteDescription || ""}
+          />
+          <p style={{ color: "red" }}>{errors.siteDescription?.message}</p>
+        </div>
+
+        <div className="field col-12">
+          <h5 style={{ marginBottom: "0.5em" }}>Images</h5>
+          <Controller
+            defaultValue={data?.images || []}
+            name="images"
+            control={control}
+            render={({ field }) => (
+              <ImageUploadComponent
+                label={"images"}
+                value={field.value}
+                onChange={(e: any) => {
+                  field.onChange(e)
+                }}
+                deleteFiles={deleteFiles}
+                setDeleteFiles={setDeleteFiles}
+                uploadFiles={uploadFiles}
+                setUploadFiles={setUploadFiles}
+
+              />
+            )}
+          />
+          <p style={{ color: "red" }}>{errors.images?.message}</p>
+        </div>
+
+        <div className="field col-12">
+          <h5 style={{ marginBottom: "0.5em" }}>Documents</h5>
+          <Controller
+            defaultValue={data?.documents || []}
+            name="documents"
+            control={control}
+            render={({ field }) => (
+              <DocumentUploadComponent
+                label={"documents"}
+                value={field.value}
+                onChange={(e: any) => {
+                  field.onChange(e)
+                }}
+                deleteFiles={deleteFiles}
+                setDeleteFiles={setDeleteFiles}
+                uploadFiles={uploadFiles}
+                setUploadFiles={setUploadFiles}
+              />
+            )}
+          />
+          <p style={{ color: "red" }}>{errors.documents?.message}</p>
+        </div>
+
+      </div> */}
+
+      <TabView className="tabview-header-icon">
+        <TabPanel header="Form" leftIcon="pi pi-bars">
+          <div className="formgrid grid">
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
+              <InputText
+                autoComplete="off"
+                {...register("name")}
+                style={{ width: '100%' }}
+                defaultValue={data?.name || ""}
+              />
+              <p style={{ color: "red" }}>{errors.name?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>Project Name</h5>
+              <InputText
+                autoComplete="off"
+                {...register("projectName")}
+                style={{ width: '100%' }}
+                defaultValue={data?.projectName || ""}
+              />
+              <p style={{ color: "red" }}>{errors.projectName?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>Category</h5>
+              <Controller
+                defaultValue={data?.category || []}
+                name="category"
+                control={control}
+                render={({ field }) => (
+                  <TreeSelect
+                    value={field.value}
+                    options={classificationCategory}
+                    onChange={(e) => {
+                      ClassificationsService.nodeInfo(e.value as string)
+                        .then((res) => {
+                          field.onChange(e.value)
+                          setCodeCategory(res.data.properties.code || "");
+                        })
+                    }}
+                    filter
+                    placeholder="Select Type"
+                    style={{ width: "100%" }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.category?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>Status</h5>
+              <Controller
+                defaultValue={data?.status || []}
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <TreeSelect
+                    value={field.value}
+                    options={classificationStatus}
+                    onChange={(e) => {
+                      ClassificationsService.nodeInfo(e.value as string)
+                        .then((res) => {
+                          console.log(res.data);
+
+                          field.onChange(e.value)
+                          setCodeStatus(res.data.properties.code || "");
+                        })
+                    }}
+                    filter
+                    placeholder="Select Type"
+                    style={{ width: "100%" }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.status?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-3">
+              <h5 style={{ marginBottom: "0.5em" }}>Owner</h5>
+              <InputText
+                autoComplete="off"
+                {...register("owner")}
+                style={{ width: "100%" }}
+                defaultValue={data?.owner || ""}
+              />
+              <p style={{ color: "red" }}>{errors.owner?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-3">
+              <h5 style={{ marginBottom: "0.5em" }}>Operator</h5>
+              <InputText
+                autoComplete="off"
+                {...register("operator")}
+                style={{ width: "100%" }}
+                defaultValue={data?.operator || ""}
+              />
+              <p style={{ color: "red" }}>{errors.owner?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-3">
+              <h5 style={{ marginBottom: "0.5em" }}>Contractor</h5>
+              <InputText
+                autoComplete="off"
+                {...register("contractor")}
+                style={{ width: "100%" }}
+                defaultValue={data?.contractor}
+              />
+              <p style={{ color: "red" }}>{errors.contractor?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-3">
+              <h5 style={{ marginBottom: "0.5em" }}>Area Measurement</h5>
+              <InputText
+                autoComplete="off"
+                {...register("areaMeasurement")}
+                style={{ width: "100%" }}
+                defaultValue={data?.areaMeasurement}
+              />
+              <p style={{ color: "red" }}>{errors.areaMeasurement?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-3">
+              <h5 style={{ marginBottom: "0.5em" }}>Handover Date</h5>
+              <Controller
+                defaultValue={new Date(data?.handoverDate)}
+                name="handoverDate"
+                control={control}
+                render={({ field }) => (
+                  <Calendar
+                    dateFormat="dd/mm/yy"
+                    value={field.value}
+                    showIcon
+                    style={{ width: "100%" }}
+                    onChange={(e) => {
+                      field.onChange(e.value)
+                    }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.handoverDate?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-3">
+              <h5 style={{ marginBottom: "0.5em" }}>Operation Start Date</h5>
+              <Controller
+                defaultValue={new Date(data?.operationStartDate)}
+                name="operationStartDate"
+                control={control}
+                render={({ field }) => (
+                  <Calendar
+                    dateFormat="dd/mm/yy"
+                    value={field.value}
+                    showIcon
+                    style={{ width: "100%" }}
+                    onChange={(e) => {
+                      field.onChange(e.value)
+                    }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.operationStartDate?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-3">
+              <h5 style={{ marginBottom: "0.5em" }}>Warranty Expire Date</h5>
+              <Controller
+                defaultValue={new Date(data?.warrantyExpireDate)}
+                name="warrantyExpireDate"
+                control={control}
+                render={({ field }) => (
+                  <Calendar
+                    dateFormat="dd/mm/yy"
+                    value={field.value}
+                    showIcon
+                    style={{ width: "100%" }}
+                    onChange={(e) => {
+                      field.onChange(e.value)
+                    }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.warrantyExpireDate?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-3">
+              <h5 style={{ marginBottom: "0.5em" }}>Phase</h5>
+              <InputText
+                autoComplete="off"
+                {...register("phase")}
+                style={{ width: "100%" }}
+                defaultValue={data?.phase || ""}
+              />
+              <p style={{ color: "red" }}>{errors.phase?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-3">
+              <h5 style={{ marginBottom: "0.5em" }}>Linear Units</h5>
+              <Controller
+                defaultValue={data?.linearUnit || []}
+                name="linearUnit"
+                control={control}
+                render={({ field }) => (
+                  <TreeSelect
+                    value={field.value}
+                    options={classificationCategory}
+                    onChange={(e) => {
+                      ClassificationsService.nodeInfo(e.value as string)
+                        .then((res) => {
+                          field.onChange(e.value)
+                          setCodeLinearUnit(res.data.properties.code || "");
+                        })
+                    }}
+                    filter
+                    placeholder="Select"
+                    style={{ width: "100%" }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.linearUnit?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-3">
+              <h5 style={{ marginBottom: "0.5em" }}>Area Units</h5>
+              <Controller
+                defaultValue={data?.areaUnit || []}
+                name="areaUnit"
+                control={control}
+                render={({ field }) => (
+                  <TreeSelect
+                    value={field.value}
+                    options={classificationCategory}
+                    onChange={(e) => {
+                      ClassificationsService.nodeInfo(e.value as string)
+                        .then((res) => {
+                          field.onChange(e.value)
+                          setCodeAreaUnit(res.data.properties.code || "");
+                        })
+                    }}
+                    filter
+                    placeholder="Select"
+                    style={{ width: "100%" }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.areaUnit?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-3">
+              <h5 style={{ marginBottom: "0.5em" }}>Volume Units</h5>
+              <Controller
+                defaultValue={data?.volumeUnit || []}
+                name="volumeUnit"
+                control={control}
+                render={({ field }) => (
+                  <TreeSelect
+                    value={field.value}
+                    options={classificationCategory}
+                    onChange={(e) => {
+                      ClassificationsService.nodeInfo(e.value as string)
+                        .then((res) => {
+                          field.onChange(e.value)
+                          setCodeVolumeUnit(res.data.properties.code || "");
+                        })
+                    }}
+                    filter
+                    placeholder="Select"
+                    style={{ width: "100%" }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.volumeUnit?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-3">
+              <h5 style={{ marginBottom: "0.5em" }}>Currency Unit</h5>
+              <Controller
+                defaultValue={data?.currencyUnit || []}
+                name="currencyUnit"
+                control={control}
+                render={({ field }) => (
+                  <TreeSelect
+                    value={field.value}
+                    options={classificationCategory}
+                    onChange={(e) => {
+                      ClassificationsService.nodeInfo(e.value as string)
+                        .then((res) => {
+                          field.onChange(e.value)
+                          setCodeCurrencyUnit(res.data.properties.code || "");
+                        })
+                    }}
+                    filter
+                    placeholder="Select"
+                    style={{ width: "100%" }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.currencyUnit?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>Address</h5>
+              <InputText
+                autoComplete="off"
+                {...register("address")}
+                style={{ width: '100%' }}
+                defaultValue={data?.address || ""}
+              />
+              <p style={{ color: "red" }}>{errors.address?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6 structureChips">
+              <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
+              <Controller
+
+                defaultValue={data?.tag || []}
+                name="tag"
+                control={control}
+                render={({ field }) => (
+                  <Chips
+                    value={field.value}
+                    onChange={(e) => {
+                      field.onChange(e.value)
+                    }}
+                    style={{ width: "100%" }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.tag?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>Description</h5>
+              <InputText
+                autoComplete="off"
+                {...register("description")}
+                style={{ width: '100%' }}
+                defaultValue={data?.description || ""}
+              />
+              <p style={{ color: "red" }}>{errors.description?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>Building Structure</h5>
+              <Controller
+                defaultValue={data?.buildingStructure || []}
+                name="buildingStructure"
+                control={control}
+                render={({ field }) => (
+                  <Dropdown
+                    value={field.value}
+                    options={buildingStructures}
+                    onChange={(e) => field.onChange(e.value)}
+                    placeholder="Select Building Structure"
+                    style={{ width: "100%" }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.buildingStructure?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>Project Description</h5>
+              <InputText
+                autoComplete="off"
+                {...register("projectDescription")}
+                style={{ width: '100%' }}
+                defaultValue={data?.projectDescription || ""}
+              />
+              <p style={{ color: "red" }}>{errors.projectDescription?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>Site Description</h5>
+              <InputText
+                autoComplete="off"
+                {...register("siteDescription")}
+                style={{ width: '100%' }}
+                defaultValue={data?.siteDescription || ""}
+              />
+              <p style={{ color: "red" }}>{errors.siteDescription?.message}</p>
+            </div>
+
+          </div>
+
+        </TabPanel>
+        <TabPanel header="Images" headerClassName="ml-4" leftIcon="pi pi-images">
+          <div className="formgrid grid">
+            <div className="field col-12">
+              <h5 style={{ marginBottom: "0.5em" }}>Images</h5>
+              <Controller
+                defaultValue={data?.images || []}
+                name="images"
+                control={control}
+                render={({ field }) => (
+                  <ImageUploadComponent
+                    label={"images"}
+                    value={field.value}
+                    onChange={(e: any) => {
+                      console.log(e);
+                      
+                      field.onChange(e)
+                    }}
+                    deleteFiles={deleteFiles}
+                    setDeleteFiles={setDeleteFiles}
+                    uploadFiles={uploadFiles}
+                    setUploadFiles={setUploadFiles}
+
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.images?.message}</p>
+            </div>
+          </div>
+        </TabPanel>
+        <TabPanel header="Documents" leftIcon="pi pi-file" >
+          <div className="formgrid grid">
+            <div className="field col-12">
+              <h5 style={{ marginBottom: "0.5em" }}>Documents</h5>
+              <Controller
+                defaultValue={data?.documents || []}
+                name="documents"
+                control={control}
+                render={({ field }) => (
+                  <DocumentUploadComponent
+                    label={"documents"}
+                    value={field.value}
+                    onChange={(e: any) => {
+                      field.onChange(e)
+                    }}
+                    deleteFiles={deleteFiles}
+                    setDeleteFiles={setDeleteFiles}
+                    uploadFiles={uploadFiles}
+                    setUploadFiles={setUploadFiles}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.documents?.message}</p>
+            </div>
+          </div>
+        </TabPanel>
+      </TabView>
+
+      {/* <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
         <InputText
           autoComplete="off"
@@ -461,6 +1358,17 @@ const BuildingForm = ({
         />
       </div>
       <p style={{ color: "red" }}>{errors.category?.message}</p>
+
+      <div className="field">
+        <h5 style={{ marginBottom: "0.5em" }}>Area Measurument</h5>
+        <InputText
+          autoComplete="off"
+          {...register("areaMeasurument")}
+          style={{ width: '100%' }}
+          defaultValue={data?.areaMeasurument || ""}
+        />
+      </div>
+      <p style={{ color: "red" }}>{errors.areaMeasurument?.message}</p>
 
 
       <div className="field">
@@ -710,7 +1618,7 @@ const BuildingForm = ({
           )}
         />
       </div>
-      <p style={{ color: "red" }}>{errors.documents?.message}</p>
+      <p style={{ color: "red" }}>{errors.documents?.message}</p> */}
 
     </form>
   );
