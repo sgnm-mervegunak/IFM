@@ -94,7 +94,6 @@ export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
             'PARENT_OF',
           );
           parentNodes.push(parentStructure[0].get('parent'));
-          //   const isInJointSpace = await this.neo4jService.read(`match(n{isDeleted:false,key:$key }) where n:JointSpace return n`, {})
         }),
       );
       //check every node's building parent is same
@@ -147,7 +146,6 @@ export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
           jointSpace.identity.low,
           RelationName.MERGEDJS,
         );
-        //   const isInJointSpace = await this.neo4jService.read(`match(n{isDeleted:false,key:$key }) where n:JointSpace return n`, {})
       });
 
       return jointSpace.properties;
