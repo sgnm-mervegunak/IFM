@@ -76,7 +76,7 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
               SpaceName:spaceProperties.name,
               Code:spaceProperties.code,
               ArchitecturalName:spaceProperties.architecturalName,
-              Category:spaceProperties.classification_by[0].name,
+              Category:spaceProperties.classified_by[0].name,
               GrossArea:spaceProperties.grossArea,
               NetArea:spaceProperties.netArea,
               Usage:spaceProperties.usage,
@@ -89,7 +89,7 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
               ExternalObject:spaceProperties.externalObject,
               ExternalIdentifier:spaceProperties.externalIdentifier,
               CreatedOn:spaceProperties.createdOn,
-              CreatedBy:spaceProperties.createdBy[0].email
+              CreatedBy:spaceProperties.created_by[0].email
               })
         }
       }
