@@ -33,6 +33,11 @@ const DocumentUploadComponent = ({
   };
 
   React.useEffect(() => {
+    if (uploadRef.current) {
+      if (uploadFiles[label]) {
+        uploadRef.current.setState({ files: uploadFiles[label].map((item) => item.file) })
+      }
+    }
     ClassificationsService.findAllActiveByLabel({
       realm: auth.auth.realm,
       label: "FacilityDocTypes",
@@ -46,8 +51,9 @@ const DocumentUploadComponent = ({
   }, []);
 
   const itemTemplate = (file, props) => {
+    console.log(props);
     const item = uploadFiles[label]
-      ? uploadFiles[label].find((f) => f.file.objectURL === file.objectURL)
+      ? uploadFiles[label].find((f,i) => i === props.index)
       : null;
     return (
       <div className="flex align-items-center flex-wrap">
@@ -70,7 +76,7 @@ const DocumentUploadComponent = ({
         <TreeSelect
           value={item ? item.type : null}
           options={docTypes}
-          onChange={(e) => SetDocType(item.file.objectURL,e.value)}
+          onChange={(e) => SetDocType(props.index,e.value,false)}
         />
         <Button
           type="button"
@@ -106,17 +112,18 @@ const DocumentUploadComponent = ({
     });
   };
 
-  const SetDocType = (id,data) => {
+  const SetDocType = (id,data,ok=true) => {
     setUploadFiles((prev) => ({
       ...prev,
-      [label]: prev[label] ? prev[label].map((item) => {
-        if (item.file.objectURL === id) {
+      [label]: prev[label] ? prev[label].map((item,index) => {
+        if (index === id) {
           item.type = data;
         } 
         return item;
       }) : [],
     }));
     if (
+      ok &&
       value &&
       typeof value === "string" &&
       value.startsWith("[") &&

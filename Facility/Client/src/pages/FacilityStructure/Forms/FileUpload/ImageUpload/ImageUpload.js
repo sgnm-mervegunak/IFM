@@ -17,8 +17,18 @@ const ImageUploadComponent = ({
   const uploadRef = useRef(null);
   const { toast } = useAppSelector((state) => state.toast);
 
+  React.useEffect(() => {
+    if (uploadRef.current) {
+      if (uploadFiles[label]) {
+        uploadRef.current.setState({ files: uploadFiles[label].map((item) => item.file) })
+      }
+    }
+  }, []);
+
   const itemTemplate = (file, props) => {
-    const item = uploadFiles[label] ? uploadFiles[label].find((f) => f.file.objectURL === file.objectURL) : null;
+    const item = uploadFiles[label]
+      ? uploadFiles[label].find((f) => f.file.objectURL === file.objectURL)
+      : null;
     return (
       <div className="flex align-items-center flex-wrap">
         <div className="flex align-items-center" style={{ width: "40%" }}>
@@ -32,14 +42,11 @@ const ImageUploadComponent = ({
         </div>
         <Button
           type="button"
-          disabled={
-            item ? item.main : false 
-              
-          }
+          disabled={item ? item.main : false}
           icon="pi pi-bookmark-fill"
           className={
             "p-button-outlined p-button-rounded ml-auto" +
-            (item ? item.main ? " p-button-success" : "" : "")
+            (item ? (item.main ? " p-button-success" : "") : "")
           }
           onClick={() => SetMain(file.objectURL)}
         />
@@ -47,7 +54,7 @@ const ImageUploadComponent = ({
           type="button"
           icon="pi pi-times"
           className="p-button-outlined p-button-rounded p-button-danger ml-auto"
-          onClick={()=>props.onRemove()}
+          onClick={() => props.onRemove()}
         />
       </div>
     );
@@ -80,14 +87,16 @@ const ImageUploadComponent = ({
   const SetMain = (data) => {
     setUploadFiles((prev) => ({
       ...prev,
-      [label]: prev[label] ? prev[label].map((item) => {
-        if (item.file.objectURL === data) {
-          item.main = true;
-        } else {
-          item.main = false;
-        }
-        return item;
-      }) : [],
+      [label]: prev[label]
+        ? prev[label].map((item) => {
+            if (item.file.objectURL === data) {
+              item.main = true;
+            } else {
+              item.main = false;
+            }
+            return item;
+          })
+        : [],
     }));
     if (
       value &&

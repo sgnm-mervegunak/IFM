@@ -161,7 +161,6 @@ const BuildingForm = ({
   useEffect(
     () => {
       console.log("dataaaa: ", data);
-
     }
     , [data])
 
@@ -183,11 +182,11 @@ const BuildingForm = ({
   const getNodeInfoForUpdate = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
-        let temp = {};
+        // let temp = {};
         await ClassificationsService.findClassificationByCodeAndLanguage(realm, "OmniClass11", language, res.data.properties.category).then(clsf1 => {
           res.data.properties.category = clsf1.data.key
-          temp = res.data.properties;
-          // setData(res.data.properties);
+          // temp = res.data.properties;
+          setData(res.data.properties);
         })
           .catch((err) => {
             setData(res.data.properties);
@@ -203,8 +202,8 @@ const BuildingForm = ({
           console.log(clsf2.data);
 
           res.data.properties.status = await clsf2.data.key
-          temp = res.data.properties;
-          // setData(res.data.properties);
+          // temp = res.data.properties;
+          setData(res.data.properties);
         })
           .catch((err) => {
             setData(res.data.properties);
@@ -215,7 +214,7 @@ const BuildingForm = ({
               life: 4000,
             });
           })
-        setData(temp);
+        // setData(temp);
       })
       .catch((err) => {
         toast.current.show({
