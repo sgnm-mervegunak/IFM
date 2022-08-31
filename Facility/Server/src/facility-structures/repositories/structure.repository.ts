@@ -24,6 +24,9 @@ import {
   Transaction,
   find_with_children_by_realm_as_tree_error,
   tree_structure_not_found_by_realm_name_error,
+  changeObjectKeyName,
+  dynamicFilterPropertiesAdderAndAddParameterKey,
+  invalid_direction_error,
 } from 'sgnm-neo4j/dist';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 import { RelationName } from 'src/common/const/relation.name.enum';
@@ -50,6 +53,7 @@ import { has_children_error, node_not_found, wrong_parent_error } from 'src/comm
 import { CustomTreeError } from 'src/common/const/custom.error.enum';
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
 import { BaseFacilitySpaceObject } from 'src/common/baseobject/base.facility.space.object';
+import { QueryResult } from 'neo4j-driver-core';
 
 @Injectable()
 export class FacilityStructureRepository implements FacilityInterface<any> {
@@ -418,7 +422,76 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
     }
     return [];
   }
+  //////////////////////////////
+  async findChildrensByLabelsAndRelationNameOneLevel(
+    first_node_labels: Array<string> = [],
+    first_node_filters: object = {},
+    second_node_labels: Array<string> = [],
+    second_node_filters: object = {},
+    relation_name: string,
+    relation_direction: RelationDirection = RelationDirection.RIGHT,
+    databaseOrTransaction?: string | Transaction
+  ) {
+    try {
+      if (!relation_name) {
+        throw new HttpException(required_fields_must_entered, 404);
+      }
+      const firstNodeLabelsWithoutEmptyString =
+        filterArrayForEmptyString(first_node_labels);
 
+      const secondNodeLabelsWithoutEmptyString =
+        filterArrayForEmptyString(second_node_labels);
+
+      let parameters;
+      let cypher: string;
+      let result:QueryResult;
+
+      switch (relation_direction) {
+        case RelationDirection.RIGHT:
+          cypher =
+            `MATCH (n`+ dynamicLabelAdder(firstNodeLabelsWithoutEmptyString)+dynamicFilterPropertiesAdder(first_node_filters)+`-[:${relation_name}]->(m` +
+            dynamicLabelAdder(secondNodeLabelsWithoutEmptyString) +
+            dynamicFilterPropertiesAdderAndAddParameterKey(second_node_filters) +
+            ` RETURN n as parent,m as children`;
+
+            second_node_filters=changeObjectKeyName(second_node_filters)
+            parameters={...first_node_filters,...second_node_filters}
+         
+          result = await this.neo4jService.read(cypher, parameters,databaseOrTransaction);
+          break;
+        case RelationDirection.LEFT:
+         
+          cypher =
+            `MATCH (n` +
+            dynamicLabelAdder(firstNodeLabelsWithoutEmptyString) +
+            dynamicFilterPropertiesAdder(first_node_filters) +
+            `<-[:${relation_name}]-(m` +
+            dynamicLabelAdder(secondNodeLabelsWithoutEmptyString) +
+            dynamicFilterPropertiesAdderAndAddParameterKey(second_node_filters) + 
+            ` RETURN m as parent,n as children`;
+
+            second_node_filters=changeObjectKeyName(second_node_filters)
+            parameters={...first_node_filters,...second_node_filters}
+
+          result = await this.neo4jService.read(cypher, first_node_filters,databaseOrTransaction);
+          break;
+        default:
+          throw new HttpException(invalid_direction_error, 400);
+      }
+
+      return result["records"];
+    } catch (error) {
+      if (error.response?.code) {
+        throw new HttpException(
+          { message: error.response?.message, code: error.response?.code },
+          error.status
+        );
+      } else {
+        throw new HttpException(error, 500);
+      }
+    }
+  }
+  ///////////////////////////////
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
   async create(key: string, structureData: Object, realm: string) {
     //is there facility-structure parent node
@@ -515,7 +588,30 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
     }
     
     baseFacilityObject = assignDtoPropToEntity(baseFacilityObject, structureData);
+    let createdBy;
+    if (structureData['nodeType'] == 'Space') {
+      delete baseFacilityObject['category'];
+      createdBy = baseFacilityObject["createdBy"];
+      delete baseFacilityObject["createdBy"];
+    }
+
     const createNode = await this.neo4jService.createNode(baseFacilityObject, [structureData['nodeType']]);
+    if (structureData['nodeType'] == 'Space') {
+      await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.key,structureData["category"], RelationName.CLASSIFIED_BY);
+      const contactNode = await this.findChildrensByLabelsAndRelationNameOneLevel(
+        ['Contact'],
+        {"isDeleted": false, "realm": realm},
+        [],
+        {"isDeleted": false, "email":  createdBy},
+        "CREATED_BY"
+        );
+        if (contactNode && contactNode.length &&contactNode.length == 1) {
+          await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.key,contactNode[0]["_fields"][1]["property"].key, RelationName.CREATED_BY); 
+        }
+      
+    }
+    
+   
     //create PARENT_OF relation between parent facility structure node and child facility structure node.
     await this.neo4jService.addRelationWithRelationNameByKey(key, createNode.properties.key, RelationName.PARENT_OF);
     let jointSpaces = new JointSpaces();
@@ -535,9 +631,9 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
         RelationName.PARENT_OF,
       );
     }
-    // if (createNode.properties.nodeType == 'Space') {
-    //   await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.spaceType, createNode.properties.key, RelationName.CLASSIFICATION_OF);
-    // }
+    if (createNode.properties.nodeType == 'Space') {
+      await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.key,structureData["category"], RelationName.CLASSIFIED_BY);
+    }
     // if (createNode.properties.nodeType == 'Building') {
     //   await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.category, createNode.properties.key, RelationName.CLASSIFICATION_OF);
     // }
