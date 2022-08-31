@@ -48,7 +48,7 @@ export class JointSpaceController {
   @Get(':key/:realm')
   @Unprotected()
   @NoCache()
-  findOne(@Param('key') label: string, @Param('realm') realm: string) {
-    return this.jointSpaceService.findOne(label, realm);
+  findOne(@Param('key') key: string, @Param('realm') realm: string) {
+    return this.jointSpaceService.findOne(key, realm);
   }
 }

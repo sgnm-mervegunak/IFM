@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { RepositoryEnums } from 'src/common/const/repository.enum';
-import { GeciciInterface } from 'src/common/interface/gecici.interface';
+import { JointSpaceAndZoneInterface } from 'src/common/interface/joint.space.zone.interface';
 import { CreateJointSpaceDto } from '../dto/create.jointspace.dto';
 import { UpdateJointSpaceDto } from '../dto/update.jointspace.dto';
 
@@ -8,7 +8,7 @@ import { UpdateJointSpaceDto } from '../dto/update.jointspace.dto';
 export class JointSpaceService {
   constructor(
     @Inject(RepositoryEnums.JOINT_SPACE)
-    private readonly jointSpaceRepository: GeciciInterface<any>,
+    private readonly jointSpaceRepository: JointSpaceAndZoneInterface<any>,
   ) {}
   async create(createJointSpaceDto: CreateJointSpaceDto) {
     return await this.jointSpaceRepository.create(createJointSpaceDto);
@@ -25,10 +25,6 @@ export class JointSpaceService {
 
   remove(id: string) {
     return this.jointSpaceRepository.delete(id);
-  }
-
-  findOneFirstLevel(label: string, realm: string) {
-    return this.jointSpaceRepository.findOneFirstLevelByRealm(label, realm);
   }
 
   findOne(key: string, realm: string) {
