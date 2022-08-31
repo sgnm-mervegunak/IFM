@@ -171,7 +171,8 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
         canDelete = true;
       }
       if (!canDelete) {
-        throw new HttpException(has_children_error, 400);
+        throw new HttpException(has_children_error({node1:node['properties']['name'],  node2:""}), 400);
+    
       } else {
         let deletedNode = await this.neo4jService.updateByIdAndFilter(+_id,{"isDeleted":false, "canDelete": true},[],{"isDeleted":true})
         if (!deletedNode) {
@@ -202,7 +203,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       } else if (code === CustomNeo4jError.PARENT_NOT_FOUND) {
         throw new ParentFacilityStructureNotFountException(_id);
       } else if (code === CustomTreeError.HAS_CHILDREN) {
-        throw new FacilityStructureDeleteExceptions(_id);
+        throw new FacilityStructureDeleteExceptions(error.response?.params['node1']);
       } else if (code === CustomNeo4jError.NODE_CANNOT_DELETE) {
         throw new FacilityStructureCanNotDeleteExceptions(_id);
       } else {
@@ -233,7 +234,6 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
           {}
         );
 
-
     if (parent_of_new_parent && parent_of_new_parent["_fields"][0]["identity"].low == _id) {
           throw new HttpException(wrong_parent_error({node1:node["properties"].name, 
                                                        node2: new_parent["properties"].name}), 400);
@@ -244,7 +244,14 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
                                                       node2: new_parent["properties"].name}), 400);
        }
      }
-    
+
+     if (new_parent['labels'] && new_parent['labels'][0] == 'FacilityStructure' ) {
+      if (!node['labels'] || node['labels'].length == 0 || node['labels'][0] != 'Building') { 
+       throw new HttpException(wrong_parent_error({node1:node["properties"].name, 
+                                                     node2: new_parent["properties"].name}), 400);
+       }
+     }  
+
      //Control of moving  between facility type nodes //////////////////////////////////////////// 
      let structureRootNode;
      if (new_parent.labels[0] === 'FacilityStructure') {
