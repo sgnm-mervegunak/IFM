@@ -49,6 +49,7 @@ import { I18NEnums } from 'src/common/const/i18n.enum';
 import { has_children_error, node_not_found, wrong_parent_error } from 'src/common/const/custom.error.object';
 import { CustomTreeError } from 'src/common/const/custom.error.enum';
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
+import { BaseFacilitySpaceObject } from 'src/common/baseobject/base.facility.space.object';
 
 @Injectable()
 export class FacilityStructureRepository implements FacilityInterface<any> {
@@ -505,7 +506,14 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
       }
     });
 
-    let baseFacilityObject = new BaseFacilityObject();
+    let baseFacilityObject;
+    if (structureData['nodeType'] === 'Space') {
+       baseFacilityObject = new BaseFacilitySpaceObject();
+    }
+    else {
+      baseFacilityObject = new BaseFacilityObject();
+    }
+    
     baseFacilityObject = assignDtoPropToEntity(baseFacilityObject, structureData);
     const createNode = await this.neo4jService.createNode(baseFacilityObject, [structureData['nodeType']]);
     //create PARENT_OF relation between parent facility structure node and child facility structure node.
@@ -527,6 +535,12 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
         RelationName.PARENT_OF,
       );
     }
+    // if (createNode.properties.nodeType == 'Space') {
+    //   await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.spaceType, createNode.properties.key, RelationName.CLASSIFICATION_OF);
+    // }
+    // if (createNode.properties.nodeType == 'Building') {
+    //   await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.category, createNode.properties.key, RelationName.CLASSIFICATION_OF);
+    // }
     const response = {
       id: createNode['identity'].low,
       labels: createNode['labels'],
