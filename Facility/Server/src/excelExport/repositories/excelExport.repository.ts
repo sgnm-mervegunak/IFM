@@ -19,7 +19,7 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
     let data:any
     let jsonData=[]
     let buildingType=[]
-    let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m) where m.isDeleted=false  and not (m:JointSpaces OR m:JointSpace OR m:Zones or m:Zone) 
+    let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m)-[:CLASSIFICATION_BY|:CREATED_BY]->(c) where m.isDeleted=false  and not (m:JointSpaces OR m:JointSpace OR m:Zones or m:Zone) 
     WITH collect(path) AS paths
     CALL apoc.convert.toTree(paths)
     YIELD value
@@ -62,7 +62,6 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
     }
     
     let typeList=await Object.values(buildingType[0])
-    console.log(typeList)
     
     
     
@@ -70,11 +69,28 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
       for (let index = 0; index < data.value.parent_of?.length; index++) {
     
         for (let i = 0; i < data.value.parent_of[index].parent_of?.length; i++) {
-          
-            jsonData.push({building:data.value.name,
-              block:"-",
-              floor:data.value.parent_of[index].name,
-                space:data.value.parent_of[index].parent_of[i].name})
+          let spaceProperties= data.value.parent_of[index].parent_of[i];
+            jsonData.push({BuildingName:data.value.name,
+              BlockName:"-",
+              FloorName:data.value.parent_of[index].name,
+              SpaceName:spaceProperties.name,
+              Code:spaceProperties.code,
+              ArchitecturalName:spaceProperties.architecturalName,
+              Category:spaceProperties.classification_by[0].name,
+              GrossArea:spaceProperties.grossArea,
+              NetArea:spaceProperties.netArea,
+              Usage:spaceProperties.usage,
+              Tag:spaceProperties.tag,
+              Status:spaceProperties.status,
+              ArchitecturalCode:spaceProperties.architecturalCode,
+              description:spaceProperties.description,
+              UsableHeight:spaceProperties.availableHeight,
+              ExternalSystem:spaceProperties.externalSystem,
+              ExternalObject:spaceProperties.externalObject,
+              ExternalIdentifier:spaceProperties.externalIdentifier,
+              CreatedOn:spaceProperties.createdOn,
+              CreatedBy:spaceProperties.createdBy[0].email
+              })
         }
       }
     
@@ -85,11 +101,29 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
         for (let i = 0; i < data.value.parent_of[index].parent_of?.length; i++) {
           
           for (let a = 0; a < data.value.parent_of[index].parent_of[i].parent_of?.length; a++) {
+            let spaceProperties=data.value.parent_of[index].parent_of[i].parent_of[a];
             
             jsonData.push({BuildingName:data.value.name,
               BlockName:data.value.parent_of[index].name,
               FloorName:data.value.parent_of[index].parent_of[i].name,
-                SpaceName:data.value.parent_of[index].parent_of[i].parent_of[a].name})
+                SpaceName:data.value.parent_of[index].parent_of[i].parent_of[a].name,
+                Code:spaceProperties.code,
+              ArchitecturalName:spaceProperties.architecturalName,
+              Category:spaceProperties.classification_by[0].name,
+              GrossArea:spaceProperties.grossArea,
+              NetArea:spaceProperties.netArea,
+              Usage:spaceProperties.usage,
+              Tag:spaceProperties.tag,
+              Status:spaceProperties.status,
+              ArchitecturalCode:spaceProperties.architecturalCode,
+              description:spaceProperties.description,
+              UsableHeight:spaceProperties.availableHeight,
+              ExternalSystem:spaceProperties.externalSystem,
+              ExternalObject:spaceProperties.externalObject,
+              ExternalIdentifier:spaceProperties.externalIdentifier,
+              CreatedOn:spaceProperties.createdOn,
+              CreatedBy:spaceProperties.createdBy[0].email
+              })
             
           }
           
