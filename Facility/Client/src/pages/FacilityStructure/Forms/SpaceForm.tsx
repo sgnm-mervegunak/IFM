@@ -9,6 +9,7 @@ import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Chips } from "primereact/chips";
 import { TreeSelect } from "primereact/treeselect";
+import { TabView, TabPanel } from 'primereact/tabview';
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAppSelector } from "../../../app/hook";
 import axios from "axios";
@@ -89,7 +90,7 @@ const SpaceForm = ({
   const [tag, setTag] = useState<string[]>([]);
   const [images, setImages] = useState("");
   const [status, setStatus] = useState<any>(undefined);
-  const [classificationSpace, setClassificationSpace] = useState<Node[]>([]);
+  const [classificationSpaceCategory, setClassificationSpaceCategory] = useState<Node[]>([]);
   const [classificationStatus, setclassificationStatus] = useState<Node[]>([]);
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
@@ -123,12 +124,12 @@ const SpaceForm = ({
   const getClassificationSpace = async () => {
     await ClassificationsService.findAllActiveByLabel({
       realm: realm,
-      label: "OmniClass13",
+      label: "OmniClass11",
       language: "en",
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodes(temp);
-      setClassificationSpace(temp);
+      setClassificationSpaceCategory(temp);
     });
   };
 
@@ -211,13 +212,19 @@ const SpaceForm = ({
         code: data?.code,
         name: data?.name,
         architecturalName: data?.architecturalName,
-        spaceType: data?.spaceType,
+        category: data?.category,
         m2: data?.m2,
         usage: data?.usage,
         tag: data?.tag,
         images: data?.images,
         status: data?.status,
         nodeType: selectedFacilityType,
+        architecturalCode: data?.architecturalCode,
+        description: data?.description,
+        usableHeight: data?.usableHeight,
+        grossArea: data?.grossArea,
+        netArea: data?.netArea,
+
       };
 
       FacilityStructureService.createStructure(selectedNodeKey, newNode)
@@ -269,7 +276,7 @@ const SpaceForm = ({
         .catch((err) => {
           toast.current.show({
             severity: "error",
-            summary:  t("Error"),
+            summary: t("Error"),
             detail: err.response ? err.response.data.message : err.message,
             life: 4000,
           });
@@ -286,13 +293,18 @@ const SpaceForm = ({
         code: data?.code,
         name: data?.name,
         architecturalName: data?.architecturalName,
-        spaceType: data?.spaceType,
+        category: data?.category,
         m2: data?.m2,
         usage: data?.usage,
         tag: data?.tag,
         images: data?.images,
         status: data?.status,
         nodeType: selectedFacilityType,
+        architecturalCode: data?.architecturalCode,
+        description: data?.description,
+        usableHeight: data?.usableHeight,
+        grossArea: data?.grossArea,
+        netArea: data?.netArea,
       };
 
       FacilityStructureService.update(selectedNodeKey, updateNode)
@@ -373,7 +385,218 @@ const SpaceForm = ({
 
   return (
     <form>
-      <div className="field">
+      <TabView className="tabview-header-icon">
+        <TabPanel header="Form" leftIcon="pi pi-bars">
+          <div className="formgrid grid">
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("code")}
+                style={{ width: '100%' }}
+                defaultValue={data?.code || ""}
+              />
+              <p style={{ color: "red" }}>{errors.code?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("name")}
+                style={{ width: '100%' }}
+                defaultValue={data?.name || ""}
+              />
+              <p style={{ color: "red" }}>{errors.name?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Architectural Code")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("architecturalCode")}
+                style={{ width: '100%' }}
+                defaultValue={data?.architecturalCode || ""}
+              />
+              <p style={{ color: "red" }}>{errors.architecturalCode?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Architectural Name")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("architecturalName")}
+                style={{ width: '100%' }}
+                defaultValue={data?.architecturalName || ""}
+              />
+              <p style={{ color: "red" }}>{errors.architecturalName?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>Category</h5>
+              <Controller
+                defaultValue={data?.category || []}
+                name="category"
+                control={control}
+                render={({ field }) => (
+                  <TreeSelect
+                    value={field.value}
+                    options={classificationSpaceCategory}
+                    onChange={(e) => {
+                      ClassificationsService.nodeInfo(e.value as string)
+                        .then((res) => {
+                          field.onChange(e.value)
+                          // setCodeCategory(res.data.properties.code || "");    // Düzeltilecek
+                        })
+                    }}
+                    filter
+                    placeholder="Select Type"
+                    style={{ width: "100%" }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.category?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Usage")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("usage")}
+                style={{ width: '100%' }}
+                defaultValue={data?.usage || ""}
+              />
+              <p style={{ color: "red" }}>{errors.usage?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Description")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("description")}
+                style={{ width: '100%' }}
+                defaultValue={data?.description || ""}
+              />
+              <p style={{ color: "red" }}>{errors.description?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
+              <Controller
+
+                defaultValue={data?.tag || []}
+                name="tag"
+                control={control}
+                render={({ field }) => (
+                  <Chips
+                    value={field.value}
+                    onChange={(e) => {
+                      field.onChange(e.value)
+                    }}
+                    style={{ width: "100%" }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.tag?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Usable Height")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("usableHeight")}
+                style={{ width: '100%' }}
+                defaultValue={data?.usableHeight || ""}
+              />
+              <p style={{ color: "red" }}>{errors.usableHeight?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+            <h5 style={{ marginBottom: "0.5em" }}>Status</h5>
+              <Controller
+                defaultValue={data?.status || []}
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <TreeSelect
+                    value={field.value}
+                    options={classificationStatus}
+                    onChange={(e) => {
+                      ClassificationsService.nodeInfo(e.value as string)
+                        .then((res) => {
+                          console.log(res.data);
+
+                          field.onChange(e.value)
+                          // setCodeStatus(res.data.properties.code || "");   //Düzeltilecek
+                        })
+                    }}
+                    filter
+                    placeholder="Select Type"
+                    style={{ width: "100%" }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.status?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Gross Area")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("grossArea")}
+                style={{ width: '100%' }}
+                defaultValue={data?.grossArea || ""}
+              />
+              <p style={{ color: "red" }}>{errors.grossArea?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Net Area")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("netArea")}
+                style={{ width: '100%' }}
+                defaultValue={data?.netArea || ""}
+              />
+              <p style={{ color: "red" }}>{errors.netArea?.message}</p>
+            </div>
+
+          </div>
+
+        </TabPanel>
+        <TabPanel header="Images" headerClassName="ml-4" leftIcon="pi pi-images">
+          <div className="formgrid grid">
+            <div className="field col-12">
+              <h5 style={{ marginBottom: "0.5em" }}>Images</h5>
+              <Controller
+                defaultValue={data?.images || []}
+                name="images"
+                control={control}
+                render={({ field }) => (
+                  <ImageUploadComponent
+                    label={"images"}
+                    value={field.value}
+                    onChange={(e: any) => {
+                      console.log(e);
+
+                      field.onChange(e)
+                    }}
+                    deleteFiles={deleteFiles}
+                    setDeleteFiles={setDeleteFiles}
+                    uploadFiles={uploadFiles}
+                    setUploadFiles={setUploadFiles}
+
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.images?.message}</p>
+            </div>
+          </div>
+        </TabPanel>
+
+      </TabView>
+      {/* <div className="field">
         <h5 style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
         <InputText
           autoComplete="off"
@@ -513,7 +736,7 @@ const SpaceForm = ({
           )}
         />
       </div>
-      <p style={{ color: "red" }}>{errors.images?.message}</p>
+      <p style={{ color: "red" }}>{errors.images?.message}</p> */}
 
     </form>
   );
