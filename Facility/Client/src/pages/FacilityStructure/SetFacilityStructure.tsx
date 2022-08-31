@@ -661,7 +661,20 @@ const SetFacilityStructure = () => {
       <Dialog
         header={t("Add New Item")}
         visible={addDia}
-        style={{ width: "40vw" }}
+        style={{ width: (() => {
+          if (selectedFacilityType === "Building") {
+            return "50vw";
+          } else if(selectedFacilityType === "Block") {
+            return "40vw";
+          } else if (selectedFacilityType === "Floor") {
+            return "40vw";
+          } else if (selectedFacilityType === "Space") {
+            return "40vw";
+          } else {
+            return "40vw";
+          }
+          
+        })()}}
         footer={renderFooterAdd}
         onHide={() => {
           setAddDia(false);
@@ -782,7 +795,17 @@ const SetFacilityStructure = () => {
       <Dialog
         header={t("Edit Item")}
         visible={editDia}
-        style={{ width: "40vw" }}
+        style={{ width: (() => {
+          if (selectedFacilityType === "Building") {
+            return "50vw";
+          } else if(selectedFacilityType === "Block") {
+            return "40vw";
+          } else if (selectedFacilityType === "Floor") {
+            return "40vw";
+          } else if (selectedFacilityType === "Space") {
+            return "40vw";
+          }
+        })()}}
         footer={renderFooterEdit}
         onHide={() => {
           setEditDia(false);
