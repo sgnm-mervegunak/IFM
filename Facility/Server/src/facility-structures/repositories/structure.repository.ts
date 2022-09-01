@@ -588,30 +588,25 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
     }
     
     baseFacilityObject = assignDtoPropToEntity(baseFacilityObject, structureData);
-    let createdBy;
-    if (structureData['nodeType'] == 'Space') {
-      delete baseFacilityObject['category'];
-      createdBy = baseFacilityObject["createdBy"];
-      delete baseFacilityObject["createdBy"];
-    }
-
+    let createdBy=baseFacilityObject["createdBy"];
+    delete baseFacilityObject["createdBy"];
+    delete baseFacilityObject['category']
+    
     const createNode = await this.neo4jService.createNode(baseFacilityObject, [structureData['nodeType']]);
-    if (structureData['nodeType'] == 'Space') {
+    const contactNode = await this.findChildrensByLabelsAndRelationNameOneLevel(
+      ['Contact'],
+      {"isDeleted": false, "realm": realm},
+      [],
+      {"isDeleted": false, "email":  createdBy},
+      "PARENT_OF"
+      );
+      if (contactNode && contactNode.length && contactNode.length == 1) {
+        await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.key,contactNode[0]["_fields"][1]["properties"].key, RelationName.CREATED_BY); 
+      }
+    if (structureData['nodeType'] != 'Block') {
       await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.key,structureData["category"], RelationName.CLASSIFIED_BY);
-      const contactNode = await this.findChildrensByLabelsAndRelationNameOneLevel(
-        ['Contact'],
-        {"isDeleted": false, "realm": realm},
-        [],
-        {"isDeleted": false, "email":  createdBy},
-        "CREATED_BY"
-        );
-        if (contactNode && contactNode.length &&contactNode.length == 1) {
-          await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.key,contactNode[0]["_fields"][1]["property"].key, RelationName.CREATED_BY); 
-        }
-      
     }
     
-   
     //create PARENT_OF relation between parent facility structure node and child facility structure node.
     await this.neo4jService.addRelationWithRelationNameByKey(key, createNode.properties.key, RelationName.PARENT_OF);
     let jointSpaces = new JointSpaces();
@@ -631,12 +626,7 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
         RelationName.PARENT_OF,
       );
     }
-    if (createNode.properties.nodeType == 'Space') {
-      await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.key,structureData["category"], RelationName.CLASSIFIED_BY);
-    }
-    // if (createNode.properties.nodeType == 'Building') {
-    //   await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.category, createNode.properties.key, RelationName.CLASSIFICATION_OF);
-    // }
+   
     const response = {
       id: createNode['identity'].low,
       labels: createNode['labels'],
