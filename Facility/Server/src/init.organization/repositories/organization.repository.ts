@@ -114,25 +114,13 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       },
       ['Zone_Config'],
     );
-    const languageTRNode = await this.neo4jService.createNode(
+     
+    const languageConfigNode = await this.neo4jService.createNode(
       {
         canDelete: false,
         isDeleted: false,
         nodesCanDelete: true,
-        name: 'TR',
-        realm: 'Signum',
-        isRoot: true,
-        canCopied: true,
-        isActive: true,
-      },
-      ['Language_Config'],
-    );
-    const languageENNode = await this.neo4jService.createNode(
-      {
-        canDelete: false,
-        isDeleted: false,
-        nodesCanDelete: true,
-        name: 'EN',
+        name: 'LanguageConfig',
         realm: 'Signum',
         isRoot: true,
         canCopied: true,
@@ -142,8 +130,32 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     );
     await this.neo4jService.addRelations(spaceConfigNode.identity.low, configNode.identity.low);
     await this.neo4jService.addRelations(zoneConfigNode.identity.low, configNode.identity.low);
-    await this.neo4jService.addRelations(languageTRNode.identity.low, configNode.identity.low);
-    await this.neo4jService.addRelations(languageENNode.identity.low, configNode.identity.low);
+    await this.neo4jService.addRelations(languageConfigNode.identity.low, configNode.identity.low);
+   
+
+
+    const languageTRNode = await this.neo4jService.createNode(
+      {
+        canDelete: true,
+        isDeleted: false,
+        name: 'TR',
+        realm: 'Signum',
+        isActive: true,
+      },
+      [],
+    );
+    const languageENNode = await this.neo4jService.createNode(
+      {
+        canDelete: true,
+        isDeleted: false,
+        name: 'EN',
+        realm: 'Signum',
+        isActive: true,
+      },
+      [],
+    );
+    await this.neo4jService.addRelations(languageTRNode.identity.low, languageConfigNode.identity.low);
+    await this.neo4jService.addRelations(languageENNode.identity.low, languageConfigNode.identity.low);
 
     const facilityStatusNode = await this.neo4jService.createNode(
       {

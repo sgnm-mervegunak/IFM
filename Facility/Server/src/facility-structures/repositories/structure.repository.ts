@@ -605,9 +605,9 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
       }
       if (structureData['nodeType'] != 'Block') {
        const languages = await this.findChildrensByLabelsAndRelationNameOneLevel(
-        ['System_Config'],
-        {"isDeleted": false, "realm": realm},
         ['Language_Config'],
+        {"isDeleted": false, "realm": realm},
+        [],
         {"isDeleted": false},
         "PARENT_OF"
         );
