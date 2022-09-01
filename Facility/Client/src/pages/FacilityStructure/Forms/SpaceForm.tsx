@@ -92,8 +92,12 @@ const SpaceForm = ({
   const [status, setStatus] = useState<any>(undefined);
   const [classificationSpaceCategory, setClassificationSpaceCategory] = useState<Node[]>([]);
   const [classificationStatus, setclassificationStatus] = useState<Node[]>([]);
+  const [codeCategory, setCodeCategory] = useState("");
+  const [codeStatus, setCodeStatus] = useState("");
+  const [codeUsage, setCodeUsage] = useState("");
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
+  const language = useAppSelector((state) => state.language.language);
 
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
   const [uploadFiles, setUploadFiles] = useState<any>({});
@@ -121,11 +125,11 @@ const SpaceForm = ({
     }
   };
 
-  const getClassificationSpace = async () => {
+  const getClassificationSpaceCategory = async () => {
     await ClassificationsService.findAllActiveByLabel({
       realm: realm,
       label: "OmniClass11",
-      language: "en",
+      language: language,
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodes(temp);
@@ -137,7 +141,7 @@ const SpaceForm = ({
     await ClassificationsService.findAllActiveByLabel({
       realm: realm,
       label: "FacilityStatus",
-      language: "en",
+      language: language,
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodes(temp);
@@ -154,7 +158,7 @@ const SpaceForm = ({
     , [data])
 
   useEffect(() => {
-    getClassificationSpace();
+    getClassificationSpaceCategory();
     getClassificationStatus();
   }, []);
 
@@ -174,9 +178,32 @@ const SpaceForm = ({
 
   const getNodeInfoForUpdate = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
-      .then((res) => {
-        setData(res.data.properties);
+      .then(async (res) => {
+        let temp = {};
+        await ClassificationsService.findClassificationByCodeAndLanguage(realm, "OmniClass11", language, res.data.properties.category).then(clsf1 => {
+          res.data.properties.category = clsf1.data.key
+          temp = res.data.properties;
+          // setData(res.data.properties);
+        })
+          .catch((err) => {
+            setData(res.data.properties);
+          })
 
+        await ClassificationsService.findClassificationByCodeAndLanguage(realm, "FacilityStatus", language, res.data.properties.status).then(async clsf2 => {
+          res.data.properties.status = await clsf2.data.key
+          temp = res.data.properties;
+          // setData(res.data.properties);
+        })
+
+        await ClassificationsService.findClassificationByCodeAndLanguage(realm, "OmniClass11", language, res.data.properties.usage).then(async clsf3 => {
+          res.data.properties.status = await clsf3.data.key
+          temp = res.data.properties;
+          // setData(res.data.properties);
+        })
+          .catch((err) => {
+            setData(res.data.properties);
+          })
+        setData(temp);
       })
       .catch((err) => {
         toast.current.show({
@@ -385,8 +412,8 @@ const SpaceForm = ({
 
   return (
     <form>
-      <TabView className="tabview-header-icon">
-        <TabPanel header="Form" leftIcon="pi pi-bars">
+      <TabView>
+        <TabPanel header="Form">
           <div className="formgrid grid">
 
             <div className="field col-12 md:col-6">
@@ -434,7 +461,7 @@ const SpaceForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>Category</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
               <Controller
                 defaultValue={data?.category || []}
                 name="category"
@@ -447,7 +474,7 @@ const SpaceForm = ({
                       ClassificationsService.nodeInfo(e.value as string)
                         .then((res) => {
                           field.onChange(e.value)
-                          // setCodeCategory(res.data.properties.code || "");    // Düzeltilecek
+                          setCodeCategory(res.data.properties.code || "");
                         })
                     }}
                     filter
@@ -461,11 +488,26 @@ const SpaceForm = ({
 
             <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Usage")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("usage")}
-                style={{ width: '100%' }}
-                defaultValue={data?.usage || ""}
+              <Controller
+                defaultValue={data?.usage || []}
+                name="usage"
+                control={control}
+                render={({ field }) => (
+                  <TreeSelect
+                    value={field.value}
+                    options={classificationSpaceCategory}                  // Düzeltilecek
+                    onChange={(e) => {
+                      ClassificationsService.nodeInfo(e.value as string)
+                        .then((res) => {
+                          field.onChange(e.value)
+                          setCodeUsage(res.data.properties.code || "");
+                        })
+                    }}
+                    filter
+                    placeholder="Select Type"
+                    style={{ width: "100%" }}
+                  />
+                )}
               />
               <p style={{ color: "red" }}>{errors.usage?.message}</p>
             </div>
@@ -481,8 +523,8 @@ const SpaceForm = ({
               <p style={{ color: "red" }}>{errors.description?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
+            <div className="field col-12 md:col-6 structureChips">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
               <Controller
 
                 defaultValue={data?.tag || []}
@@ -513,7 +555,7 @@ const SpaceForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
-            <h5 style={{ marginBottom: "0.5em" }}>Status</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Status")}</h5>
               <Controller
                 defaultValue={data?.status || []}
                 name="status"
@@ -525,14 +567,12 @@ const SpaceForm = ({
                     onChange={(e) => {
                       ClassificationsService.nodeInfo(e.value as string)
                         .then((res) => {
-                          console.log(res.data);
-
                           field.onChange(e.value)
-                          // setCodeStatus(res.data.properties.code || "");   //Düzeltilecek
+                          setCodeStatus(res.data.properties.code || "");   //Düzeltilecek
                         })
                     }}
                     filter
-                    placeholder="Select Type"
+                    placeholder="Select Status"
                     style={{ width: "100%" }}
                   />
                 )}
@@ -565,10 +605,10 @@ const SpaceForm = ({
           </div>
 
         </TabPanel>
-        <TabPanel header="Images" headerClassName="ml-4" leftIcon="pi pi-images">
+        <TabPanel header="Images">
           <div className="formgrid grid">
             <div className="field col-12">
-              <h5 style={{ marginBottom: "0.5em" }}>Images</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Images")}</h5>
               <Controller
                 defaultValue={data?.images || []}
                 name="images"
@@ -596,147 +636,6 @@ const SpaceForm = ({
         </TabPanel>
 
       </TabView>
-      {/* <div className="field">
-        <h5 style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
-        <InputText
-          autoComplete="off"
-          {...register("code")}
-          style={{ width: '100%' }}
-          defaultValue={data?.code || ""}
-        />
-      </div>
-      <p style={{ color: "red" }}>{errors.code?.message}</p>
-
-      <div className="field">
-        <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
-        <InputText
-          autoComplete="off"
-          {...register("name")}
-          style={{ width: '100%' }}
-          defaultValue={data?.name || ""}
-        />
-      </div>
-      <p style={{ color: "red" }}>{errors.name?.message}</p>
-
-      <div className="field">
-        <h5 style={{ marginBottom: "0.5em" }}>{t("Architectural Name")}</h5>
-        <InputText
-          autoComplete="off"
-          {...register("architecturalName")}
-          style={{ width: '100%' }}
-          defaultValue={data?.architecturalName || ""}
-        />
-      </div>
-      <p style={{ color: "red" }}>{errors.architecturalName?.message}</p>
-
-      <div className="field">
-        <h5 style={{ marginBottom: "0.5em" }}>{t("Space Type")}</h5>
-        <Controller
-          defaultValue={data?.spaceType || []}
-          name="spaceType"
-          control={control}
-          render={({ field }) => (
-            <TreeSelect
-              value={field.value}
-              options={classificationSpace}
-              onChange={(e) => {
-                field.onChange(e.value)
-              }}
-              filter
-              placeholder="Select Type"
-              style={{ width: "100%" }}
-            />
-          )}
-        />
-      </div>
-      <p style={{ color: "red" }}>{errors.spaceType?.message}</p>
-
-      <div className="field">
-        <h5 style={{ marginBottom: "0.5em" }}>M2</h5>
-        <InputText
-          autoComplete="off"
-          {...register("m2")}
-          style={{ width: '100%' }}
-          defaultValue={data?.m2 || ""}
-        />
-      </div>
-      <p style={{ color: "red" }}>{errors.m2?.message}</p>
-
-      <div className="field">
-        <h5 style={{ marginBottom: "0.5em" }}>{t("Usage")}</h5>
-        <InputText
-          autoComplete="off"
-          {...register("usage")}
-          style={{ width: '100%' }}
-          defaultValue={data?.usage || ""}
-        />
-      </div>
-      <p style={{ color: "red" }}>{errors.usage?.message}</p>
-
-      <div className="field structureChips">
-        <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
-        <Controller
-
-          defaultValue={data?.tag || []}
-          name="tag"
-          control={control}
-          render={({ field }) => (
-            <Chips
-              value={field.value}
-              onChange={(e) => {
-                field.onChange(e.value)
-              }}
-              style={{ width: "100%" }}
-            />
-          )}
-        />
-      </div>
-      <p style={{ color: "red" }}>{errors.tag?.message}</p>
-
-      <div className="field">
-        <h5 style={{ marginBottom: "0.5em" }}>{t("Status")}</h5>
-        <Controller
-          defaultValue={data?.status || "In used"}
-          name="status"
-          control={control}
-          render={({ field }) => (
-            <TreeSelect
-              value={field.value}
-              options={classificationStatus}
-              onChange={(e) => {
-                field.onChange(e.value)
-              }}
-              placeholder={"Select Type"}
-              style={{ width: "100%" }}
-            />
-          )}
-        />
-      </div>
-      <p style={{ color: "red" }}>{errors.status?.message}</p>
-
-      <div className="field">
-        <h5 style={{ marginBottom: "0.5em" }}>{t("Images")}</h5>
-        <Controller
-          defaultValue={data?.images || []}
-          name="images"
-          control={control}
-          render={({ field }) => (
-            <ImageUploadComponent
-              label={"images"}
-              value={field.value}
-              onChange={(e: any) => {
-                field.onChange(e)
-              }}
-              deleteFiles={deleteFiles}
-              setDeleteFiles={setDeleteFiles}
-              uploadFiles={uploadFiles}
-              setUploadFiles={setUploadFiles}
-
-            />
-          )}
-        />
-      </div>
-      <p style={{ color: "red" }}>{errors.images?.message}</p> */}
 
     </form>
   );

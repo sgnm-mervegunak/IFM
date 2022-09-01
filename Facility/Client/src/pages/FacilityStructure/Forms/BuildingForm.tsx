@@ -182,39 +182,27 @@ const BuildingForm = ({
   const getNodeInfoForUpdate = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
-        // let temp = {};
+        let temp = {};
         await ClassificationsService.findClassificationByCodeAndLanguage(realm, "OmniClass11", language, res.data.properties.category).then(clsf1 => {
           res.data.properties.category = clsf1.data.key
-          // temp = res.data.properties;
-          setData(res.data.properties);
+          temp = res.data.properties;
+          // setData(res.data.properties);
         })
           .catch((err) => {
             setData(res.data.properties);
-            toast.current.show({
-              severity: "error",
-              summary: t("Error"),
-              detail: err.response ? err.response.data.message : err.message,
-              life: 4000,
-            });
           })
 
         await ClassificationsService.findClassificationByCodeAndLanguage(realm, "FacilityStatus", language, res.data.properties.status).then(async clsf2 => {
           console.log(clsf2.data);
 
           res.data.properties.status = await clsf2.data.key
-          // temp = res.data.properties;
-          setData(res.data.properties);
+          temp = res.data.properties;
+          // setData(res.data.properties);
         })
           .catch((err) => {
             setData(res.data.properties);
-            toast.current.show({
-              severity: "error",
-              summary: t("Error"),
-              detail: err.response ? err.response.data.message : err.message,
-              life: 4000,
-            });
           })
-        // setData(temp);
+        setData(temp);
       })
       .catch((err) => {
         toast.current.show({
@@ -448,11 +436,12 @@ const BuildingForm = ({
   return (
     <form>
 
-      <TabView className="tabview-header-icon">
-        <TabPanel header="Form" leftIcon="pi pi-bars">
+      <TabView>
+        <TabPanel header="Form">
           <div className="formgrid grid">
+
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("name")}
@@ -463,7 +452,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>Project Name</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Project Name")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("projectName")}
@@ -474,7 +463,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>Category</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
               <Controller
                 defaultValue={data?.category || []}
                 name="category"
@@ -500,7 +489,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>Status</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Status")}</h5>
               <Controller
                 defaultValue={data?.status || []}
                 name="status"
@@ -528,7 +517,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Owner</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Owner")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("owner")}
@@ -539,7 +528,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Operator</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Operator")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("operator")}
@@ -550,7 +539,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Contractor</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Contractor")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("contractor")}
@@ -561,7 +550,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Area Measurement</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Area Measurement")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("areaMeasurement")}
@@ -572,7 +561,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Handover Date</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Handover Date")}</h5>
               <Controller
                 defaultValue={new Date(data?.handoverDate)}
                 name="handoverDate"
@@ -593,7 +582,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Operation Start Date</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Operation Start Date")}</h5>
               <Controller
                 defaultValue={new Date(data?.operationStartDate)}
                 name="operationStartDate"
@@ -614,7 +603,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Warranty Expire Date</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Expire Date")}</h5>
               <Controller
                 defaultValue={new Date(data?.warrantyExpireDate)}
                 name="warrantyExpireDate"
@@ -635,7 +624,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Phase</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Phase")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("phase")}
@@ -750,7 +739,7 @@ const BuildingForm = ({
             </div> */}
 
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>Address</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Address")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("address")}
@@ -761,7 +750,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-6 structureChips">
-              <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
               <Controller
 
                 defaultValue={data?.tag || []}
@@ -781,7 +770,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>Description</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Description")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("description")}
@@ -792,7 +781,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>Site Name</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Site Name")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("siteName")}
@@ -803,7 +792,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>Project Description</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Project Description")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("projectDescription")}
@@ -814,7 +803,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>Site Description</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Site Description")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("siteDescription")}
@@ -827,10 +816,10 @@ const BuildingForm = ({
           </div>
 
         </TabPanel>
-        <TabPanel header="Images" headerClassName="ml-4" leftIcon="pi pi-images">
+        <TabPanel header="Images">
           <div className="formgrid grid">
             <div className="field col-12">
-              <h5 style={{ marginBottom: "0.5em" }}>Images</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Images")}</h5>
               <Controller
                 defaultValue={data?.images || []}
                 name="images"
@@ -856,10 +845,10 @@ const BuildingForm = ({
             </div>
           </div>
         </TabPanel>
-        <TabPanel header="Documents" leftIcon="pi pi-file" >
+        <TabPanel header="Documents">
           <div className="formgrid grid">
             <div className="field col-12">
-              <h5 style={{ marginBottom: "0.5em" }}>Documents</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Documents")}</h5>
               <Controller
                 defaultValue={data?.documents || []}
                 name="documents"

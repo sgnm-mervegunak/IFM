@@ -665,7 +665,7 @@ const SetFacilityStructure = () => {
         style={{
           width: (() => {
             if (selectedFacilityType === "Building") {
-              return "50vw";
+              return "60vw";
             } else if (selectedFacilityType === "Block") {
               return "40vw";
             } else if (selectedFacilityType === "Floor") {
@@ -801,7 +801,7 @@ const SetFacilityStructure = () => {
         style={{
           width: (() => {
             if (selectedFacilityType === "Building") {
-              return "50vw";
+              return "60vw";
             } else if (selectedFacilityType === "Block") {
               return "40vw";
             } else if (selectedFacilityType === "Floor") {
