@@ -1,27 +1,26 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { FacilityStructureNotFountException } from '../../common/notFoundExceptions/not.found.exception';
-import { NestKafkaService } from 'ifmcommon';
 import { Neo4jService, assignDtoPropToEntity, createDynamicCyperObject } from 'sgnm-neo4j/dist';
 import { RelationName } from 'src/common/const/relation.name.enum';
 import { CreateZoneDto } from '../dto/create.zone.dto';
 import { Zone } from '../entities/zone.entity';
-import * as moment from 'moment';
-import { ZoneInterface } from 'src/common/interface/zone.interface';
-const exceljs =require("exceljs")
+const exceljs = require('exceljs');
 import { generateUuid } from 'src/common/baseobject/base.virtual.node.object';
+import { JointSpaceAndZoneInterface } from 'src/common/interface/joint.space.zone.interface';
 
 @Injectable()
-export class ZoneRepository implements ZoneInterface<any> {
-  constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) {}
-  changeNodeBranch(id: string, target_parent_id: string) {
-    throw new Error('Method not implemented.');
-  }
-  findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) {
-    throw new Error('Method not implemented.');
-  }
+export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
+  constructor(private readonly neo4jService: Neo4jService) {}
 
-  async findOneByRealm(label: string, realm: string) {
-    let node = await this.findByRealmWithTreeStructure(label, realm);
+  async findOneByRealm(key: string, realm: string) {
+    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
+      ['Building'],
+      { key, isDeleted: false },
+      [],
+      {
+        isDeleted: false,
+      },
+    );
     if (!node) {
       throw new FacilityStructureNotFountException(realm);
     }
@@ -42,39 +41,29 @@ export class ZoneRepository implements ZoneInterface<any> {
 
     //get all nodes by key and their parent building node
     await Promise.all(
-      nodeKeys.map(async (element) => {
-        const node = await this.neo4jService.read(
-          `match(n{isDeleted:false,key:$key,isActive:true }) where n:Space return n`,
-          {
-            key: element,
-          },
-        );
-        if (!node.records.length) {
+      nodeKeys.map(async (key) => {
+        const node = await this.neo4jService.findByLabelAndFilters(['Space'], {
+          isDeleted: false,
+          key,
+          isActive: true,
+        });
+        if (!node[0].length) {
           throw new HttpException('Node not found', HttpStatus.NOT_FOUND);
         }
         //check type and has active merged relationship
-        if (node.records[0]['_fields'][0].labels[0] === 'Space') {
-          spaceNodes.push(node.records[0]['_fields'][0]);
+        if (node[0].get('n').labels.includes('Space')) {
+          spaceNodes.push(node[0].get('n'));
+          const parentStructure = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+            ['Building'],
+            { isDeleted: false },
+            [],
+            { key: key },
+            'PARENT_OF',
+          );
+          parentNodes.push(parentStructure[0].get('parent'));
+        } else {
+          throw new HttpException('Zones cannot use for create zones', 400);
         }
-
-        //check type and has active merged relationship and updateZone property
-        // if (node.records[0]['_fields'][0].labels[0] === 'Zone') {
-        //   zoneNodes.push(node.records[0]['_fields'][0]);
-        //   const mergedNodes = await this.neo4jService.read(
-        //     `match(n {key:$key}) match(p {isActive:true,isDeleted:false}) match(p)-[:MERGED]->(n) return p`,
-        //     { key: node.records[0]['_fields'][0].properties.key },
-        //   );
-
-        //   mergedNodes.records.map((mergedNode) => {
-        //     spaceNodes.push(mergedNode['_fields'][0]);
-        //   });
-        // }
-        const parentStructure = await this.neo4jService.read(
-          `match (n:Building) match(p {key:$key}) match(n)-[r:PARENT_OF*]->(p) return n`,
-          { key: element },
-        );
-        parentNodes.push(parentStructure.records[0]['_fields'][0]);
-        //   const isInZone = await this.neo4jService.read(`match(n{isDeleted:false,key:$key }) where n:Zone return n`, {})
       }),
     );
 
@@ -85,19 +74,13 @@ export class ZoneRepository implements ZoneInterface<any> {
       }
     });
 
-    // ?????????????????????????????
-    // await Promise.all(
-    //   zoneNodes.map(async (element) => {
-    //     await this.neo4jService.updateById(element.identity.low, {
-    //       isDeleted: true,
-    //     });
-    //   }),
-    // );
-
     //get building node zones
-    const zonesNode = await this.neo4jService.read(
-      `match(p:Building {key:$key,isDeleted:false})  match(n:Zones {isDeleted:false}) match(p)-[:PARENT_OF]->(n)  return n`,
-      { key: parentNodes[0].properties.key },
+
+    const zonesNode = await this.neo4jService.findChildrensByLabelsOneLevel(
+      ['Building'],
+      { key: parentNodes[0].properties.key, isDeleted: false },
+      ['Zones'],
+      { isActive: true, isDeleted: false },
     );
 
     //create new Zone node and add relations to relating Zones node and space nodes
@@ -105,7 +88,7 @@ export class ZoneRepository implements ZoneInterface<any> {
     const zoneObject = assignDtoPropToEntity(zoneEntity, createZoneDto);
     delete zoneObject['nodeKeys'];
     const zone = await this.neo4jService.createNode(zoneObject, ['Zone']);
-    await this.neo4jService.addRelations(zone.identity.low, zonesNode.records[0]['_fields'][0].identity.low);
+    await this.neo4jService.addRelations(zone.identity.low, zonesNode[0].get('parent').identity.low);
 
     spaceNodes.map(async (element) => {
       await this.neo4jService.addRelationWithRelationName(
@@ -113,7 +96,6 @@ export class ZoneRepository implements ZoneInterface<any> {
         zone.identity.low,
         RelationName.MERGEDZN,
       );
-      //   const isInZone = await this.neo4jService.read(`match(n{isDeleted:false,key:$key }) where n:Zone return n`, {})
     });
 
     return zone.properties;
@@ -266,45 +248,39 @@ export class ZoneRepository implements ZoneInterface<any> {
     }
   }
 
-  async addZonesToBuilding( file: Express.Multer.File, realm: string,buildingKey: string,language: string){
-
-    let data=[]
+  async addZonesToBuilding(file: Express.Multer.File, realm: string, buildingKey: string, language: string) {
+    let data = [];
     let buffer = new Uint8Array(file.buffer);
     const workbook = new exceljs.Workbook();
-  
-  
-  await workbook.xlsx.load(buffer).then(function async(book) {
-      const firstSheet =  book.getWorksheet(6);
-      firstSheet.eachRow({ includeEmpty: false }, function(row) {
+
+    await workbook.xlsx.load(buffer).then(function async(book) {
+      const firstSheet = book.getWorksheet(6);
+      firstSheet.eachRow({ includeEmpty: false }, function (row) {
         data.push(row.values);
       });
-   })
-  console.log(data.length)
-   for (let i = 1; i < data.length; i++) {
-    
-    let cypherCategory=`MATCH (cl:FacilityZoneTypes_${language} {realm:"${realm}"})-[:PARENT_OF]->(c {name:"${data[i][4]}"}) return c`
-  let data2 =await this.neo4jService.read(cypherCategory)
-  let key =await data2.records[0]["_fields"][0].properties.key
-  
-  
-    let cypher =`MATCH (b:Building {key:"${buildingKey}"})-[:PARENT_OF]->(z:Zones {name:"Zones"})\
+    });
+    console.log(data.length);
+    for (let i = 1; i < data.length; i++) {
+      let cypherCategory = `MATCH (cl:FacilityZoneTypes_${language} {realm:"${realm}"})-[:PARENT_OF]->(c {name:"${data[i][4]}"}) return c`;
+      let data2 = await this.neo4jService.read(cypherCategory);
+      let key = await data2.records[0]['_fields'][0].properties.key;
+
+      let cypher = `MATCH (b:Building {key:"${buildingKey}"})-[:PARENT_OF]->(z:Zones {name:"Zones"})\
     MATCH (c:Space {name:"${data[i][5]}"})\
     MATCH (p {email:"${data[i][2]}"})\
     MATCH (zt {key:"${key}"})\
-    MERGE (zz:Zone {name:"${data[i][1]}",createdOn:"${data[i][3]}",externalSystem:"${data[i][6]}", externalObject:"${data[i][7]}", externalIdentifier:"${data[i][8]}", description:"${data[i][9]}", tag:[],\
+    MERGE (zz:Zone {name:"${data[i][1]}",createdOn:"${data[i][3]}",externalSystem:"${data[i][6]}", externalObject:"${
+        data[i][7]
+      }", externalIdentifier:"${data[i][8]}", description:"${data[i][9]}", tag:[],\
     nodeKeys:[], nodeType:"Zone", key:"${generateUuid()}", canDisplay:true, isActive:true, isDeleted:false, canDelete:true})\
     MERGE (z)-[:PARENT_OF]->(zz)  \
     MERGE (c)-[:MERGEDZN]->(zz)  \
     MERGE (zt)-[:CLASSIFICATION_OF]->(zz)\
-    MERGE (zt)-[:CREATED_BY]->(p)`
-    let data3 =await this.neo4jService.write(cypher)
-    console.log(data3)
-    
+    MERGE (zt)-[:CREATED_BY]->(p)`;
+      let data3 = await this.neo4jService.write(cypher);
+      console.log(data3);
+    }
   }
-  
-   }
-  
-
 
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
 

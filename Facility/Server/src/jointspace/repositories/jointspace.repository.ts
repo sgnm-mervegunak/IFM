@@ -71,7 +71,7 @@ export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
             }
           }
           //check type and has active merged relationship and updateJointSpace property
-          if (node[0].get('n').labels[0] === 'JointSpace') {
+          if (node[0].get('n').labels.includes('JointSpace')) {
             jointSpaceNodes.push(node[0].get('n'));
 
             const mergedNodes = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
