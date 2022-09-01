@@ -396,7 +396,7 @@ let labels = [...new Set(lbls)];
    })
      let deneme=[];
      for (let index = 1; index < data.length; index++) {
-       const element = data[index].split(new RegExp(/\s{1,}|:\s{1,}|:/g));
+       const element = data[index].split(new RegExp(/\s{3,}|:\s{1,}|:/g));
       
        deneme.push(element);
      }
