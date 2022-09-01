@@ -26,6 +26,7 @@
 	"Delete":"Sil",
 	"View Data":"Veriyi gör",
 	"Import": "İçeri Aktar",
+	"Export": "Dışarı Aktar",
 	"Download Sample File With Code":"Kodlu Örnek Dosya İndir",
 	"Download Sample File Without Code":"Kodsuz Örnek Dosya İndir",
 	"Upload File With Code":"Kodlu Dosya Yükle",
@@ -102,5 +103,6 @@
 	"Site Name": "Realm Adı",
 	"Project Description": "Proje Açıklaması",
 	"Site Description": "Realm Açıklaması",
-	"Documents": "Dökümanlar"
+	"Documents": "Dökümanlar",
+	"Select Buildings": "Binaları Seç"
 }

@@ -77,6 +77,7 @@ const DocumentUploadComponent = ({
           value={item ? item.type : null}
           options={docTypes}
           onChange={(e) => SetDocType(props.index,e.value,false)}
+          placeholder="Select a Document Type"
         />
         <Button
           type="button"

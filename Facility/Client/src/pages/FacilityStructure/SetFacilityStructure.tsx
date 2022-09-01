@@ -5,6 +5,7 @@ import { Dialog } from "primereact/dialog";
 import { Chips } from "primereact/chips";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Button } from "primereact/button";
+import { Toolbar } from "primereact/toolbar";
 import { InputText } from "primereact/inputtext";
 import { Checkbox } from "primereact/checkbox";
 import { TreeSelect } from "primereact/treeselect";
@@ -28,7 +29,6 @@ import FloorFileImport from "./ImportPages/FloorFileImport";
 import BlockFileImport from "./ImportPages/BlockFileImport";
 import SpaceFileImport from "./ImportPages/SpaceFileImport";
 import Export from "./Export/Export";
-import { Toolbar } from "primereact/toolbar";
 
 interface Node {
   cantDeleted: boolean;
@@ -104,16 +104,10 @@ const SetFacilityStructure = () => {
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
   const [generateNodeKey, setGenerateNodeKey] = useState("");
-  const [generateFormTypeKey, setGenerateFormTypeKey] = useState<
-    string | undefined
-  >("");
-  const [generateNodeName, setGenerateNodeName] = useState<string | undefined>(
-    ""
-  );
+  const [generateFormTypeKey, setGenerateFormTypeKey] = useState<string | undefined>("");
+  const [generateNodeName, setGenerateNodeName] = useState<string | undefined>("");
   const [facilityType, setFacilityType] = useState<string[]>([]);
-  const [selectedFacilityType, setSelectedFacilityType] = useState<
-    string | undefined
-  >("");
+  const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const [display, setDisplay] = useState(false);
@@ -621,7 +615,7 @@ const SetFacilityStructure = () => {
         right={() => (
           <React.Fragment>
             <Button
-              label="Export"
+              label={t("Export")}
               icon="pi pi-download"
               className="p-button"
               onClick={() => setExportDia(true)}
@@ -1023,7 +1017,7 @@ const SetFacilityStructure = () => {
           }}
           filter
           filterBy="label,name,description,tag"
-          filterPlaceholder="Search"
+          filterPlaceholder={t("Search")}
           filterMode="strict"
           nodeTemplate={(data: Node, options) => (
             <span className="flex align-items-center font-bold">
