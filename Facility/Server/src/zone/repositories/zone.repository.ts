@@ -41,39 +41,29 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
 
     //get all nodes by key and their parent building node
     await Promise.all(
-      nodeKeys.map(async (element) => {
-        const node = await this.neo4jService.read(
-          `match(n{isDeleted:false,key:$key,isActive:true }) where n:Space return n`,
-          {
-            key: element,
-          },
-        );
-        if (!node.records.length) {
+      nodeKeys.map(async (key) => {
+        const node = await this.neo4jService.findByLabelAndFilters(['Space'], {
+          isDeleted: false,
+          key,
+          isActive: true,
+        });
+        if (!node[0].length) {
           throw new HttpException('Node not found', HttpStatus.NOT_FOUND);
         }
         //check type and has active merged relationship
-        if (node.records[0]['_fields'][0].labels[0] === 'Space') {
-          spaceNodes.push(node.records[0]['_fields'][0]);
+        if (node[0].get('n').labels.includes('Space')) {
+          spaceNodes.push(node[0].get('n'));
+          const parentStructure = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+            ['Building'],
+            { isDeleted: false },
+            [],
+            { key: key },
+            'PARENT_OF',
+          );
+          parentNodes.push(parentStructure[0].get('parent'));
+        } else {
+          throw new HttpException('Zones cannot use for create zones', 400);
         }
-
-        //check type and has active merged relationship and updateZone property
-        // if (node.records[0]['_fields'][0].labels[0] === 'Zone') {
-        //   zoneNodes.push(node.records[0]['_fields'][0]);
-        //   const mergedNodes = await this.neo4jService.read(
-        //     `match(n {key:$key}) match(p {isActive:true,isDeleted:false}) match(p)-[:MERGED]->(n) return p`,
-        //     { key: node.records[0]['_fields'][0].properties.key },
-        //   );
-
-        //   mergedNodes.records.map((mergedNode) => {
-        //     spaceNodes.push(mergedNode['_fields'][0]);
-        //   });
-        // }
-        const parentStructure = await this.neo4jService.read(
-          `match (n:Building) match(p {key:$key}) match(n)-[r:PARENT_OF*]->(p) return n`,
-          { key: element },
-        );
-        parentNodes.push(parentStructure.records[0]['_fields'][0]);
-        //   const isInZone = await this.neo4jService.read(`match(n{isDeleted:false,key:$key }) where n:Zone return n`, {})
       }),
     );
 
@@ -84,19 +74,13 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
       }
     });
 
-    // ?????????????????????????????
-    // await Promise.all(
-    //   zoneNodes.map(async (element) => {
-    //     await this.neo4jService.updateById(element.identity.low, {
-    //       isDeleted: true,
-    //     });
-    //   }),
-    // );
-
     //get building node zones
-    const zonesNode = await this.neo4jService.read(
-      `match(p:Building {key:$key,isDeleted:false})  match(n:Zones {isDeleted:false}) match(p)-[:PARENT_OF]->(n)  return n`,
-      { key: parentNodes[0].properties.key },
+
+    const zonesNode = await this.neo4jService.findChildrensByLabelsOneLevel(
+      ['Building'],
+      { key: parentNodes[0].properties.key, isDeleted: false },
+      ['Zones'],
+      { isActive: true, isDeleted: false },
     );
 
     //create new Zone node and add relations to relating Zones node and space nodes
@@ -104,7 +88,7 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
     const zoneObject = assignDtoPropToEntity(zoneEntity, createZoneDto);
     delete zoneObject['nodeKeys'];
     const zone = await this.neo4jService.createNode(zoneObject, ['Zone']);
-    await this.neo4jService.addRelations(zone.identity.low, zonesNode.records[0]['_fields'][0].identity.low);
+    await this.neo4jService.addRelations(zone.identity.low, zonesNode[0].get('parent').identity.low);
 
     spaceNodes.map(async (element) => {
       await this.neo4jService.addRelationWithRelationName(
@@ -112,7 +96,6 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
         zone.identity.low,
         RelationName.MERGEDZN,
       );
-      //   const isInZone = await this.neo4jService.read(`match(n{isDeleted:false,key:$key }) where n:Zone return n`, {})
     });
 
     return zone.properties;
