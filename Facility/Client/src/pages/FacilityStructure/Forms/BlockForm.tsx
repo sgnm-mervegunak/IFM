@@ -47,13 +47,7 @@ interface Node {
 }
 
 const schema = yup.object({
-
-    // elevation: yup.number().moreThan(-1).notRequired(),
-    // height: yup.number().moreThan(-1).notRequired(),
     name: yup.string().required("This area is required.").min(2, "This area accepts min 2 characters."),
-    projectName: yup.string().required("This area is required.")
-
-
 });
 
 
@@ -80,11 +74,11 @@ const BlockForm = ({
         resolver: yupResolver(schema)
     });
 
-    const { toast } = useAppSelector(state => state.toast);
+    const { toast } = useAppSelector(state => state.toast);    
 
     useEffect(() => {
         if (submitted) {
-            handleSubmit(onSubmit)();
+            handleSubmit(onSubmit)();            
         }
         setSubmitted(false);
 
@@ -134,7 +128,7 @@ const BlockForm = ({
                 nodeType: selectedFacilityType,
             };
 
-            console.log("newNode",newNode);
+            console.log("newNode", newNode);
 
 
             FacilityStructureService.createStructure(selectedNodeKey, newNode)
@@ -210,14 +204,12 @@ const BlockForm = ({
     if (editDia && !data) {
         return null;
     }
-    
+
     return (
         <form>
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
                 <InputText
-                    // value={name}
-                    // onChange={(event) => setName(event.target.value)}
                     autoComplete="off"
                     {...register("name")}
                     style={{ width: '100%' }}
@@ -226,10 +218,21 @@ const BlockForm = ({
             </div>
             <p style={{ color: "red" }}>{errors.name?.message}</p>
 
+            <div className="field">
+                <h5 style={{ marginBottom: "0.5em" }}>{t("Description")}</h5>
+                <InputText
+                    autoComplete="off"
+                    defaultValue={data?.description || ""}
+                    {...register("description")}
+                    style={{ width: "100%" }}
+                />
+            </div>
+            <p style={{ color: "red" }}>{errors.description?.message}</p>
+
             <div className="field structureChips">
                 <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
                 <Controller
-                    defaultValue={data?.tag }
+                    defaultValue={data?.tag}
                     name="tag"
                     control={control}
                     render={({ field }) => (
@@ -245,42 +248,7 @@ const BlockForm = ({
                     )}
                 />
             </div>
-            {/* <div className="field structureChips">
-                <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
-                <Chips
-                    value={tag}
-                    onChange={(e) => setTag(e.value)}
-                    style={{ width: "100%" }}
-                />
-            </div> */}
-            {/* <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>Description</h5>
-                <InputText
-                    value={description}
-                    onChange={(event) => setDescription(event.target.value)}
-                    style={{ width: '100%' }}
-                />
-            </div> */}
-            <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>{t("Description")}</h5>
-                <InputText
-                    autoComplete="off"
-                    defaultValue={data?.description || ""}
-                    {...register("description")}
-                    style={{ width: "100%" }}
-                />
-            </div>
-            <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>Project Name</h5>
-                <InputText
-                    autoComplete="off"
-                    defaultValue={data?.projectName || ""}
-                    {...register("projectName")}
-                    style={{ width: "100%" }}
-                />
-            </div>
-            <p style={{ color: "red" }}>{errors.projectName?.message}</p>
-
+            <p style={{ color: "red" }}>{errors.tag?.message}</p>
 
         </form>
     );

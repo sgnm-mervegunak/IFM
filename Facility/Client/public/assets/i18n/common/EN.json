@@ -81,10 +81,28 @@
 	"Elevation": "Elevation",
 	"Height": "Height",
 	"Architectural Name":"Architectural Name",
+	"Architectural Code":"Architectural Code",
+	"Usable Height":"Usable Height",
+	"Gross Area":"Gross Area",
+	"Net Area":"Net Area",
 	"Space Type": "Space Type",
 	"Usage": "Usage",
 	"Status": "Status",
-	"Images": "Images"
+	"Images": "Images",
+	"Project Name":"Project Name",
+	"Owner": "Owner",
+	"Operator": "Operator",
+	"Contractor": "Contractor",
+	"Area Measurement": "Area Measurement",
+	"Handover Date": "Handover Date",
+	"Operation Start Date": "Operation Start Date",
+	"Warranty Expire Date": "Warranty Expire Date",
+	"Phase": "Phase",
+	"Address": "Address",
+	"Site Name": "Site Name",
+	"Project Description": "Project Description",
+	"Site Description": "Site Description",
+	"Documents": "Documents"
 }
 
 

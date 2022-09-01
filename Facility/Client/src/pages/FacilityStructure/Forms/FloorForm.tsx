@@ -75,15 +75,15 @@ const FloorForm = ({
 }: Params) => {
 
     const [classificationCategory, setClassificationCategory] = useState<Node[]>([]);
+    const [codeCategory, setCodeCategory] = useState("");
     const auth = useAppSelector((state) => state.auth);
     const [realm, setRealm] = useState(auth.auth.realm);
     const [data, setData] = useState<any>();
+    const language = useAppSelector((state) => state.language.language);
     const { t } = useTranslation(["common"]);
 
     const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
         defaultValues: {
-            elevation: null,
-            height: null,
             ...data
         },
         resolver: yupResolver(schema)
@@ -105,7 +105,7 @@ const FloorForm = ({
         await ClassificationsService.findAllActiveByLabel({
             realm: realm,
             label: "FacilityFloorTypes",
-            language: "en",
+            language: language,
         }).then((res) => {
             let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
             fixNodes(temp);
@@ -135,8 +135,16 @@ const FloorForm = ({
 
     const getNodeInfoForUpdate = (selectedNodeKey: string) => {
         FacilityStructureService.nodeInfo(selectedNodeKey)
-            .then((res) => {
-                setData(res.data.properties)
+            .then(async (res) => {
+                // let temp = {};
+                await ClassificationsService.findClassificationByCodeAndLanguage(realm, "FacilityFloorTypes", language, res.data.properties.category).then(clsf1 => {
+                    res.data.properties.category = clsf1.data.key
+                    setData(res.data.properties);
+                })
+                    .catch((err) => {
+                        setData(res.data.properties);
+                    })
+
             })
             .catch((err) => {
                 toast.current.show({
@@ -158,11 +166,11 @@ const FloorForm = ({
                 description: data?.description,
                 nodeType: selectedFacilityType,
                 elevation: data?.elevation || "",
-                height: data?.height ||"",
-                category: data?.category,
+                height: data?.height || "",
+                category: codeCategory,
             };
             console.log(newNode);
-            
+
 
             FacilityStructureService.createStructure(selectedNodeKey, newNode)
                 .then((res) => {
@@ -206,9 +214,9 @@ const FloorForm = ({
                 tag: data?.tag,
                 description: data?.description,
                 nodeType: selectedFacilityType,
-                elevation: data?.elevation || "",
-                height: data?.height || "",
-                category: data?.category,
+                elevation: data?.elevation,
+                height: data?.height,
+                category: codeCategory,
             };
 
             FacilityStructureService.update(selectedNodeKey, updateNode)
@@ -241,8 +249,7 @@ const FloorForm = ({
     }
 
     return (
-        <form
-        >
+        <form>
 
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
@@ -267,7 +274,11 @@ const FloorForm = ({
                             value={field.value}
                             options={classificationCategory}
                             onChange={(e) => {
-                                field.onChange(e.value)
+                                ClassificationsService.nodeInfo(e.value as string)
+                                    .then((res) => {
+                                        field.onChange(e.value)
+                                        setCodeCategory(res.data.properties.code || "");
+                                    })
                             }}
                             filter
                             placeholder="Select Type"
@@ -325,7 +336,7 @@ const FloorForm = ({
                     defaultValue={data?.height || ""}
                     {...register("height")}
                     style={{ width: "100%" }}
-                    
+
                 />
             </div>
             <p style={{ color: "red" }}>{errors.height?.message}</p>
