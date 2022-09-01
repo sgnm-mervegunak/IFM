@@ -1,5 +1,7 @@
 import React from "react";
 import { MultiSelect } from "primereact/multiselect";
+import { useTranslation } from "react-i18next";
+
 import { useAppSelector } from "../../../app/hook";
 import FacilityStructureService from "../../../services/facilitystructure";
 import ExportService from "../../../services/export";
@@ -18,6 +20,7 @@ const Export = ({
   const { toast } = useAppSelector((state) => state.toast);
   const [buildings, setBuildings] = React.useState([]);
   const [selectedBuildings, setSelectedBuildings] = React.useState<any>([]);
+  const { t } = useTranslation(["common"]);
 
   React.useEffect(() => {
     FacilityStructureService.findStuctureFirstLevel(auth.auth.realm)
@@ -62,14 +65,14 @@ const Export = ({
 
   return (
     <div>
-      <h5>Select Buildings</h5>
+      <h5>{t("Select Buildings")}</h5>
       <MultiSelect
         style={{ width: "100%" }}
         value={selectedBuildings}
         options={buildings}
         onChange={(e) => setSelectedBuildings(e.value)}
         optionLabel="name"
-        placeholder="Select a Building"
+        placeholder=""
         display="chip"
       />
     </div>

@@ -26,6 +26,7 @@
 	"Delete":"حذف",
 	"View Data":"عرض البيانات",
 	"Import": "يستورد",
+	"Export": "يصدّر",
 	"Download Sample File With Code":"تنزيل نموذج ملف مع التعليمات البرمجية",
 	"Download Sample File Without Code":"تنزيل ملف نموذج بدون رمز",
 	"Upload File With Code":"تحميل الملف مع الكود",
@@ -102,5 +103,6 @@
 	"Site Name": "اسم الموقع",
 	"Project Description": "وصف المشروع",
 	"Site Description": "وصف الموقع",
-	"Documents": "وثائق"
+	"Documents": "وثائق",
+	"Select Buildings": "حدد المباني"
 }

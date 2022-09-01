@@ -26,6 +26,7 @@
 	"Delete":"Delete",
 	"View Data":"View Data",
 	"Import": "Import",
+	"Export": "Export",
 	"Download Sample File With Code":"Download Sample File With Code",
 	"Download Sample File Without Code":"Download Sample File Without Code",
 	"Upload File With Code":"Upload File With Code",
@@ -102,7 +103,8 @@
 	"Site Name": "Site Name",
 	"Project Description": "Project Description",
 	"Site Description": "Site Description",
-	"Documents": "Documents"
+	"Documents": "Documents",
+	"Select Buildings": "Select Buildings"
 }
 
 
