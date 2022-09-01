@@ -2345,11 +2345,11 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       const realmName = 'Signum';
       ///////// the process start here
 
-      let cypher = `Match (a:Infra {realm:"${realmName}"})-[:PARENT_OF]->(n:Classification {realm:"${realmName}"}) MERGE (b:${classificationName2}_${language} {code:"${newClassification[0].parentCode}",isActive: true,name:"${classificationName2}",isDeleted:${newClassification[i].isDeleted},canCopied:true,canDelete:false,realm:"${realmName}",isRoot:true,canDisplay:true}) MERGE (n)-[:PARENT_OF]->(b)`;
+      let cypher = `Match (a:Infra {realm:"${realmName}"})-[:PARENT_OF]->(n:Classification {realm:"${realmName}"}) MERGE (b:${classificationName2}_${language} {code:"${newClassification[0].parentCode}",isActive: true,name:"${classificationName2}",isDeleted:${newClassification[i].isDeleted},canCopied:true,canDelete:false,realm:"${realmName}",isRoot:true,canDisplay:true,language:"${language}"}) MERGE (n)-[:PARENT_OF]->(b)`;
       let data = await this.neo4jService.write(cypher);
 
       for (let i = 0; i < newClassification.length; i++) {
-        let cypher2 = `MATCH (n) where n.code="${newClassification[i].parentCode}" MERGE (b {code:"${newClassification[i].code}",parentCode:"${newClassification[i].parentCode}",name:"${newClassification[i].name}",isDeleted:${newClassification[i].isDeleted},isActive:${newClassification[i].isActive},canDelete:${newClassification[i].canDelete},canDisplay:${newClassification[i].canDisplay}}) MERGE (n)-[:PARENT_OF]->(b)`;
+        let cypher2 = `MATCH (n) where n.code="${newClassification[i].parentCode}" MERGE (b {code:"${newClassification[i].code}",parentCode:"${newClassification[i].parentCode}",name:"${newClassification[i].name}",isDeleted:${newClassification[i].isDeleted},isActive:${newClassification[i].isActive},canDelete:${newClassification[i].canDelete},canDisplay:${newClassification[i].canDisplay},language:"${language}"}) MERGE (n)-[:PARENT_OF]->(b)`;
         let data2 = await this.neo4jService.write(cypher2);
       }
     }
