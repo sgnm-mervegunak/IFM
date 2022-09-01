@@ -114,8 +114,36 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       },
       ['Zone_Config'],
     );
+    const languageTRNode = await this.neo4jService.createNode(
+      {
+        canDelete: false,
+        isDeleted: false,
+        nodesCanDelete: true,
+        name: 'TR',
+        realm: 'Signum',
+        isRoot: true,
+        canCopied: true,
+        isActive: true,
+      },
+      ['Language_Config'],
+    );
+    const languageENNode = await this.neo4jService.createNode(
+      {
+        canDelete: false,
+        isDeleted: false,
+        nodesCanDelete: true,
+        name: 'EN',
+        realm: 'Signum',
+        isRoot: true,
+        canCopied: true,
+        isActive: true,
+      },
+      ['Language_Config'],
+    );
     await this.neo4jService.addRelations(spaceConfigNode.identity.low, configNode.identity.low);
     await this.neo4jService.addRelations(zoneConfigNode.identity.low, configNode.identity.low);
+    await this.neo4jService.addRelations(languageTRNode.identity.low, configNode.identity.low);
+    await this.neo4jService.addRelations(languageENNode.identity.low, configNode.identity.low);
 
     const facilityStatusNode = await this.neo4jService.createNode(
       {
