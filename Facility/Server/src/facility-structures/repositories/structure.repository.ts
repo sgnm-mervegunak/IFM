@@ -603,8 +603,39 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
       if (contactNode && contactNode.length && contactNode.length == 1) {
         await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.key,contactNode[0]["_fields"][1]["properties"].key, RelationName.CREATED_BY); 
       }
-    if (structureData['nodeType'] != 'Block') {
-      await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.key,structureData["category"], RelationName.CLASSIFIED_BY);
+      if (structureData['nodeType'] != 'Block') {
+       const languages = await this.findChildrensByLabelsAndRelationNameOneLevel(
+        ['System_Config'],
+        {"isDeleted": false, "realm": realm},
+        ['Language_Config'],
+        {"isDeleted": false},
+        "PARENT_OF"
+        );
+        let classificationRootNone;
+        if (structureData['nodeType'] == 'Building') {
+          classificationRootNone = 'OmniClass11';
+        }
+        if (structureData['nodeType'] == 'Floor') {
+          classificationRootNone = 'FacilityFloorTypes';
+        }
+        if (structureData['nodeType'] == 'Space') {
+          classificationRootNone = 'OmniClass11';
+        }
+
+        languages.map(async (record) => {
+          let lang = record['_fields'][1].properties.name;
+
+          let nodeClass = await this.neo4jService.findChildrensByLabelsAndFilters(
+              [classificationRootNone+'_'+lang],
+              {"isDeleted": false},
+              [],
+              {"language": lang, "code": structureData["category"]}
+            );
+          if (nodeClass && nodeClass.length && nodeClass.length == 1) {
+              await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.key,nodeClass[0]["_fields"][1].properties.key, RelationName.CLASSIFIED_BY);
+          }
+        });   
+               
     }
     
     //create PARENT_OF relation between parent facility structure node and child facility structure node.

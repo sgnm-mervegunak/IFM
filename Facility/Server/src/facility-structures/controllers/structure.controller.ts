@@ -26,6 +26,17 @@ export class StructureController {
     return this.facilityStructuresService.create(key, createFacilityStructureDto, realm);
   }
 
+  // Yenisi böyle olacak...........
+  // @Post(':parent_key')
+  // create(
+  //   @Param('parent_key') key: string,
+  //   @Body() createFacilityStructureDto: object,
+  //   @Headers() header,
+  // ) {
+  //   const {language, realm} = header;
+  //   return this.facilityStructuresService.create(key, createFacilityStructureDto, realm, language);
+  // }
+
   @ApiBody({
     type: Object,
     description: 'Update  facility structure',
