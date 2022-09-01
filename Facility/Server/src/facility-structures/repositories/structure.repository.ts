@@ -627,7 +627,7 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
 
           let nodeClass = await this.neo4jService.findChildrensByLabelsAndFilters(
               [classificationRootNone+'_'+lang],
-              {"isDeleted": false},
+              {"isDeleted": false, "realm": realm},
               [],
               {"language": lang, "code": structureData["category"]}
             );
@@ -665,7 +665,6 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
     };
     return response;
   }
-
 
  //REVISED FOR NEW NEO4J
   async findStructureFirstLevelNodes(label: string, realm: string) {
