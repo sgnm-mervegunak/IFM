@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export class BaseFacilityObject {
   key: string = generateUuid();
-  createdBy: string = 'danielle.r.love@usace.army.mil'; //kullanıcı session dan alınacak 
+  createdBy: string = 'atamer.atalay@signumtte.com'; //kullanıcı session dan alınacak 
   createdOn = moment().format('YYYY-MM-DD HH:mm:ss'); 
   isActive = true;
   isDeleted = false;

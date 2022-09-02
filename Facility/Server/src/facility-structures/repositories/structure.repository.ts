@@ -422,125 +422,87 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
     }
     return [];
   }
-  //////////////////////////////
-  async findChildrensByLabelsAndRelationNameOneLevel(
-    first_node_labels: Array<string> = [],
-    first_node_filters: object = {},
-    second_node_labels: Array<string> = [],
-    second_node_filters: object = {},
-    relation_name: string,
-    relation_direction: RelationDirection = RelationDirection.RIGHT,
-    databaseOrTransaction?: string | Transaction
-  ) {
-    try {
-      if (!relation_name) {
-        throw new HttpException(required_fields_must_entered, 404);
-      }
-      const firstNodeLabelsWithoutEmptyString =
-        filterArrayForEmptyString(first_node_labels);
-
-      const secondNodeLabelsWithoutEmptyString =
-        filterArrayForEmptyString(second_node_labels);
-
-      let parameters;
-      let cypher: string;
-      let result:QueryResult;
-
-      switch (relation_direction) {
-        case RelationDirection.RIGHT:
-          cypher =
-            `MATCH (n`+ dynamicLabelAdder(firstNodeLabelsWithoutEmptyString)+dynamicFilterPropertiesAdder(first_node_filters)+`-[:${relation_name}]->(m` +
-            dynamicLabelAdder(secondNodeLabelsWithoutEmptyString) +
-            dynamicFilterPropertiesAdderAndAddParameterKey(second_node_filters) +
-            ` RETURN n as parent,m as children`;
-
-            second_node_filters=changeObjectKeyName(second_node_filters)
-            parameters={...first_node_filters,...second_node_filters}
-         
-          result = await this.neo4jService.read(cypher, parameters,databaseOrTransaction);
-          break;
-        case RelationDirection.LEFT:
-         
-          cypher =
-            `MATCH (n` +
-            dynamicLabelAdder(firstNodeLabelsWithoutEmptyString) +
-            dynamicFilterPropertiesAdder(first_node_filters) +
-            `<-[:${relation_name}]-(m` +
-            dynamicLabelAdder(secondNodeLabelsWithoutEmptyString) +
-            dynamicFilterPropertiesAdderAndAddParameterKey(second_node_filters) + 
-            ` RETURN m as parent,n as children`;
-
-            second_node_filters=changeObjectKeyName(second_node_filters)
-            parameters={...first_node_filters,...second_node_filters}
-
-          result = await this.neo4jService.read(cypher, first_node_filters,databaseOrTransaction);
-          break;
-        default:
-          throw new HttpException(invalid_direction_error, 400);
-      }
-
-      return result["records"];
-    } catch (error) {
-      if (error.response?.code) {
-        throw new HttpException(
-          { message: error.response?.message, code: error.response?.code },
-          error.status
-        );
-      } else {
-        throw new HttpException(error, 500);
-      }
-    }
-  }
-  ///////////////////////////////
+  
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
   async create(key: string, structureData: Object, realm: string) {
     //is there facility-structure parent node
-
-    const node = await this.neo4jService.findOneNodeByKey(key);
-    if (!node) {
-      throw new FacilityStructureNotFountException(key);
-    }
+   try {
+    const node = await this.neo4jService.findByLabelAndFilters(
+      [],
+      {"isDeleted":false, "key": key},
+      ["Virtual"]
+    )
+    
     //////////////////////////// Control of childnode type which will be added to parent node. /////////////////////////////////////////
     let structureRootNode;
-    if (node.labels[0] === 'FacilityStructure') {
+    if (node[0]["_fields"][0].labels[0] === 'FacilityStructure') {
       structureRootNode = node;
     } else {
-      structureRootNode = await this.neo4jService.findStructureRootNode(key, 'FacilityStructure');
-      //structureRootNode=await this.findStructureRootNode(key, 'FacilityStructure');
+      structureRootNode = await this.neo4jService.findChildrensByLabelsAndFilters(
+       ['FacilityStructure'],
+       {'isDeleted': false},
+       [],
+       {'isDeleted': false, 'key': node[0]["_fields"][0].properties.key}
+     ); 
     }
     //!!!!!!!!!!!!
     //check if rootNode realm equal to keyclock token realm
+     if (structureRootNode[0]["_fields"][0].properties.realm !== realm) {
+       throw new HttpException({ message: 'You dont have permission' }, 403);
+     }
 
-    if (structureRootNode.properties.realm !== realm) {
-      throw new HttpException({ message: 'You dont have permission' }, 403);
-    }
+    ///////////////////////////// parent - child node type relation control ////////////////////////////
+    // const allowedStructureTypeNode = await this.neo4jService.getAllowedStructureTypeNode(
+    //   structureRootNode[0]["_fields"][0].properties.realm,
+    //   node[0]["_fields"][0].labels[0],
+    // );
+  
+    // const allowedStructures = await this.neo4jService.getAllowedStructures(
+    //   allowedStructureTypeNode.records[0]['_fields'][0].properties.key,
+    // );
 
-    //const allowedStructureTypeNode = await this.neo4jService.read('match (n:FacilityTypes_EN {realm:$realm}) match(p {name:$name}) match(n)-[:PARENT_OF]->(p) return p', { realm: structureRootNode.properties.realm, name: node.labels[0] })
-    const allowedStructureTypeNode = await this.neo4jService.getAllowedStructureTypeNode(
-      structureRootNode.properties.realm,
-      node.labels[0],
+    // const isExist = allowedStructures.records.filter((allowedStructure) => {
+    //   if (allowedStructure['_fields'][0].properties.name === structureData['nodeType']) {
+    //     return allowedStructure;
+    //   }
+    // });
+    // if (!isExist.length) {
+    //   throw new WrongFacilityStructureExceptions(structureData['nodeType'], node[0]["_fields"][0].properties['nodeType']);
+    //}
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+    const allowedStructureTypeNode = await this.neo4jService.findChildrensByLabelsOneLevel(
+      ['FacilityTypes_EN'],
+      {"isDeleted": false, "realm": structureRootNode[0]['_fields'][0].properties.realm},
+      [],
+      {"isDeleted": false,"name": node[0]["_fields"][0].labels[0]}
     );
-    //const allowedStructures=await this.neo4jService.read('match(n {key:$key}) match(p) match (n)-[:PARENT_OF]->(p) return p',{key:allowedStructureTypeNode.records[0]['_fields'][0].properties.key})
-    const allowedStructures = await this.neo4jService.getAllowedStructures(
-      allowedStructureTypeNode.records[0]['_fields'][0].properties.key,
-    );
-
-    const isExist = allowedStructures.records.filter((allowedStructure) => {
-      if (allowedStructure['_fields'][0].properties.name === structureData['nodeType']) {
+    
+    const allowedStructures = await this.neo4jService.findChildrensByLabelsOneLevel(
+      [],
+      {"isDeleted": false, "key":allowedStructureTypeNode[0]['_fields'][1].properties.key},
+      ['AllowedStructure'],
+      {"isDeleted": false}
+    )
+    
+    const isExist = allowedStructures.filter((allowedStructure) => {
+      if (allowedStructure['_fields'][1].properties.name === structureData['nodeType']) {
         return allowedStructure;
       }
     });
     if (!isExist.length) {
-      throw new WrongFacilityStructureExceptions(structureData['nodeType'], node.properties['nodeType']);
-      //throw new HttpException('Yapıyı Bu şekilde oluşturamazsınız1',400)
-    }
+      throw new HttpException(wrong_parent_error({node1: structureData['nodeType'], 
+                                                      node2: node[0]["_fields"][0].labels[0]}), 400);
+
+      }
+
+
+
+
 
     ////////////////////////////// Control of input properties with facility type properties //////////////////////////////////////////////////
-
-    //const properties = this.findChildrenByFacilityTypeNode('EN', structureRootNode.properties.realm,  structureData['nodeType']);
     const properties = await this.findChildrenByFacilityTypeNode(
       'EN',
-      structureRootNode.properties.realm,
+      structureRootNode[0]["_fields"][0].properties.realm,
       structureData['nodeType'],
     );
     let proper = {};
@@ -590,10 +552,10 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
     baseFacilityObject = assignDtoPropToEntity(baseFacilityObject, structureData);
     let createdBy=baseFacilityObject["createdBy"];
     delete baseFacilityObject["createdBy"];
-    delete baseFacilityObject['category']
+    delete baseFacilityObject['category'];
     
     const createNode = await this.neo4jService.createNode(baseFacilityObject, [structureData['nodeType']]);
-    const contactNode = await this.findChildrensByLabelsAndRelationNameOneLevel(
+    const contactNode = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
       ['Contact'],
       {"isDeleted": false, "realm": realm},
       [],
@@ -601,10 +563,13 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
       "PARENT_OF"
       );
       if (contactNode && contactNode.length && contactNode.length == 1) {
-        await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.key,contactNode[0]["_fields"][1]["properties"].key, RelationName.CREATED_BY); 
+        //await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.key,contactNode[0]["_fields"][1]["properties"].key, RelationName.CREATED_BY); 
+        await this.neo4jService.addRelationByIdAndRelationNameWithFilters(createNode.identity.low,{"isDeleted":false},
+                                               contactNode[0]["_fields"][1].identity.low, {"isDeleted":false}, RelationName.CREATED_BY, RelationDirection.RIGHT);
+
       }
-      if (structureData['nodeType'] != 'Block') {
-       const languages = await this.findChildrensByLabelsAndRelationNameOneLevel(
+       if (structureData['nodeType'] != 'Block') {
+       const languages = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
         ['Language_Config'],
         {"isDeleted": false, "realm": realm},
         [],
@@ -632,31 +597,39 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
               {"language": lang, "code": structureData["category"]}
             );
           if (nodeClass && nodeClass.length && nodeClass.length == 1) {
-              await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.key,nodeClass[0]["_fields"][1].properties.key, RelationName.CLASSIFIED_BY);
+              // await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.key,nodeClass[0]["_fields"][1].properties.key, RelationName.CLASSIFIED_BY);
+              await this.neo4jService.addRelationByIdAndRelationNameWithFilters(createNode.identity.low,{"isDeleted":false},
+                                     nodeClass[0]["_fields"][1].identity.low, {"isDeleted":false}, RelationName.CLASSIFIED_BY, RelationDirection.RIGHT);
+
           }
         });   
                
-    }
-    
-    //create PARENT_OF relation between parent facility structure node and child facility structure node.
-    await this.neo4jService.addRelationWithRelationNameByKey(key, createNode.properties.key, RelationName.PARENT_OF);
+     }
+    ///////create PARENT_OF relation between parent facility structure node and child facility structure node.  //////
+    await this.neo4jService.addRelationByIdAndRelationNameWithFilters(node[0]["_fields"][0].identity.low,{"isDeleted":false, "isActive":true},
+    createNode.identity.low, {"isDeleted":false}, 'PARENT_OF', RelationDirection.RIGHT);
     let jointSpaces = new JointSpaces();
     let zones = new Zones();
     if (createNode['labels'][0] === 'Building') {
       const createJointSpacesNode = await this.neo4jService.createNode(jointSpaces, ['JointSpaces']);
-      await this.neo4jService.addRelationWithRelationNameByKey(
-        createNode['properties'].key,
-        jointSpaces.key,
-        RelationName.PARENT_OF,
-      );
+      // await this.neo4jService.addRelationWithRelationNameByKey(
+      //   createNode['properties'].key,
+      //   jointSpaces.key,
+      //   RelationName.PARENT_OF,
+      // );
+      await this.neo4jService.addRelationByIdAndRelationNameWithFilters(createNode.identity.low,{"isDeleted":false},
+      createJointSpacesNode.identity.low, {"isDeleted":false}, 'PARENT_OF', RelationDirection.RIGHT);
+      
 
       const createZoneNode = await this.neo4jService.createNode(zones, ['Zones']);
-      await this.neo4jService.addRelationWithRelationNameByKey(
-        createNode['properties'].key,
-        zones.key,
-        RelationName.PARENT_OF,
-      );
-    }
+      // await this.neo4jService.addRelationWithRelationNameByKey(
+      //   createNode['properties'].key,
+      //   zones.key,
+      //   RelationName.PARENT_OF,
+      // );
+      await this.neo4jService.addRelationByIdAndRelationNameWithFilters(createNode.identity.low,{"isDeleted":false},
+        createZoneNode.identity.low, {"isDeleted":false}, 'PARENT_OF', RelationDirection.RIGHT);
+      }  
    
     const response = {
       id: createNode['identity'].low,
@@ -664,6 +637,27 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
       properties: createNode['properties'],
     };
     return response;
+  }catch (error) {
+      let code = error.response?.code;
+        if (code >= 1000 && code<=1999) {
+          if (error.response?.code == CustomIfmCommonError.EXAMPLE1) {
+  
+          }
+        }
+        else if (code >= 5000 && code<=5999) {
+          
+        }
+        else if (code >= 9000 && code<=9999) {
+          if (error.response?.code == CustomTreeError.WRONG_PARENT) {
+            throw new  WrongClassificationParentExceptions(error.response?.params['node1'],error.response?.params['node2'])
+          }
+        }
+        else {
+          throw new HttpException("", 500);
+        }if (error.response?.code == CustomTreeError.WRONG_PARENT) {
+          throw new  WrongClassificationParentExceptions(error.response?.params['node1'],error.response?.params['node2'])
+        }
+   } 
   }
 
  //REVISED FOR NEW NEO4J
@@ -682,6 +676,7 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
 
     return node['root']['children'];
     }
+    
     catch (error) {
       let code = error.response?.code;
         if (code >= 1000 && code<=1999) {
