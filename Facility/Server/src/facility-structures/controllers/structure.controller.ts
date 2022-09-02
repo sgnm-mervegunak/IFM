@@ -70,6 +70,7 @@ export class StructureController {
 
   @Get('/structuretypes/:language/:label/:realm')
   @Roles({ roles: [UserRoles.ADMIN] })
+  //@Unprotected()
   @NoCache()
   findOneFirstLevel(@Param('language') language: string, @Param('label') label: string, @Param('realm') realm: string) {
     return this.facilityStructuresService.findOneFirstLevel(language, label, realm);
@@ -77,6 +78,7 @@ export class StructureController {
 
   @Get('/structuretypes/properties/:language/:realm/:typename')
   @Roles({ roles: [UserRoles.ADMIN] })
+  //@Unprotected()
   @NoCache()
   findChildrenByFacilityTypeNode(
     @Param('language') language: string,

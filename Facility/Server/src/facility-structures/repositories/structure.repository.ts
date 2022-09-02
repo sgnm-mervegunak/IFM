@@ -335,8 +335,18 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
     if (!node || node.length == 0) {
       throw new HttpException(node_not_found({node1:"", node2:""}),404);
     }
-
+    const classNode =  await this.neo4jService.findChildrensByIdOneLevel(
+      node[0]["_fields"][0].identity.low,
+      {"isDeleted": false},
+      [],
+      {"isDeleted": false, "language": "EN"},
+      RelationName.CLASSIFIED_BY
+      )
     node = node[0]["_fields"][0];
+    if (classNode && classNode.length) {
+      node["properties"]["category"] = classNode[0]["_fields"][1]['properties'].code;
+    }
+    
       const result = {
         id: node["identity"].low,
         labels: node["labels"],
@@ -452,24 +462,7 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
      }
 
     ///////////////////////////// parent - child node type relation control ////////////////////////////
-    // const allowedStructureTypeNode = await this.neo4jService.getAllowedStructureTypeNode(
-    //   structureRootNode[0]["_fields"][0].properties.realm,
-    //   node[0]["_fields"][0].labels[0],
-    // );
-  
-    // const allowedStructures = await this.neo4jService.getAllowedStructures(
-    //   allowedStructureTypeNode.records[0]['_fields'][0].properties.key,
-    // );
-
-    // const isExist = allowedStructures.records.filter((allowedStructure) => {
-    //   if (allowedStructure['_fields'][0].properties.name === structureData['nodeType']) {
-    //     return allowedStructure;
-    //   }
-    // });
-    // if (!isExist.length) {
-    //   throw new WrongFacilityStructureExceptions(structureData['nodeType'], node[0]["_fields"][0].properties['nodeType']);
-    //}
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+ 
     const allowedStructureTypeNode = await this.neo4jService.findChildrensByLabelsOneLevel(
       ['FacilityTypes_EN'],
       {"isDeleted": false, "realm": structureRootNode[0]['_fields'][0].properties.realm},
@@ -563,7 +556,6 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
       "PARENT_OF"
       );
       if (contactNode && contactNode.length && contactNode.length == 1) {
-        //await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.key,contactNode[0]["_fields"][1]["properties"].key, RelationName.CREATED_BY); 
         await this.neo4jService.addRelationByIdAndRelationNameWithFilters(createNode.identity.low,{"isDeleted":false},
                                                contactNode[0]["_fields"][1].identity.low, {"isDeleted":false}, RelationName.CREATED_BY, RelationDirection.RIGHT);
 
@@ -597,7 +589,6 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
               {"language": lang, "code": structureData["category"]}
             );
           if (nodeClass && nodeClass.length && nodeClass.length == 1) {
-              // await this.neo4jService.addRelationWithRelationNameByKey(createNode.properties.key,nodeClass[0]["_fields"][1].properties.key, RelationName.CLASSIFIED_BY);
               await this.neo4jService.addRelationByIdAndRelationNameWithFilters(createNode.identity.low,{"isDeleted":false},
                                      nodeClass[0]["_fields"][1].identity.low, {"isDeleted":false}, RelationName.CLASSIFIED_BY, RelationDirection.RIGHT);
 
@@ -612,21 +603,13 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
     let zones = new Zones();
     if (createNode['labels'][0] === 'Building') {
       const createJointSpacesNode = await this.neo4jService.createNode(jointSpaces, ['JointSpaces']);
-      // await this.neo4jService.addRelationWithRelationNameByKey(
-      //   createNode['properties'].key,
-      //   jointSpaces.key,
-      //   RelationName.PARENT_OF,
-      // );
+      
       await this.neo4jService.addRelationByIdAndRelationNameWithFilters(createNode.identity.low,{"isDeleted":false},
       createJointSpacesNode.identity.low, {"isDeleted":false}, 'PARENT_OF', RelationDirection.RIGHT);
       
 
       const createZoneNode = await this.neo4jService.createNode(zones, ['Zones']);
-      // await this.neo4jService.addRelationWithRelationNameByKey(
-      //   createNode['properties'].key,
-      //   zones.key,
-      //   RelationName.PARENT_OF,
-      // );
+     
       await this.neo4jService.addRelationByIdAndRelationNameWithFilters(createNode.identity.low,{"isDeleted":false},
         createZoneNode.identity.low, {"isDeleted":false}, 'PARENT_OF', RelationDirection.RIGHT);
       }  
