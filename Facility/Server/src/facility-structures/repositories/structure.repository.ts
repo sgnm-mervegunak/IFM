@@ -576,7 +576,7 @@ async changeNodeBranch(_id: string, target_parent_id: string) {
           classificationRootNone = 'FacilityFloorTypes';
         }
         if (structureData['nodeType'] == 'Space') {
-          classificationRootNone = 'OmniClass11';
+          classificationRootNone = 'OmniClass13';
         }
 
         languages.map(async (record) => {
