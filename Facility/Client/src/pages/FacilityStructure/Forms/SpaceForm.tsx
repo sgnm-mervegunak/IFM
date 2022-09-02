@@ -181,6 +181,7 @@ const SpaceForm = ({
       .then(async (res) => {
         let temp = {};
         await ClassificationsService.findClassificationByCodeAndLanguage(realm, "OmniClass11", language, res.data.properties.category).then(clsf1 => {
+          setCodeCategory(res.data.properties.category);
           res.data.properties.category = clsf1.data.key
           temp = res.data.properties;
           // setData(res.data.properties);
@@ -194,15 +195,19 @@ const SpaceForm = ({
           temp = res.data.properties;
           // setData(res.data.properties);
         })
+          .catch((err) => {
+            setData(res.data.properties);
+          })
 
         await ClassificationsService.findClassificationByCodeAndLanguage(realm, "OmniClass11", language, res.data.properties.usage).then(async clsf3 => {
-          res.data.properties.status = await clsf3.data.key
+          res.data.properties.usage = await clsf3.data.key
           temp = res.data.properties;
           // setData(res.data.properties);
         })
           .catch((err) => {
             setData(res.data.properties);
           })
+          
         setData(temp);
       })
       .catch((err) => {

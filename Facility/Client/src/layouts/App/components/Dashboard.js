@@ -11,18 +11,17 @@ import FacilityStructureService from "../../../services/facilitystructure";
 import JointSpaceService from "../../../services/jointSpace";
 import { useAppSelector } from "../../../app/hook";
 
-let data2=[33,33,34];
+let data2 = [33, 33, 34];
 
 const revenueChart = {
   labels: ["Blocks", "Floors", "Spaces"],
   datasets: [
     {
       data: data2,
-      backgroundColor: ["#7986CB", "#4DB6AC","#5FD0E1"],
+      backgroundColor: ["#7986CB", "#4DB6AC", "#5FD0E1"],
     },
   ],
 };
-
 
 const Dashboard = () => {
   const [data, setData] = useState([]);
@@ -35,8 +34,8 @@ const Dashboard = () => {
   const [floorCounts2, setFloorCounts2] = useState(0);
   const [spaceCounts2, setSpaceCounts2] = useState(0);
   const [buildingNames, setBuildingNames] = useState([]);
-  const [buildingKeys, setBuildingKeys]= useState([]);
-  const [counts,setCounts]=useState([]);
+  const [buildingKeys, setBuildingKeys] = useState([]);
+  const [counts, setCounts] = useState([]);
   const auth = useAppSelector((state) => state.auth);
   const { toast } = useAppSelector((state) => state.toast);
   const [realm, setRealm] = useState(auth.auth.realm);
@@ -75,7 +74,6 @@ const Dashboard = () => {
         setBlockCounts2((prev) => prev + 1);
 
         console.log(i);
-
       }
       if (i.nodeType === "Floor") {
         setFloorCounts2((prev) => prev + 1);
@@ -86,12 +84,12 @@ const Dashboard = () => {
     }
   };
 
-  const getFacilityStructure = async() => {
+  const getFacilityStructure = async () => {
     await FacilityStructureService.findOne(realm)
-      .then(async(res) => {
+      .then(async (res) => {
         setData([res.data.root] || []);
         let temp = JSON.parse(JSON.stringify([res.data.root] || []));
-       await fixNodes(temp);
+        await fixNodes(temp);
         setData(temp);
       })
       .catch((err) => {
@@ -107,27 +105,26 @@ const Dashboard = () => {
   };
 
   const getBuildings = () => {
-     buildingKeys.map(async(key) => {
+    buildingKeys.map(async (key) => {
       await JointSpaceService.findBuildingWithKey(key, realm)
-      .then((res) => {
-        setData2([res.data.root] || []);
-        console.log(res.data.root);
-        let temp = JSON.parse(JSON.stringify([res.data.root] || []));
-        fixNodes2(temp);
-        setData2(temp);
-      })
-      .catch((err) => {
-        if (err.response.status === 500) {
-          toast.current.show({
-            severity: "error",
-            summary: "Error",
-            detail: "Facility Structure not found",
-            life: 4000,
-          });
-        }
-      });
-    }
-    )
+        .then((res) => {
+          setData2([res.data.root] || []);
+          console.log(res.data.root);
+          let temp = JSON.parse(JSON.stringify([res.data.root] || []));
+          fixNodes2(temp);
+          setData2(temp);
+        })
+        .catch((err) => {
+          if (err.response.status === 500) {
+            toast.current.show({
+              severity: "error",
+              summary: "Error",
+              detail: "Facility Structure not found",
+              life: 4000,
+            });
+          }
+        });
+    });
   };
 
   useEffect(() => {
@@ -203,28 +200,27 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="col-12 lg:col-6">
-          {buildingNames?.map((building,index) => (
-            
-            <div key={index}>
-              <div className="card revenue">
-                <h4>{building}</h4>
-                {/* <p>Comparison of your revenue sources.</p> */}
-                <div className="revenue-chart-container">
-                  <div className="flex justify-content-center">
-                    <Chart
-                      style={{ position: "relative", width: "50%" }}
-                      type="pie"
-                      id="revenue-chart"
-                      data={revenueChart}
-                    ></Chart>
-                  </div>
+      <div className="grid ">
+        {buildingNames?.map((building, index) => (
+          <div key={index} className="col-6">
+            <div className="card revenue">
+              <h4>{building}</h4>
+              {/* <p>Comparison of your revenue sources.</p> */}
+              <div className="revenue-chart-container">
+                <div className="flex justify-content-center">
+                  <Chart
+                    style={{ position: "relative", width: "50%" }}
+                    type="pie"
+                    id="revenue-chart"
+                    data={revenueChart}
+                  ></Chart>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );

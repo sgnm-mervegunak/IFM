@@ -184,6 +184,7 @@ const BuildingForm = ({
       .then(async (res) => {
         let temp = {};
         await ClassificationsService.findClassificationByCodeAndLanguage(realm, "OmniClass11", language, res.data.properties.category).then(clsf1 => {
+          setCodeCategory(res.data.properties.category);
           res.data.properties.category = clsf1.data.key
           temp = res.data.properties;
           // setData(res.data.properties);
@@ -193,8 +194,7 @@ const BuildingForm = ({
           })
 
         await ClassificationsService.findClassificationByCodeAndLanguage(realm, "FacilityStatus", language, res.data.properties.status).then(async clsf2 => {
-          console.log(clsf2.data);
-
+          setCodeStatus(res.data.properties.status);
           res.data.properties.status = await clsf2.data.key
           temp = res.data.properties;
           // setData(res.data.properties);
@@ -237,7 +237,7 @@ const BuildingForm = ({
       newNode = {
         name: data?.name,
         category: codeCategory,
-        areaMeasurument: data?.areaMeasurument,
+        areaMeasurement: data?.areaMeasurement,
         address: data?.address,
         buildingStructure: data?.buildingStructure,
         images: data?.images,
@@ -330,7 +330,7 @@ const BuildingForm = ({
       updateNode = {
         name: data?.name,
         category: codeCategory,
-        areaMeasurument: data?.areaMeasurument,
+        areaMeasurement: data?.areaMeasurement,
         address: data?.address,
         buildingStructure: data?.buildingStructure,
         images: data?.images,
@@ -355,6 +355,9 @@ const BuildingForm = ({
         siteDescription: data?.siteDescription,
         siteName: data?.siteName,
       };
+
+      console.log(updateNode);
+      
 
       FacilityStructureService.update(selectedNodeKey, updateNode)
         .then(async (res) => {
