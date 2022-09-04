@@ -115,9 +115,10 @@ const SetFacilityStructure = () => {
   const [docTypes, setDocTypes] = React.useState([]);
   const { toast } = useAppSelector((state) => state.toast);
   const { t } = useTranslation(["common"]);
+  const language = useAppSelector((state) => state.language.language);
 
   useEffect(() => {
-    FacilityStructureService.getFacilityTypes("FacilityTypes", realm)
+    FacilityStructureService.getFacilityTypes(language, "FacilityTypes", realm)
       .then((res) => {
         setFacilityType(res.data.map((item: any) => item.name));
       })
@@ -139,7 +140,7 @@ const SetFacilityStructure = () => {
       temp[0].selectable = false;
       setDocTypes(temp);
     });
-  }, []);
+  }, [language]);
 
   const getForms = async () => {
     await FormTypeService.findOne("111").then((res) => {
@@ -658,13 +659,13 @@ const SetFacilityStructure = () => {
         visible={addDia}
         style={{
           width: (() => {
-            if (selectedFacilityType === "Building") {
+            if (selectedFacilityType === "Building" || selectedFacilityType === "Bina") {
               return "60vw";
-            } else if (selectedFacilityType === "Block") {
+            } else if (selectedFacilityType === "Block" || selectedFacilityType === "Blok") {
               return "40vw";
-            } else if (selectedFacilityType === "Floor") {
+            } else if (selectedFacilityType === "Floor" || selectedFacilityType === "Kat") {
               return "40vw";
-            } else if (selectedFacilityType === "Space") {
+            } else if (selectedFacilityType === "Space" || selectedFacilityType === "Alan") {
               return "40vw";
             } else {
               return "40vw";
@@ -687,7 +688,7 @@ const SetFacilityStructure = () => {
             style={{ width: "100%" }}
           />
         </div>
-        {selectedFacilityType === "Building" ? (
+        {selectedFacilityType === "Building" || selectedFacilityType === "Bina" ? (
           <BuildingForm
             selectedFacilityType={selectedFacilityType}
             submitted={submitted}
@@ -702,7 +703,7 @@ const SetFacilityStructure = () => {
             setSelectedFacilityType={setSelectedFacilityType}
           />
         ) : null}
-        {selectedFacilityType === "Block" ? (
+        {selectedFacilityType === "Block" || selectedFacilityType === "Blok" ? (
           <BlockForm
             selectedFacilityType={selectedFacilityType}
             submitted={submitted}
@@ -717,7 +718,7 @@ const SetFacilityStructure = () => {
             setSelectedFacilityType={setSelectedFacilityType}
           />
         ) : null}
-        {selectedFacilityType === "Floor" ? (
+        {selectedFacilityType === "Floor" || selectedFacilityType === "Kat" ? (
           <FloorForm
             selectedFacilityType={selectedFacilityType}
             submitted={submitted}
@@ -732,7 +733,7 @@ const SetFacilityStructure = () => {
             setSelectedFacilityType={setSelectedFacilityType}
           />
         ) : null}
-        {selectedFacilityType === "Space" ? (
+        {selectedFacilityType === "Space" || selectedFacilityType === "Alan" ? (
           <SpaceForm
             selectedFacilityType={selectedFacilityType}
             submitted={submitted}
@@ -794,13 +795,13 @@ const SetFacilityStructure = () => {
         visible={editDia}
         style={{
           width: (() => {
-            if (selectedFacilityType === "Building") {
+            if (selectedFacilityType === "Building" || selectedFacilityType === "Bİna") {
               return "60vw";
-            } else if (selectedFacilityType === "Block") {
+            } else if (selectedFacilityType === "Block" || selectedFacilityType === "Blok") {
               return "40vw";
-            } else if (selectedFacilityType === "Floor") {
+            } else if (selectedFacilityType === "Floor" || selectedFacilityType === "Kat") {
               return "40vw";
-            } else if (selectedFacilityType === "Space") {
+            } else if (selectedFacilityType === "Space" || selectedFacilityType === "Alan") {
               return "40vw";
             }
           })()
@@ -814,13 +815,13 @@ const SetFacilityStructure = () => {
         <div className="field">
           <h5 style={{ marginBottom: "0.5em" }}>{t("Facility Type")}</h5>
           <Dropdown
-            value={selectedFacilityType}
-            options={[selectedFacilityType]}
+            value={t(selectedFacilityType as string)}
+            options={facilityType}
             disabled
             style={{ width: "100%" }}
           />
         </div>
-        {selectedFacilityType === "Building" ? (
+        {selectedFacilityType === "Building" || selectedFacilityType === "Bina" ? (
           <BuildingForm
             selectedFacilityType={selectedFacilityType}
             submitted={submitted}
@@ -835,7 +836,7 @@ const SetFacilityStructure = () => {
             setSelectedFacilityType={setSelectedFacilityType}
           />
         ) : null}
-        {selectedFacilityType === "Block" ? (
+        {selectedFacilityType === "Block" || selectedFacilityType === "Blok" ? (
           <BlockForm
             selectedFacilityType={selectedFacilityType}
             submitted={submitted}
@@ -850,7 +851,7 @@ const SetFacilityStructure = () => {
             setSelectedFacilityType={setSelectedFacilityType}
           />
         ) : null}
-        {selectedFacilityType === "Floor" ? (
+        {selectedFacilityType === "Floor" || selectedFacilityType === "Kat" ? (
           <FloorForm
             selectedFacilityType={selectedFacilityType}
             submitted={submitted}
@@ -865,7 +866,7 @@ const SetFacilityStructure = () => {
             setSelectedFacilityType={setSelectedFacilityType}
           />
         ) : null}
-        {selectedFacilityType === "Space" ? (
+        {selectedFacilityType === "Space" || selectedFacilityType === "Alan" ? (
           <SpaceForm
             selectedFacilityType={selectedFacilityType}
             submitted={submitted}

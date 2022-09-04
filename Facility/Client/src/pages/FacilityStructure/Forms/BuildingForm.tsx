@@ -440,7 +440,7 @@ const BuildingForm = ({
     <form>
 
       <TabView>
-        <TabPanel header="Form">
+        <TabPanel header={t("Form")}>
           <div className="formgrid grid">
 
             <div className="field col-12 md:col-6">
@@ -819,7 +819,7 @@ const BuildingForm = ({
           </div>
 
         </TabPanel>
-        <TabPanel header="Images">
+        <TabPanel header={t("Images")}>
           <div className="formgrid grid">
             <div className="field col-12">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Images")}</h5>
@@ -848,7 +848,7 @@ const BuildingForm = ({
             </div>
           </div>
         </TabPanel>
-        <TabPanel header="Documents">
+        <TabPanel header={t("Documents")}>
           <div className="formgrid grid">
             <div className="field col-12">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Documents")}</h5>

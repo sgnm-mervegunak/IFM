@@ -89,18 +89,19 @@ const SetFacilityStructure2 = () => {
   const cm: any = React.useRef(null);
   const navigate = useNavigate()
   const [formData, setFormData] = useState<FormNode[]>([]);
-  const auth = useAppSelector((state) => state.auth);
+  const auth = useAppSelector((state: { auth: any; }) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
   const [generateNodeKey, setGenerateNodeKey] = useState("");
   const [generateFormTypeKey, setGenerateFormTypeKey] = useState<string | undefined>("");
   const [generateNodeName, setGenerateNodeName] = useState<string | undefined>("");
   const [facilityType, setFacilityType] = useState<string[]>([]);
   const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
-  const [uploadFiles,setUploadFiles] = useState<any>({});
-  const [deleteFiles,setDeleteFiles] = useState<any>([]);
+  const [uploadFiles, setUploadFiles] = useState<any>({});
+  const [deleteFiles, setDeleteFiles] = useState<any>([]);
+  const language = useAppSelector((state: { language: { language: any; }; }) => state.language.language);
 
   useEffect(() => {
-    FacilityStructureService.getFacilityTypes("FacilityTypes_EN", realm)
+    FacilityStructureService.getFacilityTypes(language, "FacilityTypes_EN", realm)
       .then((res) => {
         setFacilityType(res.data.map((item: any) => item.name))
       })
@@ -263,7 +264,7 @@ const SetFacilityStructure2 = () => {
     }
   };
 
-  const UploadAnyFile = (folderName:string,file:any) => {
+  const UploadAnyFile = (folderName: string, file: any) => {
     const url = "http://localhost:3004/file-upload/single";
     const formData = new FormData();
 
@@ -274,10 +275,10 @@ const SetFacilityStructure2 = () => {
   };
 
 
-  const DeleteAnyFile = (realmName:string,fileName:string) => {
+  const DeleteAnyFile = (realmName: string, fileName: string) => {
     const url = "http://localhost:3004/file-upload/removeOne";
 
-    return axios.delete(url, {data:{fileName, realmName}})
+    return axios.delete(url, { data: { fileName, realmName } })
   };
 
   const addItem = (key: string, data: any) => {
@@ -310,7 +311,7 @@ const SetFacilityStructure2 = () => {
 
         console.log("data", data)
         FacilityStructureService.createStructure(key, data)
-          .then(async(res) => {
+          .then(async (res) => {
             toast.current.show({
               severity: "success",
               summary: "Successful",
@@ -326,18 +327,18 @@ const SetFacilityStructure2 = () => {
             //   })
             getFacilityStructure();
             let temp = {} as any
-            for(let item in uploadFiles) {
+            for (let item in uploadFiles) {
               temp[item] = []
-              for(let file of uploadFiles[item]) {
-                let resFile = await UploadAnyFile(res.data.properties.key+"/"+item,file)
+              for (let file of uploadFiles[item]) {
+                let resFile = await UploadAnyFile(res.data.properties.key + "/" + item, file)
                 delete resFile.data.message
                 temp[item].push(resFile.data)
               }
             }
-            for(let item in temp){
+            for (let item in temp) {
               temp[item] = JSON.stringify(temp[item])
             }
-            FacilityStructureService.update(res.data.properties.key, {...data,...temp})
+            FacilityStructureService.update(res.data.properties.key, { ...data, ...temp })
             setUploadFiles({})
 
           })
@@ -418,10 +419,10 @@ const SetFacilityStructure2 = () => {
         //   }
         //   )
         console.log(data);
-        
+
 
         FacilityStructureService.update(key, data)
-          .then(async(res) => {
+          .then(async (res) => {
             toast.current.show({
               severity: "success",
               summary: "Successful",
@@ -430,34 +431,34 @@ const SetFacilityStructure2 = () => {
             });
             // upload files
             let temp = {} as any
-            for(let item in uploadFiles) {
+            for (let item in uploadFiles) {
               temp[item] = []
-              for(let file of uploadFiles[item]) {
-                let resFile = await UploadAnyFile(key+"/"+item,file)
+              for (let file of uploadFiles[item]) {
+                let resFile = await UploadAnyFile(key + "/" + item, file)
                 delete resFile.data.message
                 temp[item].push(resFile.data)
               }
             }
-            for(let item in temp){
+            for (let item in temp) {
               try {
-                temp[item] = [...JSON.parse(data[item]),...temp[item]]
+                temp[item] = [...JSON.parse(data[item]), ...temp[item]]
               }
-              catch(err) {
+              catch (err) {
               }
               temp[item] = JSON.stringify(temp[item])
             }
 
             // delete files
-            for(let item of deleteFiles) {
+            for (let item of deleteFiles) {
               let temp = item.image_url.split("/")
-              let urlIndex = temp.findIndex((item:any) => item === "172.30.99.120:9000")
-              let temp2 = temp.slice(urlIndex+1)
+              let urlIndex = temp.findIndex((item: any) => item === "172.30.99.120:9000")
+              let temp2 = temp.slice(urlIndex + 1)
 
-              await DeleteAnyFile(temp2[0],temp2.slice(1).join("/"))
+              await DeleteAnyFile(temp2[0], temp2.slice(1).join("/"))
             }
 
             // update node
-            FacilityStructureService.update(res.data.properties.key, {...data,...temp})
+            FacilityStructureService.update(res.data.properties.key, { ...data, ...temp })
             getFacilityStructure();
             setUploadFiles({})
           })
