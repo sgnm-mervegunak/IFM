@@ -19,7 +19,7 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
     let data:any
     let jsonData=[]
     let buildingType=[]
-    let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m)-[:CLASSIFIED_BY|:CREATED_BY]->(z) where  (z.language="EN" or not exists(z.language)) and m.isDeleted=false  and not (m:JointSpaces OR m:JointSpace OR m:Zones or m:Zone) 
+    let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m)-[:CLASSIFIED_BY|:CREATED_BY]->(z) where  (z.language="EN" or not exists(z.language)) and m.isDeleted=false  and not (m:JointSpaces OR m:JointSpace OR m:Zones or m:Zone OR m:Block) 
     WITH collect(path) AS paths
     CALL apoc.convert.toTree(paths)
     YIELD value
@@ -106,8 +106,8 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
             jsonData.push({BuildingName:data.value.name,
               BlockName:data.value.parent_of[index].name,
               FloorName:data.value.parent_of[index].parent_of[i].name,
-                SpaceName:data.value.parent_of[index].parent_of[i].parent_of[a].name,
-                Code:spaceProperties.code ? spaceProperties.code :" ",
+              SpaceName:data.value.parent_of[index].parent_of[i].parent_of[a].name,
+              Code:spaceProperties.code ? spaceProperties.code :" ",
               ArchitecturalName:spaceProperties.architecturalName,
               Category:spaceProperties.classified_by[0].name,
               GrossArea:spaceProperties.grossArea,
@@ -177,7 +177,7 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
   async getZonesByBuilding(realm:string,buildingKey:string ){
         let data:any
         let jsonData=[]
-        let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m) where m.isDeleted=false  and not (m:Space OR m:JointSpaces OR m:JointSpace OR m:Floor OR m:Block)
+        let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m)-[:MERGEDZN|:CREATED_BY|:CLASSIFIED_BY]->(z) where (z.language="EN" or not exists(z.language)) and m.isDeleted=false  and not (m:Space OR m:JointSpaces OR m:JointSpace OR m:Floor OR m:Block)
         WITH collect(path) AS paths
         CALL apoc.convert.toTree(paths)
         YIELD value
@@ -209,7 +209,6 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
           }
         
 
-        console.log(jsonData)
         return jsonData;
         
         
