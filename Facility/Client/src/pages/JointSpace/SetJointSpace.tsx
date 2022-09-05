@@ -12,6 +12,7 @@ import { Calendar } from "primereact/calendar";
 import { Dropdown } from 'primereact/dropdown';
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
+import { useTranslation } from "react-i18next";
 
 import FacilityStructureService from "../../services/facilitystructure";
 import ClassificationsService from "../../services/classifications";
@@ -116,6 +117,7 @@ const SetJointSpace = () => {
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const params = useParams();
+  const { t } = useTranslation(["common"]);
 
   const fixNodesClassification = (nodes: Node[]) => {
     if (!nodes || nodes.length === 0) {
@@ -217,7 +219,7 @@ const SetJointSpace = () => {
       if (err.response.status === 500) {
         toast.current.show({
           severity: "error",
-          summary: "Error",
+          summary: t("Error"),
           detail: "Joint Space not found",
           life: 3000,
         });
@@ -272,8 +274,8 @@ const SetJointSpace = () => {
       .then((res) => {
         toast.current.show({
           severity: "success",
-          summary: "Successful",
-          detail: "Joint Space Created",
+          summary: t("Successful"),
+          detail: t("Joint Space Created"),
           life: 3000,
         });
 
@@ -285,7 +287,7 @@ const SetJointSpace = () => {
       .catch((err) => {
         toast.current.show({
           severity: "error",
-          summary: "Error",
+          summary: t("Error"),
           detail: err.response ? err.response.data.message : err.message,
           life: 2000,
         });
@@ -366,8 +368,8 @@ const SetJointSpace = () => {
       .then(() => {
         toast.current.show({
           severity: "success",
-          summary: "Success",
-          detail: "Joint Space Deleted",
+          summary: t("Successful"),
+          detail: t("Joint Space Deleted"),
           life: 2000,
         });
         getJointSpace();
@@ -377,7 +379,7 @@ const SetJointSpace = () => {
       .catch((err) => {
         toast.current.show({
           severity: "error",
-          summary: "Error",
+          summary: t("Error"),
           detail: err.response ? err.response.data.message : err.message,
           life: 2000,
         });
@@ -413,7 +415,7 @@ const SetJointSpace = () => {
     return (
       <div>
         <Button
-          label="Cancel"
+          label={t("Cancel")}
           icon="pi pi-times"
           onClick={() => {
             setAddDia(false);
@@ -427,7 +429,7 @@ const SetJointSpace = () => {
           className="p-button-text"
         />
         <Button
-          label="Add"
+          label={t("Add")}
           icon="pi pi-check"
           onClick={() => addItem()}
           autoFocus
@@ -484,28 +486,22 @@ const SetJointSpace = () => {
       <ConfirmDialog
         visible={delDia}
         onHide={() => setDelDia(false)}
-        message="Do you want to delete?"
-        header="Delete Confirmation"
+        message={t("Do you want to delete?")}
+        header={t("Delete Confirmation")}
         icon="pi pi-exclamation-triangle"
         accept={() => deleteItem(deleteNodeKey)}
       />
       <Dialog
-        header="Add New Item"
+        header={t("Add New Item")}
         visible={addDia}
         style={{ width: "40vw" }}
         footer={renderFooterAdd}
         onHide={() => {
-          setName("");
-          setTag([]);
-          setFormTypeId(undefined);
-          setLabels([]);
           setAddDia(false);
-
-          setSelectedFacilityType(undefined);
         }}
       >
         <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>ArchitecturalName</h5>
+          <h5 style={{ marginBottom: "0.5em" }}>Architectural Name</h5>
           <InputText
             value={ArchitecturalName}
             onChange={(event) => setArchitecturalName(event.target.value)}
@@ -513,7 +509,7 @@ const SetJointSpace = () => {
           />
         </div>
         <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>ArchitecturalCode</h5>
+          <h5 style={{ marginBottom: "0.5em" }}>Architectural Code</h5>
           <InputText
             value={ArchitecturalCode}
             onChange={(event) => setArchitecturalCode(event.target.value)}
@@ -617,28 +613,16 @@ const SetJointSpace = () => {
       >
       </Dialog>
 
-      <Dialog
-        // header="Form"
-        visible={formDia}
-        style={{ width: "40vw" }}
-        // footer={renderFooterForm}
-        onHide={() => {
-
-          setFormDia(false);
-        }}
-      >
-        <FormGenerate nodeKey={generateNodeKey} formKey={generateFormTypeKey} nodeName={generateNodeName} setFormDia={setFormDia} />
-
-      </Dialog>
-      <h3>Joint Space</h3>
+      
+      <h3>{t("Joint Space")}</h3>
       <div>
-        <span style={{ fontWeight: "bold", fontSize: "16px" }}>Selected Spaces:</span>
+        <span style={{ fontWeight: "bold", fontSize: "16px" }}>{t("Selected Spaces")}:</span>
         <span style={{ fontWeight: "bold", fontSize: "14px", color: "red" }}>{` ${selectedKeysName.toString().replaceAll(",", ", ")} `}</span>
         
         {selectedKeys.length > 1 &&
           <div className="mt-4">
 
-            <Button label="Join" icon="pi pi-check" className="ml-2" onClick={() => setAddDia(true)} />
+            <Button label={t("Join")} icon="pi pi-check" className="ml-2" onClick={() => setAddDia(true)} />
 
           </div>
         }
@@ -651,7 +635,7 @@ const SetJointSpace = () => {
           dragdropScope="-"
           filter
           filterBy="name,code"
-          filterPlaceholder="Search"
+          filterPlaceholder={t("Search")}
           selectionMode="checkbox"
           onSelectionChange={(event: any) => {
 
@@ -660,7 +644,6 @@ const SetJointSpace = () => {
             setSelectedNodeKey(event.value);
             setSelectedKeys(Object.keys(event.value));
             findKeyName(Object.keys(event.value));
-            // selectedKeys?.map((key) =>{findKeyName(key)});
           }
           }
           selectionKeys={selectedNodeKey}
@@ -677,7 +660,7 @@ const SetJointSpace = () => {
                       setDeleteNodeKey(data.key);
                       setDelDia(true)
                     }}
-                    title="Delete Item"
+                    title={t("Delete")}
                   />
                     : null
                 }
