@@ -17,6 +17,8 @@ import ClassificationsService from "../../services/classifications";
 import ZoneService from "../../services/zone";
 import { useAppSelector } from "../../app/hook";
 import FormGenerate from "../FormGenerate/FormGenerate";
+import { useTranslation } from "react-i18next";
+
 
 interface Node {
   cantDeleted: boolean;
@@ -103,7 +105,7 @@ const SetZone = () => {
   const [ArchitecturalCode, setArchitecturalCode] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [code, setCode] = useState<string>("");
-  const [tag, setTag] = useState<string[]>([]);
+  // const [tag, setTag] = useState<string[]>([]);
   const [m2, setM2] = useState<string>("");
   const [spaceType, setSpaceType] = useState<any>(undefined);
   const [status, setStatus] = useState<any>(undefined);
@@ -120,6 +122,8 @@ const SetZone = () => {
   const [delDia, setDelDia] = useState<boolean>(false);
   const [formDia, setFormDia] = useState<boolean>(false);
   const { toast } = useAppSelector((state) => state.toast);
+  const { t } = useTranslation(["common"]);
+  const language = useAppSelector((state) => state.language.language);
   const cm: any = React.useRef(null);
   const navigate = useNavigate();
   // const [formData, setFormData] = useState<FormNode[]>([]);
@@ -133,11 +137,11 @@ const SetZone = () => {
     ""
   );
   const [facilityType, setFacilityType] = useState<string[]>([]);
-  const [selectedFacilityType, setSelectedFacilityType] = useState<
-    string | undefined
-  >("");
+  const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
+
+
   const params = useParams();
 
   const fixNodesClassification = (nodes: Node[]) => {
@@ -204,28 +208,38 @@ const SetZone = () => {
       });
   };
 
-  const menu = [
+  // const menu = [
+  //   {
+  //     label: "Add Item",
+  //     icon: "pi pi-plus",
+  //     command: () => {
+  //       setAddDia(true);
+  //     },
+  //   },
+  //   {
+  //     label: "Edit Item",
+  //     icon: "pi pi-pencil",
+  //     command: () => {
+  //       setIsUpdate(true);
+  //       // getNodeInfoAndEdit(selectedNodeKey);
+  //       setEditDia(true);
+  //     },
+  //   },
+  //   {
+  //     label: "Delete",
+  //     icon: "pi pi-trash",
+  //     command: () => {
+  //       setDelDia(true);
+  //     },
+  //   },
+  // ];
+
+  const menuBuilding = [
     {
-      label: "Add Item",
-      icon: "pi pi-plus",
+      label: t("Export Zones"),
+      icon: "pi pi-download",
       command: () => {
-        setAddDia(true);
-      },
-    },
-    {
-      label: "Edit Item",
-      icon: "pi pi-pencil",
-      command: () => {
-        setIsUpdate(true);
-        // getNodeInfoAndEdit(selectedNodeKey);
-        setEditDia(true);
-      },
-    },
-    {
-      label: "Delete",
-      icon: "pi pi-trash",
-      command: () => {
-        setDelDia(true);
+        console.log("in here, export zones");
       },
     },
   ];
@@ -274,19 +288,7 @@ const SetZone = () => {
   const { register, handleSubmit, watch, formState: { errors }, control, reset, formState, formState: { isSubmitSuccessful } } = useForm<ZoneInterface>({
     resolver: yupResolver(schema)
   })
-  // const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
-  //   defaultValues: {
-  //     ...formData
-  //   },
-  //   resolver: yupResolver(schema)
-  // });
-  // useEffect(
-  //   () => {
-  //     console.log("dataaaa: ", createZone);
-
-  //   }
-  //   , [createZone])
-
+ 
   useEffect(() => {
     watch((value, { name, type }) => console.log(value, name, type));
   }, [watch])
@@ -295,6 +297,8 @@ const SetZone = () => {
   useEffect(() => {
     if (formState.isSubmitSuccessful) {
       reset({...createZone});
+    } else {
+      
     }
   }, [formState, createZone, reset]);
 
@@ -357,8 +361,7 @@ const SetZone = () => {
       .then((responseStructure) => {
         if (labels.length > 0) {
           updateNode = {
-            name: name,
-            tag: tag,
+            ...createZone,
             isActive: isActive,
             description: "",
             labels: [labels[0]],
@@ -366,8 +369,7 @@ const SetZone = () => {
           };
         } else {
           updateNode = {
-            name: name,
-            tag: tag,
+            ...createZone,
             isActive: isActive,
             description: "",
             formTypeId: formTypeId,
@@ -402,7 +404,7 @@ const SetZone = () => {
         });
       });
     setName("");
-    setTag([]);
+    // setTag([]);
     setFormTypeId(undefined);
     setLabels([]);
     setEditDia(false);
@@ -472,13 +474,15 @@ const SetZone = () => {
           icon="pi pi-times"
           onClick={() => {
             setAddDia(false);
-            setName("");
-            setFormTypeId(undefined);
-            setCreateZone({} as ZoneInterface)
-            setLabels([]);
-            setTag([]);
+            // setName("");
+            // setFormTypeId(undefined);
+            // setCreateZone({} as ZoneInterface)
+            // setLabels([]);
+            // setTag([]);
 
             setSelectedFacilityType(undefined);
+
+            reset({}) // reset form values after canceling the create zone operation
           }}
           className="p-button-text"
         />
@@ -501,8 +505,8 @@ const SetZone = () => {
           icon="pi pi-times"
           onClick={() => {
             setEditDia(false);
-            setName("");
-            setTag([]);
+            // setName("");
+            // setTag([]);
             setLabels([]);
             setFormTypeId(undefined);
 
@@ -536,8 +540,18 @@ const SetZone = () => {
   // };
 
   return (
+
+   
     <div className="container">
-      <ContextMenu model={menu} ref={cm} />
+
+      {
+        (() => {
+          if(selectedFacilityType==="Building")
+          return(
+            <ContextMenu id={"001" } model={menuBuilding} ref={cm} />
+          )
+        })()
+     }
       <ConfirmDialog
         visible={delDia}
         onHide={() => setDelDia(false)}
@@ -552,8 +566,8 @@ const SetZone = () => {
         style={{ width: "40vw" }}
         footer={renderFooterAdd}
         onHide={() => {
-          setName("");
-          setTag([]);
+          // setName("");
+          // setTag([]);
           setFormTypeId(undefined);
           setLabels([]);
           // setCreateZone({} as ZoneInterface)
@@ -569,11 +583,9 @@ const SetZone = () => {
           <div className="field">
             <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
             <InputText
-              // value={createZone.name}
               autoComplete="off"
               {...register("name")}
               style={{ width: '100%' }}
-              // defaultValue={editDia ? createZone?.name || "" : ""}
             />
           </div>
           <p style={{ color: "red" }}>{errors.name?.message}</p>
@@ -588,7 +600,6 @@ const SetZone = () => {
               control={control}
               render={({ field }) => (
                 <TreeSelect
-                  // value={createZone.category}
                   value={field.value}
                   options={classificationStatus}
                   onChange={(e) => {
@@ -606,7 +617,6 @@ const SetZone = () => {
           <div className="field">
             <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
             <InputText
-              // value={createZone.code}
               autoComplete="off"
               {...register("code")}
               style={{ width: '100%' }}
@@ -619,7 +629,6 @@ const SetZone = () => {
           <div className="field">
             <h5 style={{ marginBottom: "0.5em" }}>Description</h5>
             <InputText
-              // value={createZone.description}
               autoComplete="off"
               {...register("description")}
               style={{ width: '100%' }}
@@ -637,7 +646,6 @@ const SetZone = () => {
               control={control}
               render={({ field }) => (
                 <Chips
-                  // value={createZone.tags}
                   value={field.value}
                   onChange={(e) => {
                     field.onChange({ target: { name: "tags", value: e.value } })
@@ -653,7 +661,6 @@ const SetZone = () => {
           <div className="field">
             <h5 style={{ marginBottom: "0.5em" }}>External System</h5>
             <InputText
-              // value={createZone.externalSystem}
               autoComplete="off"
               {...register("externalSystem")}
               style={{ width: '100%' }}
@@ -665,7 +672,6 @@ const SetZone = () => {
           <div className="field">
             <h5 style={{ marginBottom: "0.5em" }}>External Object</h5>
             <InputText
-              // value={createZone.externalObject}
               autoComplete="off"
               {...register("externalObject")}
               style={{ width: '100%' }}
@@ -682,8 +688,8 @@ const SetZone = () => {
         style={{ width: "40vw" }}
         footer={renderFooterEdit}
         onHide={() => {
-          setName("");
-          setTag([]);
+          // setName("");
+          // setTag([]);
           setFormTypeId(undefined);
           setLabels([]);
           setEditDia(false);
@@ -723,13 +729,20 @@ const SetZone = () => {
               label="Create a Zone"
               icon="pi pi-check"
               className="ml-2"
-              onClick={() => setAddDia(true)}
+              onClick={() => {
+                setAddDia(true)
+                // setCreateZone({} as ZoneInterface)
+              }}
             />
           </div>
         )}
       </div>
       <div className="field mt-4">
         <Tree
+          onContextMenu={(event: any) => {
+            setSelectedFacilityType(event.node.nodeType);
+            cm.current.show(event.originalEvent);
+          }}
           loading={loading}
           value={data}
           dragdropScope="-"
