@@ -11,9 +11,11 @@ import { Toolbar } from "primereact/toolbar";
 import { useNavigate } from "react-router-dom";
 import { Menu } from 'primereact/menu';
 import { Chips } from 'primereact/chips';
+import { useTranslation } from "react-i18next";
 
 import FacilityStructureService from "../../services/facilitystructure";
 import { useAppSelector } from "../../app/hook";
+
 
 interface Node {
   cantDeleted: boolean;
@@ -57,6 +59,7 @@ const JointSpace = () => {
   const menu = useRef<any>(null);
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
+  const { t } = useTranslation(["common"]);
 
   useEffect(() => {
     loadLazyData();
@@ -116,12 +119,12 @@ const JointSpace = () => {
 
   const header = (
     <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-      <h3 className="m-0">Joint Space</h3>
+      <h3 className="m-0">{t("Joint Space")}</h3>
       <span className="block mt-2 md:mt-0">
         <InputText
           type="search"
           onInput={(e: any) => setGlobalFilter(e.target.value)}
-          placeholder="Search..."
+          placeholder={t("Search")}
         />
         <Button icon="pi pi-search" className="ml-1" />
       </span>
@@ -173,8 +176,8 @@ const JointSpace = () => {
         }}
         responsiveLayout="scroll"
       >
-        <Column field="name" header="Name" sortable></Column>
-        <Column field="nodeType" header="Facility Type" sortable></Column>
+        <Column field="name" header={t("Name")} sortable></Column>
+        <Column field="nodeType" header={t("Facility Type")} sortable></Column>
       </DataTable>
       <Dialog
         header="Add New Facility Structure"

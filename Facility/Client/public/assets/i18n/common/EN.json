@@ -105,7 +105,11 @@
 	"Site Description": "Site Description",
 	"Documents": "Documents",
 	"Select Buildings": "Select Buildings",
-	"Form": "Form"
+	"Form": "Form",
+	"Joint Space Created": "Joint Space Created",
+	"Joint Space Deleted": "Joint Space Deleted",
+	"Selected Spaces": "Selected Spaces",
+	"Join":"Join"
 }
 
 
