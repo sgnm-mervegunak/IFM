@@ -119,25 +119,24 @@ export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
         ['JointSpaces'],
         { isActive: true, isDeleted: false },
       );
-      let jointSpaceTitle = '';
+      let title = '';
 
       spaceNodes.forEach((element, index) => {
         if (index + 1 === spaceNodes.length) {
-          jointSpaceTitle = jointSpaceTitle + element.name;
+          title = title + element.properties.name;
         } else {
-          jointSpaceTitle = jointSpaceTitle + element.name + ',';
+          title = title + element.properties.name + ',';
         }
       });
-      createJointSpaceDto['jointSpaceTitle'] = jointSpaceTitle;
 
       //create new JointSpace node and add relations to relating JointSpaces node and space nodes
       const jointSpaceEntity = new JointSpace();
+      jointSpaceEntity['jointSpaceTitle'] = title;
       const jointSpaceObject = assignDtoPropToEntity(jointSpaceEntity, createJointSpaceDto);
       delete jointSpaceObject['nodeKeys'];
       const jointSpace = await this.neo4jService.createNode(jointSpaceObject, ['JointSpace']);
       await this.neo4jService.addRelations(jointSpace.identity.low, jointSpacesNode[0].get('children').identity.low);
       spaceNodes.map(async (element) => {
-        console.log(element);
         await this.neo4jService.updateByIdAndFilter(element.identity.low, { isDeleted: false }, [], {
           isBlocked: true,
         });

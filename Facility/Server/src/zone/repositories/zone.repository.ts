@@ -13,6 +13,7 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
   constructor(private readonly neo4jService: Neo4jService) {}
 
   async findOneByRealm(key: string, realm: string) {
+    console.log(realm);
     let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
       ['Building'],
       { key, isDeleted: false },
@@ -88,7 +89,7 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
     const zoneObject = assignDtoPropToEntity(zoneEntity, createZoneDto);
     delete zoneObject['nodeKeys'];
     const zone = await this.neo4jService.createNode(zoneObject, ['Zone']);
-    await this.neo4jService.addRelations(zone.identity.low, zonesNode[0].get('parent').identity.low);
+    await this.neo4jService.addRelations(zone.identity.low, zonesNode[0].get('children').identity.low);
 
     spaceNodes.map(async (element) => {
       await this.neo4jService.addRelationWithRelationName(
