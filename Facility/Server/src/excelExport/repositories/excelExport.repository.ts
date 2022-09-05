@@ -74,17 +74,17 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
               BlockName:"-",
               FloorName:data.value.parent_of[index].name,
               SpaceName:spaceProperties.name,
-              Code:spaceProperties.code,
+              Code:spaceProperties.code ? spaceProperties.code :" ",
               ArchitecturalName:spaceProperties.architecturalName,
               Category:spaceProperties.classified_by[0].name,
               GrossArea:spaceProperties.grossArea,
               NetArea:spaceProperties.netArea,
               Usage:spaceProperties.usage,
               Tag:spaceProperties.tag,
-              Status:spaceProperties.status,
-              ArchitecturalCode:spaceProperties.architecturalCode,
+              Status:spaceProperties.status? spaceProperties.status: " ",
+              ArchitecturalCode:spaceProperties.architecturalCode  ? spaceProperties.architecturalCode: " ",
               description:spaceProperties.description,
-              UsableHeight:spaceProperties.availableHeight,
+              UsableHeight:spaceProperties.usableHeight,
               ExternalSystem:spaceProperties.externalSystem,
               ExternalObject:spaceProperties.externalObject,
               ExternalIdentifier:spaceProperties.externalIdentifier,
@@ -107,17 +107,17 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
               BlockName:data.value.parent_of[index].name,
               FloorName:data.value.parent_of[index].parent_of[i].name,
                 SpaceName:data.value.parent_of[index].parent_of[i].parent_of[a].name,
-                Code:spaceProperties.code,
+                Code:spaceProperties.code ? spaceProperties.code :" ",
               ArchitecturalName:spaceProperties.architecturalName,
               Category:spaceProperties.classified_by[0].name,
               GrossArea:spaceProperties.grossArea,
               NetArea:spaceProperties.netArea,
               Usage:spaceProperties.usage,
               Tag:spaceProperties.tag,
-              Status:spaceProperties.status,
-              ArchitecturalCode:spaceProperties.architecturalCode,
+              Status:spaceProperties.status? spaceProperties.status: " ",
+              ArchitecturalCode:spaceProperties.architecturalCode  ? spaceProperties.architecturalCode: " ",
               description:spaceProperties.description,
-              UsableHeight:spaceProperties.availableHeight,
+              UsableHeight:spaceProperties.usableHeight,
               ExternalSystem:spaceProperties.externalSystem,
               ExternalObject:spaceProperties.externalObject,
               ExternalIdentifier:spaceProperties.externalIdentifier,
@@ -216,21 +216,20 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
 }
 
   async getSpacesAnExcelFile( {buildingKeys,realm}:ExportExcelDto ){
-          // let data = []
-          // for(let item of buildingKeys){
-          //   console.log(item);
-          //   let abc =await (this.getSpacesByBuilding(realm,item))
-          //   data = [...data,...abc]
-          // }
-        
-          // return data;
-          let abc =await (this.getSpacesByBuilding(realm,buildingKeys[0]))
-      return abc
+           let data = [];
+
+          for(let item of buildingKeys){
+            let abc =await (this.getSpacesByBuilding(realm,item))
+            data = [...data,...abc]
+          }
+           return data;
+
         }
 
 
   async getZonesAnExcelFile( {buildingKeys,realm}:ExportExcelDto ){
           let data = []
+          
           for(let item of buildingKeys){
             console.log(item);
             let abc =await (this.getZonesByBuilding(realm,item))
