@@ -15,11 +15,11 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
 
 
 
-  async getSpacesByBuilding(realm:string,buildingKey:string ){
+  async getSpacesByBuilding(realm:string,buildingKey:string){
     let data:any
     let jsonData=[]
     let buildingType=[]
-    let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m)-[:CLASSIFICATION_BY|:CREATED_BY]->(c) where m.isDeleted=false  and not (m:JointSpaces OR m:JointSpace OR m:Zones or m:Zone) 
+    let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m)-[:CLASSIFIED_BY|:CREATED_BY]->(z) where  (z.language="EN" or not exists(z.language)) and m.isDeleted=false  and not (m:JointSpaces OR m:JointSpace OR m:Zones or m:Zone) 
     WITH collect(path) AS paths
     CALL apoc.convert.toTree(paths)
     YIELD value
@@ -215,17 +215,17 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
         
 }
 
-  async getSpacesAnExcelFile( body:ExportExcelDto ){
-          let data = []
-          for(let item of body.buildingKeys){
-            console.log(item);
-            let abc =await (this.getSpacesByBuilding(body.realm,item))
-            data = [...data,...abc]
-          }
+  async getSpacesAnExcelFile( {buildingKeys,realm}:ExportExcelDto ){
+          // let data = []
+          // for(let item of buildingKeys){
+          //   console.log(item);
+          //   let abc =await (this.getSpacesByBuilding(realm,item))
+          //   data = [...data,...abc]
+          // }
         
-          return data;
-        
-      
+          // return data;
+          let abc =await (this.getSpacesByBuilding(realm,buildingKeys[0]))
+      return abc
         }
 
 
