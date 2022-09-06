@@ -186,7 +186,7 @@ const SetClassificationAdmin = () => {
               detail: t("Classification Created"),
               life: 4000,
             });
-
+            getClassification();
           })
           .catch((err) => {
             toast.current.show({
@@ -195,8 +195,8 @@ const SetClassificationAdmin = () => {
               detail: err.response ? err.response.data.message : err.message,
               life: 4000,
             });
+            getClassification();
           });
-        getClassification();
       })
       .catch((err) => {
         toast.current.show({
@@ -234,13 +234,12 @@ const SetClassificationAdmin = () => {
               detail: t("Classification Updated"),
               life: 4000,
             });
-
             if (res.data.properties.isActive === true) {
               await ClassificationsService.setActive(res.data.id)
             } else {
               await ClassificationsService.setPassive(res.data.id)
             }
-
+            getClassification();
           })
           .catch((err) => {
             toast.current.show({
@@ -249,8 +248,9 @@ const SetClassificationAdmin = () => {
               detail: err.response ? err.response.data.message : err.message,
               life: 4000,
             });
+            getClassification();
           });
-        getClassification();
+
       })
       .catch((err) => {
         toast.current.show({
@@ -259,6 +259,7 @@ const SetClassificationAdmin = () => {
           detail: err.response ? err.response.data.message : err.message,
           life: 4000,
         });
+        getClassification();
       });
 
     setName("");
@@ -278,7 +279,7 @@ const SetClassificationAdmin = () => {
               detail: t("Classification Deleted"),
               life: 4000,
             });
-
+            getClassification();
           })
           .catch((err) => {
             toast.current.show({
@@ -287,8 +288,9 @@ const SetClassificationAdmin = () => {
               detail: err.response ? err.response.data.message : err.message,
               life: 4000,
             });
+            getClassification();
           });
-        getClassification();
+
       })
       .catch((err) => {
         toast.current.show({
@@ -314,6 +316,7 @@ const SetClassificationAdmin = () => {
           detail: err.response ? err.response.data.message : err.message,
           life: 4000,
         });
+        getClassification();
         setLoading(false);
       });
   };
