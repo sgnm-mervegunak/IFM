@@ -16,56 +16,56 @@ export class ClassificationService {
 
   @Span('create a classification')
   @OtelMethodCounter()
-  async create(createClassificationDto: CreateClassificationDto) {
-    return await this.classificationRepository.create(createClassificationDto);
+  async create(createClassificationDto: CreateClassificationDto, realm, language) {
+    return await this.classificationRepository.create(createClassificationDto, realm, language);
   }
 
   @Span('find a classification by id')
   @OtelMethodCounter()
-  async findOne(label: string, realm: string) {
+  async findOne(label: string, realm: string, language: string) {
     //checkObjectIddİsValid(id);
     
-    return await this.classificationRepository.findOneByRealm(label, realm);
+    return await this.classificationRepository.findOneByRealm(label, realm, language);
   }
 
   @Span('update a classification')
   @OtelMethodCounter()
-  async update(id: string, updateClassificationDto: UpdateClassificationDto) {
+  async update(id: string, updateClassificationDto: UpdateClassificationDto, realm:string, language:string) {
     //checkObjectIddİsValid(id);
-    return await this.classificationRepository.update(id, updateClassificationDto);
+    return await this.classificationRepository.update(id, updateClassificationDto, realm, language);
   }
 
   @Span('remove a classification')
   @OtelMethodCounter()
-  async remove(id: string) {
-    return await this.classificationRepository.delete(id);
+  async remove(id: string, realm: string, language: string) {
+    return await this.classificationRepository.delete(id, realm, language);
   }
   @Span('change none branch')
   @OtelMethodCounter()
-  async changeNodeBranch(id: string, target_parent_id: string) {
-    return await this.classificationRepository.changeNodeBranch(id, target_parent_id);
+  async changeNodeBranch(id: string, target_parent_id: string, realm: string, language: string) {
+    return await this.classificationRepository.changeNodeBranch(id, target_parent_id, realm, language);
   }
 
   @Span('find a classification node by key')
   @OtelMethodCounter()
-  async findOneNode(key: string) {
+  async findOneNode(key: string, realm: string, language: string) {
     //checkObjectIddİsValid(id);
-    return await this.classificationRepository.findOneNodeByKey(key);
+    return await this.classificationRepository.findOneNodeByKey(key, realm, language);
   }
 
   @Span('change isActive status a node and if its has children change isActive status of children')
   @OtelMethodCounter()
-  async setIsActiveTrueOfClassificationAndItsChild(id:string){
-    return await this.classificationRepository.setIsActiveTrueOfClassificationAndItsChild(id);
+  async setIsActiveTrueOfClassificationAndItsChild(id:string, realm: string, language: string){
+    return await this.classificationRepository.setIsActiveTrueOfClassificationAndItsChild(id, realm, language);
   }
 
 
   @Span('change isActive status a node and if its has children change isActive status of children')
   @OtelMethodCounter()
-  async setIsActiveFalseOfClassificationAndItsChild(id:string){
-    return await this.classificationRepository.setIsActiveFalseOfClassificationAndItsChild(id);
+  async setIsActiveFalseOfClassificationAndItsChild(id:string, realm: string, language: string){
+    return await this.classificationRepository.setIsActiveFalseOfClassificationAndItsChild(id, realm, language);
   }
-
+   
   @Span('get all classifications by realm, isActive ')
   @OtelMethodCounter()
   async getClassificationByIsActiveStatus(realm: string,language: string){

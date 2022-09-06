@@ -11,29 +11,29 @@ export class ZoneService {
     @Inject(RepositoryEnums.ZONE)
     private readonly jointSpaceRepository: ZoneInterface<any>,
   ) {}
-  async create(createZoneDto: CreateZoneDto) {
-    return await this.jointSpaceRepository.create(createZoneDto);
+  async create(createZoneDto: CreateZoneDto, realm: string, language: string) {
+    return await this.jointSpaceRepository.create(createZoneDto, realm, language);
   }
 
-  update(key, updateFacilityStructureDto: UpdateZoneDto) {
-    return this.jointSpaceRepository.update(key, updateFacilityStructureDto);
+  update(key, updateFacilityStructureDto: UpdateZoneDto, realm: string, language: string) {
+    return this.jointSpaceRepository.update(key, updateFacilityStructureDto, realm, language);
   }
 
-  async findOneNode(key: string) {
+  async findOneNode(key: string, realm: string, language: string) {
     //checkObjectIddİsValid(id);
-    return await this.jointSpaceRepository.findOneNodeByKey(key);
+    return await this.jointSpaceRepository.findOneNodeByKey(key, realm, language);
   }
 
-  remove(id: string) {
-    return this.jointSpaceRepository.delete(id);
+  remove(id: string, realm:string, language: string) {
+    return this.jointSpaceRepository.delete(id, realm, language);
   }
 
-  findOneFirstLevel(label: string, realm: string) {
-    return this.jointSpaceRepository.findOneFirstLevelByRealm(label, realm);
+  findOneFirstLevel(label: string, realm: string, language: string) {
+    return this.jointSpaceRepository.findOneFirstLevelByRealm(label, realm, language);
   }
 
-  findOne(key: string, realm: string) {
-    return this.jointSpaceRepository.findOneByRealm(key, realm);
+  findOne(key: string, realm: string, language: string) {
+    return this.jointSpaceRepository.findOneByRealm(key, realm, language);
   }
 
   async addZonesToBuilding( file: Express.Multer.File, realm: string,buildingKey: string,language: string){

@@ -2,8 +2,8 @@ import { GeciciInterface } from "./gecici.interface";
 
 export interface classificationInterface<T> extends GeciciInterface<T> {
 
-  setIsActiveTrueOfClassificationAndItsChild(id:string):any;
-  setIsActiveFalseOfClassificationAndItsChild(id:string):any;
+  setIsActiveTrueOfClassificationAndItsChild(id:string, realm:string, language:string):any;
+  setIsActiveFalseOfClassificationAndItsChild(id:string, realm:string, language:string):any;
   getClassificationByIsActiveStatus(realm: string,language: string): any;
   getClassificationsByLanguage(realm: string,language: string): any;
   getAClassificationByRealmAndLabelNameAndLanguage(realm: string,labelName: string,language: string): any;

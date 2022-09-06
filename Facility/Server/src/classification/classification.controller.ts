@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile, Headers } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles, Unprotected } from 'nest-keycloak-connect';
 import { PaginationNeo4jParams } from 'src/common/commonDto/pagination.neo4j.dto';
@@ -17,80 +17,90 @@ export class ClassificationController {
   @Post()
   //@Roles({ roles: [FacilityUserRoles.ADMIN] })
   @Unprotected()
-  create(@Body() createClassificationDto: CreateClassificationDto) {
-    return this.classificationService.create(createClassificationDto);
+  create(@Body() createClassificationDto: CreateClassificationDto, @Headers() header) {
+    const {language, realm} = header;
+    return this.classificationService.create(createClassificationDto, realm, language);
   }
   
   @Unprotected()
-  @Get(':label/:realm')
+  @Get(':label/')
   @NoCache()
-  findOne(@Param('label') label: string, @Param('realm') realm: string) {
-    
-    return this.classificationService.findOne(label, realm);
+  findOne(@Param('label') label: string, @Headers() header) {
+    const {language, realm} = header;
+    return this.classificationService.findOne(label, realm, language);
   }
   @Unprotected()
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateClassificationDto: UpdateClassificationDto) {
-    return this.classificationService.update(id, updateClassificationDto);
+  update(@Param('id') id: string, @Body() updateClassificationDto: UpdateClassificationDto, @Headers() header) {
+    const {language, realm} = header;
+    return this.classificationService.update(id, updateClassificationDto, realm, language);
   }
   @Unprotected()
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.classificationService.remove(id);
+  remove(@Param('id') id: string, @Headers() header) {
+    const {language, realm} = header;
+    return this.classificationService.remove(id,realm, language);
   }
   @Unprotected()
   @Post('/relation/:id/:target_parent_id')
-  changeNodeBranch(@Param('id') id: string, @Param('target_parent_id') target_parent_id: string) {
-    return this.classificationService.changeNodeBranch(id, target_parent_id);
+  changeNodeBranch(@Param('id') id: string, @Param('target_parent_id') target_parent_id: string, @Headers() header) {
+    const {language, realm} = header;
+    return this.classificationService.changeNodeBranch(id, target_parent_id, realm, language);
   }
 
   @Unprotected()
   @Get(':key')
   @NoCache()
-  findOneNode(@Param('key') key: string) {
-    return this.classificationService.findOneNode(key);
+  findOneNode(@Param('key') key: string, @Headers() header) {
+    const {language, realm} = header;
+    return this.classificationService.findOneNode(key, realm,language);
   }
 
 
   @Unprotected()
   @Patch("setIsActiveFalseOfClassificationAndItsChild/:id")
-  async setIsActiveFalseOfClassificationAndItsChild(@Param('id') id:string) {
-    return this.classificationService.setIsActiveFalseOfClassificationAndItsChild(id);
+  async setIsActiveFalseOfClassificationAndItsChild(@Param('id') id:string, @Headers() header) {
+    const {language, realm} = header;
+    return this.classificationService.setIsActiveFalseOfClassificationAndItsChild(id, realm, language);
 
   }
 
   @Unprotected()
   @Patch("setIsActiveTrueOfClassificationAndItsChild/:id")
-  async setIsActiveTrueOfClassificationAndItsChild(@Param('id') id:string) {
-    return this.classificationService.setIsActiveTrueOfClassificationAndItsChild(id);
+  async setIsActiveTrueOfClassificationAndItsChild(@Param('id') id:string, @Headers() header) {
+    const {language, realm} = header;
+    return this.classificationService.setIsActiveTrueOfClassificationAndItsChild(id, realm, language);
   }
 
   @Unprotected()
   @NoCache()
-  @Get("getClassificationByIsActiveStatus/:realm/:language")
+  @Get("getClassificationByIsActiveStatus")
   @NoCache()
-  async getClassificationByIsActiveStatus(@Param('realm') realm:string,@Param('language') language:string){
+  async getClassificationByIsActiveStatus(@Headers() header){
+    const {language, realm} = header;
     return this.classificationService.getClassificationByIsActiveStatus(realm,language);
   }
 
   @Unprotected()
   @NoCache()
-  @Get('getClassificationsByLanguage/:realm/:language')
+  @Get('getClassificationsByLanguage')
   @NoCache()
-  async getClassificationsByLanguage(@Param('realm') realm:string,@Param('language') language:string){
+  async getClassificationsByLanguage(@Headers() header){
+    const {language, realm} = header;
     return this.classificationService.getClassificationsByLanguage(realm, language);
   }
 
   @Unprotected()
   @NoCache()
-  @Get('getAClassificationByRealmAndLabelNameAndLanguage/:realm/:labelName/:language')
+  @Get('getAClassificationByRealmAndLabelNameAndLanguage/:labelName')
   @NoCache()
-  async getAClassificationByRealmAndLabelNameAndLanguage(@Param('realm') realm:string,@Param('labelName') labelName:string,@Param('language') language:string){
+  async getAClassificationByRealmAndLabelNameAndLanguage(@Param('labelName') labelName:string,@Headers() header){
+    const {language, realm} = header;
     return this.classificationService.getAClassificationByRealmAndLabelNameAndLanguage(realm,labelName, language);
   }
 
   @Unprotected()
-  @Post('addAClassificationFromExcel/:realm/:language')
+  @Post('addAClassificationFromExcel')
   @ApiBody({
     schema: {
       type: 'object',
@@ -107,13 +117,14 @@ export class ClassificationController {
     summary: 'Upload a single excel file',
   })
   @ApiConsumes('multipart/form-data')
- async addAClassificationFromExcel(@UploadedFile() file: Express.Multer.File, @Param('realm') realm: string, @Param('language') language: string){
+ async addAClassificationFromExcel(@UploadedFile() file: Express.Multer.File, @Headers() header){
+  const {language, realm} = header;
   return this.classificationService.addAClassificationFromExcel(file, realm, language);
  }
 
 
  @Unprotected()
-  @Post('addAClassificationWithCodeFromExcel/:realm/:language')
+  @Post('addAClassificationWithCodeFromExcel')
   @ApiBody({
     schema: {
       type: 'object',
@@ -130,14 +141,16 @@ export class ClassificationController {
     summary: 'Upload a single excel file',
   })
   @ApiConsumes('multipart/form-data')
- async addAClassificationWithCodeFromExcel(@UploadedFile() file: Express.Multer.File, @Param('realm') realm: string, @Param('language') language: string){
+ async addAClassificationWithCodeFromExcel(@UploadedFile() file: Express.Multer.File, @Headers() header){
+  const {language, realm} = header;
   return this.classificationService.addAClassificationWithCodeFromExcel(file, realm, language);
  }
 
  @Unprotected()
  @NoCache()
- @Get('getAClassificationNode/:realm/:classificationName/:language/:code')
- async getNodeByClassificationLanguageRealmAndCode(@Param('classificationName') classificationName:string, @Param('language') language:string, @Param('realm') realm:string, @Param('code') code:string){
+ @Get('getAClassificationNode/:classificationName/:code')
+ async getNodeByClassificationLanguageRealmAndCode(@Param('classificationName') classificationName:string, @Param('code') code:string, @Headers() header){
+  const {language, realm} = header;
   return this.classificationService.getNodeByClassificationLanguageRealmAndCode(classificationName, language,realm, code);
 
  }

@@ -12,28 +12,28 @@ export class ContactService {
     @Inject(RepositoryEnums.CONTACT)
     private readonly contactRepository: GeciciInterface<any>,
   ) {}
-  async create(createContactDto: CreateContactDto) {
-    return await this.contactRepository.create(createContactDto);
+  async create(createContactDto: CreateContactDto, realm:string, language: string) {
+    return await this.contactRepository.create(createContactDto, realm, language);
   }
 
-  findOne(label: string, realm: string) {
-    return this.contactRepository.findOneByRealm(label, realm);
+  findOne(label: string, realm: string, language: string) {
+    return this.contactRepository.findOneByRealm(label, realm, language);
   }
 
-  update(id: string, updateContactDto: UpdateContactDto) {
-    return this.contactRepository.update(id, updateContactDto);
+  update(id: string, updateContactDto: UpdateContactDto, realm:string, language: string) {
+    return this.contactRepository.update(id, updateContactDto, realm, language);
   }
 
-  remove(id: string) {
-    return this.contactRepository.delete(id);
+  remove(id: string, realm:string, language: string) {
+    return this.contactRepository.delete(id, realm, language);
   }
 
-  async changeNodeBranch(id: string, target_parent_id: string) {
-    return await this.contactRepository.changeNodeBranch(id, target_parent_id);
+  async changeNodeBranch(id: string, target_parent_id: string, realm:string, language: string) {
+    return await this.contactRepository.changeNodeBranch(id, target_parent_id,realm, language);
   }
 
-  async findOneNode(key: string) {
+  async findOneNode(key: string, realm:string, language: string) {
     //checkObjectIddİsValid(id);
-    return await this.contactRepository.findOneNodeByKey(key);
+    return await this.contactRepository.findOneNodeByKey(key,realm, language);
   }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile, UseInterceptors, Headers } from '@nestjs/common';
 import { Unprotected } from 'nest-keycloak-connect';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NoCache } from 'ifmcommon';
@@ -19,8 +19,9 @@ export class ZoneController {
     description: 'create  facility structure',
   })
   @Post('')
-  create(@Body() createZoneDto: CreateZoneDto) {
-    return this.zoneService.create(createZoneDto);
+  create(@Body() createZoneDto: CreateZoneDto, @Headers() header) {
+    const {language, realm} = header;
+    return this.zoneService.create(createZoneDto, realm, language);
   }
 
   @ApiBody({
@@ -29,31 +30,35 @@ export class ZoneController {
   })
   @Patch(':key')
   @Unprotected()
-  update(@Param('key') key: string, @Body() updateFacilityStructureDto: UpdateZoneDto) {
-    return this.zoneService.update(key, updateFacilityStructureDto);
+  update(@Param('key') key: string, @Body() updateFacilityStructureDto: UpdateZoneDto, @Headers() header) {
+    const {language, realm} = header;
+    return this.zoneService.update(key, updateFacilityStructureDto, realm, language);
   }
 
   @Unprotected()
   @Get('/:key')
   @NoCache()
-  findOneNode(@Param('key') key: string) {
-    return this.zoneService.findOneNode(key);
+  findOneNode(@Param('key') key: string, @Headers() header) {
+    const {language, realm} = header;
+    return this.zoneService.findOneNode(key, realm, language);
   }
 
   @Delete(':key')
   @Unprotected()
-  remove(@Param('key') key: string) {
-    return this.zoneService.remove(key);
+  remove(@Param('key') key: string, @Headers() header) {
+    const {language, realm} = header;
+    return this.zoneService.remove(key, realm, language);
   }
 
-  @Get(':key/:realm')
+  @Get(':key')
   @Unprotected()
   @NoCache()
-  findOne(@Param('key') label: string, @Param('realm') realm: string) {
-    return this.zoneService.findOne(label, realm);
+  findOne(@Param('key') label: string, @Headers() header) {
+    const {language, realm} = header;
+    return this.zoneService.findOne(label, realm, language);
   }
 
-  @Post('addZoneswithCobie/:realm/:buildingKey/:language')
+  @Post('addZoneswithCobie/:buildingKey')
   @ApiBody({
     schema: {
       type: 'object',
@@ -70,7 +75,8 @@ export class ZoneController {
     summary: 'Upload all zones with excel file',
   })
   @ApiConsumes('multipart/form-data')
-  async addZonesToBuilding(@UploadedFile() file: Express.Multer.File, @Param('realm') realm: string,@Param('buildingKey') buildingKey: string,@Param('language') language: string){
+  async addZonesToBuilding(@UploadedFile() file: Express.Multer.File,@Param('buildingKey') buildingKey: string, @Headers() header){
+    const {language, realm} = header;
     return this.zoneService.addZonesToBuilding(file, realm, buildingKey, language);
   }
 }

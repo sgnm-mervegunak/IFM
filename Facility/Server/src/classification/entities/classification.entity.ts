@@ -6,4 +6,5 @@ export class Classification extends BaseGraphObject {
   isRoot?: boolean;
   code?: string;
   className: string = Classification.name;
+  language?: string; 
 }

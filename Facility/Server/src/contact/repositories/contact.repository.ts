@@ -15,7 +15,7 @@ import { has_children_error } from 'src/common/const/custom.error.object';
 export class ContactRepository implements GeciciInterface<Contact> {
   constructor(private readonly neo4jService: Neo4jService) {}
 
-  async findOneByRealm(label: string, realm: string) {
+  async findOneByRealm(label: string, realm: string, language: string) {
     let node = await this.neo4jService.findByRealmWithTreeStructure(label, realm);
     if (!node) {
       throw new ContactNotFoundException(realm);
@@ -24,7 +24,7 @@ export class ContactRepository implements GeciciInterface<Contact> {
 
     return node;
   }
-  async create(createContactDto: CreateContactDto) {
+  async create(createContactDto: CreateContactDto, realm: string, language: string) {
     const contact = new Contact();
     const contactObject = assignDtoPropToEntity(contact, createContactDto);
     delete contactObject['createdById'];
@@ -54,7 +54,7 @@ export class ContactRepository implements GeciciInterface<Contact> {
     return result;
   }
 
-  async update(_id: string, updateContactDto: UpdateContactDto) {
+  async update(_id: string, updateContactDto: UpdateContactDto, realm: string, language: string) {
     const updateContactDtoWithoutLabelsAndParentId = {};
     Object.keys(updateContactDto).forEach((element) => {
       if (element != 'labels' && element != 'parentId' && element != 'createdById' && element != 'classificationId') {
@@ -115,7 +115,7 @@ export class ContactRepository implements GeciciInterface<Contact> {
     return result;
   }
 
-  async delete(_id: string) {
+  async delete(_id: string, realm: string, language: string) {
     try {
       let deletedNode;
 
@@ -135,7 +135,7 @@ export class ContactRepository implements GeciciInterface<Contact> {
     }
   }
 
-  async changeNodeBranch(_id: string, _target_parent_id: string) {
+  async changeNodeBranch(_id: string, _target_parent_id: string, realm: string, language: string) {
     try {
       await this.neo4jService.deleteRelations(_id);
       await this.neo4jService.addRelations(_id, _target_parent_id);
@@ -156,7 +156,7 @@ export class ContactRepository implements GeciciInterface<Contact> {
     }
   }
 
-  async findOneNodeByKey(key: string) {
+  async findOneNodeByKey(key: string, realm: string, language: string) {
     try {
       const node = await this.neo4jService.findOneNodeByKey(key);
       if (!node) {
@@ -192,7 +192,7 @@ export class ContactRepository implements GeciciInterface<Contact> {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-  async findOneFirstLevelByRealm(label: string, realm: string) {
+  async findOneFirstLevelByRealm(label: string, realm: string, language: string) {
     return null;
   }
 

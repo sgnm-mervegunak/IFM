@@ -62,7 +62,7 @@ export class StructureController {
     return this.facilityStructuresService.changeNodeBranch(id, target_parent_id, realm, language);
   }
 
-  @Get('/structuretypes/:language/:label/:realm')
+  @Get('/structuretypes/:label')
   @Roles({ roles: [UserRoles.ADMIN] })
   //@Unprotected()
   @NoCache()
@@ -71,7 +71,7 @@ export class StructureController {
     return this.facilityStructuresService.findOneFirstLevel(label, realm, language);
   }
 
-  @Get('/structuretypes/properties/:language/:realm/:typename')
+  @Get('/structuretypes/properties/:typename')
   @Roles({ roles: [UserRoles.ADMIN] })
   //@Unprotected()
   @NoCache()
@@ -83,7 +83,7 @@ export class StructureController {
     return this.facilityStructuresService.findChildrenByFacilityTypeNode(typename, realm, language);
   }
 
-  @Get(':label/:realm')
+  @Get(':label')
   @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
   findOne(@Param('label') label: string, @Headers() header) {
@@ -91,7 +91,7 @@ export class StructureController {
     return this.facilityStructuresService.findOne(label, realm, language);
   }
 
-  @Get('/structurefirstlevel/nodes/:label/:realm')
+  @Get('/structurefirstlevel/nodes/:label')
   @Roles({ roles: [UserRoles.ADMIN] })
   //@Unprotected()
   @NoCache()

@@ -39,13 +39,14 @@ export class ClassificationRepository implements classificationInterface<Classif
   }
 
    //REVISED FOR NEW NEO4J
-  async create(createClassificationDto: CreateClassificationDto) {
+  async create(createClassificationDto: CreateClassificationDto, realm: string, language: string) {
     function assignDtoPropToEntity(entity, dto) {
       Object.keys(dto).forEach((element) => {
         if (element != 'parentId' && element != 'parentKey') {
           entity[element] = dto[element];
         }
       });
+      entity["language"] = language;
       return entity;
     }
     const classification = new Classification();
@@ -72,7 +73,7 @@ export class ClassificationRepository implements classificationInterface<Classif
 
 
   //REVISED FOR NEW NEO4J
-  async update(_id: string, updateClassificationto: UpdateClassificationDto) {
+  async update(_id: string, updateClassificationto: UpdateClassificationDto, realm: string, language: string) {
     const updateClassificationDtoWithoutLabelsAndParentId = {};
 
     Object.keys(updateClassificationto).forEach((element) => {
@@ -97,7 +98,7 @@ export class ClassificationRepository implements classificationInterface<Classif
   }
 
   //REVISED FOR NEW NEO4J
-  async delete(_id: string) {
+  async delete(_id: string, realm: string, language: string) {
     try {
       const children = await this.neo4jService.findChildrensByIdOneLevel(
           Number(_id), {}, [], {"isDeleted":false}, 'PARENT_OF')
@@ -117,7 +118,7 @@ export class ClassificationRepository implements classificationInterface<Classif
   }
 s
   //REVISED FOR NEW NEO4J
-  async changeNodeBranch(_id: string, target_parent_id: string) {
+  async changeNodeBranch(_id: string, target_parent_id: string, realm: string, language: string) {
     try {
       
       const new_parent = await this.neo4jService.findByIdAndFilters(
@@ -193,7 +194,7 @@ s
   }
 } 
   //REVISED FOR NEW NEO4J
-  async findOneNodeByKey(key: string) {
+  async findOneNodeByKey(key: string, realm: string, language: string) {
     try {
 
       const node = await this.neo4jService.findByLabelAndFilters(
@@ -251,7 +252,7 @@ let labels = [...new Set(lbls)];
  return root;
 }
   //REVISED FOR NEW NEO4J
-  async setIsActiveTrueOfClassificationAndItsChild(id: string) {
+  async setIsActiveTrueOfClassificationAndItsChild(id: string, realm: string, language: string) {
     await this.neo4jService.updateByIdAndFilter(Number(id),{"isDeleted":false},[],{"isActive":true})
 
     const children = await this.neo4jService.findChildrensByIdOneLevel(
@@ -269,7 +270,7 @@ let labels = [...new Set(lbls)];
   }
 
   //REVISED FOR NEW NEO4J
-  async setIsActiveFalseOfClassificationAndItsChild(id: string) {
+  async setIsActiveFalseOfClassificationAndItsChild(id: string, realm: string, language: string) {
     await this.neo4jService.updateByIdAndFilter(Number(id),{"isDeleted":false},[],{"isActive":false})
     const children = await this.neo4jService.findChildrensByIdOneLevel(
       Number(id),
@@ -283,7 +284,7 @@ let labels = [...new Set(lbls)];
     }
   }
 
-   async findOneFirstLevelByRealm(label: string, realm: string) {
+   async findOneFirstLevelByRealm(label: string, realm: string, language: string) {
      return null;
    }
 
