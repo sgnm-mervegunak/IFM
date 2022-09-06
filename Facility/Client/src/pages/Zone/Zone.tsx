@@ -15,8 +15,7 @@ import { Chips } from 'primereact/chips';
 import FacilityStructureService from "../../services/facilitystructure";
 import { useAppSelector } from "../../app/hook";
 import { useTranslation } from "react-i18next";
-import Export from "../FacilityStructure/Export/Export";
-import {ExportType} from "../FacilityStructure/Export/Export";
+import Export, {ExportType} from "../FacilityStructure/Export/Export";
 
 interface Node {
   cantDeleted: boolean;
