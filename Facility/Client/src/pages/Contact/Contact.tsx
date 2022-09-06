@@ -10,6 +10,7 @@ import { Checkbox } from 'primereact/checkbox';
 import { TreeSelect } from "primereact/treeselect";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
+import { useTranslation } from "react-i18next";
 
 import ContactService from "../../services/contact";
 import FormTypeService from "../../services/formType";
@@ -102,6 +103,7 @@ const Contact = () => {
   const [categoryNodeId, setCategoryNodeId] = useState<string>("");
   const [company, setCompany] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
+  const { t } = useTranslation(["common"]);
 
   const getForms = async () => {
     await FormTypeService.findOne('111').then((res) => {
@@ -1133,7 +1135,7 @@ const Contact = () => {
           </div>
         </div>
       </Dialog>
-      <h1>Edit Contact</h1>
+      <h1>{t("Contact Editing")}</h1>
       <div className="field">
         <Tree
           loading={loading}
@@ -1209,13 +1211,6 @@ const Contact = () => {
                 />
                 {/* } */}
 
-                {/* <Button
-                  icon="pi pi-plus" className="p-button-rounded p-button-secondary p-button-text" aria-label="Delete"
-                  onClick={() => {
-                    console.log(data);
-
-                  }}
-                /> */}
               </span>
             </>
           }
