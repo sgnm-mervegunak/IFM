@@ -109,7 +109,9 @@
 	"Joint Space Created": "Joint Space Created",
 	"Joint Space Deleted": "Joint Space Deleted",
 	"Selected Spaces": "Selected Spaces",
-	"Join":"Join"
+	"Join":"Join",
+	"Joint Start Date": "Joint Start Date",
+	"Joint End Date": "Joint End Date"
 }
 
 
