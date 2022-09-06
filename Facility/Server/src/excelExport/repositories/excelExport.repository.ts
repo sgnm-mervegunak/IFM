@@ -139,7 +139,7 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
   async getJointSpacesByBuilding(realm:string,buildingKey:string ){
       let data:any
       let jsonData=[]
-      let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m) where m.isDeleted=false  and not (m:Space OR m:Zone OR m:Zones OR m:Floor OR m:Block)
+      let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m)-[:CLASSIFIED_BY|:CREATED_BY]->(z) where  (z.language="EN" or not exists(z.language)) and m.isDeleted=false  and not (m:Space OR m:Zone OR m:Zones OR m:Floor OR m:Block)
       WITH collect(path) AS paths
       CALL apoc.convert.toTree(paths)
       YIELD value
@@ -160,9 +160,10 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
         for (let i = 0; i < data.value.parent_of[index].parent_of?.length; i++) {
           
           jsonData.push({BuildingName:data.value.name,
-            JointSpaces:data.value.parent_of[index].name,
             JointSpaceName:data.value.parent_of[index].parent_of[i].name,
-            SpaceNames:data.value.parent_of[index].parent_of[i].spaceNames ? data.value.parent_of[index].parent_of[i].spaceNames: "--"})
+            Category:data.value.parent_of[index].parent_of[i].classified_by[0].name,
+            CreatedBy:data.value.parent_of[index].parent_of[i].created_by[0].name,
+            SpaceNames:data.value.parent_of[index].parent_of[i].jointSpaceTitle})
         }
       }
     
