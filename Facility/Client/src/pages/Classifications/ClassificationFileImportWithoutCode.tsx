@@ -63,7 +63,7 @@ const ClassificationFileImportWithoutCode: React.FC = () => {
                 <p
                     className="mt-4 cursor-pointer"
                     style={{ color: "red" }}
-                    onClick={() => window.location.href = "http://localhost:3000/documents/classification-sample-data-with-code.xlsx"}
+                    onClick={() => window.location.href = "http://localhost:3000/documents/classification-without-code.xlsx"}
                 >
                     {t("Click to download sample classification file")}
                 </p>
