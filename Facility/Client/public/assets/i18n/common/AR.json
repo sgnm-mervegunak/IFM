@@ -105,5 +105,11 @@
 	"Site Description": "وصف الموقع",
 	"Documents": "وثائق",
 	"Select Buildings": "حدد المباني",
-	"Form": "استمارة"
+	"Form": "استمارة",
+	"Joint Space Created": "خلق الفضاء المشترك",
+	"Joint Space Deleted": "تم حذف المساحة المشتركة",
+	"Selected Spaces": "مساحات مختارة",
+	"Join":"انضم",
+	"Joint Start Date": "تاريخ البدء المشترك",
+	"Joint End Date": "تاريخ الانتهاء المشترك"
 }

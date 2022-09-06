@@ -115,7 +115,7 @@ export class WinformRelationRepository implements VirtualNodeInterface<FacilityS
 
   async delete(key: string, referenceKey) {
     try {
-      await this.structureService.findOneNode(key);
+      await this.structureService.findOneNode(key, "", "");
       const winformObservableObject = await this.httpService
         .get(`${process.env.WINFORM_URL}/${referenceKey}`)
         .pipe(

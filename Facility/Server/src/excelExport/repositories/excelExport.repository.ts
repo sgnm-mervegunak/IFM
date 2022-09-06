@@ -15,11 +15,11 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
 
 
 
-  async getSpacesByBuilding(realm:string,buildingKey:string ){
+  async getSpacesByBuilding(realm:string,buildingKey:string){
     let data:any
     let jsonData=[]
     let buildingType=[]
-    let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m)-[:CLASSIFICATION_BY|:CREATED_BY]->(c) where m.isDeleted=false  and not (m:JointSpaces OR m:JointSpace OR m:Zones or m:Zone) 
+    let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m)-[:CLASSIFIED_BY|:CREATED_BY]->(z) where  (z.language="EN" or not exists(z.language)) and m.isDeleted=false  and not (m:JointSpaces OR m:JointSpace OR m:Zones or m:Zone OR m:Block) 
     WITH collect(path) AS paths
     CALL apoc.convert.toTree(paths)
     YIELD value
@@ -74,17 +74,17 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
               BlockName:"-",
               FloorName:data.value.parent_of[index].name,
               SpaceName:spaceProperties.name,
-              Code:spaceProperties.code,
+              Code:spaceProperties.code ? spaceProperties.code :" ",
               ArchitecturalName:spaceProperties.architecturalName,
               Category:spaceProperties.classified_by[0].name,
               GrossArea:spaceProperties.grossArea,
               NetArea:spaceProperties.netArea,
               Usage:spaceProperties.usage,
               Tag:spaceProperties.tag,
-              Status:spaceProperties.status,
-              ArchitecturalCode:spaceProperties.architecturalCode,
+              Status:spaceProperties.status? spaceProperties.status: " ",
+              ArchitecturalCode:spaceProperties.architecturalCode  ? spaceProperties.architecturalCode: " ",
               description:spaceProperties.description,
-              UsableHeight:spaceProperties.availableHeight,
+              UsableHeight:spaceProperties.usableHeight,
               ExternalSystem:spaceProperties.externalSystem,
               ExternalObject:spaceProperties.externalObject,
               ExternalIdentifier:spaceProperties.externalIdentifier,
@@ -106,18 +106,18 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
             jsonData.push({BuildingName:data.value.name,
               BlockName:data.value.parent_of[index].name,
               FloorName:data.value.parent_of[index].parent_of[i].name,
-                SpaceName:data.value.parent_of[index].parent_of[i].parent_of[a].name,
-                Code:spaceProperties.code,
+              SpaceName:data.value.parent_of[index].parent_of[i].parent_of[a].name,
+              Code:spaceProperties.code ? spaceProperties.code :" ",
               ArchitecturalName:spaceProperties.architecturalName,
               Category:spaceProperties.classified_by[0].name,
               GrossArea:spaceProperties.grossArea,
               NetArea:spaceProperties.netArea,
               Usage:spaceProperties.usage,
               Tag:spaceProperties.tag,
-              Status:spaceProperties.status,
-              ArchitecturalCode:spaceProperties.architecturalCode,
+              Status:spaceProperties.status? spaceProperties.status: " ",
+              ArchitecturalCode:spaceProperties.architecturalCode  ? spaceProperties.architecturalCode: " ",
               description:spaceProperties.description,
-              UsableHeight:spaceProperties.availableHeight,
+              UsableHeight:spaceProperties.usableHeight,
               ExternalSystem:spaceProperties.externalSystem,
               ExternalObject:spaceProperties.externalObject,
               ExternalIdentifier:spaceProperties.externalIdentifier,
@@ -177,7 +177,7 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
   async getZonesByBuilding(realm:string,buildingKey:string ){
         let data:any
         let jsonData=[]
-        let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m) where m.isDeleted=false  and not (m:Space OR m:JointSpaces OR m:JointSpace OR m:Floor OR m:Block)
+        let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m)-[:MERGEDZN|:CREATED_BY|:CLASSIFIED_BY]->(z) where (z.language="EN" or not exists(z.language)) and m.isDeleted=false  and not (m:Space OR m:JointSpaces OR m:JointSpace OR m:Floor OR m:Block)
         WITH collect(path) AS paths
         CALL apoc.convert.toTree(paths)
         YIELD value
@@ -209,28 +209,26 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
           }
         
 
-        console.log(jsonData)
         return jsonData;
         
         
 }
 
-  async getSpacesAnExcelFile( body:ExportExcelDto ){
-          let data = []
-          for(let item of body.buildingKeys){
-            console.log(item);
-            let abc =await (this.getSpacesByBuilding(body.realm,item))
+  async getSpacesAnExcelFile( {buildingKeys,realm}:ExportExcelDto ){
+           let data = [];
+
+          for(let item of buildingKeys){
+            let abc =await (this.getSpacesByBuilding(realm,item))
             data = [...data,...abc]
           }
-        
-          return data;
-        
-      
+           return data;
+
         }
 
 
   async getZonesAnExcelFile( {buildingKeys,realm}:ExportExcelDto ){
           let data = []
+          
           for(let item of buildingKeys){
             console.log(item);
             let abc =await (this.getZonesByBuilding(realm,item))

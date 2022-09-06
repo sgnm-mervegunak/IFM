@@ -7,14 +7,21 @@ import FacilityStructureService from "../../../services/facilitystructure";
 import ExportService from "../../../services/export";
 import DownloadExcel from "../../../utils/download-excel";
 
+export enum ExportType {
+  Space,
+  Zone
+}
+
 const Export = ({
   submitted,
   setSubmitted,
   setExportDia,
+  exportType
 }: {
   submitted: boolean;
   setSubmitted: any;
   setExportDia: any;
+  exportType:ExportType
 }) => {
   const auth = useAppSelector((state) => state.auth);
   const { toast } = useAppSelector((state) => state.toast);
@@ -37,28 +44,58 @@ const Export = ({
       });
   }, []);
 
+  
+
   React.useEffect(() => {
     if (submitted && selectedBuildings.length > 0) {
-      ExportService.exportSpaces({
-        buildingKeys: selectedBuildings.map((item: any) => {
-          if (item.key) {
-            return item.key;
-          }
-        }),
-        realm: auth.auth.realm,
-      })
-        .then(async(res) => {
-          await DownloadExcel(res.data, "test", "deneme");
-          setExportDia(false);
+      if (exportType == ExportType.Space) {
+        
+        ExportService.exportSpaces({
+          buildingKeys: selectedBuildings.map((item: any) => {
+            if (item.key) {
+              return item.key;
+            }
+          }),
+          realm: auth.auth.realm,
         })
-        .catch((err) => {
-          toast.current.show({
-            severity: "error",
-            summary: "Error",
-            detail: err.response ? err.response.data.message : err.message,
-            life: 2000,
+          .then(async(res) => {
+            await DownloadExcel(res.data, "test", "deneme");
+            setExportDia(false);
+          })
+          .catch((err) => {
+            toast.current.show({
+              severity: "error",
+              summary: "Error",
+              detail: err.response ? err.response.data.message : err.message,
+              life: 2000,
+            });
           });
-        });
+      } else if (exportType ==ExportType.Zone) {
+        ExportService.exportZones({
+          buildingKeys: selectedBuildings.map((item: any) => {
+            if (item.key) {
+              return item.key;
+            }
+          }),
+          realm: auth.auth.realm,
+        })
+          .then(async (res) => {
+            await DownloadExcel(res.data, "test", "zones-deneme");
+            setExportDia(false);
+          })
+          .catch((err) => {
+            toast.current.show({
+              severity: "error",
+              summary: "Error",
+              detail: err.response ? err.response.data.message : err.message,
+              life: 2000,
+            });
+          });
+      } else {
+        
+        setSubmitted(false);
+      }
+
     }
     setSubmitted(false);
   }, [submitted]);

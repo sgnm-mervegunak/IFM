@@ -1,19 +1,13 @@
 import React, { useState, useEffect, InputHTMLAttributes } from "react";
-import { useForm, Controller } from "react-hook-form";
 import { InputText } from "primereact/inputtext";
-import { InputTextarea } from "primereact/inputtextarea";
-import { Dropdown } from "primereact/dropdown";
-import { Checkbox } from "primereact/checkbox";
-import { RadioButton } from "primereact/radiobutton";
-import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Chips } from "primereact/chips";
 import { TreeSelect } from "primereact/treeselect";
 import { TabView, TabPanel } from 'primereact/tabview';
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
+import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
+import axios from "axios";
 import { useTranslation } from "react-i18next";
 
 import ClassificationsService from "../../../services/classifications";
@@ -34,9 +28,7 @@ interface Params {
   setEditDia: React.Dispatch<React.SetStateAction<boolean>>;
   isUpdate: boolean;
   setIsUpdate: React.Dispatch<React.SetStateAction<boolean>>;
-  setSelectedFacilityType: React.Dispatch<
-    React.SetStateAction<string | undefined>
-  >;
+  setSelectedFacilityType: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 
 interface Node {

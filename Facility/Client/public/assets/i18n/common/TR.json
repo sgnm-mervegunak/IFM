@@ -105,5 +105,11 @@
 	"Site Description": "Realm Açıklaması",
 	"Documents": "Dokümanlar",
 	"Select Buildings": "Binaları Seç",
-	"Form": "Form"
+	"Form": "Form",
+	"Joint Space Created": "Birleştirilmiş Alan Oluşturuldu",
+	"Joint Space Deleted": "Birleştirilmiş Alan Silindi",
+	"Selected Spaces": "Seçilen Alanlar",
+	"Join":"Birleştir",
+	"Joint Start Date": "Birleştirme Başlangıç Tarihi",
+	"Joint End Date": "Birleştirme Bitiş Tarihi"
 }
