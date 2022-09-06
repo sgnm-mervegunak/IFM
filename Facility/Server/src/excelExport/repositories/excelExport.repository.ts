@@ -177,7 +177,7 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
   async getZonesByBuilding(realm:string,buildingKey:string ){
         let data:any
         let jsonData=[]
-        let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m)-[:MERGEDZN|:CREATED_BY|:CLASSIFIED_BY]->(z) where (z.language="EN" or not exists(z.language)) and m.isDeleted=false  and not (m:Space OR m:JointSpaces OR m:JointSpace OR m:Floor OR m:Block)
+        let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m)-[:CREATED_BY|:CLASSIFIED_BY]->(z) where (z.language="EN" or not exists(z.language)) and m.isDeleted=false  and not (m:Space OR m:JointSpaces OR m:JointSpace OR m:Floor OR m:Block)
         WITH collect(path) AS paths
         CALL apoc.convert.toTree(paths)
         YIELD value
@@ -201,16 +201,17 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
             for (let i = 0; i < data.value.parent_of[index].parent_of?.length; i++) {
               
               jsonData.push({BuildingName:data.value.name,
-                Zones:data.value.parent_of[index].name,
                 ZoneName:data.value.parent_of[index].parent_of[i].name,
+                Category:data.value.parent_of[index].parent_of[i].classified_by[0].name,
+                CreatedBy:data.value.parent_of[index].parent_of[i].created_by[0].email,
                 SpaceNames:data.value.parent_of[index].parent_of[i].spaceNames})
                
             }
           }
         
 
-        return jsonData;
-        
+         return jsonData;
+       
         
 }
 
@@ -234,8 +235,8 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
             let abc =await (this.getZonesByBuilding(realm,item))
             data = [...data,...abc]
           }
-        
-          return data;
+
+           return data;
         
       
         }
