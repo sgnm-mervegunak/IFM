@@ -16,6 +16,7 @@ import { HttpCacheInterceptor, KafkaModule } from 'ifmcommon';
 import { AssetModule } from './asset/asset.module';
 import { InfraModule } from './infra/infra.module';
 import { OrganizationModule } from './organization/organization.module';
+import { TypesModule } from './types/types.module';
 
 @Module({
   imports: [
@@ -75,9 +76,9 @@ import { OrganizationModule } from './organization/organization.module';
 
     MessagebrokerModule,
 
-    AssetModule,
     InfraModule,
     OrganizationModule,
+    TypesModule,
   ],
   providers: [
     //to cache all get request

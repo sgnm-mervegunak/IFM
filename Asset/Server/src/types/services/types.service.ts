@@ -1,24 +1,24 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { RepositoryEnums } from 'src/common/const/repository.enum';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
-import { CreateAssetDto } from '../dto/create-asset.dto';
-import { UpdateAssetDto } from '../dto/update-asset.dto';
+import { CreateTypesDto } from '../dto/create.types.dto';
+import { UpdateTypesDto } from '../dto/update.tpes.dto';
 
 @Injectable()
-export class AssetService {
+export class TypesService {
   constructor(
-    @Inject(RepositoryEnums.ASSET)
+    @Inject(RepositoryEnums.TYPES)
     private readonly assetRepository: GeciciInterface<any>,
   ) {}
-  async create(createAssetDto: CreateAssetDto) {
+  async create(createAssetDto: CreateTypesDto) {
     return await this.assetRepository.create(createAssetDto);
   }
 
-  findOne(label: string, realm: string) {
-    return this.assetRepository.findOneByRealm(label, realm);
+  findOne(realm: string) {
+    return this.assetRepository.findRootByRealm(realm);
   }
 
-  update(id: string, updateAssetDto: UpdateAssetDto) {
+  update(id: string, updateAssetDto: UpdateTypesDto) {
     return this.assetRepository.update(id, updateAssetDto);
   }
 

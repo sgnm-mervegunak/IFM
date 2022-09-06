@@ -5,9 +5,6 @@ import { Unprotected } from 'nest-keycloak-connect';
 import { catchError, firstValueFrom, map } from 'rxjs';
 import { assignDtoPropToEntity, Neo4jService } from 'sgnm-neo4j/dist';
 import { VirtualNode } from 'src/common/baseobject/virtual.node';
-import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
-import { Facility } from '../entities/facility.entity';
-import { AssetService } from '../services/asset.service';
 
 @Controller('assetListener')
 @Unprotected()
@@ -15,15 +12,15 @@ export class AssetListenerController {
   constructor(
     private readonly neo4jService: Neo4jService,
     private readonly httpService: HttpService,
-    private readonly assetService: AssetService,
-  ) {}
+  ) //private readonly assetService: AssetService,
+  {}
 
   @EventPattern('createStructureAssetRelation')
   async createAssetListener(@Payload() message) {
     if (!message.value?.referenceKey || !message.value?.parentKey) {
       throw new HttpException('key is not available on kafka object', 400);
     }
-    const asset = await this.assetService.findOneNode(message.value?.parentKey);
+    //  const asset = await this.assetService.findOneNode(message.value?.parentKey);
     //check if facilityStructure exist
     const structurePromise = await this.httpService
       .get(`${process.env.STRUCTURE_URL}/${message.value?.referenceKey}`)
@@ -58,7 +55,7 @@ export class AssetListenerController {
     if (!message.value?.referenceKey) {
       throw new HttpException('key is not provided by service', 400);
     }
-    const asset = await this.assetService.findOneNode(message.value?.key);
+    //const asset = await this.assetService.findOneNode(message.value?.key);
     //check if asset exist
     const structurePromise = await this.httpService
       .get(`${process.env.STRUCTURE_URL}/${message.value?.referenceKey}`)
@@ -86,7 +83,7 @@ export class AssetListenerController {
       throw new HttpException('key is not available on kafka object', 400);
     }
 
-    const asset = await this.assetService.findOneNode(message.value?.key);
+    // const asset = await this.assetService.findOneNode(message.value?.key);
 
     //check if asset exist
     const structurePromise = await this.httpService

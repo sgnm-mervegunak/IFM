@@ -1,9 +1,9 @@
 import { ApiProperty, OmitType } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { CreateAssetDto } from './create-asset.dto';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 import * as moment from 'moment';
+import { CreateTypesDto } from './create.types.dto';
 
-export class UpdateAssetDto extends OmitType(CreateAssetDto, ['key']) {
+export class UpdateTypesDto extends OmitType(CreateTypesDto, ['key']) {
   @ApiProperty()
   @IsOptional()
   @IsBoolean()
@@ -13,7 +13,6 @@ export class UpdateAssetDto extends OmitType(CreateAssetDto, ['key']) {
   @IsOptional()
   @IsString()
   name: string;
-
 
   @IsOptional()
   updatedAt = moment().format('YYYY-MM-DD HH:mm:ss');
