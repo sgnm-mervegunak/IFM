@@ -36,8 +36,7 @@ export class OrganizationService {
     return this.organizationRepository.findOneByRealmAndLabel(label, realm);
   }
 
-
-  importClassificationFromExcel(file: Express.Multer.File,language:string){
-    return this.organizationRepository.importClassificationFromExcel(file,language);
+  importClassificationFromExcel(file: Express.Multer.File, language: string) {
+    return this.organizationRepository.importClassificationFromExcel(file, language);
   }
 }

@@ -14,6 +14,8 @@ import { i18nOptions } from './common/configs/i18n.options';
 import { KeycloakModule } from './common/keycloak/keycloak.module';
 import { HttpCacheInterceptor, KafkaModule } from 'ifmcommon';
 import { AssetModule } from './asset/asset.module';
+import { InfraModule } from './infra/infra.module';
+import { OrganizationModule } from './organization/organization.module';
 
 @Module({
   imports: [
@@ -74,6 +76,8 @@ import { AssetModule } from './asset/asset.module';
     MessagebrokerModule,
 
     AssetModule,
+    InfraModule,
+    OrganizationModule,
   ],
   providers: [
     //to cache all get request

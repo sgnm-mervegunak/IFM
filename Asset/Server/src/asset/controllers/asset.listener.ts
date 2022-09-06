@@ -18,30 +18,6 @@ export class AssetListenerController {
     private readonly assetService: AssetService,
   ) {}
 
-  @EventPattern('createFacility')
-  async createFacilityListener(@Payload() message) {
-    const facilityInfo = message.value;
-
-    const facilityExist = await this.neo4jService.findByLabelAndFilters(['Root'], { realm: facilityInfo.realm });
-
-    if (!facilityExist.length) {
-      throw new HttpException('facility already exist', 400);
-    }
-
-    const assetInfo = { name: 'AssetRoot', realm: facilityInfo.realm };
-
-    const facility = new Facility();
-    const asset = new Facility();
-
-    const finalFacilityObject = assignDtoPropToEntity(facility, facilityInfo);
-    const finalAssetObject = assignDtoPropToEntity(asset, assetInfo);
-
-    const facilityNode = await this.neo4jService.createNode(finalFacilityObject, [Neo4jLabelEnum.ROOT]);
-    const assetNode = await this.neo4jService.createNode(finalAssetObject, [Neo4jLabelEnum.ASSET]);
-
-    await this.neo4jService.addRelations(assetNode.identity.low, facilityNode.identity.low);
-  }
-
   @EventPattern('createStructureAssetRelation')
   async createAssetListener(@Payload() message) {
     if (!message.value?.referenceKey || !message.value?.parentKey) {
