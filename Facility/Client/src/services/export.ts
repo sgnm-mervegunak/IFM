@@ -11,6 +11,10 @@ const exportSpaces = async (body: ExportDto) => {
   return axios.post(url + `exportSpaces`,body);
 };
 
-const service = { exportSpaces };
+const exportZones = async (body: ExportDto) => {
+  return axios.post(url + `exportZones`, body);
+};
+
+const service = { exportSpaces, exportZones };
 
 export default service;

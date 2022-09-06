@@ -14,6 +14,9 @@ import { Chips } from 'primereact/chips';
 
 import FacilityStructureService from "../../services/facilitystructure";
 import { useAppSelector } from "../../app/hook";
+import { useTranslation } from "react-i18next";
+import Export from "../FacilityStructure/Export/Export";
+import {ExportType} from "../FacilityStructure/Export/Export";
 
 interface Node {
   cantDeleted: boolean;
@@ -51,12 +54,16 @@ const Zone = () => {
   const [tag, setTag] = useState<string[]>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [loading, setLoading] = useState(false);
+  const [exportDia, setExportDia] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const dt = useRef<any>();
   const { toast } = useAppSelector((state) => state.toast);
   const menu = useRef<any>(null);
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
+  const { t } = useTranslation(["common"]);
+  const language = useAppSelector((state) => state.language.language);
 
   useEffect(() => {
     loadLazyData();
@@ -152,7 +159,49 @@ const Zone = () => {
 
   return (
     <div className="card">
- 
+      <Toolbar
+        className="mb-4"
+        right={() => (
+          <React.Fragment>
+            <Button
+              label={t("Export Zones")}
+              icon="pi pi-download"
+              className="p-button"
+              onClick={() => setExportDia(true)}
+            />
+          </React.Fragment>
+        )}
+      ></Toolbar>
+
+      <Dialog
+        header={t("Export")}
+        visible={exportDia}
+        style={{ width: "40vw" }}
+        footer={() => (
+          <div>
+            <Button
+              label={t("Cancel")}
+              icon="pi pi-times"
+              onClick={() => {
+                setExportDia(false);
+              }}
+              className="p-button-text"
+            />
+            <Button
+              label={t("Export")}
+              icon="pi pi-check"
+              onClick={() => setSubmitted(true)}
+              autoFocus
+            />
+          </div>
+        )}
+        onHide={() => {
+          setExportDia(false);
+        }}
+      >
+        <Export submitted={submitted} setSubmitted={setSubmitted} setExportDia={setExportDia} exportType={ExportType.Zone} />
+      </Dialog>
+
       <DataTable
         ref={dt}
         value={data}

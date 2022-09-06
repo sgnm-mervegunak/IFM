@@ -320,7 +320,6 @@ const SetZone = () => {
 
   const addItem = (createZone:any) => {
     let newNode: any = {};
-    console.log("-------",createZone);
     newNode = {
       ...createZone,
       spaceNames: `${selectedKeysName.toString().replaceAll(",", ", ")}` || "",

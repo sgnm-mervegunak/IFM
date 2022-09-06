@@ -28,7 +28,7 @@ import DisplayNode from "./Display/DisplayNode";
 import FloorFileImport from "./ImportPages/FloorFileImport";
 import BlockFileImport from "./ImportPages/BlockFileImport";
 import SpaceFileImport from "./ImportPages/SpaceFileImport";
-import Export from "./Export/Export";
+import Export, { ExportType } from "./Export/Export";
 
 interface Node {
   cantDeleted: boolean;
@@ -651,7 +651,7 @@ const SetFacilityStructure = () => {
           setExportDia(false);
         }}
       >
-        <Export submitted={submitted} setSubmitted={setSubmitted} setExportDia={setExportDia} />
+        <Export submitted={submitted} setSubmitted={setSubmitted} setExportDia={setExportDia} exportType={ExportType.Space} />
       </Dialog>
 
       <Dialog
