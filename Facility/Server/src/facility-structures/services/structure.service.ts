@@ -13,39 +13,39 @@ export class StructureService {
     @Inject(RepositoryEnums.FACILITY_STRUCTURE)
     private readonly facilityStructureRepository: FacilityInterface<any>,
   ) {}
-  async create(key: string, createFacilityStructureDto: Object, realm: string) {
-    return await this.facilityStructureRepository.create(key, createFacilityStructureDto, realm);
+  async create(key: string, createFacilityStructureDto: Object, realm: string, language: string) {
+    return await this.facilityStructureRepository.create(key, createFacilityStructureDto, realm, language);
   }
 
-  update(key: string, updateFacilityStructureDto: Object) {
-    return this.facilityStructureRepository.update(key, updateFacilityStructureDto);
+  update(key: string, updateFacilityStructureDto: Object, realm: string, language: string) {
+    return this.facilityStructureRepository.update(key, updateFacilityStructureDto, realm, language);
   }
 
-  async findOneNode(key: string) {
+  async findOneNode(key: string, realm: string, language: string) {
     //checkObjectIddİsValid(id);
-    return await this.facilityStructureRepository.findOneNodeByKey(key);
+    return await this.facilityStructureRepository.findOneNodeByKey(key, realm, language);
   }
 
-  remove(id: string) {
-    return this.facilityStructureRepository.delete(id);
+  remove(id: string, realm: string, language: string) {
+    return this.facilityStructureRepository.delete(id, realm, language);
   }
 
-  async changeNodeBranch(id: string, target_parent_id: string) {
-    return await this.facilityStructureRepository.changeNodeBranch(id, target_parent_id);
+  async changeNodeBranch(id: string, target_parent_id: string, realm: string, language: string) {
+    return await this.facilityStructureRepository.changeNodeBranch(id, target_parent_id, realm, language);
   }
 
-  findOneFirstLevel(language: string, label: string, realm: string) {
-    return this.facilityStructureRepository.findOneFirstLevelByRealm(language, label, realm);
+  findOneFirstLevel(label: string, realm: string, language: string) {
+    return this.facilityStructureRepository.findOneFirstLevelByRealm(label, realm, language);
   }
 
-  findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) {
-    return this.facilityStructureRepository.findChildrenByFacilityTypeNode(language, realm, typename);
+  findChildrenByFacilityTypeNode(typename: string, realm: string, language: string) {
+    return this.facilityStructureRepository.findChildrenByFacilityTypeNode(typename, realm, language);
   }
 
-  findOne(label: string, realm: string) {
-    return this.facilityStructureRepository.findOneByRealm(label, realm);
+  findOne(label: string, realm: string, language: string) {
+    return this.facilityStructureRepository.findOneByRealm(label, realm, language);
   }
-  findStructureFirstLevelNodes(label: string, realm: string) {
-    return this.facilityStructureRepository.findStructureFirstLevelNodes(label, realm);
+  findStructureFirstLevelNodes(label: string, realm: string, language: string) {
+    return this.facilityStructureRepository.findStructureFirstLevelNodes(label, realm, language);
   }
 }

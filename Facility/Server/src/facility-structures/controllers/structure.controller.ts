@@ -21,59 +21,54 @@ export class StructureController {
   create(
     @Param('parent_key') key: string,
     @Body() createFacilityStructureDto: object,
-    @Headers('realm') realm: string,
+    @Headers() header,
   ) {
-    return this.facilityStructuresService.create(key, createFacilityStructureDto, realm);
+    const {language, realm} = header;
+    return this.facilityStructuresService.create(key, createFacilityStructureDto, realm, language);
   }
-
-  // Yenisi böyle olacak...........
-  // @Post(':parent_key')
-  // create(
-  //   @Param('parent_key') key: string,
-  //   @Body() createFacilityStructureDto: object,
-  //   @Headers() header,
-  // ) {
-  //   const {language, realm} = header;
-  //   return this.facilityStructuresService.create(key, createFacilityStructureDto, realm, language);
-  // }
 
   @ApiBody({
     type: Object,
     description: 'Update  facility structure',
   })
   @Patch(':key')
-  @Unprotected()
-  update(@Param('key') key: string, @Body() updateFacilityStructureDto: object) {
-    return this.facilityStructuresService.update(key, updateFacilityStructureDto);
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
+  update(@Param('key') key: string, @Body() updateFacilityStructureDto: object, @Headers() header) {
+    const {language, realm} = header;
+    return this.facilityStructuresService.update(key, updateFacilityStructureDto, realm, language);
   }
 
  // @Roles({ roles: [UserRoles.ADMIN] })
   @Unprotected()
   @Get('/:key')
   @NoCache()
-  findOneNode(@Param('key') key: string) {
-    return this.facilityStructuresService.findOneNode(key);
+  findOneNode(@Param('key') key: string, @Headers() header) {
+    const {language, realm} = header;
+    return this.facilityStructuresService.findOneNode(key, realm, language);
   }
 
   @Delete(':id')
   @Roles({ roles: [UserRoles.ADMIN] })
-  remove(@Param('id') id: string, @Headers('') realm) {
-    console.log(realm);
-    return this.facilityStructuresService.remove(id);
+  remove(@Param('id') id: string, @Headers() header) {
+    const {language, realm} = header;
+    return this.facilityStructuresService.remove(id,realm, language);
   }
 
   @Unprotected()
   @Post('/relation/:id/:target_parent_id')
-  changeNodeBranch(@Param('id') id: string, @Param('target_parent_id') target_parent_id: string) {
-    return this.facilityStructuresService.changeNodeBranch(id, target_parent_id);
+  changeNodeBranch(@Param('id') id: string, @Param('target_parent_id') target_parent_id: string,  @Headers() header) {
+    const {language, realm} = header;
+    return this.facilityStructuresService.changeNodeBranch(id, target_parent_id, realm, language);
   }
 
   @Get('/structuretypes/:language/:label/:realm')
   @Roles({ roles: [UserRoles.ADMIN] })
   //@Unprotected()
   @NoCache()
-  findOneFirstLevel(@Param('language') language: string, @Param('label') label: string, @Param('realm') realm: string) {
-    return this.facilityStructuresService.findOneFirstLevel(language, label, realm);
+  findOneFirstLevel(@Param('label') label: string, @Headers() header) {
+    const {language, realm} = header;
+    return this.facilityStructuresService.findOneFirstLevel(label, realm, language);
   }
 
   @Get('/structuretypes/properties/:language/:realm/:typename')
@@ -81,25 +76,27 @@ export class StructureController {
   //@Unprotected()
   @NoCache()
   findChildrenByFacilityTypeNode(
-    @Param('language') language: string,
-    @Param('realm') realm: string,
     @Param('typename') typename: string,
+    @Headers() header
   ) {
-    return this.facilityStructuresService.findChildrenByFacilityTypeNode(language, realm, typename);
+    const {language, realm} = header;
+    return this.facilityStructuresService.findChildrenByFacilityTypeNode(typename, realm, language);
   }
 
   @Get(':label/:realm')
   @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
-  findOne(@Param('label') label: string, @Param('realm') realm: string) {
-    return this.facilityStructuresService.findOne(label, realm);
+  findOne(@Param('label') label: string, @Headers() header) {
+    const {language, realm} = header;
+    return this.facilityStructuresService.findOne(label, realm, language);
   }
 
   @Get('/structurefirstlevel/nodes/:label/:realm')
   @Roles({ roles: [UserRoles.ADMIN] })
   //@Unprotected()
   @NoCache()
-  findStructureFirstLevelNodes(@Param('label') label: string, @Param('realm') realm: string) {
-    return this.facilityStructuresService.findStructureFirstLevelNodes(label, realm);
+  findStructureFirstLevelNodes(@Param('label') label: string, @Headers() header) {
+    const {language, realm} = header;
+    return this.facilityStructuresService.findStructureFirstLevelNodes(label, realm, language);
   }
 }

@@ -8,4 +8,6 @@ export enum RepositoryEnums {
   ROOM = 'ROOM',
   ROOM_HISTORY = 'ROOM_HISTORY',
   ASSET = 'ASSET',
+  ORGANIZATION = 'ORGANIZATION',
+  INFRA = 'INFRA',
 }

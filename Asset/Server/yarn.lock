@@ -8201,10 +8201,10 @@
   "resolved" "https://registry.npmjs.org/setprototypeof/-/setprototypeof-1.2.0.tgz"
   "version" "1.2.0"
 
-"sgnm-neo4j@^0.0.167":
-  "integrity" "sha512-Lp9MfojRkVz9ebh30e7vdZqqlnVNinVLx9iXErES+saqNVRNPL2KA2KWS8K34fLxCjlVLSFhJK2usn/jTpMNWA=="
-  "resolved" "https://registry.npmjs.org/sgnm-neo4j/-/sgnm-neo4j-0.0.167.tgz"
-  "version" "0.0.167"
+"sgnm-neo4j@^0.0.192":
+  "integrity" "sha512-3xnHHo08D5SepY2GT5Pzo/3c9JRsJ3+j2FjhdEz1r4NWP8X0pb35OguSMYJFg8a8L6EnY3gVodRKXOZ/orIbgA=="
+  "resolved" "https://registry.npmjs.org/sgnm-neo4j/-/sgnm-neo4j-0.0.192.tgz"
+  "version" "0.0.192"
   dependencies:
     "@nestjs/common" "^8.4.5"
     "@nestjs/config" "^2.0.0"

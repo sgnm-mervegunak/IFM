@@ -18,7 +18,9 @@ import ZoneService from "../../services/zone";
 import { useAppSelector } from "../../app/hook";
 import FormGenerate from "../FormGenerate/FormGenerate";
 import { useTranslation } from "react-i18next";
-
+import Export, { ExportType } from "../FacilityStructure/Export/Export";
+import ExportService from "../../services/export";
+import DownloadExcel from "../../utils/download-excel";
 
 interface Node {
   cantDeleted: boolean;
@@ -121,6 +123,7 @@ const SetZone = () => {
   const [editDia, setEditDia] = useState(false);
   const [delDia, setDelDia] = useState<boolean>(false);
   const [formDia, setFormDia] = useState<boolean>(false);
+  const [exportDia, setExportDia] = useState(false);
   const { toast } = useAppSelector((state) => state.toast);
   const { t } = useTranslation(["common"]);
   const language = useAppSelector((state) => state.language.language);
@@ -208,41 +211,39 @@ const SetZone = () => {
       });
   };
 
-  // const menu = [
+  // const menuBuilding = [
   //   {
-  //     label: "Add Item",
-  //     icon: "pi pi-plus",
+  //     label: t("Export Zones"),
+  //     icon: "pi pi-download",
   //     command: () => {
-  //       setAddDia(true);
-  //     },
-  //   },
-  //   {
-  //     label: "Edit Item",
-  //     icon: "pi pi-pencil",
-  //     command: () => {
-  //       setIsUpdate(true);
-  //       // getNodeInfoAndEdit(selectedNodeKey);
-  //       setEditDia(true);
-  //     },
-  //   },
-  //   {
-  //     label: "Delete",
-  //     icon: "pi pi-trash",
-  //     command: () => {
-  //       setDelDia(true);
+  //       console.log("in here, export zones");
+
+  //       let key = selectedNodeKey;
+  //       console.log("node key", key);
+  //       ExportService.exportZones({
+  //         buildingKeys: key.map((item: any) => {
+  //           if (item.key) {
+  //             return item.key;
+  //           }
+  //         }),
+  //         realm: auth.auth.realm,
+  //       })
+  //         .then(async (res) => {
+  //           await DownloadExcel(res.data, "test", "zones-deneme");
+  //           setExportDia(false);
+  //         })
+  //         .catch((err) => {
+  //           toast.current.show({
+  //             severity: "error",
+  //             summary: "Error",
+  //             detail: err.response ? err.response.data.message : err.message,
+  //             life: 2000,
+  //           });
+  //         });
+      
   //     },
   //   },
   // ];
-
-  const menuBuilding = [
-    {
-      label: t("Export Zones"),
-      icon: "pi pi-download",
-      command: () => {
-        console.log("in here, export zones");
-      },
-    },
-  ];
 
   const getZone = () => {
     const key = params.id || "";
@@ -320,7 +321,6 @@ const SetZone = () => {
 
   const addItem = (createZone:any) => {
     let newNode: any = {};
-    console.log("-------",createZone);
     newNode = {
       ...createZone,
       spaceNames: `${selectedKeysName.toString().replaceAll(",", ", ")}` || "",
@@ -544,14 +544,14 @@ const SetZone = () => {
    
     <div className="container">
 
-      {
+      {/* {
         (() => {
           if(selectedFacilityType==="Building")
           return(
             <ContextMenu id={"001" } model={menuBuilding} ref={cm} />
           )
         })()
-     }
+     } */}
       <ConfirmDialog
         visible={delDia}
         onHide={() => setDelDia(false)}
