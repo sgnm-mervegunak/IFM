@@ -121,7 +121,7 @@ export class AssetRelationRepository implements VirtualNodeInterface<FacilityStr
 
   async delete(key: string, referenceKey: string) {
     try {
-      await this.structureService.findOneNode(key);
+      await this.structureService.findOneNode(key, "", "");
 
       const assetObservableObject = await this.httpService
         .get(`${process.env.ASSET_URL}/${referenceKey}`)
