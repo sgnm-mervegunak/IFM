@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Tree, TreeSelectionKeys } from "primereact/tree";
+import { Tree } from "primereact/tree";
 import { ContextMenu } from "primereact/contextmenu";
 import { Dialog } from "primereact/dialog";
 import { Chips } from 'primereact/chips';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-import { Checkbox } from 'primereact/checkbox';
 import { TreeSelect } from "primereact/treeselect";
 import { Calendar } from "primereact/calendar";
-import { Dropdown } from 'primereact/dropdown';
 import { useNavigate, useParams } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
 import { useTranslation } from "react-i18next";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from "yup";
 
 import FacilityStructureService from "../../services/facilitystructure";
 import ClassificationsService from "../../services/classifications";
@@ -20,8 +20,6 @@ import FormTypeService from "../../services/formType";
 import StructureWinformService from "../../services/structureWinform";
 import JointSpaceService from "../../services/jointSpace";
 import { useAppSelector } from "../../app/hook";
-
-import axios from "axios";
 import FormGenerate from "../FormGenerate/FormGenerate";
 
 interface Node {
@@ -76,26 +74,25 @@ interface FormNode {
   icon?: string;
 }
 
+const schema = yup.object({
+  name: yup.string().required("This area is required.").min(2, "This area accepts min 2 characters."),
+  // buildingStructure: yup.string().required("This area is required"),
+  // status: yup.string().required("This area is required")
+
+});
+
 const SetJointSpace = () => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [selectedKeysName, setSelectedKeysName] = useState<string[]>([]);
   const [selectedNodeKey, setSelectedNodeKey] = useState<any>([]);
   const [deleteNodeKey, setDeleteNodeKey] = useState<any>("");
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<Node[]>([]);
-  const [ArchitecturalName, setArchitecturalName] = useState<string>("");
-  const [ArchitecturalCode, setArchitecturalCode] = useState<string>("");
-  const [name, setName] = useState<string>("");
-  const [code, setCode] = useState<string>("");
-  const [tag, setTag] = useState<string[]>([]);
-  const [m2, setM2] = useState<string>("");
-  const [spaceType, setSpaceType] = useState<any>(undefined);
-  const [status, setStatus] = useState<any>(undefined);
-  const [jointStartDate, setJointStartDate] = useState<any>(undefined);
-  const [jointEndDate, setJointEndDate] = useState<any>(undefined);
+  const [data, setData] = useState<any>();
   const [nodeKeys, setNodeKeys] = useState<string[]>([]);
   const [classificationSpace, setClassificationSpace] = useState<Node[]>([]);
   const [classificationStatus, setclassificationStatus] = useState<Node[]>([]);
+  const [codeCategory, setCodeCategory] = useState("");
+  const [codeStatus, setCodeStatus] = useState("");
   const [formTypeId, setFormTypeId] = useState<any>(undefined);
   const [labels, setLabels] = useState<string[]>([]);
   const [isActive, setIsActive] = useState<boolean>(true);
@@ -118,6 +115,17 @@ const SetJointSpace = () => {
   const [isUpdate, setIsUpdate] = useState(false);
   const params = useParams();
   const { t } = useTranslation(["common"]);
+
+  const { register, handleSubmit, watch, reset, formState: { errors }, control } = useForm({
+    defaultValues: {
+      ...data
+    },
+    resolver: yupResolver(schema)
+  });
+
+  useEffect(() => {
+    watch((value, { name, type }) => console.log(value, name, type));
+  }, [watch])
 
   const fixNodesClassification = (nodes: Node[]) => {
     if (!nodes || nodes.length === 0) {
@@ -251,24 +259,23 @@ const SetJointSpace = () => {
     }
   };
 
-  const addItem = () => {
+  const addItem = handleSubmit((data) => {
     let newNode: any = {};
 
     newNode = {
-      ArchitecturalName: ArchitecturalName,
-      ArchitecturalCode: ArchitecturalCode,
-      name: name,  //selectedKeysName.toString().replaceAll(",", "-"),
-      code: code,
-      tag: tag,
-      m2: m2,
-      spaceType: spaceType,
-      status: status,
-      jointStartDate: jointStartDate,
-      jointEndDate: jointEndDate,
+      ArchitecturalName: data?.ArchitecturalName,
+      ArchitecturalCode: data?.ArchitecturalCode,
+      name: data?.name,  //selectedKeysName.toString().replaceAll(",", "-"),
+      code: data?.code,
+      tag: data?.tag,
+      m2: data?.m2,
+      spaceType: data?.spaceType,
+      status: data?.status,
+      jointStartDate: data?.jointStartDate,
+      jointEndDate: data?.jointEndDate,
       nodeKeys: selectedKeys
     };
     console.log(newNode);
-
 
     JointSpaceService.createJointSpace(newNode)
       .then((res) => {
@@ -293,75 +300,62 @@ const SetJointSpace = () => {
         });
       });
 
-    setArchitecturalName("");
-    setArchitecturalCode("");
-    setName("");
-    setCode("");
-    setTag([]);
-    setM2("");
-    setSpaceType(undefined);
-    setStatus(undefined);
-    setJointStartDate("");
-    setJointEndDate("");
     setAddDia(false);
-  };
+  });
 
-  const editItem = (key: string) => {
-    let updateNode: any = {};
-    FacilityStructureService.nodeInfo(key)
-      .then((responseStructure) => {
-        if (labels.length > 0) {
-          updateNode = {
-            name: name,
-            tag: tag,
-            isActive: isActive,
-            description: "",
-            labels: [labels[0]],
-            formTypeId: formTypeId,
-          };
-        } else {
-          updateNode = {
-            name: name,
-            tag: tag,
-            isActive: isActive,
-            description: "",
-            formTypeId: formTypeId,
-          }
-        }
+  // const editItem = (key: string) => {
+  //   let updateNode: any = {};
+  //   FacilityStructureService.nodeInfo(key)
+  //     .then((responseStructure) => {
+  //       if (labels.length > 0) {
+  //         updateNode = {
+  //           name: name,
+  //           tag: tag,
+  //           isActive: isActive,
+  //           description: "",
+  //           labels: [labels[0]],
+  //           formTypeId: formTypeId,
+  //         };
+  //       } else {
+  //         updateNode = {
+  //           name: name,
+  //           tag: tag,
+  //           isActive: isActive,
+  //           description: "",
+  //           formTypeId: formTypeId,
+  //         }
+  //       }
 
-        FacilityStructureService.update(responseStructure.data.id, updateNode)
-          .then((res) => {
-            toast.current.show({
-              severity: "success",
-              summary: "Successful",
-              detail: "Structure Updated",
-              life: 3000,
-            });
-            getJointSpace();
-          })
-          .catch((err) => {
-            toast.current.show({
-              severity: "error",
-              summary: "Error",
-              detail: err.response ? err.response.data.message : err.message,
-              life: 2000,
-            });
-          });
-      })
-      .catch((err) => {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
-        });
-      });
-    setName("");
-    setTag([]);
-    setFormTypeId(undefined);
-    setLabels([]);
-    setEditDia(false);
-  }
+  //       FacilityStructureService.update(responseStructure.data.id, updateNode)
+  //         .then((res) => {
+  //           toast.current.show({
+  //             severity: "success",
+  //             summary: "Successful",
+  //             detail: "Structure Updated",
+  //             life: 3000,
+  //           });
+  //           getJointSpace();
+  //         })
+  //         .catch((err) => {
+  //           toast.current.show({
+  //             severity: "error",
+  //             summary: "Error",
+  //             detail: err.response ? err.response.data.message : err.message,
+  //             life: 2000,
+  //           });
+  //         });
+  //     })
+  //     .catch((err) => {
+  //       toast.current.show({
+  //         severity: "error",
+  //         summary: "Error",
+  //         detail: err.response ? err.response.data.message : err.message,
+  //         life: 2000,
+  //       });
+  //     });
+
+  //   setEditDia(false);
+  // }
 
   const deleteItem = (key: string) => {
     JointSpaceService.remove(key)
@@ -401,7 +395,6 @@ const SetJointSpace = () => {
     }
   };
 
-
   const showSuccess = (detail: string) => {
     toast.current.show({
       severity: "success",
@@ -419,12 +412,18 @@ const SetJointSpace = () => {
           icon="pi pi-times"
           onClick={() => {
             setAddDia(false);
-            setName("");
-            setFormTypeId(undefined);
-            setLabels([]);
-            setTag([]);
-
-            setSelectedFacilityType(undefined);
+            reset({
+              name: "",
+              code: "",
+              ArchitecturalCode: "",
+              ArchitecturalName: "",
+              tag: "",
+              m2: "",
+              spaceType: "",
+              status: "",
+              jointStartDate: "",
+              jointEndDate: ""
+            });
           }}
           className="p-button-text"
         />
@@ -446,12 +445,6 @@ const SetJointSpace = () => {
           icon="pi pi-times"
           onClick={() => {
             setEditDia(false);
-            setName("");
-            setTag([]);
-            setLabels([]);
-            setFormTypeId(undefined);
-
-            setSelectedFacilityType(undefined);
           }}
           className="p-button-text"
         />
@@ -500,100 +493,182 @@ const SetJointSpace = () => {
           setAddDia(false);
         }}
       >
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Architectural Name</h5>
-          <InputText
-            value={ArchitecturalName}
-            onChange={(event) => setArchitecturalName(event.target.value)}
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Architectural Code</h5>
-          <InputText
-            value={ArchitecturalCode}
-            onChange={(event) => setArchitecturalCode(event.target.value)}
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
-          <InputText
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
-          <InputText
-            value={code}
-            onChange={(event) => setCode(event.target.value)}
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field structureChips">
-          <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
-          <Chips
-            value={tag}
-            onChange={(e) => setTag(e.value)}
-            style={{ width: "100%" }}
-          />
-        </div>
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>M2</h5>
-          <InputText
-            value={m2}
-            onChange={(event) => setM2(event.target.value)}
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Space Type</h5>
-          <TreeSelect
-            value={spaceType}
-            options={classificationSpace}
-            onChange={(e) => {
-              setSpaceType(e.value);
-            }}
-            filter
-            placeholder="Select Type"
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Status</h5>
-          <TreeSelect
-            value={status}
-            options={classificationStatus}
-            onChange={(e) => {
-              setStatus(e.value);
-            }}
-            filter
-            placeholder="Select Type"
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Joint Start Date</h5>
-          <Calendar
-            dateFormat="dd/mm/yy"
-            value={jointStartDate}
-            onChange={(e) => setJointStartDate(e.value?.toString())}
-            showIcon
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Joint End Date</h5>
-          <Calendar
-            dateFormat="dd/mm/yy"
-            value={jointEndDate}
-            onChange={(e) => setJointEndDate(e.value?.toString())}
-            showIcon
-            style={{ width: '100%' }}
-          />
-        </div>
+
+        <form>
+          <div className="formgrid grid">
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("code")}
+                style={{ width: '100%' }}
+                defaultValue={data?.code || ""}
+              />
+              <p style={{ color: "red" }}>{errors.code?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("name")}
+                style={{ width: '100%' }}
+                defaultValue={data?.name || ""}
+              />
+              <p style={{ color: "red" }}>{errors.name?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Architectural Code")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("ArchitecturalCode")}
+                style={{ width: '100%' }}
+                defaultValue={data?.ArchitecturalCode || ""}
+              />
+              <p style={{ color: "red" }}>{errors.ArchitecturalCode?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Architectural Name")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("ArchitecturalName")}
+                style={{ width: '100%' }}
+                defaultValue={data?.ArchitecturalName || ""}
+              />
+              <p style={{ color: "red" }}>{errors.ArchitecturalName?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
+              <Controller
+                defaultValue={data?.spaceType || []}
+                name="spaceType"
+                control={control}
+                render={({ field }) => (
+                  <TreeSelect
+                    value={field.value}
+                    options={classificationSpace}
+                    onChange={(e) => {
+                      ClassificationsService.nodeInfo(e.value as string)
+                        .then((res) => {
+                          field.onChange(e.value)
+                          setCodeCategory(res.data.properties.code || "");
+                        })
+                    }}
+                    filter
+                    placeholder="Select Type"
+                    style={{ width: "100%" }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.spaceType?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Status")}</h5>
+              <Controller
+                defaultValue={data?.status || []}
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <TreeSelect
+                    value={field.value}
+                    options={classificationStatus}
+                    onChange={(e) => {
+                      ClassificationsService.nodeInfo(e.value as string)
+                        .then((res) => {
+                          field.onChange(e.value)
+                          setCodeStatus(res.data.properties.code || "");
+                        })
+                    }}
+                    filter
+                    placeholder="Select Status"
+                    style={{ width: "100%" }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.status?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("M2")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("m2")}
+                style={{ width: '100%' }}
+                defaultValue={data?.m2 || ""}
+              />
+              <p style={{ color: "red" }}>{errors.m2?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6 structureChips">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
+              <Controller
+
+                defaultValue={data?.tag || []}
+                name="tag"
+                control={control}
+                render={({ field }) => (
+                  <Chips
+                    value={field.value}
+                    onChange={(e) => {
+                      field.onChange(e.value)
+                    }}
+                    style={{ width: "100%" }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.tag?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Joint Start Date")}</h5>
+              <Controller
+                defaultValue={new Date(data?.jointStartDate)}
+                name="jointStartDate"
+                control={control}
+                render={({ field }) => (
+                  <Calendar
+                    dateFormat="dd/mm/yy"
+                    value={field.value}
+                    showIcon
+                    style={{ width: "100%" }}
+                    onChange={(e) => {
+                      field.onChange(e.value)
+                    }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.jointStartDate?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Joint End Date")}</h5>
+              <Controller
+                defaultValue={new Date(data?.jointEndDate)}
+                name="jointEndDate"
+                control={control}
+                render={({ field }) => (
+                  <Calendar
+                    dateFormat="dd/mm/yy"
+                    value={field.value}
+                    showIcon
+                    style={{ width: "100%" }}
+                    onChange={(e) => {
+                      field.onChange(e.value)
+                    }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.jointEndDate?.message}</p>
+            </div>
+
+          </div>
+        </form>
+
       </Dialog>
 
       <Dialog
@@ -602,23 +677,17 @@ const SetJointSpace = () => {
         style={{ width: "40vw" }}
         footer={renderFooterEdit}
         onHide={() => {
-          setName("");
-          setTag([]);
-          setFormTypeId(undefined);
-          setLabels([]);
           setEditDia(false);
-
-          setSelectedFacilityType(undefined);
         }}
       >
       </Dialog>
 
-      
+
       <h3>{t("Joint Space")}</h3>
       <div>
         <span style={{ fontWeight: "bold", fontSize: "16px" }}>{t("Selected Spaces")}:</span>
         <span style={{ fontWeight: "bold", fontSize: "14px", color: "red" }}>{` ${selectedKeysName.toString().replaceAll(",", ", ")} `}</span>
-        
+
         {selectedKeys.length > 1 &&
           <div className="mt-4">
 
@@ -652,7 +721,6 @@ const SetJointSpace = () => {
           nodeTemplate={(data: Node, options) => <span className="flex align-items-center font-bold">{data.label} {
             <>
               <span className="ml-4 ">
-
                 {
                   data.nodeType === "JointSpace" ? <Button
                     icon="pi pi-trash" className="p-button-rounded p-button-secondary p-button-text" aria-label="Delete"
@@ -664,8 +732,6 @@ const SetJointSpace = () => {
                   />
                     : null
                 }
-
-
               </span>
             </>
           }

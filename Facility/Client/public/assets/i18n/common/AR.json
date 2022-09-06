@@ -109,5 +109,7 @@
 	"Joint Space Created": "خلق الفضاء المشترك",
 	"Joint Space Deleted": "تم حذف المساحة المشتركة",
 	"Selected Spaces": "مساحات مختارة",
-	"Join":"انضم"
+	"Join":"انضم",
+	"Joint Start Date": "تاريخ البدء المشترك",
+	"Joint End Date": "تاريخ الانتهاء المشترك"
 }

@@ -109,5 +109,7 @@
 	"Joint Space Created": "Birleştirilmiş Alan Oluşturuldu",
 	"Joint Space Deleted": "Birleştirilmiş Alan Silindi",
 	"Selected Spaces": "Seçilen Alanlar",
-	"Join":"Birleştir"
+	"Join":"Birleştir",
+	"Joint Start Date": "Birleştirme Başlangıç Tarihi",
+	"Joint End Date": "Birleştirme Bitiş Tarihi"
 }
