@@ -22,13 +22,13 @@ export class ClassificationController {
     return this.classificationService.create(createClassificationDto, realm, language);
   }
   
-  @Unprotected()
-  @Get(':label/')
-  @NoCache()
-  findOne(@Param('label') label: string, @Headers() header) {
-    const {language, realm} = header;
-    return this.classificationService.findOne(label, realm, language);
-  }
+  // @Unprotected()
+  // @Get(':label/')
+  // @NoCache()
+  // findOne(@Param('label') label: string, @Headers() header) {
+  //   const {language, realm} = header;
+  //   return this.classificationService.findOne(label, realm, language);
+  // }
   @Unprotected()
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateClassificationDto: UpdateClassificationDto, @Headers() header) {
@@ -74,7 +74,7 @@ export class ClassificationController {
 
   @Unprotected()
   @NoCache()
-  @Get("getClassificationByIsActiveStatus")
+  @Get("getClassificationByIsActiveStatus/active")
   @NoCache()
   async getClassificationByIsActiveStatus(@Headers() header){
     const {language, realm} = header;
@@ -83,7 +83,7 @@ export class ClassificationController {
 
   @Unprotected()
   @NoCache()
-  @Get('getClassificationsByLanguage')
+  @Get('')
   @NoCache()
   async getClassificationsByLanguage(@Headers() header){
     const {language, realm} = header;
@@ -92,7 +92,7 @@ export class ClassificationController {
 
   @Unprotected()
   @NoCache()
-  @Get('getAClassificationByRealmAndLabelNameAndLanguage/:labelName')
+  @Get('getAClassificationByRealmAndLabelNameAndLanguage/info/:labelName')
   @NoCache()
   async getAClassificationByRealmAndLabelNameAndLanguage(@Param('labelName') labelName:string,@Headers() header){
     const {language, realm} = header;
@@ -148,7 +148,7 @@ export class ClassificationController {
 
  @Unprotected()
  @NoCache()
- @Get('getAClassificationNode/:classificationName/:code')
+ @Get('getAClassificationNode/info/:classificationName/:code')
  async getNodeByClassificationLanguageRealmAndCode(@Param('classificationName') classificationName:string, @Param('code') code:string, @Headers() header){
   const {language, realm} = header;
   return this.classificationService.getNodeByClassificationLanguageRealmAndCode(classificationName, language,realm, code);
