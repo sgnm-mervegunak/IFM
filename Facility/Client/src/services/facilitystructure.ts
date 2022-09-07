@@ -42,7 +42,7 @@ const findAll = async () => {
 };
 
 const findStuctureFirstLevel = async (realm: string) => {
-    return axios.get(url + "/structurefirstlevel/nodes/FacilityStructure/" + realm);
+    return axios.get(url + "/structurefirstlevel/nodes/FacilityStructure/");
 };
 
 const findAssets = async (key: string) => {

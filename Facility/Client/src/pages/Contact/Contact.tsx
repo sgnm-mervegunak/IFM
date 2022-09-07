@@ -213,7 +213,7 @@ const Contact = () => {
   ];
 
   const getFacilityStructure = () => {
-    ContactService.findOne(realm).then((res) => {
+    ContactService.findAll().then((res) => {
       console.log(res.data);
       
       if (!res.data.root.children) {
