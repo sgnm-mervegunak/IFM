@@ -39,7 +39,7 @@ export class ZoneController {
 
   //@Unprotected()
   @Roles({ roles: [UserRoles.ADMIN] })
-  @Get('/:key')
+  @Get(':key')
   @NoCache()
   findOneNode(@Param('key') key: string, @Headers() header) {
     const {language, realm} = header;
@@ -54,13 +54,13 @@ export class ZoneController {
     return this.zoneService.remove(key, realm, language);
   }
 
-  @Get(':key')
+  @Get('zones/:key')
   //@Unprotected()
   @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
-  findOne(@Param('key') label: string, @Headers() header) {
+  findOne(@Param('key') key: string, @Headers() header) {
     const {language, realm} = header;
-    return this.zoneService.findOne(label, realm, language);
+    return this.zoneService.findOne(key, realm, language);
   }
 
   @Post('addZoneswithCobie/:buildingKey')

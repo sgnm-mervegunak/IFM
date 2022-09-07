@@ -1,25 +1,27 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { Unprotected } from 'nest-keycloak-connect';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Headers } from '@nestjs/common';
+import { Roles, Unprotected } from 'nest-keycloak-connect';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { NoCache } from 'ifmcommon';
 import { JointSpaceService } from '../services/jointspace.service';
 import { CreateJointSpaceDto } from '../dto/create.jointspace.dto';
 import { UpdateJointSpaceDto } from '../dto/update.jointspace.dto';
+import { UserRoles } from 'src/common/const/keycloak.role.enum';
 @ApiTags('JointSpace')
 @ApiBearerAuth('JWT-auth')
 @Controller('JointSpace')
 export class JointSpaceController {
   constructor(private readonly jointSpaceService: JointSpaceService) {}
 
-  @Unprotected()
-  //@Roles({ roles: [UserRoles.ADMIN] })
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
   @ApiBody({
     type: CreateJointSpaceDto,
     description: 'create  facility structure',
   })
   @Post('')
-  create(@Body() createJointSpaceDto: CreateJointSpaceDto) {
-    return this.jointSpaceService.create(createJointSpaceDto);
+  create(@Body() createJointSpaceDto: CreateJointSpaceDto, @Headers() header) {
+    const {language, realm} = header;
+    return this.jointSpaceService.create(createJointSpaceDto, realm, language);
   }
 
   @ApiBody({
@@ -27,28 +29,36 @@ export class JointSpaceController {
     description: 'Update  facility structure',
   })
   @Patch(':key')
-  @Unprotected()
-  update(@Param('key') key: string, @Body() updateFacilityStructureDto: UpdateJointSpaceDto) {
-    return this.jointSpaceService.update(key, updateFacilityStructureDto);
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
+  update(@Param('key') key: string, @Body() updateFacilityStructureDto: UpdateJointSpaceDto, @Headers() header) {
+    const {language, realm} = header;
+    return this.jointSpaceService.update(key, updateFacilityStructureDto, realm, language);
   }
 
-  @Unprotected()
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
   @Get('/:key')
   @NoCache()
-  findOneNode(@Param('key') key: string) {
-    return this.jointSpaceService.findOneNode(key);
+  findOneNode(@Param('key') key: string, @Headers() header) {
+    const {language, realm} = header;
+    return this.jointSpaceService.findOneNode(key, realm, language);
   }
 
   @Delete(':key')
-  @Unprotected()
-  remove(@Param('key') key: string) {
-    return this.jointSpaceService.remove(key);
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
+  remove(@Param('key') key: string, @Headers() header) {
+    const {language, realm} = header;
+    return this.jointSpaceService.remove(key, realm, language);
   }
 
-  @Get(':key/:realm')
-  @Unprotected()
+  @Get('children/:key')
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
-  findOne(@Param('key') key: string, @Param('realm') realm: string) {
-    return this.jointSpaceService.findOne(key, realm);
+  findOne(@Param('key') key: string, @Headers() header) {
+    const {language, realm} = header;
+    return this.jointSpaceService.findOne(key, realm, language);
   }
 }

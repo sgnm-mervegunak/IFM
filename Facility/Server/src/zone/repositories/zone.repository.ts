@@ -12,8 +12,7 @@ import { JointSpaceAndZoneInterface } from 'src/common/interface/joint.space.zon
 export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
   constructor(private readonly neo4jService: Neo4jService) {}
 
-  async findOneByRealm(key: string, realm: string) {
-    console.log(realm);
+  async findOneByRealm(key: string, realm: string, language: string) {
     let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
       ['Building'],
       { key, isDeleted: false },
@@ -34,7 +33,7 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
     return node;
   }
 
-  async create(createZoneDto: CreateZoneDto) {
+  async create(createZoneDto: CreateZoneDto, realm: string, language: string) {
     const { nodeKeys } = createZoneDto;
 
     const spaceNodes = [];
@@ -102,7 +101,7 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
     return zone.properties;
   }
   ///////////////////////// Static DTO ////////////////////////////////////////////////////////////////////
-  async update(_id: string, updateFacilityStructureDto) {
+  async update(_id: string, updateFacilityStructureDto, realm: string, language: string) {
     const updateFacilityStructureDtoWithoutLabelsAndParentId = {};
     Object.keys(updateFacilityStructureDto).forEach((element) => {
       if (element != 'labels' && element != 'parentId') {
@@ -126,7 +125,7 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
     return result;
   }
 
-  async delete(key: string) {
+  async delete(key: string, realm: string, language: string) {
     const node = await this.neo4jService.read(
       `match(n{isDeleted:false,key:$key,isActive:true }) where n:Zone return n`,
       {
@@ -156,7 +155,7 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
     return deletedNode.properties;
   }
 
-  async findOneNodeByKey(key: string) {
+  async findOneNodeByKey(key: string, realm: string, language: string) {
     const node = await this.neo4jService.findOneNodeByKey(key);
     if (!node) {
       throw new FacilityStructureNotFountException(key);
@@ -164,7 +163,7 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
     return node;
   }
 
-  async findOneFirstLevelByRealm(label: string, realm: string) {
+  async findOneFirstLevelByRealm(label: string, realm: string, language: string) {
     let node = await this.neo4jService.findByRealmWithTreeStructureOneLevel(label, realm);
     if (!node) {
       throw new FacilityStructureNotFountException(realm);
@@ -283,13 +282,4 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
     }
   }
 
-  //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
-
-  //------------------------------------------
-  // async findStructureRootNode(key){
-  //  const structureRootNode=await this.neo4jService.read('match(n:FacilityStructure) match(p {key:$key}) match (n)-[:PARENT_OF*]->(p) return n',{key})
-  //   console.log(structureRootNode.records[0]['_fields'][0])
-
-  //  return structureRootNode.records[0]['_fields'][0]
-  // }
 }

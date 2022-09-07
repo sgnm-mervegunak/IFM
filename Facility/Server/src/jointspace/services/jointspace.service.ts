@@ -10,24 +10,24 @@ export class JointSpaceService {
     @Inject(RepositoryEnums.JOINT_SPACE)
     private readonly jointSpaceRepository: JointSpaceAndZoneInterface<any>,
   ) {}
-  async create(createJointSpaceDto: CreateJointSpaceDto) {
-    return await this.jointSpaceRepository.create(createJointSpaceDto);
+  async create(createJointSpaceDto: CreateJointSpaceDto, realm: string, language: string) {
+    return await this.jointSpaceRepository.create(createJointSpaceDto, realm, language);
   }
 
-  update(key, updateFacilityStructureDto: UpdateJointSpaceDto) {
-    return this.jointSpaceRepository.update(key, updateFacilityStructureDto);
+  update(key, updateFacilityStructureDto: UpdateJointSpaceDto, realm: string, language: string) {
+    return this.jointSpaceRepository.update(key, updateFacilityStructureDto, realm, language);
   }
 
-  async findOneNode(key: string) {
+  async findOneNode(key: string, realm: string, language: string) {
     //checkObjectIddİsValid(id);
-    return await this.jointSpaceRepository.findOneNodeByKey(key);
+    return await this.jointSpaceRepository.findOneNodeByKey(key, realm, language);
   }
 
-  remove(id: string) {
-    return this.jointSpaceRepository.delete(id);
+  remove(id: string, realm: string, language: string) {
+    return this.jointSpaceRepository.delete(id, realm, language);
   }
 
-  findOne(key: string, realm: string) {
-    return this.jointSpaceRepository.findOneByRealm(key, realm);
+  findOne(key: string, realm: string, language: string) {
+    return this.jointSpaceRepository.findOneByRealm(key, realm, language);
   }
 }
