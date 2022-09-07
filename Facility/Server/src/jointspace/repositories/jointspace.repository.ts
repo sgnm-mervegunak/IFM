@@ -10,7 +10,7 @@ import { JointSpaceAndZoneInterface } from 'src/common/interface/joint.space.zon
 @Injectable()
 export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
   constructor(private readonly neo4jService: Neo4jService) {}
-  async findOneByRealm(key: string, realm: string) {
+  async findOneByRealm(key: string, realm: string, language: string) {
     const buildingNode = await this.neo4jService.findChildrensByLabelsOneLevel(
       ['FacilityStructure'],
       { isDeleted: false, realm },
@@ -43,7 +43,7 @@ export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
     return tree;
   }
 
-  async create(createJointSpaceDto: CreateJointSpaceDto) {
+  async create(createJointSpaceDto: CreateJointSpaceDto,realm: string, language: string) {
     try {
       const { nodeKeys } = createJointSpaceDto;
 
@@ -157,7 +157,7 @@ export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
     }
   }
 
-  async update(_id: string, updateFacilityStructureDto) {
+  async update(_id: string, updateFacilityStructureDto,realm: string, language: string) {
     const updateFacilityStructureDtoWithoutLabelsAndParentId = {};
     Object.keys(updateFacilityStructureDto).forEach((element) => {
       if (element != 'labels' && element != 'parentId') {
@@ -181,7 +181,7 @@ export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
     return result;
   }
 
-  async delete(key: string) {
+  async delete(key: string,realm: string, language: string) {
     const node = await this.neo4jService.findByLabelAndFilters(['JointSpace'], {
       isDeleted: false,
       key,
@@ -215,7 +215,7 @@ export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
     return deletedNode.properties;
   }
 
-  async findOneNodeByKey(key: string) {
+  async findOneNodeByKey(key: string,realm: string, language: string) {
     const node = await this.neo4jService.findByLabelAndFilters([], { key }, ['Virtual']);
     if (!node.length) {
       throw new FacilityStructureNotFountException(key);
@@ -223,7 +223,7 @@ export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
     return node;
   }
 
-  async findOneFirstLevelByRealm(label: string, realm: string) {
+  async findOneFirstLevelByRealm(label: string, realm: string, laanguage: string) {
     let node = await this.neo4jService.findByRealmWithTreeStructureOneLevel(label, realm);
     if (!node) {
       throw new FacilityStructureNotFountException(realm);

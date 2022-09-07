@@ -28,9 +28,9 @@ export class ZoneService {
     return this.zoneRepository.delete(id, realm, language);
   }
 
-  findOneFirstLevel(label: string, realm: string, language: string) {
-    return this.zoneRepository.findOneFirstLevelByRealm(label, realm, language);
-  }
+   findOneFirstLevel(label: string, realm: string, language: string) {
+     return this.zoneRepository.findOneFirstLevelByRealm(label, realm, language);
+   }
 
   findOne(key: string, realm: string, language: string) {
     return this.zoneRepository.findOneByRealm(key, realm, language);
