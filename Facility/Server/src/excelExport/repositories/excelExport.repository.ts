@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Neo4jService } from 'sgnm-neo4j/dist';
 
 
-import { ExcelExportInterface } from 'src/common/interface/excel.export.interface';
+import { ExcelExportInterface, HeaderInterface } from 'src/common/interface/excel.export.interface';
 import { ExportExcelDto } from '../dto/excel.export.dto';
 
 @Injectable()
@@ -12,11 +12,11 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
 
 
 
-  async getSpacesByBuilding(realm:string,buildingKey:string){
+  async getSpacesByBuilding(realm:string,buildingKey:string,language:string){
     let data:any
     let jsonData=[]
     let buildingType=[]
-    let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m)-[:CLASSIFIED_BY|:CREATED_BY]->(z) where  (z.language="EN" or not exists(z.language)) and m.isDeleted=false  and not (m:JointSpaces OR m:JointSpace OR m:Zones or m:Zone OR m:Block) 
+    let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m)-[:CLASSIFIED_BY|:CREATED_BY]->(z) where  (z.language="${language}" or not exists(z.language)) and m.isDeleted=false  and not (m:JointSpaces OR m:JointSpace OR m:Zones or m:Zone OR m:Block) 
     WITH collect(path) AS paths
     CALL apoc.convert.toTree(paths)
     YIELD value
@@ -77,10 +77,10 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
               GrossArea:spaceProperties.grossArea,
               NetArea:spaceProperties.netArea,
               Usage:spaceProperties.usage,
-              Tag:spaceProperties.tag,
+              Tag:spaceProperties.tag.toString(),
               Status:spaceProperties.status? spaceProperties.status: " ",
               ArchitecturalCode:spaceProperties.architecturalCode  ? spaceProperties.architecturalCode: " ",
-              description:spaceProperties.description,
+              Description:spaceProperties.description,
               UsableHeight:spaceProperties.usableHeight,
               ExternalSystem:spaceProperties.externalSystem,
               ExternalObject:spaceProperties.externalObject,
@@ -110,10 +110,10 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
               GrossArea:spaceProperties.grossArea,
               NetArea:spaceProperties.netArea,
               Usage:spaceProperties.usage,
-              Tag:spaceProperties.tag,
+              Tag:spaceProperties.tag.toString(),
               Status:spaceProperties.status? spaceProperties.status: " ",
               ArchitecturalCode:spaceProperties.architecturalCode  ? spaceProperties.architecturalCode: " ",
-              description:spaceProperties.description,
+              Description:spaceProperties.description,
               UsableHeight:spaceProperties.usableHeight,
               ExternalSystem:spaceProperties.externalSystem,
               ExternalObject:spaceProperties.externalObject,
@@ -133,10 +133,10 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
     
     }
     
-  async getJointSpacesByBuilding(realm:string,buildingKey:string ){
+  async getJointSpacesByBuilding(realm:string,buildingKey:string,language:string ){
       let data:any
       let jsonData=[]
-      let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m)-[:CLASSIFIED_BY|:CREATED_BY]->(z) where  (z.language="EN" or not exists(z.language)) and m.isDeleted=false  and not (m:Space OR m:Zone OR m:Zones OR m:Floor OR m:Block)
+      let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m)-[:CLASSIFIED_BY|:CREATED_BY]->(z) where  (z.language="${language}" or not exists(z.language)) and m.isDeleted=false  and not (m:Space OR m:Zone OR m:Zones OR m:Floor OR m:Block)
       WITH collect(path) AS paths
       CALL apoc.convert.toTree(paths)
       YIELD value
@@ -165,17 +165,17 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
       }
     
 
-    console.log(jsonData)
+
     return jsonData;
     
       
       }
     
     
-  async getZonesByBuilding(realm:string,buildingKey:string ){
+  async getZonesByBuilding(realm:string,buildingKey:string,language:string ){
         let data:any
         let jsonData=[]
-        let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m)-[:CREATED_BY|:CLASSIFIED_BY]->(z) where (z.language="EN" or not exists(z.language)) and m.isDeleted=false  and not (m:Space OR m:JointSpaces OR m:JointSpace OR m:Floor OR m:Block)
+        let cypher =`WITH 'MATCH (c:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b {key:"${buildingKey}"}) MATCH path = (b)-[:PARENT_OF*]->(m)-[:CREATED_BY|:CLASSIFIED_BY]->(z) where (z.language="${language}" or not exists(z.language)) and m.isDeleted=false  and not (m:Space OR m:JointSpaces OR m:JointSpace OR m:Floor OR m:Block)
         WITH collect(path) AS paths
         CALL apoc.convert.toTree(paths)
         YIELD value
@@ -213,11 +213,11 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
         
 }
 
-  async getSpacesAnExcelFile( {buildingKeys,realm} ){
+  async getSpacesAnExcelFile( {buildingKeys}:ExportExcelDto,{realm,language}:HeaderInterface){
            let data = [];
 
           for(let item of buildingKeys){
-            let abc =await (this.getSpacesByBuilding(realm,item))
+            let abc =await (this.getSpacesByBuilding(realm,item,language))
             data = [...data,...abc]
           }
            return data;
@@ -225,12 +225,12 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
         }
 
 
-  async getZonesAnExcelFile( {buildingKeys,realm} ){
+  async getZonesAnExcelFile( {buildingKeys}:ExportExcelDto,{realm,language}:HeaderInterface){
           let data = []
           
           for(let item of buildingKeys){
             console.log(item);
-            let abc =await (this.getZonesByBuilding(realm,item))
+            let abc =await (this.getZonesByBuilding(realm,item,language))
             data = [...data,...abc]
           }
 
@@ -239,11 +239,11 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
       
         }
 
-  async getJointSpacesAnExcelFile( {buildingKeys,realm}){
+  async getJointSpacesAnExcelFile( {buildingKeys}:ExportExcelDto,{realm,language}:HeaderInterface){
           let data = []
           for(let item of buildingKeys){
             console.log(item);
-            let abc =await (this.getJointSpacesByBuilding(realm,item))
+            let abc =await (this.getJointSpacesByBuilding(realm,item,language))
             data = [...data,...abc]
           }
         

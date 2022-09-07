@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { RepositoryEnums } from 'src/common/const/repository.enum';
-import { ExcelExportInterface } from 'src/common/interface/excel.export.interface';
+import { ExcelExportInterface, HeaderInterface } from 'src/common/interface/excel.export.interface';
 import { ExportExcelDto } from '../dto/excel.export.dto';
 
 
@@ -12,15 +12,15 @@ export class ExcelExportService {
   ) {}
 
 
-  async getSpacesAnExcelFile( header ){
-    return await this.excelExportRepository.getSpacesAnExcelFile(header)
+  async getSpacesAnExcelFile( body:ExportExcelDto,header:HeaderInterface ){
+    return await this.excelExportRepository.getSpacesAnExcelFile(body,header)
   }
 
-  async getJointSpacesAnExcelFile(  header ){
-    return await this.excelExportRepository.getJointSpacesAnExcelFile(header);
+  async getJointSpacesAnExcelFile(  body:ExportExcelDto,header:HeaderInterface ){
+    return await this.excelExportRepository.getJointSpacesAnExcelFile(body,header);
   }
 
-  async getZonesAnExcelFile(  header ){
-    return  await this.excelExportRepository.getZonesAnExcelFile(header);
+  async getZonesAnExcelFile(  body:ExportExcelDto,header:HeaderInterface ){
+    return  await this.excelExportRepository.getZonesAnExcelFile(body,header);
   }
 }

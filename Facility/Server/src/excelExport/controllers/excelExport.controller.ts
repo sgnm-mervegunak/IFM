@@ -16,8 +16,8 @@ export class ExcelExportController {
     description: 'export spaces',
   })
   @Post('exportSpaces')
-  getSpacesAnExcelFile(@Headers() header) {
-    return this.excelExportService.getSpacesAnExcelFile(header);
+  getSpacesAnExcelFile(@Body() body,@Headers() header) {
+    return this.excelExportService.getSpacesAnExcelFile(body,header);
   }
 
   @Unprotected()
@@ -26,8 +26,8 @@ export class ExcelExportController {
     type: ExportExcelDto,
     description: 'export jointspaces',
   })
-  async getJointSpacesAnExcelFile(@Headers() header){
-    return this.excelExportService.getJointSpacesAnExcelFile(header);
+  async getJointSpacesAnExcelFile(@Body() body,@Headers() header){
+    return this.excelExportService.getJointSpacesAnExcelFile(body,header);
   }
 
   @Unprotected()
@@ -36,7 +36,7 @@ export class ExcelExportController {
     type: ExportExcelDto,
     description: 'export zones',
   })
-  async getZonesAnExcelFile(@Headers() header){
-    return this.excelExportService.getZonesAnExcelFile(header);
+  async getZonesAnExcelFile(@Body() body,@Headers() header){
+    return this.excelExportService.getZonesAnExcelFile(body,header);
   }
 }

@@ -5,8 +5,4 @@ export class ExportExcelDto {
   @ApiProperty()
   @IsString({ each: true })
   buildingKeys: string[];
-
-  @ApiProperty()
-  @IsString()
-  realm: string;
 }
