@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete,Headers } from '@nestjs/common';
 import { Unprotected } from 'nest-keycloak-connect';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { NoCache } from 'ifmcommon';
@@ -16,8 +16,8 @@ export class ExcelExportController {
     description: 'export spaces',
   })
   @Post('exportSpaces')
-  getSpacesAnExcelFile(@Body() exportExcelDto: ExportExcelDto) {
-    return this.excelExportService.getSpacesAnExcelFile(exportExcelDto);
+  getSpacesAnExcelFile(@Headers() header) {
+    return this.excelExportService.getSpacesAnExcelFile(header);
   }
 
   @Unprotected()
@@ -26,8 +26,8 @@ export class ExcelExportController {
     type: ExportExcelDto,
     description: 'export jointspaces',
   })
-  async getJointSpacesAnExcelFile(@Body() body:ExportExcelDto ){
-    return this.excelExportService.getJointSpacesAnExcelFile(body);
+  async getJointSpacesAnExcelFile(@Headers() header){
+    return this.excelExportService.getJointSpacesAnExcelFile(header);
   }
 
   @Unprotected()
@@ -36,7 +36,7 @@ export class ExcelExportController {
     type: ExportExcelDto,
     description: 'export zones',
   })
-  async getZonesAnExcelFile(@Body() body:ExportExcelDto ){
-    return this.excelExportService.getZonesAnExcelFile(body);
+  async getZonesAnExcelFile(@Headers() header){
+    return this.excelExportService.getZonesAnExcelFile(header);
   }
 }

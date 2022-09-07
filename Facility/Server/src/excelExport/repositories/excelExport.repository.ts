@@ -1,8 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { FacilityStructureNotFountException } from '../../common/notFoundExceptions/not.found.exception';
-import { NestKafkaService } from 'ifmcommon';
-import { Neo4jService, assignDtoPropToEntity, createDynamicCyperObject } from 'sgnm-neo4j/dist';
-import { RelationName } from 'src/common/const/relation.name.enum';
+import { Neo4jService } from 'sgnm-neo4j/dist';
 
 
 import { ExcelExportInterface } from 'src/common/interface/excel.export.interface';
@@ -216,7 +213,7 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
         
 }
 
-  async getSpacesAnExcelFile( {buildingKeys,realm}:ExportExcelDto ){
+  async getSpacesAnExcelFile( {buildingKeys,realm} ){
            let data = [];
 
           for(let item of buildingKeys){
@@ -228,7 +225,7 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
         }
 
 
-  async getZonesAnExcelFile( {buildingKeys,realm}:ExportExcelDto ){
+  async getZonesAnExcelFile( {buildingKeys,realm} ){
           let data = []
           
           for(let item of buildingKeys){
@@ -242,7 +239,7 @@ export class ExcelExportRepository implements ExcelExportInterface<any> {
       
         }
 
-  async getJointSpacesAnExcelFile( {buildingKeys,realm}:ExportExcelDto ){
+  async getJointSpacesAnExcelFile( {buildingKeys,realm}){
           let data = []
           for(let item of buildingKeys){
             console.log(item);

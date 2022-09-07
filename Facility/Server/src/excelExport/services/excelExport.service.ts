@@ -12,15 +12,15 @@ export class ExcelExportService {
   ) {}
 
 
-  async getSpacesAnExcelFile( body:ExportExcelDto ){
-    return await this.excelExportRepository.getSpacesAnExcelFile(body)
+  async getSpacesAnExcelFile( header ){
+    return await this.excelExportRepository.getSpacesAnExcelFile(header)
   }
 
-  async getJointSpacesAnExcelFile(  body:ExportExcelDto ){
-    return await this.excelExportRepository.getJointSpacesAnExcelFile(body);
+  async getJointSpacesAnExcelFile(  header ){
+    return await this.excelExportRepository.getJointSpacesAnExcelFile(header);
   }
 
-  async getZonesAnExcelFile(  body:ExportExcelDto ){
-    return  await this.excelExportRepository.getZonesAnExcelFile(body);
+  async getZonesAnExcelFile(  header ){
+    return  await this.excelExportRepository.getZonesAnExcelFile(header);
   }
 }
