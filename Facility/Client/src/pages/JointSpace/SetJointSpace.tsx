@@ -208,7 +208,7 @@ const SetJointSpace = () => {
 
   const getJointSpace = () => {
     const key = params.id || "";
-    JointSpaceService.findBuildingWithKey(key, realm).then((res) => {
+    JointSpaceService.findBuildingWithKey(key).then((res) => {
 
       if (!res.data.root.children) {
         setData([res.data.root.properties] || []);
