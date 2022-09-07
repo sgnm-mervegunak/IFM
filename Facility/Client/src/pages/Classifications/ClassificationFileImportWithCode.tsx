@@ -19,7 +19,7 @@ const ClassificationFileImportWithCode: React.FC = () => {
 
     const uploadCSV = (e: any) => {
         const file = e.files[0];
-        const url = `http://localhost:3010/classification/addAClassificationWithCodeFromExcel/${realm}/${language}`;
+        const url = `http://localhost:3010/classification/addAClassificationWithCodeFromExcel`;
         const formData = new FormData();
 
         formData.append('file', file);
