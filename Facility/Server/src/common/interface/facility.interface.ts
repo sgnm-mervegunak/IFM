@@ -9,7 +9,7 @@ export interface FacilityInterface<T> {
   findOneFirstLevelByRealm(label: string,realm: string, language: string): any;
   findChildrenByFacilityTypeNode(language: string, realm: string, typename: string): any;
 
-  findOneByRealm(label: string, realm: string, language: string): any;
+  findOneByRealm(realm: string, language: string): any;
 
   findStructureFirstLevelNodes(label: string, realm: string, language: string): any;
 }

@@ -80,7 +80,7 @@ export class ClassificationController {
   }
 
   //@Unprotected()
-  @Roles({ roles: [UserRoles.ADMIN] })
+  @Roles({ roles: [UserRoles.ADMIN, UserRoles.USER] })
   @NoCache()
   @Get("getClassificationByIsActiveStatus/active")
   @NoCache()

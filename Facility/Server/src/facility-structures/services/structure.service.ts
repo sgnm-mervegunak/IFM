@@ -42,8 +42,8 @@ export class StructureService {
     return this.facilityStructureRepository.findChildrenByFacilityTypeNode(typename, realm, language);
   }
 
-  findOne(label: string, realm: string, language: string) {
-    return this.facilityStructureRepository.findOneByRealm(label, realm, language);
+  findOne(realm: string, language: string) {
+    return this.facilityStructureRepository.findOneByRealm(realm, language);
   }
   findStructureFirstLevelNodes(label: string, realm: string, language: string) {
     return this.facilityStructureRepository.findStructureFirstLevelNodes(label, realm, language);

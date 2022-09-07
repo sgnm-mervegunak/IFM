@@ -46,9 +46,9 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
   constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) {}
 
   //REVISED FOR NEW NEO4J
-  async findOneByRealm(label: string, realm: string, language: string) {
+  async findOneByRealm(realm: string, language: string) {
     let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
-      [label],
+      ['FacilityStructure'],
       { realm: realm, isDeleted: false },
       [],
       { isDeleted: false, canDisplay: true },

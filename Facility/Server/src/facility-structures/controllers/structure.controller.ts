@@ -39,8 +39,8 @@ export class StructureController {
     return this.facilityStructuresService.update(key, updateFacilityStructureDto, realm, language);
   }
 
- // @Roles({ roles: [UserRoles.ADMIN] })
-  @Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
+  //@Unprotected()
   @Get('/:key')
   @NoCache()
   findOneNode(@Param('key') key: string, @Headers() header) {
@@ -71,7 +71,7 @@ export class StructureController {
     return this.facilityStructuresService.findOneFirstLevel(label, realm, language);
   }
 
-  @Get('/structuretypes/properties/:typename')
+  @Get('/structuretypes/properties/all/:typename')
   @Roles({ roles: [UserRoles.ADMIN] })
   //@Unprotected()
   @NoCache()
@@ -83,12 +83,12 @@ export class StructureController {
     return this.facilityStructuresService.findChildrenByFacilityTypeNode(typename, realm, language);
   }
 
-  @Get(':label')
+  @Get('')
   @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
-  findOne(@Param('label') label: string, @Headers() header) {
+  findOne(@Headers() header) {
     const {language, realm} = header;
-    return this.facilityStructuresService.findOne(label, realm, language);
+    return this.facilityStructuresService.findOne(realm, language);
   }
 
   @Get('/structurefirstlevel/nodes/:label')
