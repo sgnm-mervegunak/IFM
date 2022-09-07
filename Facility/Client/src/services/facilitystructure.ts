@@ -30,15 +30,15 @@ interface FormInterface {
     formKey: string;
 }
 
-const findAll = async (query: PaginationParams) => {
-    return axios.get(
-        url +
-        `?page=${query.page}&limit=${query.limit}&orderBy=${query.sortKind}&orderByColumn=${query.sortField}&class_name=${query.class_name}`
-    );
-};
+// const findAll = async (query: PaginationParams) => {
+//     return axios.get(
+//         url +
+//         `?page=${query.page}&limit=${query.limit}&orderBy=${query.sortKind}&orderByColumn=${query.sortField}&class_name=${query.class_name}`
+//     );
+// };
 
-const findOne = async (id: string) => {
-    return axios.get(url + "/FacilityStructure/" + id);
+const findAll = async () => {
+    return axios.get(url);
 };
 
 const findStuctureFirstLevel = async (realm: string) => {
@@ -49,6 +49,7 @@ const findAssets = async (key: string) => {
     return axios.get(url2 + key);
 };
 
+// Kullanılmıyor
 const create = async (structure: StructureInterface) => {
     return axios.post(url, structure);
 };
@@ -84,21 +85,18 @@ const nodeInfo = async (key: string) => {
     return axios.get(`${url}/${key}`);
 };
 
-const getFacilityTypes = async (language: string, label: string, realm: string) => {
-    return axios.get(url + "/structuretypes/" + language + "/" + label + "/" + realm);
+const getFacilityTypes = async (label: string) => {
+    return axios.get(url + "/structuretypes/" + label);
 };
 
 const getFacilityTypeProperties = async (
-    first_node_realm: string,
     second_child_node_name: string,
 ) => {
-    return axios.get(url + "/structuretypes/" + "properties/" + "EN" + "/" + first_node_realm + "/" +
-        second_child_node_name);
+    return axios.get(url + "/structuretypes/" + "properties/" + "all" + "/" + second_child_node_name);
 };
 
 const service = {
     findAll,
-    findOne,
     findAssets,
     create,
     createAsset,

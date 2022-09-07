@@ -101,7 +101,7 @@ const SetFacilityStructure2 = () => {
   const language = useAppSelector((state: { language: { language: any; }; }) => state.language.language);
 
   useEffect(() => {
-    FacilityStructureService.getFacilityTypes(language, "FacilityTypes_EN", realm)
+    FacilityStructureService.getFacilityTypes("FacilityTypes_EN")
       .then((res) => {
         setFacilityType(res.data.map((item: any) => item.name))
       })
@@ -217,7 +217,7 @@ const SetFacilityStructure2 = () => {
   ];
 
   const getFacilityStructure = () => {
-    FacilityStructureService.findOne(realm).then((res) => {
+    FacilityStructureService.findAll().then((res) => {
 
       if (!res.data.root.children) {
         setData([res.data.root.properties] || []);

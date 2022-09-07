@@ -53,36 +53,36 @@ const FacilityStructure = () => {
   const toast = useRef<any>();
   const menu = useRef<any>(null);
 
-  useEffect(() => {
-    loadLazyData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lazyParams]);
+  // useEffect(() => {
+  //   loadLazyData();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [lazyParams]);
 
-  const loadLazyData = () => {
-    let soertField2=lazyParams.sortField.split('.')[1];
-    setLoading(true);
-    FacilityStructureService.findAll({
-      page: lazyParams.page,
-      limit: lazyParams.rows,
-      sortField: soertField2,
-      sortKind: lazyParams.sortOrder === 1 ? "ascending" : "descending",
-      class_name:"FacilityStructure",
-    })
-      .then((response) => {
-        setData(response.data[0]);
-        setCountClassifications(response.data[1].count);
-        setLoading(false);
-      })
-      .catch((err) => {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
-        });
-        setLoading(false);
-      });
-  };
+  // const loadLazyData = () => {
+  //   let soertField2=lazyParams.sortField.split('.')[1];
+  //   setLoading(true);
+  //   FacilityStructureService.findAll({
+  //     page: lazyParams.page,
+  //     limit: lazyParams.rows,
+  //     sortField: soertField2,
+  //     sortKind: lazyParams.sortOrder === 1 ? "ascending" : "descending",
+  //     class_name:"FacilityStructure",
+  //   })
+  //     .then((response) => {
+  //       setData(response.data[0]);
+  //       setCountClassifications(response.data[1].count);
+  //       setLoading(false);
+  //     })
+  //     .catch((err) => {
+  //       toast.current.show({
+  //         severity: "error",
+  //         summary: "Error",
+  //         detail: err.response ? err.response.data.message : err.message,
+  //         life: 2000,
+  //       });
+  //       setLoading(false);
+  //     });
+  // };
 
   // const dispatch = useAppDispatch();
 

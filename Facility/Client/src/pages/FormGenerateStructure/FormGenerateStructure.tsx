@@ -241,7 +241,6 @@ const FormGenerateStructure = ({
 
       setNodeType(nodetype);
       FacilityTypePropertiesService.getFacilityTypeProperties(
-        realm,
         selectedFacilityType || nodetype
       )
         .then(async (responsegetProperties) => {
@@ -263,11 +262,11 @@ const FormGenerateStructure = ({
                 defaultValue:
                   [responsegetData.data].length > 0
                     ? responsegetData.data.properties[
-                        item.label.replaceAll(" ", "")
-                      ]
+                      item.label.replaceAll(" ", "")
+                    ]
                       ? responsegetData.data.properties[
-                          item.label.replaceAll(" ", "")
-                        ]
+                      item.label.replaceAll(" ", "")
+                      ]
                       : item.defaultValue
                     : item.defaultValue,
                 label: item.label,

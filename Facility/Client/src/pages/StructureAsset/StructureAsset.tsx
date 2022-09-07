@@ -126,7 +126,7 @@ const StructureAsset = () => {
   ];
 
   const getFacilityStructure = () => {
-    FacilityStructureService.findOne(realm).then((res) => {
+    FacilityStructureService.findAll().then((res) => {
 
       if (!res.data.root.children) {
         setData([res.data.root.properties] || []);
