@@ -16,8 +16,8 @@ interface ZoneInterface {
     nodeKeys: string[];
 }
 
-const findBuildingWithKey = async (key: string,realm: string) => {
-    return axios.get(url + key + "/" + realm);
+const findBuildingWithKey = async (key: string) => {
+    return axios.get(url + "zones/" + key);
 };
 
 const createZone = async (createData: ZoneInterface) => {

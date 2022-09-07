@@ -243,7 +243,7 @@ const SetZone = () => {
 
   const getZone = () => {
     const key = params.id || "";
-    ZoneService.findBuildingWithKey(key, realm)
+    ZoneService.findBuildingWithKey(key)
       .then((res) => {
         console.log(res.data);
         if (!res.data.root.children) {

@@ -16,8 +16,8 @@ interface JointSpaceInterface {
     nodeKeys: string[];
 }
 
-const findBuildingWithKey = async (key: string,realm: string) => {
-    return axios.get(url + key + "/" + realm);
+const findBuildingWithKey = async (key: string) => {
+    return axios.get(url + "children/" + key);
 };
 
 const createJointSpace = async (jointData: JointSpaceInterface) => {
