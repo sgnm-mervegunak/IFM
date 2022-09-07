@@ -20,15 +20,15 @@ interface StructureInterface {
     formTypeId?: string;
 }
 
-const findAll = async (query: PaginationParams) => {
-    return axios.get(
-        url +
-        `?page=${query.page}&limit=${query.limit}&orderBy=${query.sortKind}&orderByColumn=${query.sortField}&class_name=${query.class_name}`
-    );
-};
+// const findAll = async (query: PaginationParams) => {
+//     return axios.get(
+//         url +
+//         `?page=${query.page}&limit=${query.limit}&orderBy=${query.sortKind}&orderByColumn=${query.sortField}&class_name=${query.class_name}`
+//     );
+// };
 
-const findOne = async (id: string) => {
-    return axios.get(url + "/Contact/" + id);
+const findAll = async () => {
+    return axios.get(url);
 };
 
 const create = async (structure: StructureInterface) => {
@@ -51,6 +51,6 @@ const nodeInfo = async (key: string) => {
     return axios.get(`${url}/${key}`);
 };
 
-const service = { findAll, findOne, create, update, remove, relation, nodeInfo };
+const service = { findAll, create, update, remove, relation, nodeInfo };
 
 export default service;
