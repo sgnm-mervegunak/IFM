@@ -103,9 +103,7 @@ const FloorForm = ({
 
     const getClassificationCategory = async () => {
         await ClassificationsService.findAllActiveByLabel({
-            realm: realm,
-            label: "FacilityFloorTypes",
-            language: language,
+            label: "FacilityFloorTypes"
         }).then((res) => {
             let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
             fixNodes(temp);
@@ -137,7 +135,7 @@ const FloorForm = ({
         FacilityStructureService.nodeInfo(selectedNodeKey)
             .then(async (res) => {
                 // let temp = {};
-                await ClassificationsService.findClassificationByCodeAndLanguage(realm, "FacilityFloorTypes", language, res.data.properties.category).then(clsf1 => {
+                await ClassificationsService.findClassificationByCodeAndLanguage("FacilityFloorTypes", res.data.properties.category).then(clsf1 => {
                     res.data.properties.category = clsf1.data.key
                     setData(res.data.properties);
                 })

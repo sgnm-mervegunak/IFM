@@ -160,9 +160,7 @@ const SetZone = () => {
 
   const getClassificationSpace = async () => {
     await ClassificationsService.findAllActiveByLabel({
-      realm: realm,
-      label: "OmniClass13",
-      language: "en",
+      label: "OmniClass13"
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodesClassification(temp);
@@ -172,9 +170,7 @@ const SetZone = () => {
 
   const getClassificationStatus = async () => {
     await ClassificationsService.findAllActiveByLabel({
-      realm: realm,
-      label: "FacilityZoneTypes",
-      language: "en",
+      label: "FacilityZoneTypes"
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodesClassification(temp);

@@ -131,9 +131,7 @@ const SetFacilityStructure = () => {
         });
       });
     ClassificationsService.findAllActiveByLabel({
-      realm: auth.auth.realm,
-      label: "FacilityDocTypes",
-      language: "en",
+      label: "FacilityDocTypes"
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodes(temp);

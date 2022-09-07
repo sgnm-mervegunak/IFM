@@ -139,7 +139,7 @@ const SetJointSpace = () => {
   };
 
   const getClassificationSpace = async () => {
-    await ClassificationsService.findAllActiveByLabel({ realm: realm, label: "OmniClass13", language: "en" }).then((res) => {
+    await ClassificationsService.findAllActiveByLabel({ label: "OmniClass13"}).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodesClassification(temp);
       setClassificationSpace(temp);
@@ -147,7 +147,7 @@ const SetJointSpace = () => {
   };
 
   const getClassificationStatus = async () => {
-    await ClassificationsService.findAllActiveByLabel({ realm: realm, label: "FacilityStatus", language: "en" }).then((res) => {
+    await ClassificationsService.findAllActiveByLabel({ label: "FacilityStatus"}).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodesClassification(temp);
       setclassificationStatus(temp);

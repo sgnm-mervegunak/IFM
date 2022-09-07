@@ -122,9 +122,7 @@ const BuildingForm = ({
 
   const getClassificationCategory = async () => {
     await ClassificationsService.findAllActiveByLabel({
-      realm: realm,
-      label: "OmniClass11",
-      language,
+      label: "OmniClass11"
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodes(temp);
@@ -134,9 +132,7 @@ const BuildingForm = ({
 
   const getClassificationStatus = async () => {
     await ClassificationsService.findAllActiveByLabel({
-      realm: realm,
-      label: "FacilityStatus",
-      language,
+      label: "FacilityStatus"
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodes(temp);
@@ -175,7 +171,7 @@ const BuildingForm = ({
     FacilityStructureService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
         let temp = {};
-        await ClassificationsService.findClassificationByCodeAndLanguage(realm, "OmniClass11", language, res.data.properties.category).then(clsf1 => {
+        await ClassificationsService.findClassificationByCodeAndLanguage("OmniClass11", res.data.properties.category).then(clsf1 => {
           setCodeCategory(res.data.properties.category);
           res.data.properties.category = clsf1.data.key
           temp = res.data.properties;
@@ -185,7 +181,7 @@ const BuildingForm = ({
             setData(res.data.properties);
           })
 
-        await ClassificationsService.findClassificationByCodeAndLanguage(realm, "FacilityStatus", language, res.data.properties.status).then(async clsf2 => {
+        await ClassificationsService.findClassificationByCodeAndLanguage("FacilityStatus", res.data.properties.status).then(async clsf2 => {
           setCodeStatus(res.data.properties.status);
           res.data.properties.status = await clsf2.data.key
           temp = res.data.properties;

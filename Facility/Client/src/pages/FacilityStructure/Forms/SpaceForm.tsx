@@ -126,9 +126,7 @@ const SpaceForm = ({
 
   const getClassificationSpaceCategory = async () => {
     await ClassificationsService.findAllActiveByLabel({
-      realm: realm,
-      label: "OmniClass13",
-      language: language,
+      label: "OmniClass13"
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodes(temp);
@@ -138,9 +136,7 @@ const SpaceForm = ({
 
   const getClassificationStatus = async () => {
     await ClassificationsService.findAllActiveByLabel({
-      realm: realm,
-      label: "FacilityStatus",
-      language: language,
+      label: "FacilityStatus"
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodes(temp);
@@ -179,7 +175,7 @@ const SpaceForm = ({
     FacilityStructureService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
         let temp = {};
-        await ClassificationsService.findClassificationByCodeAndLanguage(realm, "OmniClass13", language, res.data.properties.category).then(async clsf1 => {
+        await ClassificationsService.findClassificationByCodeAndLanguage("OmniClass13", res.data.properties.category).then(async clsf1 => {
           setCodeCategory(res.data.properties.category);
           res.data.properties.category =await clsf1.data.key
           temp = res.data.properties;
@@ -189,7 +185,7 @@ const SpaceForm = ({
             setData(res.data.properties);
           })
 
-        await ClassificationsService.findClassificationByCodeAndLanguage(realm, "FacilityStatus", language, res.data.properties.status).then(async clsf2 => {
+        await ClassificationsService.findClassificationByCodeAndLanguage("FacilityStatus", res.data.properties.status).then(async clsf2 => {
           setCodeStatus(res.data.properties.status);
           res.data.properties.status = await clsf2.data.key
           temp = res.data.properties;
@@ -199,7 +195,7 @@ const SpaceForm = ({
             setData(res.data.properties);
           })
 
-        await ClassificationsService.findClassificationByCodeAndLanguage(realm, "OmniClass13", language, res.data.properties.usage).then(async clsf3 => {
+        await ClassificationsService.findClassificationByCodeAndLanguage("OmniClass13", res.data.properties.usage).then(async clsf3 => {
           setCodeUsage(res.data.properties.usage);
           res.data.properties.usage = await clsf3.data.key
           temp = res.data.properties;

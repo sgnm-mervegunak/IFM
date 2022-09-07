@@ -27,9 +27,7 @@ interface ActiveInterface {
 }
 
 interface ActiveInterfaceWithLabel {
-  realm: string;
   label: string;
-  language: string;
 }
 
 interface ClassificationInterface2 {
@@ -59,32 +57,30 @@ interface ClassificationInterface2 {
 
 const findAll = async () => {
   return axios.get(
-    url + "/getClassificationsByLanguage"
+    url
   );
 };
 
-const findAllActive = async (params: ActiveInterface) => {
-  params.language = params.language.toUpperCase();
+const findAllActive = async () => {
   return axios.get(
-    url + "/getClassificationByIsActiveStatus/" + params.realm + "/" + params.language
+    url + "/getClassificationByIsActiveStatus/" + "active"
   );
 };
 
 const findAllActiveByLabel = async (params: ActiveInterfaceWithLabel) => {
-  params.language = params.language.toUpperCase();
   return axios.get(
-    url + "/getAClassificationByRealmAndLabelNameAndLanguage/" + params.realm + "/" + params.label + "/" + params.language
+    url + "/getAClassificationByRealmAndLabelNameAndLanguage/" + "info" + "/" + params.label
   );
 };
 
-// const findOne = async (id: string) => {
-//   return axios.get(url + "/Classification/" + id);
-// };
-
-const findClassificationByCodeAndLanguage = async (realm: string, label: string, language: string, code: string) => {
-  return axios.get(url + "/getAClassificationNode/" + realm + "/" + label + "/" + language + "/" + code + "/");
+// Kullanılmıyor
+const findOne = async (id: string) => {
+  return axios.get(url + "/Classification/" + id);
 };
 
+const findClassificationByCodeAndLanguage = async (label: string, code: string) => {
+  return axios.get(url + "/getAClassificationNode/" + "info" + "/" + label + "/" + code);
+};
 
 const create = async (classification: ClassificationInterface) => {
   return axios.post(url, classification);
@@ -118,6 +114,6 @@ const setPassive = async (id: string) => {
   return axios.patch(url + "/setIsActiveFalseOfClassificationAndItsChild/" + id);
 };
 
-const service = { findAll, findAllActive, create, update, remove, relation, nodeInfo, setActive, setPassive, findAllActiveByLabel, findClassificationByCodeAndLanguage };
+const service = { findOne, findAll, findAllActive, create, update, remove, relation, nodeInfo, setActive, setPassive, findAllActiveByLabel, findClassificationByCodeAndLanguage };
 
 export default service;
