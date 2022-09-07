@@ -9,34 +9,34 @@ import { UpdateZoneDto } from '../dto/update.zone.dto';
 export class ZoneService {
   constructor(
     @Inject(RepositoryEnums.ZONE)
-    private readonly jointSpaceRepository: ZoneInterface<any>,
+    private readonly zoneRepository: ZoneInterface<any>,
   ) {}
   async create(createZoneDto: CreateZoneDto, realm: string, language: string) {
-    return await this.jointSpaceRepository.create(createZoneDto, realm, language);
+    return await this.zoneRepository.create(createZoneDto, realm, language);
   }
 
   update(key, updateFacilityStructureDto: UpdateZoneDto, realm: string, language: string) {
-    return this.jointSpaceRepository.update(key, updateFacilityStructureDto, realm, language);
+    return this.zoneRepository.update(key, updateFacilityStructureDto, realm, language);
   }
 
   async findOneNode(key: string, realm: string, language: string) {
     //checkObjectIddİsValid(id);
-    return await this.jointSpaceRepository.findOneNodeByKey(key, realm, language);
+    return await this.zoneRepository.findOneNodeByKey(key, realm, language);
   }
 
   remove(id: string, realm:string, language: string) {
-    return this.jointSpaceRepository.delete(id, realm, language);
+    return this.zoneRepository.delete(id, realm, language);
   }
 
   findOneFirstLevel(label: string, realm: string, language: string) {
-    return this.jointSpaceRepository.findOneFirstLevelByRealm(label, realm, language);
+    return this.zoneRepository.findOneFirstLevelByRealm(label, realm, language);
   }
 
   findOne(key: string, realm: string, language: string) {
-    return this.jointSpaceRepository.findOneByRealm(key, realm, language);
+    return this.zoneRepository.findOneByRealm(key, realm, language);
   }
 
   async addZonesToBuilding( file: Express.Multer.File, realm: string,buildingKey: string,language: string){
-    return this.jointSpaceRepository.addZonesToBuilding(file, realm,buildingKey,language);
+    return this.zoneRepository.addZonesToBuilding(file, realm,buildingKey,language);
   }
 }

@@ -15,8 +15,8 @@ import { has_children_error } from 'src/common/const/custom.error.object';
 export class ContactRepository implements GeciciInterface<Contact> {
   constructor(private readonly neo4jService: Neo4jService) {}
 
-  async findOneByRealm(label: string, realm: string, language: string) {
-    let node = await this.neo4jService.findByRealmWithTreeStructure(label, realm);
+  async findOneByRealm(realm: string, language: string) {
+    let node = await this.neo4jService.findByRealmWithTreeStructure('Contact', realm);
     if (!node) {
       throw new ContactNotFoundException(realm);
     }
