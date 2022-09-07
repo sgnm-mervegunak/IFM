@@ -91,7 +91,7 @@ const SetClassificationUser = () => {
   ];
 
   const getClassification = () => {
-    ClassificationsService.findAllActive({ realm: realm, language: "en" }).then((res) => {
+    ClassificationsService.findAllActive().then((res) => {
       console.log(res.data);
 
 

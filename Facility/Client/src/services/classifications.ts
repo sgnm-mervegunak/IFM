@@ -57,10 +57,9 @@ interface ClassificationInterface2 {
 //   );
 // };
 
-const findAll = async (params: ActiveInterface) => {
-  params.language = params.language.toUpperCase();
+const findAll = async () => {
   return axios.get(
-    url + "/getClassificationsByLanguage/" + params.realm + "/" + params.language
+    url + "/getClassificationsByLanguage"
   );
 };
 
@@ -78,9 +77,9 @@ const findAllActiveByLabel = async (params: ActiveInterfaceWithLabel) => {
   );
 };
 
-const findOne = async (id: string) => {
-  return axios.get(url + "/Classification/" + id);
-};
+// const findOne = async (id: string) => {
+//   return axios.get(url + "/Classification/" + id);
+// };
 
 const findClassificationByCodeAndLanguage = async (realm: string, label: string, language: string, code: string) => {
   return axios.get(url + "/getAClassificationNode/" + realm + "/" + label + "/" + language + "/" + code + "/");
@@ -119,6 +118,6 @@ const setPassive = async (id: string) => {
   return axios.patch(url + "/setIsActiveFalseOfClassificationAndItsChild/" + id);
 };
 
-const service = { findAll, findAllActive, findOne, create, update, remove, relation, nodeInfo, setActive, setPassive, findAllActiveByLabel, findClassificationByCodeAndLanguage };
+const service = { findAll, findAllActive, create, update, remove, relation, nodeInfo, setActive, setPassive, findAllActiveByLabel, findClassificationByCodeAndLanguage };
 
 export default service;

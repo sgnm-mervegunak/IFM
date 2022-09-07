@@ -105,7 +105,7 @@ const SetClassificationAdmin = () => {
   ];
 
   const getClassification = () => {
-    ClassificationsService.findAll({ realm, language: language }).then((res) => {
+    ClassificationsService.findAll().then((res) => {
 
       if (!res.data.root.children) {
         setData([res.data.root.properties] || []);
