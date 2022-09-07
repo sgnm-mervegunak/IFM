@@ -85,7 +85,7 @@ const Dashboard = () => {
   };
 
   const getFacilityStructure = async () => {
-    await FacilityStructureService.findOne(realm)
+    await FacilityStructureService.findAll()
       .then(async (res) => {
         setData([res.data.root] || []);
         let temp = JSON.parse(JSON.stringify([res.data.root] || []));
