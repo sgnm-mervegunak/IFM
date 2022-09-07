@@ -7,6 +7,7 @@ import { ClassificationService } from './classification.service';
 import { CreateClassificationDto } from './dto/create-classification.dto';
 import { UpdateClassificationDto } from './dto/update-classification.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UserRoles } from 'src/common/const/keycloak.role.enum';
 
 @ApiTags('Classification')
 @ApiBearerAuth('JWT-auth')
@@ -15,8 +16,8 @@ export class ClassificationController {
   constructor(private readonly classificationService: ClassificationService) {}
 
   @Post()
-  //@Roles({ roles: [FacilityUserRoles.ADMIN] })
-  @Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
+  //@Unprotected()
   create(@Body() createClassificationDto: CreateClassificationDto, @Headers() header) {
     const {language, realm} = header;
     return this.classificationService.create(createClassificationDto, realm, language);
@@ -29,26 +30,30 @@ export class ClassificationController {
   //   const {language, realm} = header;
   //   return this.classificationService.findOne(label, realm, language);
   // }
-  @Unprotected()
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateClassificationDto: UpdateClassificationDto, @Headers() header) {
     const {language, realm} = header;
     return this.classificationService.update(id, updateClassificationDto, realm, language);
   }
-  @Unprotected()
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
   @Delete(':id')
   remove(@Param('id') id: string, @Headers() header) {
     const {language, realm} = header;
     return this.classificationService.remove(id,realm, language);
   }
-  @Unprotected()
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
   @Post('/relation/:id/:target_parent_id')
   changeNodeBranch(@Param('id') id: string, @Param('target_parent_id') target_parent_id: string, @Headers() header) {
     const {language, realm} = header;
     return this.classificationService.changeNodeBranch(id, target_parent_id, realm, language);
   }
 
-  @Unprotected()
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
   @Get(':key')
   @NoCache()
   findOneNode(@Param('key') key: string, @Headers() header) {
@@ -57,7 +62,8 @@ export class ClassificationController {
   }
 
 
-  @Unprotected()
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
   @Patch("setIsActiveFalseOfClassificationAndItsChild/:id")
   async setIsActiveFalseOfClassificationAndItsChild(@Param('id') id:string, @Headers() header) {
     const {language, realm} = header;
@@ -65,14 +71,16 @@ export class ClassificationController {
 
   }
 
-  @Unprotected()
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
   @Patch("setIsActiveTrueOfClassificationAndItsChild/:id")
   async setIsActiveTrueOfClassificationAndItsChild(@Param('id') id:string, @Headers() header) {
     const {language, realm} = header;
     return this.classificationService.setIsActiveTrueOfClassificationAndItsChild(id, realm, language);
   }
 
-  @Unprotected()
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
   @Get("getClassificationByIsActiveStatus/active")
   @NoCache()
@@ -81,7 +89,8 @@ export class ClassificationController {
     return this.classificationService.getClassificationByIsActiveStatus(realm,language);
   }
 
-  @Unprotected()
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
   @Get('')
   @NoCache()
@@ -90,7 +99,8 @@ export class ClassificationController {
     return this.classificationService.getClassificationsByLanguage(realm, language);
   }
 
-  @Unprotected()
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
   @Get('getAClassificationByRealmAndLabelNameAndLanguage/info/:labelName')
   @NoCache()
@@ -99,7 +109,8 @@ export class ClassificationController {
     return this.classificationService.getAClassificationByRealmAndLabelNameAndLanguage(realm,labelName, language);
   }
 
-  @Unprotected()
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
   @Post('addAClassificationFromExcel')
   @ApiBody({
     schema: {
@@ -123,7 +134,8 @@ export class ClassificationController {
  }
 
 
- @Unprotected()
+ //@Unprotected()
+ @Roles({ roles: [UserRoles.ADMIN] })
   @Post('addAClassificationWithCodeFromExcel')
   @ApiBody({
     schema: {
@@ -146,7 +158,8 @@ export class ClassificationController {
   return this.classificationService.addAClassificationWithCodeFromExcel(file, realm, language);
  }
 
- @Unprotected()
+ //@Unprotected()
+ @Roles({ roles: [UserRoles.ADMIN] })
  @NoCache()
  @Get('getAClassificationNode/info/:classificationName/:code')
  async getNodeByClassificationLanguageRealmAndCode(@Param('classificationName') classificationName:string, @Param('code') code:string, @Headers() header){
