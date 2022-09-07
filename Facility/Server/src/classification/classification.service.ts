@@ -22,10 +22,10 @@ export class ClassificationService {
 
   @Span('find a classification by id')
   @OtelMethodCounter()
-  async findOne(label: string, realm: string, language: string) {
+  async findOne(realm: string, language: string) {
     //checkObjectIddİsValid(id);
     
-    return await this.classificationRepository.findOneByRealm(label, realm, language);
+    return await this.classificationRepository.findOneByRealm(realm, language);
   }
 
   @Span('update a classification')

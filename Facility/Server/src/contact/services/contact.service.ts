@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { BaseGraphDatabaseInterfaceRepository } from 'ifmcommon';
 import { RepositoryEnums } from 'src/common/const/repository.enum';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
+import { ZoneInterface } from 'src/common/interface/zone.interface';
 import { CreateContactDto } from '../dto/create-contact.dto';
 import { UpdateContactDto } from '../dto/update-contact.dto';
 
@@ -16,8 +17,8 @@ export class ContactService {
     return await this.contactRepository.create(createContactDto, realm, language);
   }
 
-  findOne(label: string, realm: string, language: string) {
-    return this.contactRepository.findOneByRealm(label, realm, language);
+  findOne(realm: string, language: string) {
+    return this.contactRepository.findOneByRealm(realm, language);
   }
 
   update(id: string, updateContactDto: UpdateContactDto, realm:string, language: string) {

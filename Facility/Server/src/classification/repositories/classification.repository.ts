@@ -25,7 +25,7 @@ export class ClassificationRepository implements classificationInterface<Classif
   constructor(private readonly neo4jService: Neo4jService) {}
 
 
-  async findOneByRealm(label: string, realm: string) {
+  async findOneByRealm(realm: string, language: string) {
     // //let node = await this.neo4jService.findByRealmWithTreeStructure(label, realm);
     // let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
     //   ['FacilityStructure'],{"realm":realm, "isDeleted":false},[],{"isDeleted":false, "canDisplay":true}
