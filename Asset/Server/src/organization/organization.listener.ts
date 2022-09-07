@@ -11,11 +11,7 @@ import { Facility } from './entities/facility.entity';
 @Controller('organizationListener')
 @Unprotected()
 export class OrganizationListenerController {
-  constructor(
-    private readonly neo4jService: Neo4jService,
-    private readonly httpService: HttpService,
-   // private readonly assetService: AssetService,
-  ) {}
+  constructor(private readonly neo4jService: Neo4jService, private readonly httpService: HttpService) {}
 
   @EventPattern('createFacility')
   async createFacilityListener(@Payload() message) {

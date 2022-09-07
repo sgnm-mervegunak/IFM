@@ -3,19 +3,17 @@ import {
   AssetNotFoundException,
   FacilityStructureNotFountException,
 } from '../../common/notFoundExceptions/not.found.exception';
-import { Type } from '../entities/types.entity';
+import { Types } from '../entities/component.entity';
 import { NestKafkaService, nodeHasChildException } from 'ifmcommon';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
 import { assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError, Neo4jService } from 'sgnm-neo4j/dist';
-import { CreateTypesDto } from '../dto/create.types.dto';
-import { UpdateTypesDto } from '../dto/update.tpes.dto';
+
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
-import { wrong_parent_error } from 'src/common/const/custom.error.object';
-import { CustomAssetError } from 'src/common/const/custom.error.enum';
-import { WrongIdProvided } from 'src/common/bad.request.exception';
+import { CreateComponentDto } from '../dto/create.component.dto';
+import { UpdateComponentDto } from '../dto/update.component.dto';
 
 @Injectable()
-export class TypesRepository implements GeciciInterface<Type> {
+export class ComponentRepository implements GeciciInterface<Types> {
   constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) {}
   async findByKey(key: string) {
     try {
@@ -30,16 +28,11 @@ export class TypesRepository implements GeciciInterface<Type> {
   }
 
   async findRootByRealm(realm: string) {
-    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructureOneLevel(
-      [Neo4jLabelEnum.TYPES],
-      {
-        realm,
-        isDeleted: false,
-        isActive: true,
-      },
-      [Neo4jLabelEnum.TYPE],
-      { isDeleted: false },
-    );
+    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure([Neo4jLabelEnum.TYPES], {
+      realm,
+      isDeleted: false,
+      isActive: true,
+    });
     if (!node) {
       throw new FacilityStructureNotFountException(realm);
     }
@@ -47,49 +40,20 @@ export class TypesRepository implements GeciciInterface<Type> {
 
     return node;
   }
-  async create(createTypesDto: CreateTypesDto, realm) {
-    try {
-      const rootNode = await this.neo4jService.findByIdAndOrLabelsAndFilters(
-        +createTypesDto.parentId,
-        [Neo4jLabelEnum.TYPES],
-        {
-          isDeleted: false,
-          realm,
-        },
-      );
-      if (!rootNode.length) {
-        throw new HttpException(wrong_parent_error(), 400);
-      }
+  async create(createAssetDto: CreateComponentDto) {
+    const asset = new Types();
+    const assetObject = assignDtoPropToEntity(asset, createAssetDto);
+    const value = await this.neo4jService.createNode(assetObject, ['Asset']);
 
-      const type = new Type();
-      const typeObject = assignDtoPropToEntity(type, createTypesDto);
-      const value = await this.neo4jService.createNode(typeObject, [Neo4jLabelEnum.TYPE]);
-
-      value['properties']['id'] = value['identity'].low;
-      const result = { id: value['identity'].low, labels: value['labels'], properties: value['properties'] };
-      if (createTypesDto['parentId']) {
-        await this.neo4jService.addRelations(String(result['id']), createTypesDto['parentId']);
-      }
-      return result;
-    } catch (error) {
-      console.log(error.response);
-      const code = error.response?.code;
-      console.log(code);
-      if (code >= 1000 && code <= 1999) {
-      } else if (code >= 5000 && code <= 5999) {
-        if (error.response?.code == CustomNeo4jError.ADD_CHILDREN_RELATION_BY_ID_ERROR) {
-        }
-      } else if (code >= 9500 && code <= 9750) {
-        if (error.response?.code == CustomAssetError.WRONG_PARENT) {
-          throw new WrongIdProvided();
-        }
-      } else {
-        throw new HttpException(error, 500);
-      }
+    value['properties']['id'] = value['identity'].low;
+    const result = { id: value['identity'].low, labels: value['labels'], properties: value['properties'] };
+    if (createAssetDto['parentId']) {
+      await this.neo4jService.addRelations(String(result['id']), createAssetDto['parentId']);
     }
+    return result;
   }
 
-  async update(_id: string, updateAssetDto: UpdateTypesDto) {
+  async update(_id: string, updateAssetDto: UpdateComponentDto) {
     const updateAssetDtoWithoutLabelsAndParentId = {};
     Object.keys(updateAssetDto).forEach((element) => {
       if (element != 'labels' && element != 'parentId') {
