@@ -21,7 +21,7 @@ const Export = ({
   submitted: boolean;
   setSubmitted: any;
   setExportDia: any;
-  exportType:ExportType
+  exportType: ExportType
 }) => {
   const auth = useAppSelector((state) => state.auth);
   const { toast } = useAppSelector((state) => state.toast);
@@ -44,21 +44,20 @@ const Export = ({
       });
   }, []);
 
-  
+
 
   React.useEffect(() => {
     if (submitted && selectedBuildings.length > 0) {
       if (exportType == ExportType.Space) {
-        
+
         ExportService.exportSpaces({
           buildingKeys: selectedBuildings.map((item: any) => {
             if (item.key) {
               return item.key;
             }
           }),
-          realm: auth.auth.realm,
         })
-          .then(async(res) => {
+          .then(async (res) => {
             await DownloadExcel(res.data, "test", "deneme");
             setExportDia(false);
           })
@@ -70,14 +69,13 @@ const Export = ({
               life: 2000,
             });
           });
-      } else if (exportType ==ExportType.Zone) {
+      } else if (exportType == ExportType.Zone) {
         ExportService.exportZones({
           buildingKeys: selectedBuildings.map((item: any) => {
             if (item.key) {
               return item.key;
             }
           }),
-          realm: auth.auth.realm,
         })
           .then(async (res) => {
             await DownloadExcel(res.data, "test", "zones-deneme");
@@ -92,7 +90,7 @@ const Export = ({
             });
           });
       } else {
-        
+
         setSubmitted(false);
       }
 

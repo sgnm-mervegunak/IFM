@@ -3,7 +3,6 @@ import axios from 'axios';
 const url = process.env.REACT_APP_API_URL + 'ExcelExport/';
 
 interface ExportDto{
-  realm: string;
   buildingKeys: string[];
 }
 
