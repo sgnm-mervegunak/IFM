@@ -3,10 +3,10 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { kafkaOptions } from './common/configs/message.broker.options';
-import { Topics, LoggingInterceptor, HttpExceptionFilter, MongoExceptionFilter } from 'ifmcommon';
+import { LoggingInterceptor, HttpExceptionFilter, MongoExceptionFilter } from 'ifmcommon';
 import trial from './tracing';
 import { i18nValidationErrorFactory, I18nValidationExceptionFilter } from 'nestjs-i18n';
-import { kafkaConf } from './common/const/kafka.conf';
+
 import { Neo4jErrorFilter } from 'sgnm-neo4j';
 import { ConfigService } from '@nestjs/config';
 
@@ -45,13 +45,17 @@ async function bootstrap() {
       ),
       new MongoExceptionFilter(
         { brokers: [configService.get('KAFKA_BROKER')], clientId: configService.get('KAFKA_CLIENT_ID') },
-        Topics.ASSET_EXCEPTIONS,
+        'ASSET_EXCEPTIONS',
       ),
       new Neo4jErrorFilter(),
       new I18nValidationExceptionFilter(),
     );
     app.useGlobalInterceptors(
-      new LoggingInterceptor(kafkaConf, Topics.ASSET_LOGGER, Topics.ASSET_OPERATION),
+      new LoggingInterceptor(
+        { brokers: [configService.get('KAFKA_BROKER')], clientId: configService.get('KAFKA_CLIENT_ID') },
+        'ASSET_LOGGER',
+        'ASSET_OPERATION',
+      ),
       //new TimeoutInterceptor(),
     );
     app.enableCors();

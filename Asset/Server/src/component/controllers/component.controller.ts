@@ -1,11 +1,12 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Headers } from '@nestjs/common';
-import { Unprotected } from 'nest-keycloak-connect';
+import { Roles, Unprotected } from 'nest-keycloak-connect';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { NoCache } from 'ifmcommon';
 import { ChangeBranchDto } from '../dto/change.branch.dto';
 import { CreateComponentDto } from '../dto/create.component.dto';
 import { UpdateComponentDto } from '../dto/update.component.dto';
 import { ComponentService } from '../services/component.service';
+import { UserRoles } from 'src/common/const/keycloak.role.enum';
 
 @ApiTags('component')
 @ApiBearerAuth('JWT-auth')
@@ -13,8 +14,7 @@ import { ComponentService } from '../services/component.service';
 export class ComponentController {
   constructor(private readonly componentService: ComponentService) {}
 
-  @Unprotected()
-  //@Roles({ roles: [UserRoles.ADMIN] })
+  @Roles({ roles: [UserRoles.ADMIN] })
   @ApiBody({
     type: CreateComponentDto,
     description: 'create  Types ',
@@ -25,7 +25,7 @@ export class ComponentController {
   }
 
   @Get('')
-  @Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
   findOne(@Headers('realm') realm) {
     return this.componentService.findOne(realm);

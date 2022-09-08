@@ -10,9 +10,9 @@ import { assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError, Neo4
 import { CreateTypesDto } from '../dto/create.types.dto';
 import { UpdateTypesDto } from '../dto/update.tpes.dto';
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
-import { wrong_parent_error } from 'src/common/const/custom.error.object';
+import { node_not_found, wrong_parent_error } from 'src/common/const/custom.error.object';
 import { CustomAssetError } from 'src/common/const/custom.error.enum';
-import { WrongIdProvided } from 'src/common/bad.request.exception';
+import { NodeNotFound, WrongIdProvided } from 'src/common/bad.request.exception';
 
 @Injectable()
 export class TypesRepository implements GeciciInterface<Type> {
@@ -30,22 +30,38 @@ export class TypesRepository implements GeciciInterface<Type> {
   }
 
   async findRootByRealm(realm: string) {
-    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructureOneLevel(
-      [Neo4jLabelEnum.TYPES],
-      {
-        realm,
-        isDeleted: false,
-        isActive: true,
-      },
-      [Neo4jLabelEnum.TYPE],
-      { isDeleted: false },
-    );
-    if (!node) {
-      throw new FacilityStructureNotFountException(realm);
-    }
-    node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
+    try {
+      const node = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+        [Neo4jLabelEnum.TYPES],
+        {
+          realm,
+          isDeleted: false,
+          isActive: true,
+        },
+        [Neo4jLabelEnum.TYPE],
+        { isDeleted: false },
+        'PARENT_OF',
+      );
+      if (!node.length) {
+        throw new HttpException(node_not_found, 400);
+      }
 
-    return node;
+      return node;
+    } catch (error) {
+      const code = error.response?.code;
+
+      if (code >= 1000 && code <= 1999) {
+      } else if (code >= 5000 && code <= 5999) {
+        if (error.response?.code == CustomNeo4jError.ADD_CHILDREN_RELATION_BY_ID_ERROR) {
+        }
+      } else if (code >= 9500 && code <= 9750) {
+        if (error.response?.code == CustomAssetError.NODE_NOT_FOUND) {
+          NodeNotFound();
+        }
+      } else {
+        throw new HttpException(error, 500);
+      }
+    }
   }
   async create(createTypesDto: CreateTypesDto, realm) {
     try {
@@ -72,9 +88,8 @@ export class TypesRepository implements GeciciInterface<Type> {
       }
       return result;
     } catch (error) {
-      console.log(error.response);
       const code = error.response?.code;
-      console.log(code);
+
       if (code >= 1000 && code <= 1999) {
       } else if (code >= 5000 && code <= 5999) {
         if (error.response?.code == CustomNeo4jError.ADD_CHILDREN_RELATION_BY_ID_ERROR) {

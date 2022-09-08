@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsNumber, IsOptional, Max, Min } from 'class-validator';
+import { IsNumber, IsOptional, Max, Min } from 'class-validator';
 import { i18nValidationMessageEnum, IsStringWithI18nMessage, LengthWithI18nMessage } from 'ifmcommon';
 import { IsNotEmptyWithI18nMessage } from 'ifmcommon';
+import * as moment from 'moment';
 
 export class CreateComponentDto {
   @ApiProperty()
@@ -37,13 +38,13 @@ export class CreateComponentDto {
 
   @ApiProperty()
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
-  @IsDate()
-  installationDate: Date;
+  @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
+  installationDate: string = moment().format('YYYY-MM-DD HH:mm:ss');
 
   @ApiProperty()
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
-  @IsDate()
-  warrantyStartDate: Date;
+  @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
+  warrantyStartDate: string = moment().format('YYYY-MM-DD HH:mm:ss');
 
   @ApiProperty()
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
