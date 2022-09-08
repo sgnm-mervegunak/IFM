@@ -1,29 +1,27 @@
 import { HttpService } from '@nestjs/axios';
-import { Controller, HttpException } from '@nestjs/common';
+import { Controller, HttpException, Headers } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import { Unprotected } from 'nest-keycloak-connect';
 import { catchError, firstValueFrom, map } from 'rxjs';
 import { assignDtoPropToEntity, Neo4jService } from 'sgnm-neo4j/dist';
 import { VirtualNode } from 'src/common/baseobject/virtual.node';
-import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
-import { Facility } from '../entities/facility.entity';
-import { AssetService } from '../services/asset.service';
+import { ComponentService } from '../services/component.service';
 
-@Controller('assetListener')
+@Controller('componentListener')
 @Unprotected()
-export class AssetListenerController {
+export class ComponentListenerController {
   constructor(
     private readonly neo4jService: Neo4jService,
     private readonly httpService: HttpService,
-    private readonly assetService: AssetService,
+    private readonly componentService: ComponentService,
   ) {}
 
   @EventPattern('createStructureAssetRelation')
-  async createAssetListener(@Payload() message) {
+  async createAssetListener(@Payload() message, @Headers('realm') realm) {
     if (!message.value?.referenceKey || !message.value?.parentKey) {
       throw new HttpException('key is not available on kafka object', 400);
     }
-    const asset = await this.assetService.findOneNode(message.value?.parentKey);
+    const component = await this.componentService.findOneNode(message.value?.parentKey, realm);
     //check if facilityStructure exist
     const structurePromise = await this.httpService
       .get(`${process.env.STRUCTURE_URL}/${message.value?.referenceKey}`)
@@ -54,11 +52,11 @@ export class AssetListenerController {
   }
 
   @EventPattern('deleteStructure')
-  async deleteAssetListener(@Payload() message) {
+  async deleteAssetListener(@Payload() message, @Headers('realm') realm) {
     if (!message.value?.referenceKey) {
       throw new HttpException('key is not provided by service', 400);
     }
-    const asset = await this.assetService.findOneNode(message.value?.key);
+    const component = await this.componentService.findOneNode(message.value?.key, realm);
     //check if asset exist
     const structurePromise = await this.httpService
       .get(`${process.env.STRUCTURE_URL}/${message.value?.referenceKey}`)
@@ -81,12 +79,12 @@ export class AssetListenerController {
   }
 
   @EventPattern('deleteAssetFromStructure')
-  async deleteAssetFromStructureListener(@Payload() message) {
+  async deleteAssetFromStructureListener(@Payload() message, @Headers('realm') realm) {
     if (!message.value?.referenceKey || !message.value?.key) {
       throw new HttpException('key is not available on kafka object', 400);
     }
 
-    const asset = await this.assetService.findOneNode(message.value?.key);
+    const component = await this.componentService.findOneNode(message.value?.key, realm);
 
     //check if asset exist
     const structurePromise = await this.httpService

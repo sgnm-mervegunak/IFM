@@ -3,7 +3,7 @@
   "FACILITY_NOT_FOUND": "#{id} no lu tesis bulunamadı",
   "FACILITY_STRUCTURE_NOT_FOUND": "#{id} no lu bina bulunamadı",
   "CLASSIFICATION_NOT_FOUND": " id #{id} no lu sınıflandırma bulunamadı ",
-  "ASSET_NOT_FOUND":" id #{id}no lu asset bulunamadı",
+  "ASSET_NOT_FOUND": " id #{id}no lu asset bulunamadı",
   "USER_NOT_HAVE_PERMISSION": "kullanıcı '{username}' bu işlem için izniniz yoktur.Yöneticinizle irtibata geçiniz ",
   "OBJECTID_NOT_VALID": "girdiğiniz ıd #{id} geçerli değil",
   "GOODBYE_MESSAGE": "İyi günler {username}",
@@ -15,6 +15,7 @@
   "ARRAY": ["ONE", "TWO", "THREE"],
   "NODE_HAS_CHILD": "{name} isimli düğüm, alt düğümlere sahip olduğundan siliinemedi.",
   "NOT_EMPTY": "{property} boş bırakılamaz",
+  "NODE_NOT_FOUND": "node bulunamadı",
   "IS_STRING": "{property} string bir değer olmalı",
   "LENGTH": "{property}  en az  {constraints.0} en fazla  {constraints.1} karakterli olmalıdır",
   "DUBLICATE_ERROR": "girilen değerler  #{errorProperties} sistemde zaten mevcut"

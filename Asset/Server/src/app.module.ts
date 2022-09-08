@@ -5,7 +5,6 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { MessagebrokerModule } from './messagebroker/messagebroker.module';
 import * as Joi from 'joi';
 import { MulterModule } from '@nestjs/platform-express';
-
 import * as redisStore from 'cache-manager-redis-store';
 import { LoggerModule } from './trace_logger/trace.logger.module';
 import { OpenTelemetryModuleConfig } from './common/configs/opentelemetry.options';
@@ -13,9 +12,10 @@ import { Neo4jModule } from 'sgnm-neo4j';
 import { i18nOptions } from './common/configs/i18n.options';
 import { KeycloakModule } from './common/keycloak/keycloak.module';
 import { HttpCacheInterceptor, KafkaModule } from 'ifmcommon';
-import { AssetModule } from './asset/asset.module';
 import { InfraModule } from './infra/infra.module';
 import { OrganizationModule } from './organization/organization.module';
+import { TypesModule } from './types/types.module';
+import { ComponentModule } from './component/component.module';
 
 @Module({
   imports: [
@@ -60,7 +60,7 @@ import { OrganizationModule } from './organization/organization.module';
         port: configService.get('NEO4J_PORT'),
         scheme: configService.get('NEO4J_SCHEME'),
         username: configService.get('NEO4J_USERNAME'),
-        database: configService.get('NEO4J_DATABASE'),
+        database: 'test',
       }),
     }),
 
@@ -74,10 +74,10 @@ import { OrganizationModule } from './organization/organization.module';
     }),
 
     MessagebrokerModule,
-
-    AssetModule,
+    ComponentModule,
     InfraModule,
     OrganizationModule,
+    TypesModule,
   ],
   providers: [
     //to cache all get request

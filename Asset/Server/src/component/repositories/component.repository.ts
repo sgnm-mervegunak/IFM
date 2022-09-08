@@ -3,19 +3,21 @@ import {
   AssetNotFoundException,
   FacilityStructureNotFountException,
 } from '../../common/notFoundExceptions/not.found.exception';
-import { Asset } from '../entities/asset.entity';
+import { Types } from '../entities/component.entity';
 import { NestKafkaService, nodeHasChildException } from 'ifmcommon';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
-import { CreateAssetDto } from '../dto/create-asset.dto';
-import { UpdateAssetDto } from '../dto/update-asset.dto';
 import { assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError, Neo4jService } from 'sgnm-neo4j/dist';
 
+import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
+import { CreateComponentDto } from '../dto/create.component.dto';
+import { UpdateComponentDto } from '../dto/update.component.dto';
+
 @Injectable()
-export class AssetRepository implements GeciciInterface<Asset> {
+export class ComponentRepository implements GeciciInterface<Types> {
   constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) {}
   async findByKey(key: string) {
     try {
-      const nodes = await this.neo4jService.findByLabelAndFilters(['Asset'], { key });
+      const nodes = await this.neo4jService.findByLabelAndFilters(['Type'], { key });
       if (!nodes.length) {
         throw new AssetNotFoundException(key);
       }
@@ -25,8 +27,8 @@ export class AssetRepository implements GeciciInterface<Asset> {
     }
   }
 
-  async findOneByRealm(label: string, realm: string) {
-    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure([label], {
+  async findRootByRealm(realm: string) {
+    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure([Neo4jLabelEnum.TYPES], {
       realm,
       isDeleted: false,
       isActive: true,
@@ -38,8 +40,8 @@ export class AssetRepository implements GeciciInterface<Asset> {
 
     return node;
   }
-  async create(createAssetDto: CreateAssetDto) {
-    const asset = new Asset();
+  async create(createAssetDto: CreateComponentDto) {
+    const asset = new Types();
     const assetObject = assignDtoPropToEntity(asset, createAssetDto);
     const value = await this.neo4jService.createNode(assetObject, ['Asset']);
 
@@ -51,7 +53,7 @@ export class AssetRepository implements GeciciInterface<Asset> {
     return result;
   }
 
-  async update(_id: string, updateAssetDto: UpdateAssetDto) {
+  async update(_id: string, updateAssetDto: UpdateComponentDto) {
     const updateAssetDtoWithoutLabelsAndParentId = {};
     Object.keys(updateAssetDto).forEach((element) => {
       if (element != 'labels' && element != 'parentId') {
