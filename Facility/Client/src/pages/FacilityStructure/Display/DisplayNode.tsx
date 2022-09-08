@@ -15,6 +15,7 @@ const DisplayNode = ({ displayKey, docTypes }: Params) => {
   const [type, setType] = useState<string>("");
   const [category, setCategory] = useState<string>();
   const [status, setStatus] = useState<string>();
+  const [language, setLanguage] = useState<string>();
 
   useEffect(() => {
     FacilityStructureService.nodeInfo(displayKey).then((res) => {
@@ -27,6 +28,7 @@ const DisplayNode = ({ displayKey, docTypes }: Params) => {
     <div>
       <h5 className="field">Name</h5>
       <p>{data?.name}</p>
+      {console.log("*********************",data)}
       {data &&
         Object.keys(data)
           .sort()
@@ -93,8 +95,8 @@ const DisplayNode = ({ displayKey, docTypes }: Params) => {
                   </div>
                 );
               } else if (key === "category") {
-                ClassificationService.nodeInfo(data[key]).then((res) => {
-                  setCategory(res.data.properties.name);
+                ClassificationService.findClassificationByCodeAndLanguage(localStorage.getItem("i18nextLng") || "EN", data[key]).then((res) => {
+                  setCategory(res.data[0]?._fields[1]?.properties?.name);
                 });
                 return (
                   <div className="field" key={index}>
