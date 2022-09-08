@@ -151,10 +151,8 @@ const BlockForm = ({
                     });
                 });
 
-            setTimeout(() => {
                 setAddDia(false);
                 setSelectedFacilityType(undefined);
-            }, 1000);
 
         } else {
 

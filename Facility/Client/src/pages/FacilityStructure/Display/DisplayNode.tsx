@@ -95,7 +95,7 @@ const DisplayNode = ({ displayKey, docTypes }: Params) => {
                   </div>
                 );
               } else if (key === "category") {
-                ClassificationService.findClassificationByCodeAndLanguage(localStorage.getItem("i18nextLng") || "EN", data[key]).then((res) => {
+                ClassificationService.findClassificationByCodeAndLanguage(localStorage.getItem("i18nextLng") || "EN", data[key]).then((res) => { //will be refactor
                   setCategory(res.data[0]?._fields[1]?.properties?.name);
                 });
                 return (
@@ -105,7 +105,7 @@ const DisplayNode = ({ displayKey, docTypes }: Params) => {
                   </div>
                 );
               } else if (key === "status") {
-                ClassificationService.nodeInfo(data[key]).then((res) => {
+                ClassificationService.nodeInfo(data[key]).then((res) => {//will be refactor
                   setStatus(res.data.properties.name);
                 });
                 return (
