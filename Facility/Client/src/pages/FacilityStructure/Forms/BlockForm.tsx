@@ -2,13 +2,12 @@ import React, { useState, useEffect, InputHTMLAttributes } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { InputText } from "primereact/inputtext";
 import { Chips } from 'primereact/chips';
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useAppSelector } from '../../../app/hook';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
 import { useTranslation } from "react-i18next";
 
 import FacilityStructureService from "../../../services/facilitystructure";
+import { useAppSelector } from '../../../app/hook';
 
 interface Params {
     selectedFacilityType: string | undefined;
@@ -50,7 +49,6 @@ const schema = yup.object({
     name: yup.string().required("This area is required.").min(2, "This area accepts min 2 characters."),
 });
 
-
 const BlockForm = ({
     selectedFacilityType,
     submitted,
@@ -67,14 +65,14 @@ const BlockForm = ({
 
     const [data, setData] = useState<any>();
     const { t } = useTranslation(["common"]);
+    const { toast } = useAppSelector(state => state.toast);  
+
     const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
         defaultValues: {
             ...data,
         },
         resolver: yupResolver(schema)
     });
-
-    const { toast } = useAppSelector(state => state.toast);    
 
     useEffect(() => {
         if (submitted) {
@@ -94,15 +92,14 @@ const BlockForm = ({
     useEffect(
         () => {
             console.log("useEffect'ten gelen data: ", data);
-
         }
         , [data])
+
     const getNodeInfoForUpdate = (selectedNodeKey: string) => {
         FacilityStructureService.nodeInfo(selectedNodeKey)
             .then((res) => {
                 setData(res.data.properties);
                 console.log("getNodeIndfo'dan gelen data:", res.data.properties);
-
             })
             .catch((err) => {
                 toast.current.show({
@@ -113,7 +110,6 @@ const BlockForm = ({
                 });
             });
     }
-
 
     const onSubmit = (data: any) => {
         console.log("onSubmit'ten gelen data", data);
@@ -127,9 +123,6 @@ const BlockForm = ({
                 projectName: data?.projectName,
                 nodeType: selectedFacilityType,
             };
-
-            console.log("newNode", newNode);
-
 
             FacilityStructureService.createStructure(selectedNodeKey, newNode)
                 .then((res) => {
@@ -156,14 +149,12 @@ const BlockForm = ({
                         detail: err.response ? err.response.data.message : err.message,
                         life: 4000,
                     });
-
                 });
 
             setTimeout(() => {
                 setAddDia(false);
                 setSelectedFacilityType(undefined);
             }, 1000);
-
 
         } else {
 
@@ -175,7 +166,6 @@ const BlockForm = ({
                 projectName: data?.projectName,
                 nodeType: selectedFacilityType,
             };
-            console.log("updateNode:", data);
 
             FacilityStructureService.update(selectedNodeKey, updateNode)
                 .then((res) => {
