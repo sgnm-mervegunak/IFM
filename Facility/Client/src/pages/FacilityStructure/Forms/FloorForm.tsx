@@ -3,7 +3,6 @@ import { useForm, Controller } from "react-hook-form";
 import { InputText } from "primereact/inputtext";
 import { Chips } from 'primereact/chips';
 import { TreeSelect } from "primereact/treeselect";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
 import { useTranslation } from "react-i18next";
@@ -46,17 +45,22 @@ interface Node {
     labels?: string[]; // for form type
     parentId?: string;
     className?: string;
-
 }
 
 const schema = yup.object({
-
-    elevation: yup.number().moreThan(-1).notRequired().nullable(),
-    height: yup.number().moreThan(-1).notRequired().nullable(),
     name: yup.string().required("This area is required.").min(2, "This area accepts min 2 characters."),
-
+    elevation: yup
+        .number()
+        .typeError('Elevation must be a number')
+        .nullable().moreThan(-1, "Elevation can not be negative")
+        .transform((_, val) => (val !== "" ? Number(val) : null)),
+    height: yup
+        .number()
+        .typeError('Elevation must be a number')
+        .nullable()
+        .moreThan(-1, "Elevation can not be negative")
+        .transform((_, val) => (val !== "" ? Number(val) : null)),
 });
-
 
 const FloorForm = ({
     selectedFacilityType,
@@ -70,17 +74,13 @@ const FloorForm = ({
     isUpdate,
     setIsUpdate,
     setSelectedFacilityType,
-
-
 }: Params) => {
 
     const [classificationCategory, setClassificationCategory] = useState<Node[]>([]);
     const [codeCategory, setCodeCategory] = useState("");
-    const auth = useAppSelector((state) => state.auth);
-    const [realm, setRealm] = useState(auth.auth.realm);
     const [data, setData] = useState<any>();
-    const language = useAppSelector((state) => state.language.language);
     const { t } = useTranslation(["common"]);
+    const { toast } = useAppSelector(state => state.toast);
 
     const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
         defaultValues: {
@@ -88,8 +88,6 @@ const FloorForm = ({
         },
         resolver: yupResolver(schema)
     });
-
-    const { toast } = useAppSelector(state => state.toast);
 
     const fixNodes = (nodes: Node[]) => {
         if (!nodes || nodes.length === 0) {
@@ -167,9 +165,7 @@ const FloorForm = ({
                 height: data?.height || "",
                 category: codeCategory,
             };
-            console.log(newNode);
-
-
+          
             FacilityStructureService.createStructure(selectedNodeKey, newNode)
                 .then((res) => {
                     toast.current.show({
@@ -263,7 +259,6 @@ const FloorForm = ({
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
                 <Controller
-
                     defaultValue={data?.category || []}
                     name="category"
                     control={control}
@@ -289,7 +284,6 @@ const FloorForm = ({
             <div className="field structureChips">
                 <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
                 <Controller
-
                     defaultValue={data?.tag || []}
                     name="tag"
                     control={control}
@@ -320,7 +314,7 @@ const FloorForm = ({
                 <h5 style={{ marginBottom: "0.5em" }}>{t("Elevation")} (cm)</h5>
                 <InputText
                     autoComplete={"off"}
-                    defaultValue={data?.elevation || ""}
+                    defaultValue={data?.elevation}
                     {...register("elevation")}
                     style={{ width: "100%" }}
                 />
@@ -334,7 +328,6 @@ const FloorForm = ({
                     defaultValue={data?.height || ""}
                     {...register("height")}
                     style={{ width: "100%" }}
-
                 />
             </div>
             <p style={{ color: "red" }}>{errors.height?.message}</p>

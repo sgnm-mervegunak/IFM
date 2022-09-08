@@ -54,12 +54,12 @@ interface Node {
 }
 
 const schema = yup.object({
-  name: yup.string().required("This area is required.").min(2, "This area accepts min 2 characters."),
-  // buildingStructure: yup.string().required("This area is required"),
-  // status: yup.string().required("This area is required")
-
+  name: yup
+    .string()
+    .required("This area is required.").min(2, "This area accepts min 2 characters."),
+  category: yup.string().required("This area is required."),
+  status: yup.string().required("This area is required."),
 });
-
 
 const BuildingForm = ({
   selectedFacilityType,
@@ -95,6 +95,7 @@ const BuildingForm = ({
 
   const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
     defaultValues: {
+      siteName: realm,
       ...data
     },
     resolver: yupResolver(schema)
@@ -345,7 +346,7 @@ const BuildingForm = ({
       };
 
       console.log(updateNode);
-      
+
 
       FacilityStructureService.update(selectedNodeKey, updateNode)
         .then(async (res) => {
@@ -456,7 +457,7 @@ const BuildingForm = ({
             <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
               <Controller
-                defaultValue={data?.category || []}
+                defaultValue={data?.category || ""}
                 name="category"
                 control={control}
                 render={({ field }) => (
@@ -482,7 +483,7 @@ const BuildingForm = ({
             <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Status")}</h5>
               <Controller
-                defaultValue={data?.status || []}
+                defaultValue={data?.status || ""}
                 name="status"
                 control={control}
                 render={({ field }) => (
@@ -778,6 +779,7 @@ const BuildingForm = ({
                 {...register("siteName")}
                 style={{ width: '100%' }}
                 defaultValue={data?.siteName || ""}
+                disabled
               />
               <p style={{ color: "red" }}>{errors.siteName?.message}</p>
             </div>
