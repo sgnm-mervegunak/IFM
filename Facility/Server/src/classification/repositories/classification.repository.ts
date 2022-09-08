@@ -16,6 +16,7 @@ import { I18NEnums } from 'src/common/const/i18n.enum';
 import { WrongClassificationParentExceptions } from 'src/common/badRequestExceptions/bad.request.exception';
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
 import { has_children_error, wrong_parent_error } from 'src/common/const/custom.error.object';
+import { RelationName } from 'src/common/const/relation.name.enum';
 
 const exceljs = require('exceljs');
 const { v4: uuidv4 } = require('uuid');
@@ -38,6 +39,7 @@ export class ClassificationRepository implements classificationInterface<Classif
     // return node;
   }
 
+ 
    //REVISED FOR NEW NEO4J
   async create(createClassificationDto: CreateClassificationDto, realm: string, language: string) {
     function assignDtoPropToEntity(entity, dto) {
@@ -55,19 +57,47 @@ export class ClassificationRepository implements classificationInterface<Classif
 
     if (classificationObject['labels']) {
       value = await this.neo4jService.createNode(classificationObject, classificationObject['labels']);
+    if (createClassificationDto['parentId']) {
+        await this.neo4jService.addParentRelationByIdAndFilters(
+          value['identity'].low,
+          {"isDeleted": false},
+          Number(createClassificationDto['parentId']),
+          {"isDeleted": false}
+        ) 
+      }
     } else {
       value = await this.neo4jService.createNode(classificationObject);
+
+      if (createClassificationDto['parentId']) {
+        await this.neo4jService.addParentRelationByIdAndFilters(
+          value['identity'].low,
+          {"isDeleted": false},
+          Number(createClassificationDto['parentId']),
+          {"isDeleted": false}
+        ) 
+      }
+    
+    const newLabel = await this.neo4jService.findChildrensByChildIdAndFilters(
+      [],
+      {"isDeleted": false, "isRoot": true},
+      value['identity'].low,
+      [],
+      {"isDeleted": false},
+      RelationName.PARENT_OF
+      // databaseOrTransaction?: string | Transaction
+    )
+
+    const label = newLabel[0]["_fields"][0].labels[0].split('_')[0];
+    const updateLabel = await this.neo4jService.updateByIdAndFilter(
+      value['identity'].low,
+      {},
+      [label],
+      {}
+     )
     }
     value['properties']['id'] = value['identity'].low;
     const result = { id: value['identity'].low, labels: value['labels'], properties: value['properties'] };
-    if (createClassificationDto['parentId']) {
-      await this.neo4jService.addParentRelationByIdAndFilters(
-        result['id'],
-        {"isDeleted": false},
-        Number(createClassificationDto['parentId']),
-        {"isDeleted": false}
-      ) 
-    }
+    
     return result;
   }
 
