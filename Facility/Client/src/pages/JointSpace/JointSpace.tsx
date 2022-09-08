@@ -9,13 +9,13 @@ import React, { useEffect, useState, useRef } from "react";
 // import { save } from "../../features/tree/treeSlice";
 import { Toolbar } from "primereact/toolbar";
 import { useNavigate } from "react-router-dom";
-import { Menu } from 'primereact/menu';
-import { Chips } from 'primereact/chips';
+import { Menu } from "primereact/menu";
+import { Chips } from "primereact/chips";
 import { useTranslation } from "react-i18next";
 
 import FacilityStructureService from "../../services/facilitystructure";
 import { useAppSelector } from "../../app/hook";
-
+import Export, { ExportType } from "../FacilityStructure/Export/Export";
 
 interface Node {
   cantDeleted: boolean;
@@ -31,7 +31,7 @@ interface Node {
   _id: {
     low: string;
     high: string;
-  },
+  };
   icon?: string;
   label?: string;
   labels?: string[]; // for form type
@@ -40,10 +40,7 @@ interface Node {
   Name?: string;
 }
 
-
 const JointSpace = () => {
-
-
   const navigate = useNavigate();
   const [data, setData] = useState<Node[]>([]);
   const [addDia, setAddDia] = useState(false);
@@ -53,6 +50,8 @@ const JointSpace = () => {
   const [tag, setTag] = useState<string[]>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [loading, setLoading] = useState(false);
+  const [exportDia, setExportDia] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const dt = useRef<any>();
   const { toast } = useAppSelector((state) => state.toast);
@@ -155,7 +154,54 @@ const JointSpace = () => {
 
   return (
     <div className="card">
- 
+      <Toolbar
+        className="mb-4"
+        right={() => (
+          <React.Fragment>
+            <Button
+              label={t("Export Joint Spaces")}
+              icon="pi pi-download"
+              className="p-button"
+              onClick={() => setExportDia(true)}
+            />
+          </React.Fragment>
+        )}
+      ></Toolbar>
+
+      <Dialog
+        header={t("Export")}
+        visible={exportDia}
+        style={{ width: "40vw" }}
+        footer={() => (
+          <div>
+            <Button
+              label={t("Cancel")}
+              icon="pi pi-times"
+              onClick={() => {
+                setExportDia(false);
+              }}
+              className="p-button-text"
+            />
+            <Button
+              label={t("Export")}
+              icon="pi pi-check"
+              onClick={() => setSubmitted(true)}
+              autoFocus
+            />
+          </div>
+        )}
+        onHide={() => {
+          setExportDia(false);
+        }}
+      >
+        <Export
+          submitted={submitted}
+          setSubmitted={setSubmitted}
+          setExportDia={setExportDia}
+          exportType={ExportType.JointSpace}
+        />
+      </Dialog>
+
       <DataTable
         ref={dt}
         value={data}
@@ -172,7 +218,6 @@ const JointSpace = () => {
         onSelectionChange={(e) => {
           navigate("/jointspace/" + e.value.key);
           console.log(e.value);
-          
         }}
         responsiveLayout="scroll"
       >

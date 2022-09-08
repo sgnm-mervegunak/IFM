@@ -9,7 +9,8 @@ import DownloadExcel from "../../../utils/download-excel";
 
 export enum ExportType {
   Space,
-  Zone
+  Zone,
+  JointSpace
 }
 
 const Export = ({
@@ -89,7 +90,29 @@ const Export = ({
               life: 2000,
             });
           });
-      } else {
+      }
+      else if (exportType == ExportType.JointSpace) {
+        ExportService.exportJointSpaces({
+          buildingKeys: selectedBuildings.map((item: any) => {
+            if (item.key) {
+              return item.key;
+            }
+          }),
+        })
+          .then(async (res) => {
+            await DownloadExcel(res.data, "test", "joint-space-deneme");
+            setExportDia(false);
+          })
+          .catch((err) => {
+            toast.current.show({
+              severity: "error",
+              summary: "Error",
+              detail: err.response ? err.response.data.message : err.message,
+              life: 2000,
+            });
+          });
+      }
+      else {
 
         setSubmitted(false);
       }

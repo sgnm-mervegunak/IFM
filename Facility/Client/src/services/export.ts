@@ -14,6 +14,10 @@ const exportZones = async (body: ExportDto) => {
   return axios.post(url + `exportZones`, body);
 };
 
-const service = { exportSpaces, exportZones };
+const exportJointSpaces = async (body: ExportDto) => {
+  return axios.post(url + `exportJointSpaces`, body);
+};
+
+const service = { exportSpaces, exportZones,exportJointSpaces };
 
 export default service;
