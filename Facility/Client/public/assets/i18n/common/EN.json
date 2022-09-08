@@ -112,7 +112,28 @@
 	"Join":"Join",
 	"Joint Start Date": "Joint Start Date",
 	"Joint End Date": "Joint End Date",
-	"Contact Editing": "Contact Editing"
+	"Contact Editing": "Contact Editing",
+	"Contact Updated": "Contact Updated",
+	"Contact Created": "Contact Created",
+	"Contact not found": "Contact not found",
+	"Contact Deleted": "Contact Deleted",
+	"Confirmation": "Confirmation",
+	"Email": "Email",
+	"Company": "Company",
+	"Type": "Type",
+	"Department": "Department",
+	"Organization Code": "Organization Code",
+	"Given Name": "Given Name",
+	"Family Name": "Family Name",
+	"Phone": "Phone",
+	"Country": "Country",
+	"Street": "Street",
+	"Town": "Town",
+	"State Region": "State Region",
+	"Postal Code": "Postal Code",
+	"Postal Box": "Postal Box",
+	"Created By": "Created By",
+	"Is Active": "Is Active"
 }
 
 

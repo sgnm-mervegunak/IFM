@@ -179,7 +179,7 @@ const Contact = () => {
       .catch((err) => {
         toast.current.show({
           severity: "error",
-          summary: "Error",
+          summary: t("Error"),
           detail: err.response ? err.response.data.message : err.message,
           life: 2000,
         });
@@ -188,14 +188,14 @@ const Contact = () => {
 
   const menu = [
     {
-      label: "Add Item",
+      label:t("Add Item"),
       icon: "pi pi-plus",
       command: () => {
         setAddDia(true);
       },
     },
     {
-      label: "Edit Item",
+      label: t("Edit Item"),
       icon: "pi pi-pencil",
       command: () => {
         getNodeInfoAndEdit(selectedNodeKey);
@@ -203,7 +203,7 @@ const Contact = () => {
       },
     },
     {
-      label: "Delete",
+      label: t("Delete"),
       icon: "pi pi-trash",
       command: () => {
         setDelDia(true);
@@ -235,8 +235,8 @@ const Contact = () => {
         if (err.response.status === 500) {
           toast.current.show({
             severity: "error",
-            summary: "Error",
-            detail: "Contact not found",
+            summary: t("Error"),
+            detail: t("Contact not found"),
             life: 3000,
           });
           setTimeout(() => {
@@ -326,8 +326,8 @@ const Contact = () => {
           .then((res) => {
             toast.current.show({
               severity: "success",
-              summary: "Successful",
-              detail: "Structure Created",
+              summary: t("Successful"),
+              detail: t("Contact Created"),
               life: 3000,
             });
             getFacilityStructure();
@@ -335,7 +335,7 @@ const Contact = () => {
           .catch((err) => {
             toast.current.show({
               severity: "error",
-              summary: "Error",
+              summary: t("Error"),
               detail: err.response ? err.response.data.message : err.message,
               life: 2000,
             });
@@ -344,7 +344,7 @@ const Contact = () => {
       .catch((err) => {
         toast.current.show({
           severity: "error",
-          summary: "Error",
+          summary: t("Error"),
           detail: err.response ? err.response.data.message : err.message,
           life: 2000,
         });
@@ -404,8 +404,8 @@ const Contact = () => {
           .then((res) => {
             toast.current.show({
               severity: "success",
-              summary: "Successful",
-              detail: "Structure Updated",
+              summary: t("Successful"),
+              detail: t("Contact Updated"),
               life: 3000,
             });
             getFacilityStructure();
@@ -413,7 +413,7 @@ const Contact = () => {
           .catch((err) => {
             toast.current.show({
               severity: "error",
-              summary: "Error",
+              summary: t("Error"),
               detail: err.response ? err.response.data.message : err.message,
               life: 2000,
             });
@@ -422,7 +422,7 @@ const Contact = () => {
       .catch((err) => {
         toast.current.show({
           severity: "error",
-          summary: "Error",
+          summary: t("Error"),
           detail: err.response ? err.response.data.message : err.message,
           life: 2000,
         });
@@ -455,8 +455,8 @@ const Contact = () => {
             .then(() => {
               toast.current.show({
                 severity: "success",
-                summary: "Success",
-                detail: "Structure Deleted",
+                summary: t("Successful"),
+                detail: t("Contact Deleted"),
                 life: 2000,
               });
               navigate("/facilitystructure");
@@ -464,7 +464,7 @@ const Contact = () => {
             .catch((err) => {
               toast.current.show({
                 severity: "error",
-                summary: "Error",
+                summary: t("Error"),
                 detail: err.response ? err.response.data.message : err.message,
                 life: 2000,
               });
@@ -474,8 +474,8 @@ const Contact = () => {
             .then(() => {
               toast.current.show({
                 severity: "success",
-                summary: "Success",
-                detail: "Structure Deleted",
+                summary: t("Successful"),
+                detail: t("Contact Deleted"),
                 life: 2000,
               });
               getFacilityStructure();
@@ -483,7 +483,7 @@ const Contact = () => {
             .catch((err) => {
               toast.current.show({
                 severity: "error",
-                summary: "Error",
+                summary: t("Error"),
                 detail: err.response ? err.response.data.message : err.message,
                 life: 2000,
               });
@@ -493,7 +493,7 @@ const Contact = () => {
       .catch((err) => {
         toast.current.show({
           severity: "error",
-          summary: "Error",
+          summary: t("Error"),
           detail: err.response ? err.response.data.message : err.message,
           life: 2000,
         });
@@ -509,7 +509,7 @@ const Contact = () => {
       .catch((err) => {
         toast.current.show({
           severity: "error",
-          summary: "Error",
+          summary: t("Error"),
           detail: err.response ? err.response.data.message : err.message,
           life: 2000,
         });
@@ -518,8 +518,8 @@ const Contact = () => {
 
   const dragConfirm = (dragId: string, dropId: string) => {
     confirmDialog({
-      message: "Are you sure you want to move?",
-      header: "Confirmation",
+      message: t("Are you sure you want to move?"),
+      header: t("Confirmation"),
       icon: "pi pi-exclamation-triangle",
       accept: () => {
         setLoading(true);
@@ -535,7 +535,7 @@ const Contact = () => {
   const showSuccess = (detail: string) => {
     toast.current.show({
       severity: "success",
-      summary: "Success Message",
+      summary: t("Successful"),
       detail: detail,
       life: 3000,
     });
@@ -545,7 +545,7 @@ const Contact = () => {
     return (
       <div>
         <Button
-          label="Cancel"
+          label={t("Cancel")}
           icon="pi pi-times"
           onClick={() => {
             setTag([]);
@@ -570,7 +570,7 @@ const Contact = () => {
           className="p-button-text"
         />
         <Button
-          label="Add"
+          label={t("Add")}
           icon="pi pi-check"
           onClick={() => addItem(selectedNodeKey)}
           autoFocus
@@ -583,7 +583,7 @@ const Contact = () => {
     return (
       <div>
         <Button
-          label="Cancel"
+          label={t("Cancel")}
           icon="pi pi-times"
           onClick={() => {
             setTag([]);
@@ -608,7 +608,7 @@ const Contact = () => {
           className="p-button-text"
         />
         <Button
-          label="Save"
+          label={t("Save")}
           icon="pi pi-check"
           onClick={() => editItem(selectedNodeKey)}
           autoFocus
@@ -623,15 +623,15 @@ const Contact = () => {
       <ConfirmDialog
         visible={delDia}
         onHide={() => setDelDia(false)}
-        message="Do you want to delete?"
-        header="Delete Confirmation"
+        message={t("Do you want to delete?")}
+        header={t("Delete Confirmation")}
         icon="pi pi-exclamation-triangle"
         accept={() => deleteItem(selectedNodeKey)}
       />
       <Dialog
-        header="Add New Item"
+        header={t("Add New Item")}
         visible={addDia}
-        style={{ width: "50vw" }}
+        style={{ width: "55vw" }}
         footer={renderFooterAdd}
         className="dial"
         onHide={() => {
@@ -657,7 +657,7 @@ const Contact = () => {
       >
         <div className="formgrid grid p-fluid">
           <div className="field col-12 md:col-6">
-            <h5 style={{ marginBottom: "0.5em" }}>Email</h5>
+            <h5 style={{ marginBottom: "0.5em" }}>{t("Email")}</h5>
             <InputText
               value={email}
               onChange={(event) => setEmail(event.target.value)}
@@ -666,7 +666,7 @@ const Contact = () => {
           </div>
 
           <div className="field col-12 md:col-6">
-            <h5 style={{ marginBottom: "0.5em" }}>Company</h5>
+            <h5 style={{ marginBottom: "0.5em" }}>{t("Company")}</h5>
             <InputText
               value={company}
               onChange={(event) => setCompany(event.target.value)}
@@ -675,7 +675,7 @@ const Contact = () => {
           </div>
 
           <div className="field col-12 md:col-3">
-            <h5 style={{ marginBottom: "0.5em" }}>Category</h5>
+            <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
             <TreeSelect
               value={category}
               options={classification}
@@ -691,7 +691,7 @@ const Contact = () => {
                   .catch((err) => {
                     toast.current.show({
                       severity: "error",
-                      summary: "Error",
+                      summary: t("Error"),
                       detail: err.response
                         ? err.response.data.message
                         : err.message,
@@ -705,7 +705,7 @@ const Contact = () => {
           </div>
 
           <div className="field col-12 md:col-3">
-            <h5 style={{ marginBottom: "0.5em" }}>Type</h5>
+            <h5 style={{ marginBottom: "0.5em" }}>{t("Type")}</h5>
             <TreeSelect
               value={formTypeId}
               options={formData}
@@ -721,7 +721,7 @@ const Contact = () => {
                   .catch((err) => {
                     toast.current.show({
                       severity: "error",
-                      summary: "Error",
+                      summary: t("Error"),
                       detail: err.response
                         ? err.response.data.message
                         : err.message,
@@ -735,7 +735,7 @@ const Contact = () => {
           </div>
 
           <div className="field col-12 md:col-3">
-            <h5 style={{ marginBottom: "0.5em" }}>Department</h5>
+            <h5 style={{ marginBottom: "0.5em" }}>{t("Department")}</h5>
             <InputText
               value={department}
               onChange={(event) => setDepartment(event.target.value)}
@@ -743,7 +743,7 @@ const Contact = () => {
             />
           </div>
           <div className="field col-12 md:col-3">
-            <h5 style={{ marginBottom: "0.5em" }}>Organization Code</h5>
+            <h5 style={{ marginBottom: "0.5em" }}>{t("Organization Code")}</h5>
             <InputText
               value={organizationCode}
               onChange={(event) => setOrganizationCode(event.target.value)}
@@ -752,7 +752,7 @@ const Contact = () => {
           </div>
 
           <div className="field col-12 md:col-3">
-            <h5 style={{ marginBottom: "0.5em" }}>Given Name</h5>
+            <h5 style={{ marginBottom: "0.5em" }}>{t("Given Name")}</h5>
             <InputText
               value={givenName}
               onChange={(event) => setGivenName(event.target.value)}
@@ -760,7 +760,7 @@ const Contact = () => {
             />
           </div>
           <div className="field col-12 md:col-3">
-            <h5 style={{ marginBottom: "0.5em" }}>Family Name</h5>
+            <h5 style={{ marginBottom: "0.5em" }}>{t("Family Name")}</h5>
             <InputText
               value={familyName}
               onChange={(event) => setFamilyName(event.target.value)}
@@ -769,7 +769,7 @@ const Contact = () => {
           </div>
 
           <div className="field col-12 md:col-6">
-            <h5 style={{ marginBottom: "0.5em" }}>Phone</h5>
+            <h5 style={{ marginBottom: "0.5em" }}>{t("Phone")}</h5>
             <InputText
               value={phone}
               onChange={(event) => setPhone(event.target.value)}
@@ -777,7 +777,7 @@ const Contact = () => {
             />
           </div>
           <div className="field col-12 md:col-6">
-            <h5 style={{ marginBottom: "0.5em" }}>Country</h5>
+            <h5 style={{ marginBottom: "0.5em" }}>{t("Country")}</h5>
             <InputText
               value={country}
               onChange={(event) => setCountry(event.target.value)}
@@ -786,7 +786,7 @@ const Contact = () => {
           </div>
 
           <div className="field col-12 md:col-6">
-            <h5 style={{ marginBottom: "0.5em" }}>Street</h5>
+            <h5 style={{ marginBottom: "0.5em" }}>{t("Street")}</h5>
             <InputText
               value={street}
               onChange={(event) => setStreet(event.target.value)}
@@ -795,7 +795,7 @@ const Contact = () => {
           </div>
 
           <div className="field col-12 md:col-3">
-            <h5 style={{ marginBottom: "0.5em" }}>Town</h5>
+            <h5 style={{ marginBottom: "0.5em" }}>{t("Town")}</h5>
             <InputText
               value={town}
               onChange={(event) => setTown(event.target.value)}
@@ -803,7 +803,7 @@ const Contact = () => {
             />
           </div>
           <div className="field col-12 md:col-3">
-            <h5 style={{ marginBottom: "0.5em" }}>State Region</h5>
+            <h5 style={{ marginBottom: "0.5em" }}>{t("State Region")}</h5>
             <InputText
               value={stateRegion}
               onChange={(event) => setStateRegion(event.target.value)}
@@ -812,7 +812,7 @@ const Contact = () => {
           </div>
 
           <div className="field col-12 md:col-3">
-            <h5 style={{ marginBottom: "0.5em" }}>Postal Code</h5>
+            <h5 style={{ marginBottom: "0.5em" }}>{t("Postal Code")}</h5>
             <InputText
               value={postalCode}
               onChange={(event) => setPostalCode(event.target.value)}
@@ -820,7 +820,7 @@ const Contact = () => {
             />
           </div>
           <div className="field col-12 md:col-3">
-            <h5 style={{ marginBottom: "0.5em" }}>Postal Box</h5>
+            <h5 style={{ marginBottom: "0.5em" }}>{t("Postal Box")}</h5>
             <InputText
               value={postalBox}
               onChange={(event) => setPostalBox(event.target.value)}
@@ -829,7 +829,7 @@ const Contact = () => {
           </div>
 
           <div className="field structureChips col-12 md:col-6">
-            <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
+            <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
             <Chips
               value={tag}
               onChange={(e) => setTag(e.value)}
@@ -838,7 +838,7 @@ const Contact = () => {
           </div>
 
           <div className="field col-12 md:col-6">
-            <h5 style={{ marginBottom: "0.5em" }}>Created By</h5>
+            <h5 style={{ marginBottom: "0.5em" }}>{t("Created By")}</h5>
             <TreeSelect
               value={createdBy}
               options={data}
@@ -853,7 +853,7 @@ const Contact = () => {
                   .catch((err) => {
                     toast.current.show({
                       severity: "error",
-                      summary: "Error",
+                      summary: t("Error"),
                       detail: err.response
                         ? err.response.data.message
                         : err.message,
@@ -868,9 +868,9 @@ const Contact = () => {
         </div>
       </Dialog>
       <Dialog
-        header="Edit Item"
+        header={t("Edit Item")}
         visible={editDia}
-        style={{ width: "50vw" }}
+        style={{ width: "55vw" }}
         footer={renderFooterEdit}
         onHide={() => {
           setTag([]);
@@ -895,7 +895,7 @@ const Contact = () => {
       >
         <div className="formgrid grid p-fluid">
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>Email</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Email")}</h5>
               <InputText
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
@@ -904,7 +904,7 @@ const Contact = () => {
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>Company</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Company")}</h5>
               <InputText
                 value={company}
                 onChange={(event) => setCompany(event.target.value)}
@@ -913,7 +913,7 @@ const Contact = () => {
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Category</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
               <TreeSelect
                 value={category}
                 options={classification}
@@ -929,7 +929,7 @@ const Contact = () => {
                     .catch((err) => {
                       toast.current.show({
                         severity: "error",
-                        summary: "Error",
+                        summary: t("Error"),
                         detail: err.response
                           ? err.response.data.message
                           : err.message,
@@ -943,7 +943,7 @@ const Contact = () => {
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Type</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Type")}</h5>
               <TreeSelect
                 value={formTypeId}
                 options={formData}
@@ -959,7 +959,7 @@ const Contact = () => {
                     .catch((err) => {
                       toast.current.show({
                         severity: "error",
-                        summary: "Error",
+                        summary: t("Error"),
                         detail: err.response
                           ? err.response.data.message
                           : err.message,
@@ -973,7 +973,7 @@ const Contact = () => {
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Department</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Department")}</h5>
               <InputText
                 value={department}
                 onChange={(event) => setDepartment(event.target.value)}
@@ -981,7 +981,7 @@ const Contact = () => {
               />
             </div>
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Organization Code</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Organization Code")}</h5>
               <InputText
                 value={organizationCode}
                 onChange={(event) => setOrganizationCode(event.target.value)}
@@ -990,7 +990,7 @@ const Contact = () => {
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Given Name</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Given Name")}</h5>
               <InputText
                 value={givenName}
                 onChange={(event) => setGivenName(event.target.value)}
@@ -998,7 +998,7 @@ const Contact = () => {
               />
             </div>
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Family Name</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Family Name")}</h5>
               <InputText
                 value={familyName}
                 onChange={(event) => setFamilyName(event.target.value)}
@@ -1007,7 +1007,7 @@ const Contact = () => {
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>Phone</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Phone")}</h5>
               <InputText
                 value={phone}
                 onChange={(event) => setPhone(event.target.value)}
@@ -1015,7 +1015,7 @@ const Contact = () => {
               />
             </div>
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>Country</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Country")}</h5>
               <InputText
                 value={country}
                 onChange={(event) => setCountry(event.target.value)}
@@ -1024,7 +1024,7 @@ const Contact = () => {
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>Street</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Street")}</h5>
               <InputText
                 value={street}
                 onChange={(event) => setStreet(event.target.value)}
@@ -1033,7 +1033,7 @@ const Contact = () => {
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Town</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Town")}</h5>
               <InputText
                 value={town}
                 onChange={(event) => setTown(event.target.value)}
@@ -1041,7 +1041,7 @@ const Contact = () => {
               />
             </div>
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>State Region</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("State Region")}</h5>
               <InputText
                 value={stateRegion}
                 onChange={(event) => setStateRegion(event.target.value)}
@@ -1050,7 +1050,7 @@ const Contact = () => {
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Postal Code</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Postal Code")}</h5>
               <InputText
                 value={postalCode}
                 onChange={(event) => setPostalCode(event.target.value)}
@@ -1058,7 +1058,7 @@ const Contact = () => {
               />
             </div>
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Postal Box</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Postal Box")}</h5>
               <InputText
                 value={postalBox}
                 onChange={(event) => setPostalBox(event.target.value)}
@@ -1067,7 +1067,7 @@ const Contact = () => {
             </div>
 
             <div className="field structureChips col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
               <Chips
                 value={tag}
                 onChange={(e) => setTag(e.value)}
@@ -1076,7 +1076,7 @@ const Contact = () => {
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>Created By</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Created By")}</h5>
               <TreeSelect
                 value={createdBy}
                 options={data}
@@ -1091,7 +1091,7 @@ const Contact = () => {
                     .catch((err) => {
                       toast.current.show({
                         severity: "error",
-                        summary: "Error",
+                        summary: t("Error"),
                         detail: err.response
                           ? err.response.data.message
                           : err.message,
@@ -1105,7 +1105,7 @@ const Contact = () => {
             </div>
 
             <div className="field col-12">
-              <h5 style={{ marginBottom: "0.5em" }}>Is Active</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Is Active")}</h5>
               <Checkbox
                 className="ml-5"
                 onChange={(e) => setIsActive(e.checked)}
@@ -1130,8 +1130,8 @@ const Contact = () => {
             if (event.value.length > 1) {
               toast.current.show({
                 severity: "error",
-                summary: "Error",
-                detail: "You can't drag here.",
+                summary: t("Error"),
+                detail: t("You can't drag here"),
                 life: 1000,
               });
               return;
@@ -1140,7 +1140,7 @@ const Contact = () => {
           }}
           filter
           filterBy="name,code"
-          filterPlaceholder="Search"
+          filterPlaceholder={t("Search")}
           nodeTemplate={(data: FormNode, options) => (
             <span className="flex align-items-center font-bold">
               {data.label}{" "}
@@ -1150,17 +1150,17 @@ const Contact = () => {
                     <Button
                       icon="pi pi-plus"
                       className="p-button-rounded p-button-secondary p-button-text"
-                      aria-label="Add Item"
+                      aria-label={t("Add Item")}
                       onClick={() => {
                         setSelectedNodeKey(data.key);
                         setAddDia(true);
                       }}
-                      title="Add Item"
+                      title={t("Add Item")}
                     />
                     <Button
                       icon="pi pi-pencil"
                       className="p-button-rounded p-button-secondary p-button-text"
-                      aria-label="Edit Item"
+                      aria-label={t("Edit Item")}
                       onClick={() => {
                         setSelectedNodeKey(data.key);
                         let dataKey: any = data.key;
@@ -1168,24 +1168,24 @@ const Contact = () => {
                         getNodeInfoAndEdit(dataKey);
                         setEditDia(true);
                       }}
-                      title="Edit Item"
+                      title={t("Edit Item")}
                     />
                     <Button
                       icon="pi pi-trash"
                       className="p-button-rounded p-button-secondary p-button-text"
-                      aria-label="Delete"
+                      aria-label={t("Delete")}
                       onClick={() => {
                         setSelectedNodeKey(data.key);
                         setDelDia(true);
                       }}
-                      title="Delete Item"
+                      title={t("Delete Item")}
                     />
                     {/* {
                   data.hasType &&  */}
                     <Button
                       icon="pi pi-book"
                       className="p-button-rounded p-button-secondary p-button-text"
-                      aria-label="Edit Form"
+                      aria-label={t("Edit Form")}
                       // onClick={(e) => navigate(`/formgenerate/${data.key}?id=${data._id.low}`,
                       // {
                       //   state: {
@@ -1199,7 +1199,7 @@ const Contact = () => {
                           `/formgenerate/${data.self_id.low}?formTypeId=${data.formTypeId}`
                         )
                       }
-                      title="Edit Form"
+                      title={t("Edit Form")}
                     />
                     {/* } */}
                   </span>
