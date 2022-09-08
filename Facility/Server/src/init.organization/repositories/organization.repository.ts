@@ -309,9 +309,10 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Situation plan',
       code: "FacilityDocType1",
       isActive: true,
-      language: 'EN',
-      
-    });
+      language: 'EN', 
+    },
+    ['FacilityDocTypes']
+    );
     const facilityDocTypeNode1TR = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -321,7 +322,9 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'TR',
       
-    });
+    },
+    ['FacilityDocTypes']
+    );
     const facilityDocTypeNode2 = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -331,7 +334,9 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'EN',
       
-    });
+    },
+    ['FacilityDocTypes']
+    );
     const facilityDocTypeNode2TR = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -341,7 +346,9 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'TR',
       
-    });
+    },
+    ['FacilityDocTypes']
+    );
     const facilityDocTypeNode3 = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -351,7 +358,9 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'EN',
       
-    });
+    },
+    ['FacilityDocTypes']
+    );
     const facilityDocTypeNode3TR = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -361,7 +370,9 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'TR',
       
-    });
+    },
+    ['FacilityDocTypes']
+    );
     await this.neo4jService.addRelations(facilityDocTypeNode1.identity.low, FacilityDocTypesNode.identity.low);
     await this.neo4jService.addRelations(facilityDocTypeNode2.identity.low, FacilityDocTypesNode.identity.low);
     await this.neo4jService.addRelations(facilityDocTypeNode3.identity.low, FacilityDocTypesNode.identity.low);
@@ -380,7 +391,9 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'EN',
       
-    });
+    },
+    ['FacilityZoneTypes']
+    );
     const facilityZoneTypeNode2 = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -390,7 +403,9 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'EN',
       
-    });
+    },
+    ['FacilityZoneTypes']
+    );
     const facilityZoneTypeNode3 = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -400,7 +415,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'EN',
       
-    });
+    },
+    ['FacilityZoneTypes']);
     const facilityZoneTypeNode4 = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -410,7 +426,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'EN',
       
-    });
+    },
+    ['FacilityZoneTypes']);
     const facilityZoneTypeNode5 = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -420,7 +437,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'EN',
       
-    });
+    },
+    ['FacilityZoneTypes']);
     const facilityZoneTypeNode6 = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -430,7 +448,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'EN',
       
-    });
+    },
+    ['FacilityZoneTypes']);
 
 
     const facilityZoneTypeNode1TR = await this.neo4jService.createNode({
@@ -442,7 +461,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'TR',
       
-    });
+    },
+    ['FacilityZoneTypes']);
     const facilityZoneTypeNode2TR = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -452,7 +472,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'TR',
       
-    });
+    },
+    ['FacilityZoneTypes']);
     const facilityZoneTypeNode3TR = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -462,7 +483,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'TR',
       
-    });
+    },
+    ['FacilityZoneTypes']);
     const facilityZoneTypeNode4TR = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -472,7 +494,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'TR',
       
-    });
+    },
+    ['FacilityZoneTypes']);
     const facilityZoneTypeNode5TR = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -482,7 +505,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'TR',
     
-    });
+    },
+    ['FacilityZoneTypes']);
     const facilityZoneTypeNode6TR = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -492,7 +516,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'TR',
       
-    });
+    },
+    ['FacilityZoneTypes']);
     await this.neo4jService.addRelations(facilityZoneTypeNode1.identity.low, FacilityZoneTypesNode.identity.low);
     await this.neo4jService.addRelations(facilityZoneTypeNode2.identity.low, FacilityZoneTypesNode.identity.low);
     await this.neo4jService.addRelations(facilityZoneTypeNode3.identity.low, FacilityZoneTypesNode.identity.low);
@@ -516,7 +541,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'EN',
       
-    });
+    },
+    ['FacilityFloorTypes']);
     const facilityFloorTypeNode2 = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -526,7 +552,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'EN',
       
-    });
+    },
+    ['FacilityFloorTypes']);
     const facilityFloorTypeNode3 = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -536,7 +563,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'EN',
       
-    });
+    },
+    ['FacilityFloorTypes']);
 
     const facilityFloorTypeNode1TR = await this.neo4jService.createNode({
       canDelete: true,
@@ -547,7 +575,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'TR',
       
-    });
+    },
+    ['FacilityFloorTypes']);
     const facilityFloorTypeNode2TR = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -557,7 +586,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'TR',
       
-    });
+    },
+    ['FacilityFloorTypes']);
     const facilityFloorTypeNode3TR = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -567,7 +597,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'TR',
     
-    });
+    },
+    ['FacilityFloorTypes']);
 
     await this.neo4jService.addRelations(facilityFloorTypeNode1.identity.low, FacilityFloorTypesNode.identity.low);
     await this.neo4jService.addRelations(facilityFloorTypeNode2.identity.low, FacilityFloorTypesNode.identity.low);
@@ -586,7 +617,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'EN',
      
-    });
+    },
+    ['FacilityStatus']);
     const facilityStatusNode2 = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -596,7 +628,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'EN',
    
-    });
+    },
+    ['FacilityStatus']);
 
     const facilityStatusNode3 = await this.neo4jService.createNode({
       canDelete: true,
@@ -607,7 +640,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'EN',
       
-    });
+    },
+    ['FacilityStatus']);
     const facilityStatusNode4 = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -617,7 +651,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'EN',
       
-    });
+    },
+    ['FacilityStatus']);
 
     const facilityStatusNode1TR = await this.neo4jService.createNode({
       canDelete: true,
@@ -628,7 +663,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'TR',
       
-    });
+    },
+    ['FacilityStatus']);
     const facilityStatusNode2TR = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -638,7 +674,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'TR',
       
-    });
+    },
+    ['FacilityStatus']);
 
     const facilityStatusNode3TR = await this.neo4jService.createNode({
       canDelete: true,
@@ -649,7 +686,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'TR',
       
-    });
+    },
+    ['FacilityStatus']);
     const facilityStatusNode4TR = await this.neo4jService.createNode({
       canDelete: true,
       canDisplay: true,
@@ -659,7 +697,8 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       isActive: true,
       language: 'TR',
       
-    });
+    },
+    ['FacilityStatus']);
     await this.neo4jService.addRelations(facilityStatusNode1.identity.low, facilityStatusNode.identity.low);
     await this.neo4jService.addRelations(facilityStatusNode2.identity.low, facilityStatusNode.identity.low);
     await this.neo4jService.addRelations(facilityStatusNode3.identity.low, facilityStatusNode.identity.low);

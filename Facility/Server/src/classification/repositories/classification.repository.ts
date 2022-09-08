@@ -403,7 +403,7 @@ let labels = [...new Set(lbls)];
       }
 
       let params = {"name":data[i],"key":key2(),"isActive":true,"isDeleted":false,"canDelete":true,"canDisplay":true, "language": language, "code":data[0]+i};
-      let labels = [];
+      let labels = [data[0]];
       let node = await this.neo4jService.createNode(params, labels);
       let parent  = await this.neo4jService.findByLabelAndFilters([data[0]+'_'+language],{"isDeleted":false},[]);
       await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(parent[0]["_fields"][0]["identity"].low, node["identity"].low,
@@ -561,7 +561,7 @@ let labels = [...new Set(lbls)];
         ,"name":newClassification[i].name,"isDeleted":newClassification[i].isDeleted,"isActive":newClassification[i].isActive
         ,"canDelete":newClassification[i].canDelete,"key":uuidReturn3(),"canDisplay":newClassification[i].canDisplay,"language": language};
       
-      let labels = [];
+      let labels = [label];
       let node = await this.neo4jService.createNode(params, labels);
       let parent  = await this.neo4jService.findByLabelAndFilters([],{"isDeleted":false, "code":newClassification[i].parentCode, "language":language},[]);
 
