@@ -23,3 +23,11 @@ export function node_not_found(params) {
   params: params,
   }
 };
+
+export function null_value(params) {
+  return {
+  message: 'Value can not be null',
+  code: CustomTreeError.NULL_VALUE,
+  params: params,
+  }
+};

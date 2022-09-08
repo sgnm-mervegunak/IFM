@@ -31,11 +31,12 @@ import {
   FacilityNodeNotFoundException,
   FacilityStructureCanNotDeleteExceptions,
   FacilityStructureDeleteExceptions,
+  ValueNotNullException,
   WrongClassificationParentExceptions,
   WrongFacilityStructurePropsExceptions,
   WrongFacilityStructurePropsRulesExceptions,
 } from 'src/common/badRequestExceptions/bad.request.exception';
-import { has_children_error, node_not_found, wrong_parent_error } from 'src/common/const/custom.error.object';
+import { has_children_error, node_not_found, null_value, wrong_parent_error } from 'src/common/const/custom.error.object';
 import { CustomTreeError } from 'src/common/const/custom.error.enum';
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
 import { BaseFacilitySpaceObject } from 'src/common/baseobject/base.facility.space.object';
@@ -460,8 +461,11 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
 
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
   async create(key: string, structureData: Object, realm: string, language: string) {
-    //is there facility-structure parent node
    try {
+    if (!structureData["category"] || structureData["category"] == null) {
+      throw new HttpException(null_value({"val": "category"}), 400);
+    }
+    //is there facility-structure parent node
     const node = await this.neo4jService.findByLabelAndFilters(
       [],
       {"isDeleted":false, "key": key},
@@ -655,6 +659,9 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
         else if (code >= 9000 && code<=9999) {
           if (error.response?.code == CustomTreeError.WRONG_PARENT) {
             throw new  WrongClassificationParentExceptions(error.response?.params['node1'],error.response?.params['node2'])
+          }
+          if (error.response?.code == CustomTreeError.NULL_VALUE) {
+            throw new  ValueNotNullException(error.response?.params['val'])
           }
         }
         else {

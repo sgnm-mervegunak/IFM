@@ -29,6 +29,7 @@
   "WRONG_FACILITY_STRUCTURE_PROPS_RULES":"{prop} {rule} olmalıdır.",
   "NODE_NOT_FOUND": "Uygun düğüm bulunamadı ",
   "WRONG_CLASSIFICATION_PARENT": "{node1}, {node2} numaralı düğümün altına taşınamaz.",
-  "FIND_WITH_CHILDREN_BY_REALM_AS_TREE_ERROR": "{realm} de {label} ağacı bulunamadı"
+  "FIND_WITH_CHILDREN_BY_REALM_AS_TREE_ERROR": "{realm} de {label} ağacı bulunamadı",
+  "NULL_VALUE": "{val} boş geçilemez.."
 
 }
