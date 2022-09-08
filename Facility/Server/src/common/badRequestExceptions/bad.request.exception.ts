@@ -21,5 +21,8 @@ export function WrongClassificationParentExceptions(node1, node2) {
 }
 export function FacilityNodeNotFoundException() {
   throw new HttpException({ key: I18NEnums.NODE_NOT_FOUND, args: {} }, HttpStatus.NOT_FOUND);
-
+}
+  export function ValueNotNullException(val) {
+    throw new HttpException({key: I18NEnums.NULL_VALUE, args: {val:val} }, HttpStatus.BAD_REQUEST);  
+  
 }
