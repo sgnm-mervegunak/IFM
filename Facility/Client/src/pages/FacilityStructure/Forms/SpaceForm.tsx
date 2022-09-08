@@ -1,17 +1,10 @@
 import React, { useState, useEffect, InputHTMLAttributes } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { InputText } from "primereact/inputtext";
-import { InputTextarea } from "primereact/inputtextarea";
-import { Dropdown } from "primereact/dropdown";
-import { Checkbox } from "primereact/checkbox";
-import { RadioButton } from "primereact/radiobutton";
 import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
 import { Chips } from "primereact/chips";
 import { TreeSelect } from "primereact/treeselect";
 import { TabView, TabPanel } from 'primereact/tabview';
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useAppSelector } from "../../../app/hook";
 import axios from "axios";
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
@@ -20,6 +13,7 @@ import { useTranslation } from "react-i18next";
 import ClassificationsService from "../../../services/classifications";
 import FacilityStructureService from "../../../services/facilitystructure";
 import ImageUploadComponent from "./FileUpload/ImageUpload/ImageUpload";
+import { useAppSelector } from "../../../app/hook";
 
 interface Params {
   selectedFacilityType: string | undefined;
@@ -32,9 +26,7 @@ interface Params {
   setEditDia: React.Dispatch<React.SetStateAction<boolean>>;
   isUpdate: boolean;
   setIsUpdate: React.Dispatch<React.SetStateAction<boolean>>;
-  setSelectedFacilityType: React.Dispatch<
-    React.SetStateAction<string | undefined>
-  >;
+  setSelectedFacilityType: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 
 interface Node {
@@ -62,11 +54,10 @@ interface Node {
 const schema = yup.object({
   name: yup.string().required("This area is required."),
   code: yup.string().required("This area is required."),
+  category: yup.string().required("This area is required."),
   usage: yup.string().required("This area is required."),
   status: yup.string().required("This area is required")
-
 });
-
 
 const SpaceForm = ({
   selectedFacilityType,
@@ -81,29 +72,16 @@ const SpaceForm = ({
   setIsUpdate,
   setSelectedFacilityType,
 }: Params) => {
-  const [code, setCode] = useState<string>("");
-  const [name, setName] = useState<string>("");
-  const [architecturalName, setArchitecturalName] = useState<string>("");
-  const [spaceType, setSpaceType] = useState<any>(undefined);
-  const [m2, setM2] = useState<string>("");
-  const [usage, setUsage] = useState<string>("");
-  const [tag, setTag] = useState<string[]>([]);
-  const [images, setImages] = useState("");
-  const [status, setStatus] = useState<any>(undefined);
+
   const [classificationSpaceCategory, setClassificationSpaceCategory] = useState<Node[]>([]);
   const [classificationStatus, setclassificationStatus] = useState<Node[]>([]);
   const [codeCategory, setCodeCategory] = useState("");
   const [codeStatus, setCodeStatus] = useState("");
   const [codeUsage, setCodeUsage] = useState("");
   const auth = useAppSelector((state) => state.auth);
-  const [realm, setRealm] = useState(auth.auth.realm);
-  const language = useAppSelector((state) => state.language.language);
-
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
   const [uploadFiles, setUploadFiles] = useState<any>({});
-
   const { toast } = useAppSelector(state => state.toast);
-
   const [data, setData] = useState<any>();
   const { t } = useTranslation(["common"]);
 
@@ -177,7 +155,7 @@ const SpaceForm = ({
         let temp = {};
         await ClassificationsService.findClassificationByCodeAndLanguage("OmniClass13", res.data.properties.category).then(async clsf1 => {
           setCodeCategory(res.data.properties.category);
-          res.data.properties.category =await clsf1.data.key
+          res.data.properties.category = await clsf1.data.key
           temp = res.data.properties;
           // setData(res.data.properties);
         })
@@ -204,7 +182,7 @@ const SpaceForm = ({
           .catch((err) => {
             setData(res.data.properties);
           })
-          
+
         setData(temp);
       })
       .catch((err) => {
@@ -465,7 +443,7 @@ const SpaceForm = ({
             <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
               <Controller
-                defaultValue={data?.category || []}
+                defaultValue={data?.category || ""}
                 name="category"
                 control={control}
                 render={({ field }) => (
@@ -491,7 +469,7 @@ const SpaceForm = ({
             <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Usage")}</h5>
               <Controller
-                defaultValue={data?.usage || []}
+                defaultValue={data?.usage || ""}
                 name="usage"
                 control={control}
                 render={({ field }) => (
@@ -559,7 +537,7 @@ const SpaceForm = ({
             <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Status")}</h5>
               <Controller
-                defaultValue={data?.status || []}
+                defaultValue={data?.status || ""}
                 name="status"
                 control={control}
                 render={({ field }) => (
@@ -628,7 +606,6 @@ const SpaceForm = ({
                     setDeleteFiles={setDeleteFiles}
                     uploadFiles={uploadFiles}
                     setUploadFiles={setUploadFiles}
-
                   />
                 )}
               />
@@ -636,7 +613,6 @@ const SpaceForm = ({
             </div>
           </div>
         </TabPanel>
-
       </TabView>
 
     </form>
