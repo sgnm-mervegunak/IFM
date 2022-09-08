@@ -706,13 +706,21 @@ const SetJointSpace = () => {
           filterBy="name,code"
           filterPlaceholder={t("Search")}
           selectionMode="checkbox"
+          onSelect={(e:any)=>{
+            setSelectedKeysName(prev=>([...prev,e.node.name]))
+            
+          }}
+          onUnselect={(e:any)=>{
+            setSelectedKeysName(prev=>prev.filter(item=>item!==e.node.name))
+            
+          }}
           onSelectionChange={(event: any) => {
 
             console.log(event);
 
             setSelectedNodeKey(event.value);
             setSelectedKeys(Object.keys(event.value));
-            findKeyName(Object.keys(event.value));
+            // findKeyName(Object.keys(event.value));
           }
           }
           selectionKeys={selectedNodeKey}

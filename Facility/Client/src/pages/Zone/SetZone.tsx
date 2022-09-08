@@ -340,6 +340,7 @@ const SetZone = () => {
         setSelectedKeys([]);
         setAddDia(false);
         getZone();
+        setSelectedKeysName([])
       })
       .catch((err) => {
         toast.current.show({
@@ -746,12 +747,20 @@ const SetZone = () => {
           filterBy="name,code"
           filterPlaceholder="Search"
           selectionMode="checkbox"
+          onSelect={(e:any)=>{
+            setSelectedKeysName(prev=>([...prev,e.node.name]))
+            
+          }}
+          onUnselect={(e:any)=>{
+            setSelectedKeysName(prev=>prev.filter(item=>item!==e.node.name))
+            
+          }}
           onSelectionChange={(event: any) => {
             console.log(event);
 
             setSelectedNodeKey(event.value);
             setSelectedKeys(Object.keys(event.value));
-            findKeyName(Object.keys(event.value));
+            // findKeyName(Object.keys(event.value));
             // selectedKeys?.map((key) =>{findKeyName(key)});
           }}
           selectionKeys={selectedNodeKey}
