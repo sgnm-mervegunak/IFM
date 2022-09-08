@@ -194,11 +194,8 @@ const FloorForm = ({
 
                 });
 
-            setTimeout(() => {
                 setAddDia(false);
                 setSelectedFacilityType(undefined);
-            }, 1000);
-
 
         } else {
 

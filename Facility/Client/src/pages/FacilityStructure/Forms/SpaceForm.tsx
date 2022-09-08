@@ -56,7 +56,18 @@ const schema = yup.object({
   code: yup.string().required("This area is required."),
   category: yup.string().required("This area is required."),
   usage: yup.string().required("This area is required."),
-  status: yup.string().required("This area is required")
+  status: yup.string().required("This area is required"),
+  grossArea: yup
+    .number()
+    .typeError('Gross Area must be a number')
+    .nullable().moreThan(-1, "Gross Area can not be negative")
+    .transform((_, val) => (val !== "" ? Number(val) : null)),
+  netArea: yup
+    .number()
+    .typeError('Net Area must be a number')
+    .nullable()
+    .moreThan(-1, "Net Area can not be negative")
+    .transform((_, val) => (val !== "" ? Number(val) : null)),
 });
 
 const SpaceForm = ({
@@ -289,11 +300,10 @@ const SpaceForm = ({
           });
         });
 
-      setTimeout(() => {
         setAddDia(false);
-        setUploadFiles({});
         setSelectedFacilityType(undefined);
-      }, 1000);
+        setUploadFiles({});
+
     } else {
       let updateNode: any = {};
       updateNode = {

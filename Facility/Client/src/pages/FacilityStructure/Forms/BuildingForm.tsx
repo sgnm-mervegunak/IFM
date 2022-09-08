@@ -309,11 +309,10 @@ const BuildingForm = ({
           });
         });
 
-      setTimeout(() => {
         setAddDia(false);
-        setUploadFiles({});
         setSelectedFacilityType(undefined);
-      }, 1000);
+        setUploadFiles({});
+
     } else {
       let updateNode: any = {};
       updateNode = {
