@@ -81,7 +81,6 @@ import { ExcelExportModule } from './excelExport/excelExport.module';
         port: configService.get('NEO4J_PORT'),
         scheme: configService.get('NEO4J_SCHEME'),
         username: configService.get('NEO4J_USERNAME'),
-        database: 'test',
       }),
     }),
 

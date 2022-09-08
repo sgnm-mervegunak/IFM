@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { NestKafkaService } from 'ifmcommon';
 import { Neo4jService } from 'sgnm-neo4j/dist';
 import { InfraInterface } from 'src/common/interface/infra.interface';
@@ -11,25 +11,20 @@ export class InfraRepository implements InfraInterface {
     const neo4Transaction = await this.neo4jService.beginTransaction();
     const constraintArr = [
       'CREATE CONSTRAINT IF NOT EXISTS ON (node:Infra) ASSERT  (node.realm) IS UNIQUE',
+      'CREATE CONSTRAINT IF NOT EXISTS ON (node:Types) ASSERT  (node.realm) IS UNIQUE',
+      'CREATE CONSTRAINT IF NOT EXISTS ON (node:Type) ASSERT  (node.name) IS UNIQUE',
       'CREATE CONSTRAINT IF NOT EXISTS ON (node:Root) ASSERT  (node.realm) IS UNIQUE',
       'CREATE CONSTRAINT IF NOT EXISTS ON (node:Classification) ASSERT  (node.realm) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityStructure) ASSERT (node.realm) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityStructure) ASSERT (node.key) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityDocTypes) ASSERT (node.realm) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityDocTypes) ASSERT (node.key) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityTypes) ASSERT (node.realm) IS UNIQUE',
     ];
 
     constraintArr.forEach((element) => {
       neo4Transaction
         .run(element)
-        .then((res) => {
-          console.log(res);
-        })
+        .then((res) => {})
         .catch((err) => {
           console.log(err);
-
           neo4Transaction.rollback();
+          throw new HttpException(err, 400);
         });
     });
     neo4Transaction.commit();

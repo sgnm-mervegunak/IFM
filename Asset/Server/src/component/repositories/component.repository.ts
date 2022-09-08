@@ -40,7 +40,7 @@ export class ComponentRepository implements GeciciInterface<Types> {
 
     return node;
   }
-  async create(createAssetDto: CreateComponentDto) {
+  async create(createAssetDto: CreateComponentDto, realm, language, authorization) {
     const asset = new Types();
     const assetObject = assignDtoPropToEntity(asset, createAssetDto);
     const value = await this.neo4jService.createNode(assetObject, ['Asset']);
@@ -118,27 +118,6 @@ export class ComponentRepository implements GeciciInterface<Types> {
       } else {
         throw new HttpException(message, code);
       }
-    }
-  }
-
-  async changeNodeBranch(_id: string, _target_parent_id: string) {
-    try {
-      await this.neo4jService.deleteRelations(_id);
-      await this.neo4jService.addRelations(_id, _target_parent_id);
-    } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
-
-  async deleteRelations(_id: string) {
-    await this.neo4jService.deleteRelations(_id);
-  }
-
-  async addRelations(_id: string, _target_parent_id: string) {
-    try {
-      await this.neo4jService.addRelations(_id, _target_parent_id);
-    } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

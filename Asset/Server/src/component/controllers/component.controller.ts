@@ -2,7 +2,6 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Headers } from '@nes
 import { Roles, Unprotected } from 'nest-keycloak-connect';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { NoCache } from 'ifmcommon';
-import { ChangeBranchDto } from '../dto/change.branch.dto';
 import { CreateComponentDto } from '../dto/create.component.dto';
 import { UpdateComponentDto } from '../dto/update.component.dto';
 import { ComponentService } from '../services/component.service';
@@ -20,8 +19,9 @@ export class ComponentController {
     description: 'create  Types ',
   })
   @Post()
-  create(@Body() createComponentDto: CreateComponentDto, @Headers('realm') realm) {
-    return this.componentService.create(createComponentDto, realm);
+  create(@Body() createComponentDto: CreateComponentDto, @Headers() header) {
+    const { realm, language, authorization } = header;
+    return this.componentService.create(createComponentDto, realm, language, authorization);
   }
 
   @Get('')
@@ -41,12 +41,6 @@ export class ComponentController {
   @Unprotected()
   remove(@Param('id') id: string, @Headers('realm') realm) {
     return this.componentService.remove(id, realm);
-  }
-  @Unprotected()
-  @Post('/changeBranch')
-  changeNodeBranch(@Body() changeNodeBranch: ChangeBranchDto) {
-    const { id, targetParentId } = changeNodeBranch;
-    return this.componentService.changeNodeBranch(id, targetParentId);
   }
 
   @Unprotected()

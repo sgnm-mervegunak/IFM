@@ -10,8 +10,8 @@ export class TypesService {
     @Inject(RepositoryEnums.TYPES)
     private readonly assetRepository: GeciciInterface<any>,
   ) {}
-  async create(createAssetDto: CreateTypesDto, realm: string) {
-    return await this.assetRepository.create(createAssetDto, realm);
+  async create(createAssetDto: CreateTypesDto, realm: string, language, authorization) {
+    return await this.assetRepository.create(createAssetDto, realm, language, authorization);
   }
 
   findOne(realm: string) {
@@ -24,10 +24,6 @@ export class TypesService {
 
   remove(id: string, realm: string) {
     return this.assetRepository.delete(id, realm);
-  }
-
-  async changeNodeBranch(id: string, target_parent_id: string) {
-    return await this.assetRepository.changeNodeBranch(id, target_parent_id);
   }
 
   async findOneNode(key: string, realm) {
