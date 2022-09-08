@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Tree } from "primereact/tree";
 import { ContextMenu } from "primereact/contextmenu";
 import { Dialog } from "primereact/dialog";
-import { Chips } from 'primereact/chips';
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { Chips } from "primereact/chips";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-import { Checkbox } from 'primereact/checkbox';
+import { Checkbox } from "primereact/checkbox";
 import { TreeSelect } from "primereact/treeselect";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
@@ -31,7 +31,7 @@ interface Node {
   _id: {
     low: string;
     high: string;
-  },
+  };
   icon?: string;
   label?: string;
   labels?: string[]; // for form type
@@ -57,11 +57,11 @@ interface FormNode {
   _id: {
     low: string;
     high: string;
-  },
+  };
   self_id: {
     low: string;
     high: string;
-  },
+  };
   labelclass: string;
   icon?: string;
 }
@@ -79,11 +79,11 @@ const Contact = () => {
   const [editDia, setEditDia] = useState(false);
   const [delDia, setDelDia] = useState<boolean>(false);
   const cm: any = React.useRef(null);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<FormNode[]>([]);
   const [classification, setClassification] = useState<Node[]>([]);
   const auth = useAppSelector((state) => state.auth);
-  const {toast} = useAppSelector((state) => state.toast);
+  const { toast } = useAppSelector((state) => state.toast);
   const [realm, setRealm] = useState(auth.auth.realm);
 
   const [email, setEmail] = useState<string>("");
@@ -106,14 +106,14 @@ const Contact = () => {
   const { t } = useTranslation(["common"]);
 
   const getForms = async () => {
-    await FormTypeService.findOne('111').then((res) => {
+    await FormTypeService.findOne("111").then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root] || []));
       const iconFormNodes = (nodes: FormNode[]) => {
         if (!nodes || nodes.length === 0) {
           return;
         }
         for (let i of nodes) {
-          iconFormNodes(i.children)
+          iconFormNodes(i.children);
           if (i.hasType === true) {
             i.icon = "pi pi-fw pi-book";
             // i.selectable = true;
@@ -137,8 +137,8 @@ const Contact = () => {
           return;
         }
         for (let i of nodes) {
-          classificationNodes(i.children)
-          i.label = i.name||i.name_EN;
+          classificationNodes(i.children);
+          i.label = i.name || i.name_EN;
         }
       };
       classificationNodes(temp);
@@ -184,7 +184,7 @@ const Contact = () => {
           life: 2000,
         });
       });
-  }
+  };
 
   const menu = [
     {
@@ -198,7 +198,6 @@ const Contact = () => {
       label: "Edit Item",
       icon: "pi pi-pencil",
       command: () => {
-
         getNodeInfoAndEdit(selectedNodeKey);
         setEditDia(true);
       },
@@ -213,36 +212,39 @@ const Contact = () => {
   ];
 
   const getFacilityStructure = () => {
-    ContactService.findAll().then((res) => {
-      console.log(res.data);
-      
-      if (!res.data.root.children) {
-        setData([res.data.root.properties] || []);
-        let temp = JSON.parse(JSON.stringify([res.data.root.properties] || []));
-        fixNodes(temp)
-        setData(temp)
-      }
-      else if (res.data.root.children) {
-        setData([res.data.root] || []);
-        let temp = JSON.parse(JSON.stringify([res.data.root] || []));
-        fixNodes(temp)
-        setData(temp)
-      }
-      setLoading(false);
-    }).catch(err => {
-      if (err.response.status === 500) {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: "Contact not found",
-          life: 3000,
-        });
-        setTimeout(() => {
-          navigate("/")
-        }, 3000)
-      }
-    })
-  }
+    ContactService.findAll()
+      .then((res) => {
+        console.log(res.data);
+
+        if (!res.data.root.children) {
+          setData([res.data.root.properties] || []);
+          let temp = JSON.parse(
+            JSON.stringify([res.data.root.properties] || [])
+          );
+          fixNodes(temp);
+          setData(temp);
+        } else if (res.data.root.children) {
+          setData([res.data.root] || []);
+          let temp = JSON.parse(JSON.stringify([res.data.root] || []));
+          fixNodes(temp);
+          setData(temp);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (err.response.status === 500) {
+          toast.current.show({
+            severity: "error",
+            summary: "Error",
+            detail: "Contact not found",
+            life: 3000,
+          });
+          setTimeout(() => {
+            navigate("/");
+          }, 3000);
+        }
+      });
+  };
 
   useEffect(() => {
     getFacilityStructure();
@@ -253,9 +255,8 @@ const Contact = () => {
       return;
     }
     for (let i of nodes) {
-      
-      fixNodes(i.children)
-      i.label = i.name||i.email;
+      fixNodes(i.children);
+      i.label = i.name || i.email;
     }
   };
 
@@ -290,8 +291,7 @@ const Contact = () => {
             // labels: optionalLabels[0]?.replace(/ /g, '').split(",") || [],
             labels: [labels[0]],
             createdById: createdByNodeId,
-            classificationId: categoryNodeId
-
+            classificationId: categoryNodeId,
           };
         } else {
           newNode = {
@@ -317,7 +317,7 @@ const Contact = () => {
             tag: tag,
             description: "",
             createdById: createdByNodeId,
-            classificationId: categoryNodeId
+            classificationId: categoryNodeId,
           };
         }
         console.log(newNode);
@@ -445,7 +445,7 @@ const Contact = () => {
     setPostalCode("");
     setCountry("");
     setEditDia(false);
-  }
+  };
 
   const deleteItem = (key: string) => {
     ContactService.nodeInfo(key)
@@ -459,7 +459,7 @@ const Contact = () => {
                 detail: "Structure Deleted",
                 life: 2000,
               });
-              navigate("/facilitystructure")
+              navigate("/facilitystructure");
             })
             .catch((err) => {
               toast.current.show({
@@ -518,13 +518,19 @@ const Contact = () => {
 
   const dragConfirm = (dragId: string, dropId: string) => {
     confirmDialog({
-      message: 'Are you sure you want to move?',
-      header: 'Confirmation',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => { setLoading(true); dragDropUpdate(dragId, dropId) },
-      reject: () => { setLoading(true); getFacilityStructure() }
+      message: "Are you sure you want to move?",
+      header: "Confirmation",
+      icon: "pi pi-exclamation-triangle",
+      accept: () => {
+        setLoading(true);
+        dragDropUpdate(dragId, dropId);
+      },
+      reject: () => {
+        setLoading(true);
+        getFacilityStructure();
+      },
     });
-  }
+  };
 
   const showSuccess = (detail: string) => {
     toast.current.show({
@@ -625,7 +631,7 @@ const Contact = () => {
       <Dialog
         header="Add New Item"
         visible={addDia}
-        style={{ width: "40vw" }}
+        style={{ width: "50vw" }}
         footer={renderFooterAdd}
         className="dial"
         onHide={() => {
@@ -649,237 +655,222 @@ const Contact = () => {
           setAddDia(false);
         }}
       >
-        <div className="grid p-fluid">
-          <div className="col-12 md:col-6">
-            <div className="field">
-              <h5 style={{ marginBottom: "0.5em" }}>Email</h5>
-              <InputText
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                style={{ width: '100%' }}
-              />
-            </div>
+        <div className="formgrid grid p-fluid">
+          <div className="field col-12 md:col-6">
+            <h5 style={{ marginBottom: "0.5em" }}>Email</h5>
+            <InputText
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              style={{ width: "100%" }}
+            />
           </div>
 
-          <div className="col-12 md:col-6">
-            <div className="field">
-              <h5 style={{ marginBottom: "0.5em" }}>Company</h5>
-              <InputText
-                value={company}
-                onChange={(event) => setCompany(event.target.value)}
-                style={{ width: '100%' }}
-              />
-            </div>
+          <div className="field col-12 md:col-6">
+            <h5 style={{ marginBottom: "0.5em" }}>Company</h5>
+            <InputText
+              value={company}
+              onChange={(event) => setCompany(event.target.value)}
+              style={{ width: "100%" }}
+            />
           </div>
 
-          <div className="col-12 md:col-6">
-            <div className="field">
-              <h5 style={{ marginBottom: "0.5em" }}>Category</h5>
-              <TreeSelect
-                value={category}
-                options={classification}
-                onChange={(e) => {
-                  setCategory(e.value);
-                  console.log(e);
-                  let nodeKey: any = e.value;
-                  ClassificationsService.nodeInfo(nodeKey)
-                    .then((res) => {
-                      console.log(res.data);
-                      setCategoryNodeId(res.data.id);
-                    })
-                    .catch((err) => {
-                      toast.current.show({
-                        severity: "error",
-                        summary: "Error",
-                        detail: err.response ? err.response.data.message : err.message,
-                        life: 2000,
-                      });
+          <div className="field col-12 md:col-3">
+            <h5 style={{ marginBottom: "0.5em" }}>Category</h5>
+            <TreeSelect
+              value={category}
+              options={classification}
+              onChange={(e) => {
+                setCategory(e.value);
+                console.log(e);
+                let nodeKey: any = e.value;
+                ClassificationsService.nodeInfo(nodeKey)
+                  .then((res) => {
+                    console.log(res.data);
+                    setCategoryNodeId(res.data.id);
+                  })
+                  .catch((err) => {
+                    toast.current.show({
+                      severity: "error",
+                      summary: "Error",
+                      detail: err.response
+                        ? err.response.data.message
+                        : err.message,
+                      life: 2000,
                     });
-                }}
-                filter
-                style={{ width: '100%' }}
-              />
-            </div>
+                  });
+              }}
+              filter
+              style={{ width: "100%" }}
+            />
           </div>
 
-          <div className="col-12 md:col-6">
-            <div className="field">
-              <h5 style={{ marginBottom: "0.5em" }}>Type</h5>
-              <TreeSelect
-                value={formTypeId}
-                options={formData}
-                onChange={(e) => {
-                  setFormTypeId(e.value);
-                  console.log(e);
-                  let nodeKey: any = e.value;
-                  FormTypeService.nodeInfo(nodeKey)
-                    .then((res) => {
-                      console.log(res.data);
-                      setLabels([res.data.properties.name])
-                    })
-                    .catch((err) => {
-                      toast.current.show({
-                        severity: "error",
-                        summary: "Error",
-                        detail: err.response ? err.response.data.message : err.message,
-                        life: 2000,
-                      });
+          <div className="field col-12 md:col-3">
+            <h5 style={{ marginBottom: "0.5em" }}>Type</h5>
+            <TreeSelect
+              value={formTypeId}
+              options={formData}
+              onChange={(e) => {
+                setFormTypeId(e.value);
+                console.log(e);
+                let nodeKey: any = e.value;
+                FormTypeService.nodeInfo(nodeKey)
+                  .then((res) => {
+                    console.log(res.data);
+                    setLabels([res.data.properties.name]);
+                  })
+                  .catch((err) => {
+                    toast.current.show({
+                      severity: "error",
+                      summary: "Error",
+                      detail: err.response
+                        ? err.response.data.message
+                        : err.message,
+                      life: 2000,
                     });
-                }}
-                filter
-                style={{ width: '100%' }}
-              />
-            </div>
+                  });
+              }}
+              filter
+              style={{ width: "100%" }}
+            />
           </div>
 
-          <div className="col-12 md:col-6 flex">
-            <div className="field">
-              <h5 style={{ marginBottom: "0.5em" }}>Department</h5>
-              <InputText
-                value={department}
-                onChange={(event) => setDepartment(event.target.value)}
-                style={{ width: '100%' }}
-              />
-            </div>
-            <div className="field ml-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Organization Code</h5>
-              <InputText
-                value={organizationCode}
-                onChange={(event) => setOrganizationCode(event.target.value)}
-                style={{ width: '100%' }}
-              />
-            </div>
+          <div className="field col-12 md:col-3">
+            <h5 style={{ marginBottom: "0.5em" }}>Department</h5>
+            <InputText
+              value={department}
+              onChange={(event) => setDepartment(event.target.value)}
+              style={{ width: "100%" }}
+            />
+          </div>
+          <div className="field col-12 md:col-3">
+            <h5 style={{ marginBottom: "0.5em" }}>Organization Code</h5>
+            <InputText
+              value={organizationCode}
+              onChange={(event) => setOrganizationCode(event.target.value)}
+              style={{ width: "100%" }}
+            />
           </div>
 
-          <div className="col-12 md:col-6 flex">
-            <div className="field">
-              <h5 style={{ marginBottom: "0.5em" }}>Given Name</h5>
-              <InputText
-                value={givenName}
-                onChange={(event) => setGivenName(event.target.value)}
-                style={{ width: '100%' }}
-              />
-            </div>
-            <div className="field ml-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Family Name</h5>
-              <InputText
-                value={familyName}
-                onChange={(event) => setFamilyName(event.target.value)}
-                style={{ width: '100%' }}
-              />
-            </div>
+          <div className="field col-12 md:col-3">
+            <h5 style={{ marginBottom: "0.5em" }}>Given Name</h5>
+            <InputText
+              value={givenName}
+              onChange={(event) => setGivenName(event.target.value)}
+              style={{ width: "100%" }}
+            />
+          </div>
+          <div className="field col-12 md:col-3">
+            <h5 style={{ marginBottom: "0.5em" }}>Family Name</h5>
+            <InputText
+              value={familyName}
+              onChange={(event) => setFamilyName(event.target.value)}
+              style={{ width: "100%" }}
+            />
           </div>
 
-          <div className="col-12 md:col-6 flex">
-            <div className="field">
-              <h5 style={{ marginBottom: "0.5em" }}>Phone</h5>
-              <InputText
-                value={phone}
-                onChange={(event) => setPhone(event.target.value)}
-                style={{ width: '100%' }}
-              />
-            </div>
-            <div className="field ml-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Country</h5>
-              <InputText
-                value={country}
-                onChange={(event) => setCountry(event.target.value)}
-                style={{ width: '100%' }}
-              />
-            </div>
+          <div className="field col-12 md:col-6">
+            <h5 style={{ marginBottom: "0.5em" }}>Phone</h5>
+            <InputText
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              style={{ width: "100%" }}
+            />
+          </div>
+          <div className="field col-12 md:col-6">
+            <h5 style={{ marginBottom: "0.5em" }}>Country</h5>
+            <InputText
+              value={country}
+              onChange={(event) => setCountry(event.target.value)}
+              style={{ width: "100%" }}
+            />
           </div>
 
-          <div className="col-12 md:col-6">
-            <div className="field">
-              <h5 style={{ marginBottom: "0.5em" }}>Street</h5>
-              <InputText
-                value={street}
-                onChange={(event) => setStreet(event.target.value)}
-                style={{ width: '100%' }}
-              />
-            </div>
+          <div className="field col-12 md:col-6">
+            <h5 style={{ marginBottom: "0.5em" }}>Street</h5>
+            <InputText
+              value={street}
+              onChange={(event) => setStreet(event.target.value)}
+              style={{ width: "100%" }}
+            />
           </div>
 
-          <div className="col-12 md:col-6 flex">
-            <div className="field">
-              <h5 style={{ marginBottom: "0.5em" }}>Town</h5>
-              <InputText
-                value={town}
-                onChange={(event) => setTown(event.target.value)}
-                style={{ width: '100%' }}
-              />
-            </div>
-            <div className="field ml-3">
-              <h5 style={{ marginBottom: "0.5em" }}>State Region</h5>
-              <InputText
-                value={stateRegion}
-                onChange={(event) => setStateRegion(event.target.value)}
-                style={{ width: '100%' }}
-              />
-            </div>
+          <div className="field col-12 md:col-3">
+            <h5 style={{ marginBottom: "0.5em" }}>Town</h5>
+            <InputText
+              value={town}
+              onChange={(event) => setTown(event.target.value)}
+              style={{ width: "100%" }}
+            />
+          </div>
+          <div className="field col-12 md:col-3">
+            <h5 style={{ marginBottom: "0.5em" }}>State Region</h5>
+            <InputText
+              value={stateRegion}
+              onChange={(event) => setStateRegion(event.target.value)}
+              style={{ width: "100%" }}
+            />
           </div>
 
-          <div className="col-12 md:col-6 flex">
-            <div className="field">
-              <h5 style={{ marginBottom: "0.5em" }}>Postal Code</h5>
-              <InputText
-                value={postalCode}
-                onChange={(event) => setPostalCode(event.target.value)}
-                style={{ width: '100%' }}
-              />
-            </div>
-            <div className="field ml-3">
-              <h5 style={{ marginBottom: "0.5em" }}>Postal Box</h5>
-              <InputText
-                value={postalBox}
-                onChange={(event) => setPostalBox(event.target.value)}
-                style={{ width: '100%' }}
-              />
-            </div>
+          <div className="field col-12 md:col-3">
+            <h5 style={{ marginBottom: "0.5em" }}>Postal Code</h5>
+            <InputText
+              value={postalCode}
+              onChange={(event) => setPostalCode(event.target.value)}
+              style={{ width: "100%" }}
+            />
+          </div>
+          <div className="field col-12 md:col-3">
+            <h5 style={{ marginBottom: "0.5em" }}>Postal Box</h5>
+            <InputText
+              value={postalBox}
+              onChange={(event) => setPostalBox(event.target.value)}
+              style={{ width: "100%" }}
+            />
           </div>
 
-          <div className="col-12 md:col-6">
-            <div className="field structureChips">
-              <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
-              <Chips value={tag} onChange={(e) => setTag(e.value)} style={{ width: "100%" }} />
-            </div>
+          <div className="field structureChips col-12 md:col-6">
+            <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
+            <Chips
+              value={tag}
+              onChange={(e) => setTag(e.value)}
+              style={{ width: "100%" }}
+            />
           </div>
 
-          <div className="col-12 md:col-6">
-            <div className="field">
-              <h5 style={{ marginBottom: "0.5em" }}>Created By</h5>
-              <TreeSelect
-                value={createdBy}
-                options={data}
-                onChange={(e) => {
-                  setCreatedBy(e.value);
-                  let nodeKey: any = e.value;
-                  ContactService.nodeInfo(nodeKey)
-                    .then((res) => {
-                      console.log(res.data);
-                      setCreatedByNodeId(res.data.id);
-                    })
-                    .catch((err) => {
-                      toast.current.show({
-                        severity: "error",
-                        summary: "Error",
-                        detail: err.response ? err.response.data.message : err.message,
-                        life: 2000,
-                      });
+          <div className="field col-12 md:col-6">
+            <h5 style={{ marginBottom: "0.5em" }}>Created By</h5>
+            <TreeSelect
+              value={createdBy}
+              options={data}
+              onChange={(e) => {
+                setCreatedBy(e.value);
+                let nodeKey: any = e.value;
+                ContactService.nodeInfo(nodeKey)
+                  .then((res) => {
+                    console.log(res.data);
+                    setCreatedByNodeId(res.data.id);
+                  })
+                  .catch((err) => {
+                    toast.current.show({
+                      severity: "error",
+                      summary: "Error",
+                      detail: err.response
+                        ? err.response.data.message
+                        : err.message,
+                      life: 2000,
                     });
-                }}
-                filter
-                style={{ width: '100%' }}
-              />
-            </div>
+                  });
+              }}
+              filter
+              style={{ width: "100%" }}
+            />
           </div>
         </div>
-
       </Dialog>
       <Dialog
         header="Edit Item"
         visible={editDia}
-        style={{ width: "40vw" }}
+        style={{ width: "50vw" }}
         footer={renderFooterEdit}
         onHide={() => {
           setTag([]);
@@ -902,31 +893,26 @@ const Contact = () => {
           setEditDia(false);
         }}
       >
-        <div className="grid p-fluid">
-          <div className="col-12 md:col-6">
-            <div className="field">
+        <div className="formgrid grid p-fluid">
+            <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>Email</h5>
               <InputText
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               />
             </div>
-          </div>
 
-          <div className="col-12 md:col-6">
-            <div className="field">
+            <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>Company</h5>
               <InputText
                 value={company}
                 onChange={(event) => setCompany(event.target.value)}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               />
             </div>
-          </div>
 
-          <div className="col-12 md:col-6">
-            <div className="field">
+            <div className="field col-12 md:col-3">
               <h5 style={{ marginBottom: "0.5em" }}>Category</h5>
               <TreeSelect
                 value={category}
@@ -944,19 +930,19 @@ const Contact = () => {
                       toast.current.show({
                         severity: "error",
                         summary: "Error",
-                        detail: err.response ? err.response.data.message : err.message,
+                        detail: err.response
+                          ? err.response.data.message
+                          : err.message,
                         life: 2000,
                       });
                     });
                 }}
                 filter
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               />
             </div>
-          </div>
 
-          <div className="col-12 md:col-6">
-            <div className="field">
+            <div className="field col-12 md:col-3">
               <h5 style={{ marginBottom: "0.5em" }}>Type</h5>
               <TreeSelect
                 value={formTypeId}
@@ -968,138 +954,128 @@ const Contact = () => {
                   FormTypeService.nodeInfo(nodeKey)
                     .then((res) => {
                       console.log(res.data);
-                      setLabels([res.data.properties.name])
+                      setLabels([res.data.properties.name]);
                     })
                     .catch((err) => {
                       toast.current.show({
                         severity: "error",
                         summary: "Error",
-                        detail: err.response ? err.response.data.message : err.message,
+                        detail: err.response
+                          ? err.response.data.message
+                          : err.message,
                         life: 2000,
                       });
                     });
                 }}
                 filter
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               />
             </div>
-          </div>
 
-          <div className="col-12 md:col-6 flex">
-            <div className="field">
+            <div className="field col-12 md:col-3">
               <h5 style={{ marginBottom: "0.5em" }}>Department</h5>
               <InputText
                 value={department}
                 onChange={(event) => setDepartment(event.target.value)}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               />
             </div>
-            <div className="field ml-3">
+            <div className="field col-12 md:col-3">
               <h5 style={{ marginBottom: "0.5em" }}>Organization Code</h5>
               <InputText
                 value={organizationCode}
                 onChange={(event) => setOrganizationCode(event.target.value)}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               />
             </div>
-          </div>
 
-          <div className="col-12 md:col-6 flex">
-            <div className="field">
+            <div className="field col-12 md:col-3">
               <h5 style={{ marginBottom: "0.5em" }}>Given Name</h5>
               <InputText
                 value={givenName}
                 onChange={(event) => setGivenName(event.target.value)}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               />
             </div>
-            <div className="field ml-3">
+            <div className="field col-12 md:col-3">
               <h5 style={{ marginBottom: "0.5em" }}>Family Name</h5>
               <InputText
                 value={familyName}
                 onChange={(event) => setFamilyName(event.target.value)}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               />
             </div>
-          </div>
 
-          <div className="col-12 md:col-6 flex">
-            <div className="field">
+            <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>Phone</h5>
               <InputText
                 value={phone}
                 onChange={(event) => setPhone(event.target.value)}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               />
             </div>
-            <div className="field ml-3">
+            <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>Country</h5>
               <InputText
                 value={country}
                 onChange={(event) => setCountry(event.target.value)}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               />
             </div>
-          </div>
 
-          <div className="col-12 md:col-6">
-            <div className="field">
+            <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>Street</h5>
               <InputText
                 value={street}
                 onChange={(event) => setStreet(event.target.value)}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               />
             </div>
-          </div>
 
-          <div className="col-12 md:col-6 flex">
-            <div className="field">
+            <div className="field col-12 md:col-3">
               <h5 style={{ marginBottom: "0.5em" }}>Town</h5>
               <InputText
                 value={town}
                 onChange={(event) => setTown(event.target.value)}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               />
             </div>
-            <div className="field ml-3">
+            <div className="field col-12 md:col-3">
               <h5 style={{ marginBottom: "0.5em" }}>State Region</h5>
               <InputText
                 value={stateRegion}
                 onChange={(event) => setStateRegion(event.target.value)}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               />
             </div>
-          </div>
 
-          <div className="col-12 md:col-6 flex">
-            <div className="field">
+            <div className="field col-12 md:col-3">
               <h5 style={{ marginBottom: "0.5em" }}>Postal Code</h5>
               <InputText
                 value={postalCode}
                 onChange={(event) => setPostalCode(event.target.value)}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               />
             </div>
-            <div className="field ml-3">
+            <div className="field col-12 md:col-3">
               <h5 style={{ marginBottom: "0.5em" }}>Postal Box</h5>
               <InputText
                 value={postalBox}
                 onChange={(event) => setPostalBox(event.target.value)}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               />
             </div>
-          </div>
 
-          <div className="col-12 md:col-6">
-            <div className="field structureChips">
+            <div className="field structureChips col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
-              <Chips value={tag} onChange={(e) => setTag(e.value)} style={{ width: "100%" }} />
+              <Chips
+                value={tag}
+                onChange={(e) => setTag(e.value)}
+                style={{ width: "100%" }}
+              />
             </div>
-          </div>
 
-          <div className="col-12 md:col-6">
-            <div className="field">
+            <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>Created By</h5>
               <TreeSelect
                 value={createdBy}
@@ -1116,23 +1092,26 @@ const Contact = () => {
                       toast.current.show({
                         severity: "error",
                         summary: "Error",
-                        detail: err.response ? err.response.data.message : err.message,
+                        detail: err.response
+                          ? err.response.data.message
+                          : err.message,
                         life: 2000,
                       });
                     });
                 }}
                 filter
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               />
             </div>
-          </div>
 
-          <div className="col-12">
-            <div className="field flex">
+            <div className="field col-12">
               <h5 style={{ marginBottom: "0.5em" }}>Is Active</h5>
-              <Checkbox className="ml-5" onChange={e => setIsActive(e.checked)} checked={isActive}></Checkbox>
+              <Checkbox
+                className="ml-5"
+                onChange={(e) => setIsActive(e.checked)}
+                checked={isActive}
+              ></Checkbox>
             </div>
-          </div>
         </div>
       </Dialog>
       <h1>{t("Contact Editing")}</h1>
@@ -1155,69 +1134,81 @@ const Contact = () => {
                 detail: "You can't drag here.",
                 life: 1000,
               });
-              return
+              return;
             }
-            dragConfirm(event.dragNode._id.low, event.dropNode._id.low)
+            dragConfirm(event.dragNode._id.low, event.dropNode._id.low);
           }}
           filter
           filterBy="name,code"
           filterPlaceholder="Search"
-          nodeTemplate={(data: FormNode, options) => <span className="flex align-items-center font-bold">{data.label} {
-            <>
-              <span className="ml-4 ">
-                <Button
-                  icon="pi pi-plus" className="p-button-rounded p-button-secondary p-button-text" aria-label="Add Item"
-                  onClick={() => {
-                    setSelectedNodeKey(data.key);
-                    setAddDia(true)
-                  }
-                  }
-                  title="Add Item"
-                />
-                <Button
-                  icon="pi pi-pencil" className="p-button-rounded p-button-secondary p-button-text" aria-label="Edit Item"
-                  onClick={() => {
-                    setSelectedNodeKey(data.key);
-                    let dataKey: any = data.key
+          nodeTemplate={(data: FormNode, options) => (
+            <span className="flex align-items-center font-bold">
+              {data.label}{" "}
+              {
+                <>
+                  <span className="ml-4 ">
+                    <Button
+                      icon="pi pi-plus"
+                      className="p-button-rounded p-button-secondary p-button-text"
+                      aria-label="Add Item"
+                      onClick={() => {
+                        setSelectedNodeKey(data.key);
+                        setAddDia(true);
+                      }}
+                      title="Add Item"
+                    />
+                    <Button
+                      icon="pi pi-pencil"
+                      className="p-button-rounded p-button-secondary p-button-text"
+                      aria-label="Edit Item"
+                      onClick={() => {
+                        setSelectedNodeKey(data.key);
+                        let dataKey: any = data.key;
 
-                    getNodeInfoAndEdit(dataKey)
-                    setEditDia(true);
-                  }
-                  }
-                  title="Edit Item"
-                />
-                <Button
-                  icon="pi pi-trash" className="p-button-rounded p-button-secondary p-button-text" aria-label="Delete"
-                  onClick={() => {
-                    setSelectedNodeKey(data.key);
-                    setDelDia(true)
-                  }}
-                  title="Delete Item"
-                />
-                {/* {
+                        getNodeInfoAndEdit(dataKey);
+                        setEditDia(true);
+                      }}
+                      title="Edit Item"
+                    />
+                    <Button
+                      icon="pi pi-trash"
+                      className="p-button-rounded p-button-secondary p-button-text"
+                      aria-label="Delete"
+                      onClick={() => {
+                        setSelectedNodeKey(data.key);
+                        setDelDia(true);
+                      }}
+                      title="Delete Item"
+                    />
+                    {/* {
                   data.hasType &&  */}
-                <Button
-                  icon="pi pi-book" className="p-button-rounded p-button-secondary p-button-text" aria-label="Edit Form"
-                  // onClick={(e) => navigate(`/formgenerate/${data.key}?id=${data._id.low}`, 
-                  // {
-                  //   state: {
-                  //     data: data,
-                  //     rootId: structure.root._id.low,
-                  //   }
-                  // }
-                  // )} 
-                  onClick={(e) => navigate(`/formgenerate/${data.self_id.low}?formTypeId=${data.formTypeId}`)}
-                  title="Edit Form"
-                />
-                {/* } */}
-
-              </span>
-            </>
-          }
-          </span>}
+                    <Button
+                      icon="pi pi-book"
+                      className="p-button-rounded p-button-secondary p-button-text"
+                      aria-label="Edit Form"
+                      // onClick={(e) => navigate(`/formgenerate/${data.key}?id=${data._id.low}`,
+                      // {
+                      //   state: {
+                      //     data: data,
+                      //     rootId: structure.root._id.low,
+                      //   }
+                      // }
+                      // )}
+                      onClick={(e) =>
+                        navigate(
+                          `/formgenerate/${data.self_id.low}?formTypeId=${data.formTypeId}`
+                        )
+                      }
+                      title="Edit Form"
+                    />
+                    {/* } */}
+                  </span>
+                </>
+              }
+            </span>
+          )}
         />
       </div>
-
     </div>
   );
 };
