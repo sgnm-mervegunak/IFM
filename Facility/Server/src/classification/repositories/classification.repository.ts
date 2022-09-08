@@ -542,26 +542,12 @@ let labels = [...new Set(lbls)];
   }
 
   
-  async getNodeByClassificationLanguageRealmAndCode(language: string, realm: string, code: string, classificationName?: string) {
-    
-    //   const cypher=`match (n:${classificationName}_${language} {realm:"${realm}"})-[:PARENT_OF*]->(m {code:"${code}"}) return m`
+  async getNodeByClassificationLanguageRealmAndCode(classificationName: string, language: string, realm: string, code: string) {
 
-    //   let data = await this.neo4jService.read(cypher);
+    const cypher = `match (n:${classificationName}_${language} {realm:"${realm}"})-[:PARENT_OF*]->(m {code:"${code}"}) return m`
 
-    //   data.records[0]["_fields"][0].properties["realm"];
+    let data = await this.neo4jService.read(cypher);
 
-    //   return data.records[0]["_fields"][0].properties;
-    // }
-
-    const deneme = await this.neo4jService.findChildrensByLabelsAndFilters(
-      ['Classification'],
-      {
-        "isDeleted": false, "realm": realm
-      },
-      [],
-      { "isDeleted": false, "code": code, "language": language }
-    
-    )
-    return deneme;
+    return data.records[0]["_fields"][0].properties;
   }
 }
