@@ -8,10 +8,12 @@ import { useNavigate } from 'react-router-dom';
 
 interface Params {
     selectedNodeKey: string;
+    setSpaceImportDia: React.Dispatch<React.SetStateAction<boolean>>;
+    getFacilityStructure: () => void;
   }
 
-const SpaceFileImport = ({selectedNodeKey}:Params) => {
-    const toast = useRef<any>();
+const SpaceFileImport = ({selectedNodeKey, setSpaceImportDia, getFacilityStructure}:Params) => {
+    const { toast } = useAppSelector((state) => state.toast);
     const refUpload = useRef<any>(null);
     const auth = useAppSelector((state) => state.auth);
     const [token, setToken] = useState(auth.auth.token);
@@ -19,7 +21,7 @@ const SpaceFileImport = ({selectedNodeKey}:Params) => {
 
     const uploadCSV = (e:any) => {
         const file = e.files[0];
-        const url = 'http://localhost:3010/classification/addAClassificationWithCodeFromExcel/IFM/EN';
+        const url = `http://localhost:3010/ExcelImportExport/addSpaceswithCobie/${selectedNodeKey}`;
         const formData = new FormData();
 
         formData.append('file', file);
@@ -30,30 +32,27 @@ const SpaceFileImport = ({selectedNodeKey}:Params) => {
             },
         };
         axios.post(url, formData, config).then((response) => {
-            console.log(response.data);
             toast.current.show({ severity: 'success', summary: 'File uploaded', life: 3000 });
+            setSpaceImportDia(false);
+            getFacilityStructure();
         })
             .catch(error => {
                 toast.current.show({ severity: 'error', summary: 'File not uploaded', life: 3000 });
+                setSpaceImportDia(false);
+                getFacilityStructure();
             })
 
         refUpload.current.clear();
-        function backToFacility() {
-            history('/facilitystructure');
-          }
-          
-          setTimeout(backToFacility, 1200);
         
     }
     return (
         <>
-            <Toast ref={toast}></Toast>
 
             <div className="card">
                 <FileUpload
                     name="upfile[]"
                     accept="csv/*"
-                    maxFileSize={1000000}
+                    maxFileSize={10000000}
                     chooseLabel="Select File"
                     customUpload={true}
                     uploadHandler={uploadCSV}

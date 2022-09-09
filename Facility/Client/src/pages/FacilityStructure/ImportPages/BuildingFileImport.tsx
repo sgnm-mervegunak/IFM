@@ -9,10 +9,11 @@ import { useNavigate } from 'react-router-dom';
 interface Params {
     selectedNodeKey: string;
     setBuildingImportDia: React.Dispatch<React.SetStateAction<boolean>>;
+    getFacilityStructure: () => void;
 }
 
-const BuildingFileImport = ({ setBuildingImportDia }: Params) => {
-    const toast = useRef<any>();
+const BuildingFileImport = ({ setBuildingImportDia, getFacilityStructure }: Params) => {
+    const { toast } = useAppSelector((state) => state.toast);
     const refUpload = useRef<any>(null);
     const auth = useAppSelector((state) => state.auth);
     const [token, setToken] = useState(auth.auth.token);
@@ -33,12 +34,12 @@ const BuildingFileImport = ({ setBuildingImportDia }: Params) => {
         axios.post(url, formData, config).then((response) => {
             toast.current.show({ severity: 'success', summary: 'File uploaded', life: 3000 });
             setBuildingImportDia(false);
-            history('/FacilityStructure');
+            getFacilityStructure();
         })
             .catch(error => {
                 toast.current.show({ severity: 'error', summary: 'File not uploaded', life: 3000 });
                 setBuildingImportDia(false);
-                history('/FacilityStructure');
+                getFacilityStructure();
             })
 
         refUpload.current.clear();
@@ -46,7 +47,6 @@ const BuildingFileImport = ({ setBuildingImportDia }: Params) => {
     }
     return (
         <>
-            <Toast ref={toast}></Toast>
 
             <div className="card">
                 <FileUpload

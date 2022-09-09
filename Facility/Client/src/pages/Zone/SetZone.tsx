@@ -165,7 +165,7 @@ const SetZone = () => {
 
   const getClassificationSpace = async () => {
     await ClassificationsService.findAllActiveByLabel({
-      label: "OmniClass13"
+      label: "FacilityZoneTypes"
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodesClassification(temp);
