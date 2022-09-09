@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import Export, { ExportType } from "../FacilityStructure/Export/Export";
 import ExportService from "../../services/export";
 import DownloadExcel from "../../utils/download-excel";
+import DisplayNode from "../FacilityStructure/Display/DisplayNode";
 
 interface Node {
   cantDeleted: boolean;
@@ -123,6 +124,8 @@ const SetZone = () => {
   const [editDia, setEditDia] = useState(false);
   const [delDia, setDelDia] = useState<boolean>(false);
   const [formDia, setFormDia] = useState<boolean>(false);
+  const [display, setDisplay] = useState(false);
+  const [displayKey, setDisplayKey] = useState("");
   const [exportDia, setExportDia] = useState(false);
   const { toast } = useAppSelector((state) => state.toast);
   const { t } = useTranslation(["common"]);
@@ -558,6 +561,20 @@ const SetZone = () => {
         accept={() => deleteItem(deleteNodeKey)}
       />
       <Dialog
+        header={t("Joint Space Detail")}
+        visible={display}
+        position={"right"}
+        modal={false}
+        style={{ width: "30vw" }}
+        onHide={() => {
+          setDisplay(false);
+          setDisplayKey("");
+        }}
+        resizable
+      >
+        <DisplayNode displayKey={displayKey} />
+      </Dialog>
+      <Dialog
         header="Add New Item"
         visible={addDia}
         style={{ width: "40vw" }}
@@ -782,6 +799,20 @@ const SetZone = () => {
                           setDelDia(true);
                         }}
                         title="Delete Item"
+                      />
+                    ) : null}
+                  </span>
+                  <span>
+                    {data.nodeType === "Zone" ? (
+                      <Button
+                        icon="pi pi-eye"
+                        className="p-button-rounded p-button-secondary p-button-text"
+                        aria-label="Display"
+                        onClick={() => {
+                          setDisplay(true);
+                          setDisplayKey(data.key);
+                        }}
+                        title={t("Display")}
                       />
                     ) : null}
                   </span>

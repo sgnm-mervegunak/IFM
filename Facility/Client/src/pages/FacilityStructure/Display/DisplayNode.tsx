@@ -7,10 +7,10 @@ import ClassificationService from "../../../services/classifications";
 
 interface Params {
   displayKey: string;
-  docTypes: any;
+  docTypes?: any;
 }
 
-const DisplayNode = ({ displayKey, docTypes }: Params) => {
+const DisplayNode = ({ displayKey, docTypes=[] }: Params) => {
   const [data, setData] = useState<any>(null);
   const [type, setType] = useState<string>("");
   const [category, setCategory] = useState<string>();
