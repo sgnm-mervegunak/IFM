@@ -30,13 +30,13 @@ export class CreateZoneDto {
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
   description: string;
 
-  @ApiProperty()
-  @IsOptional()
-  createdBy: string;
+  // @ApiProperty()
+  // @IsOptional()
+  // createdBy: string;
 
-  @ApiProperty()
-  @IsOptional()
-  createdOn: string;
+  // @ApiProperty()
+  // @IsOptional()
+  // createdOn: string;
 
   @ApiProperty()
   @IsOptional()
