@@ -45,7 +45,7 @@ export class ExcelImportExportController {
     return this.excelImportExport.getZonesAnExcelFile(body,header);
   }
 
-  // @Unprotected()
+  @Unprotected()
   // @Roles({ roles: [UserRoles.ADMIN] })
   @Post('addBuildingwithCobie')
   @ApiBody({
@@ -68,7 +68,7 @@ export class ExcelImportExportController {
     return this.excelImportExport.addBuildingwithCobie(file,header);
   }
 
-  // @Unprotected()
+  @Unprotected()
   // @Roles({ roles: [UserRoles.ADMIN] })
   @Post('addFloorwithCobie/:buildingKey')
   @ApiBody({
@@ -118,8 +118,8 @@ export class ExcelImportExportController {
   }
 
 
-  // @Unprotected()
-  @Roles({ roles: [UserRoles.ADMIN] })
+  @Unprotected()
+  // @Roles({ roles: [UserRoles.ADMIN] })
   @Post('addZoneswithCobie/:buildingKey')
   @ApiBody({
     schema: {

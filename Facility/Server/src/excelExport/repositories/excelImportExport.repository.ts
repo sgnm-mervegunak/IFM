@@ -256,7 +256,9 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
 
  async addBuildingwithCobie( file: Express.Multer.File,header:MainHeaderInterface){
    
-    const {realm}= header;
+  let email:string;
+    //const {realm}= header;
+  let realm="IFM";
     let data=[]
     let values:[string];
     let buffer = new Uint8Array(file.buffer);
@@ -298,11 +300,17 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
  
   
       let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"OmniClass11",code,"b");
+
+      if(typeof data[1][2]=='object'){
+        email=await data[1][2].text;
+      }else {
+        email= await data[1][2];
+      }
   
   // cypher query for building 
   let cypher=`MATCH (r:FacilityStructure {realm:"${realm}"}) \
   ${createdCypher} \
-  MATCH (p {email:"${data[1][2]}"} ) \
+  MATCH (p {email:"${email}"} ) \
   MERGE (b:Building {name:"${data[1][1]}",createdOn:"${data[1][3]}",projectName:"${data[1][5]}",siteName:"${data[1][6]}",areaMeasurement:"${data[1][11]}",externalSystem:"${data[1][12]}",externalObject:"${data[1][13]}", \
   externalIdentifier:"${data[1][14]}",externalSiteObject:"${data[1][15]}",externalSiteIdentifier:"${data[1][16]}",externalFacilityObject:"${data[1][17]}",externalFacilityIdentifier:"${data[1][18]}", \
   description:"${data[1][19]}",projectDescription:"${data[1][20]}",siteDescription:"${data[1][21]}",phase:"${data[1][22]}",address:"",status:"${data[1][23]}",owner:"",operator:"",contractor:"",handoverDate:"",operationStartDate:"",warrantyExpireDate:"",tag:[],canDisplay:true,key:"${this.keyGenerate()}",canDelete:true,isActive:true,isDeleted:false, \
