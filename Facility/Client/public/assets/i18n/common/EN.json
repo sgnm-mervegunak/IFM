@@ -56,6 +56,7 @@
 	"Upload":"Upload",
 	"Click to download sample classification file":"Click to download sample classification file",
 	"Classification File Import Without Code":"Classification File Import Without Code",
+	"Import Building":"Import Building",
 	"Import Block":"Import Block",
 	"Import Floor":"Import Floor",
 	"Import Space":"Import Space",
@@ -132,8 +133,7 @@
 	"State Region": "State Region",
 	"Postal Code": "Postal Code",
 	"Postal Box": "Postal Box",
-	"Created By": "Created By",
-	"Is Active": "Is Active"
+	"Created By": "Created By"
 }
 
 
