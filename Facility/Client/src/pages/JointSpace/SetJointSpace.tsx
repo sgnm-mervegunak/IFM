@@ -272,8 +272,8 @@ const SetJointSpace = () => {
       code: data?.code,
       tag: data?.tag,
       m2: data?.m2,
-      spaceType: data?.spaceType,
-      status: data?.status,
+      spaceType: codeCategory,
+      status: codeStatus,
       jointStartDate: data?.jointStartDate,
       jointEndDate: data?.jointEndDate,
       nodeKeys: selectedKeys

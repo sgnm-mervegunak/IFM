@@ -8,16 +8,17 @@ import { useNavigate } from 'react-router-dom';
 
 interface Params {
     selectedNodeKey: string;
-  }
+    setBuildingImportDia: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
-const BuildingFileImport = ({selectedNodeKey}:Params) => {
+const BuildingFileImport = ({ setBuildingImportDia }: Params) => {
     const toast = useRef<any>();
     const refUpload = useRef<any>(null);
     const auth = useAppSelector((state) => state.auth);
     const [token, setToken] = useState(auth.auth.token);
     const history = useNavigate();
 
-    const uploadCSV = (e:any) => {
+    const uploadCSV = (e: any) => {
         const file = e.files[0];
         const url = 'http://localhost:3010/ExcelImportExport/addBuildingwithCobie';
         const formData = new FormData();
@@ -30,20 +31,18 @@ const BuildingFileImport = ({selectedNodeKey}:Params) => {
             },
         };
         axios.post(url, formData, config).then((response) => {
-            console.log(response.data);
             toast.current.show({ severity: 'success', summary: 'File uploaded', life: 3000 });
+            setBuildingImportDia(false);
+            history('/FacilityStructure');
         })
             .catch(error => {
                 toast.current.show({ severity: 'error', summary: 'File not uploaded', life: 3000 });
+                setBuildingImportDia(false);
+                history('/FacilityStructure');
             })
 
         refUpload.current.clear();
-        function backToFacility() {
-            history('/facilitystructure');
-          }
-          
-          setTimeout(backToFacility, 1200);
-        
+
     }
     return (
         <>
@@ -53,7 +52,7 @@ const BuildingFileImport = ({selectedNodeKey}:Params) => {
                 <FileUpload
                     name="upfile[]"
                     accept="csv/*"
-                    maxFileSize={1000000}
+                    maxFileSize={10000000}
                     chooseLabel="Select File"
                     customUpload={true}
                     uploadHandler={uploadCSV}

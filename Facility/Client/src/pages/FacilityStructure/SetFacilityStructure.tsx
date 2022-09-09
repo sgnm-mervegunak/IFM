@@ -1002,7 +1002,7 @@ const SetFacilityStructure = () => {
           setBuildingImportDia(false);
         }}
       >
-        <BuildingFileImport selectedNodeKey={selectedNodeKey} />
+        <BuildingFileImport selectedNodeKey={selectedNodeKey} setBuildingImportDia={setBuildingImportDia} />
       </Dialog>
       <Dialog
         header={t("Import Block")}
