@@ -46,7 +46,7 @@ export class ExcelImportExportController {
   }
 
   // @Unprotected()
-  @Roles({ roles: [UserRoles.ADMIN] })
+  // @Roles({ roles: [UserRoles.ADMIN] })
   @Post('addBuildingwithCobie')
   @ApiBody({
     schema: {
@@ -69,7 +69,7 @@ export class ExcelImportExportController {
   }
 
   // @Unprotected()
-  @Roles({ roles: [UserRoles.ADMIN] })
+  // @Roles({ roles: [UserRoles.ADMIN] })
   @Post('addFloorwithCobie/:buildingKey')
   @ApiBody({
     schema: {
@@ -94,7 +94,7 @@ export class ExcelImportExportController {
 
 
   // @Unprotected()
-  @Roles({ roles: [UserRoles.ADMIN] })
+  // @Roles({ roles: [UserRoles.ADMIN] })
   @Post('addSpaceswithCobie/:buildingKey')
   @ApiBody({
     schema: {

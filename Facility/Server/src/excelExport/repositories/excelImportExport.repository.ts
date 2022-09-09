@@ -435,6 +435,7 @@ for (let i = 1; i < data.length; i++) {
 }
 
 async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, buildingKey: string){
+  let email:string;
   const {realm}= header;
   let data=[]
   let buffer = new Uint8Array(file.buffer);
@@ -453,9 +454,15 @@ await workbook.xlsx.load(buffer).then(function async(book) {
   
     let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"FacilityZoneTypes",data[i][4],"zz");
 
+    if(typeof data[i][2]=='object'){
+      email=await data[i][2].text;
+    }else {
+      email= await data[i][2];
+    }
+
   let cypher =`MATCH (b:Building {key:"${buildingKey}"})-[:PARENT_OF]->(z:Zones {name:"Zones"})\
   MATCH (c:Space {name:"${data[i][5]}"})\
-  MATCH (p {email:"${data[i][2]}"})\
+  MATCH (p {email:"${email}"})\
   ${createdCypher} \
   MERGE (zz:Zone {name:"${data[i][1]}",createdOn:"${data[i][3]}",externalSystem:"${data[i][6]}", externalObject:"${data[i][7]}", externalIdentifier:"${data[i][8]}", description:"${data[i][9]}", tag:[],\
   nodeKeys:[], nodeType:"Zone", key:"${this.keyGenerate()}", canDisplay:true, isActive:true, isDeleted:false, canDelete:true})\
