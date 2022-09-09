@@ -321,17 +321,17 @@ const SetFacilityStructure = () => {
       },
     },
     {
-      label: t("Import Block"),
-      icon: "pi pi-fw pi-upload",
-      command: () => {
-        importBlock();
-      },
-    },
-    {
       label: t("Import Floor"),
       icon: "pi pi-fw pi-upload",
       command: () => {
         importFloor();
+      },
+    },
+    {
+      label: t("Import Space"),
+      icon: "pi pi-fw pi-upload",
+      command: () => {
+        importSpace();
       },
     },
   ];
@@ -380,13 +380,6 @@ const SetFacilityStructure = () => {
         importFloor();
       },
     },
-    {
-      label: "Import Space",
-      icon: "pi pi-fw pi-upload",
-      command: () => {
-        importSpace();
-      },
-    },
   ];
 
   const menuFloor = [
@@ -424,13 +417,6 @@ const SetFacilityStructure = () => {
       command: () => {
         setDisplay(true);
         setDisplayKey(selectedNodeKey);
-      },
-    },
-    {
-      label: t("Import Space"),
-      icon: "pi pi-fw pi-upload",
-      command: () => {
-        importSpace();
       },
     },
   ];
@@ -1002,7 +988,10 @@ const SetFacilityStructure = () => {
           setBuildingImportDia(false);
         }}
       >
-        <BuildingFileImport selectedNodeKey={selectedNodeKey} setBuildingImportDia={setBuildingImportDia} />
+        <BuildingFileImport
+          selectedNodeKey={selectedNodeKey}
+          setBuildingImportDia={setBuildingImportDia}
+          getFacilityStructure={getFacilityStructure} />
       </Dialog>
       <Dialog
         header={t("Import Block")}
@@ -1024,7 +1013,10 @@ const SetFacilityStructure = () => {
           setFloorImportDia(false);
         }}
       >
-        <FloorFileImport selectedNodeKey={selectedNodeKey} />
+        <FloorFileImport
+          selectedNodeKey={selectedNodeKey}
+          setFloorImportDia={setFloorImportDia}
+          getFacilityStructure={getFacilityStructure} />
       </Dialog>
       <Dialog
         header={t("Import Space")}
@@ -1035,7 +1027,10 @@ const SetFacilityStructure = () => {
           setSpaceImportDia(false);
         }}
       >
-        <SpaceFileImport selectedNodeKey={selectedNodeKey} />
+        <SpaceFileImport
+          selectedNodeKey={selectedNodeKey}
+          setSpaceImportDia={setSpaceImportDia}
+          getFacilityStructure={getFacilityStructure} />
       </Dialog>
       <Dialog
         header={t("Structure Detail")}
