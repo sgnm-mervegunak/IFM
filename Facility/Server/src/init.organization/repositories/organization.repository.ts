@@ -2424,7 +2424,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     ] = data;
 
     //let firstThree = [ApprovalBy, AreaUnit, AssetType];
-    let classifications = [category_facility, category_space, category_element, category_product, category_role];
+    let classifications = [category_facility, category_space, category_role];
 
     /////////// classifications ////////////////////////////////
     for (let i = 0; i < classifications.length; i++) {
@@ -2625,35 +2625,11 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       let data = await this.neo4jService.write(cypher);
 
       for (let i = 0; i < newClassification.length; i++) {
-        let cypher2 = `MATCH (n) where n.code="${newClassification[i].parentCode}" MERGE (b {code:"${newClassification[i].code}",parentCode:"${newClassification[i].parentCode}",name:"${newClassification[i].name}",isDeleted:${newClassification[i].isDeleted},isActive:${newClassification[i].isActive},canDelete:${newClassification[i].canDelete},canDisplay:${newClassification[i].canDisplay},language:"${language}"}) MERGE (n)-[:PARENT_OF]->(b)`;
+        let cypher2 = `MATCH (n:${classificationName2}_${language}) where n.code="${newClassification[i].parentCode}" MERGE (b:${classificationName2}_${language} {code:"${newClassification[i].code}",parentCode:"${newClassification[i].parentCode}",name:"${newClassification[i].name}",isDeleted:${newClassification[i].isDeleted},isActive:${newClassification[i].isActive},canDelete:${newClassification[i].canDelete},canDisplay:${newClassification[i].canDisplay},language:"${language}"}) MERGE (n)-[:PARENT_OF]->(b)`;
         let data2 = await this.neo4jService.write(cypher2);
       }
     }
-    ////////////////////////////category element//////////////////////////////////////
-
-    // let cat=await category_element.filter(i=>i!="")
-
-    // let values=[];
-    // for (let index = 1; index < cat.length; index++) {
-
-    //   const element = cat[index].split()
-
-    //   values.push(element);
-    // }
-
-    // let cat2= this.ascendingSort2(values)
-    // console.log(cat2)
-
-    // console.log(values);
-
-    // let cypher= `MERGE (n:PickList {name:"PickList"}) MERGE (b:CategoryElement {name:"CategoryElement",isDeleted:false}) MERGE (n)-[:PARENT_OF]->(b) MERGE (n)<-[:CHILD_OF]-(b)`;
-    // await this.neo4jService.write(cypher);
-
-    // for(let i=0;i<values.length;i++){
-
-    //   let cypher2= `MATCH (n:CategoryElement {name:"CategoryElement",isDeleted:false}) MERGE (b {code:"${values[i][0]}",name:"${values[i][1]}"}) MERGE (n)<-[:CHILD_OF]-(b) MERGE (n)-[:PARENT_OF]->(b)`;
-    //   await this.neo4jService.write(cypher2)
-    // }
+   
 
     /////////////////////////////////////////////////////////////// first three datas ////////////////////////////////////////////////////////////////
     // let deneme4 = []
