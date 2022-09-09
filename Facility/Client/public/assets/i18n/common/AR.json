@@ -56,6 +56,7 @@
 	"Upload":"حمل",
 	"Click to download sample classification file":"انقر لتنزيل ملف تصنيف العينة",
 	"Classification File Import Without Code":"استيراد ملف التصنيف غير المشفر",
+	"Import Building":"استيراد مبنى",
 	"Import Block":"كتلة الاستيراد",
 	"Import Floor":"استيراد أرضية",
 	"Import Space":"مجال الاستيراد",
@@ -132,6 +133,5 @@
 	"State Region": "الدولة / المنطقة",
 	"Postal Code": "الرمز البريدي",
 	"Postal Box": "صندوق بريدي",
-	"Created By": "صنع من قبل",
-	"Is Active": "نشيط"
+	"Created By": "صنع من قبل"
 }

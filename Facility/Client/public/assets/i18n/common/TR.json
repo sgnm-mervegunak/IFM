@@ -56,6 +56,7 @@
 	"Upload":"Yükle",
 	"Click to download sample classification file":"Örnek sınıflandırma dosyasını indirmek için tıklayın",
 	"Classification File Import Without Code":"Kodsuz Sınıflandırma Dosyasını İçeri Aktarma",
+	"Import Building":"Bina İçeri Aktar",
 	"Import Block":"Blok İçeri Aktar",
 	"Import Floor":"Kat İçeri Aktar",
 	"Import Space":"Alan İçeri Aktar",
@@ -132,6 +133,5 @@
 	"State Region": "Bölge",
 	"Postal Code": "Posta Kodu",
 	"Postal Box": "Posta Kutusu",
-	"Created By": "Oluşturan",
-	"Is Active": "Aktif"
+	"Created By": "Oluşturan"
 }
