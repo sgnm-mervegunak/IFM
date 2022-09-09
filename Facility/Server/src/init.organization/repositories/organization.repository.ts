@@ -838,7 +838,6 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       allowedForFacilityStructureBuilding.identity.low,
       facilityTypesNode4.identity.low,
     );
-
     const allowedForFacilityStructureBuildingTR = await this.neo4jService.createNode(
       {
         canDelete: false,
@@ -849,10 +848,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       },
       ['AllowedStructure'],
     );
-    await this.neo4jService.addRelations(
-      allowedForFacilityStructureBuilding.identity.low,
-      facilityTypesNode4.identity.low,
-    );
+   
 
     await this.neo4jService.addRelations(
       allowedForFacilityStructureBuildingTR.identity.low,
@@ -964,7 +960,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       ['AllowedStructure'],
     );
     await this.neo4jService.addRelations(allowedForBlockStructureFloorTR.identity.low, facilityTypesNodeTR3.identity.low);
-
+    await this.neo4jService.addRelations(allowedForBlockStructureFloor.identity.low, facilityTypesNode3.identity.low);
     //Building
     const facilityTypesNode1property1 = await this.neo4jService.createNode(
       {
