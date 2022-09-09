@@ -256,9 +256,9 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
 
  async addBuildingwithCobie( file: Express.Multer.File,header:MainHeaderInterface){
    
-  let email:string;
-    //const {realm}= header;
-  let realm="IFM";
+    let email:string;
+    const {realm}= header;
+
     let data=[]
     let values:[string];
     let buffer = new Uint8Array(file.buffer);
@@ -324,6 +324,7 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
 
   async addFloorsToBuilding(file: Express.Multer.File, header:MainHeaderInterface, buildingKey: string)
 {
+  let email:string;
   const {realm}=header;
 
   let data=[]
@@ -344,22 +345,29 @@ await workbook.xlsx.load(buffer).then(function async(book) {
    for (let i = 1; i < data.length; i++) {
     let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"FacilityFloorTypes",data[i][4],"f");
 
+    if(typeof data[i][2]=='object'){
+      email=await data[i][2].text;
+    }else {
+      email= await data[i][2];
+    }
+
     let cypher=`MATCH (a:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b:Building {key:"${buildingKey}"}) \
                 ${createdCypher} \
-                MATCH (p {email:"${data[i][2]}"}) \
+                MATCH (p {email:"${email}"}) \
                 MERGE (f:Floor {code:"",name:"${data[i][1]}",isDeleted:false,isActive:true,nodeType:"Floor",description:"${data[i][8]}",tag:[],canDelete:true,canDisplay:true,key:"${this.keyGenerate()}",createdOn:"${data[i][3]}",elevation:"${data[i][9]}",height:"${data[i][10]}",externalSystem:"",externalObject:"",externalIdentifier:""}) \
                 MERGE (b)-[:PARENT_OF]->(f)\
                 ${createdRelationCypher} \
                 MERGE (f)-[:CREATED_BY]->(p)`;
 
- let value =await this.neo4jService.write(cypher);
- console.log(value);
+ await this.neo4jService.write(cypher);
+
   }
 
 }
 
 async addSpacesToBuilding( file: Express.Multer.File, header:MainHeaderInterface, buildingKey: string)
 {
+  let email:string;
 const {realm}= header;
 
   let data=[]
@@ -428,9 +436,16 @@ for (let index = 0; index < categoryColumn.length; index++) {
 }
 
 for (let i = 1; i < data.length; i++) {
+
   let {createdCypher,createdRelationCypher} =await this.createCypherForClassification(realm,'OmniClass13',categoryColumn[i-1][0],"s")
+  if(typeof data[i][2]=='object'){
+    email=await data[i][2].text;
+  }else {
+    email= await data[i][2];
+  }
+
   let cypher=`MATCH (a:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b:Building {key:"${buildingKey}"}) \
-  MATCH (p {email:"${data[i][2]}"}) \
+  MATCH (p {email:"${email}"}) \
    ${createdCypher} \
    MATCH (b)-[:PARENT_OF]->(f:Floor {name:"${data[i][5]}"})\
    MERGE (s:Space {code:"",name:"${data[i][1]}",createdOn:"${data[i][3]}",architecturalName:"${data[i][6]}",usage:"${data[i][8]}",description:"${data[i][6]}",key:"${this.keyGenerate()}",externalSystem:"${data[i][7]}",externalObject:"${data[i][8]}",externalIdentifier:"${data[i][9]}",tag:["${data[i][10]}"],usableHeight:"${data[i][11]}",grossArea:"${data[i][12]}",netArea:"${data[i][13]}",image:[],canDisplay:true,isDeleted:false,isActive:true,nodeType:"Space",isBlocked:false,canDelete:true})\
