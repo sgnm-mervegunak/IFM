@@ -1,55 +1,42 @@
 import { HttpService } from '@nestjs/axios';
 import { Controller, HttpException, Headers } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
+import { string } from 'joi';
 import { Unprotected } from 'nest-keycloak-connect';
 import { catchError, firstValueFrom, map } from 'rxjs';
 import { assignDtoPropToEntity, Neo4jService } from 'sgnm-neo4j/dist';
 import { VirtualNode } from 'src/common/baseobject/virtual.node';
 import { ContactService } from '../services/contact.service';
-
 @Controller('contactListener')
 @Unprotected()
 export class ContactListenerController {
   constructor(
     private readonly neo4jService: Neo4jService,
     private readonly httpService: HttpService,
-    private readonly componentService: ContactService,
   ) {}
 
+
   @EventPattern('createTypeContactRelation')
-  async createAssetListener(@Payload() message, @Headers('realm') realm) {
+  async createAssetListener(@Payload() message) {
     console.log(message);
     if (!message.value?.referenceKey || !message.value?.parentKey) {
       throw new HttpException('key is not available on kafka object', 400);
     }
-    // const component = await this.componentService.findOneNode(message.value?.parentKey, realm);
-    //check if facilityStructure exist
-    const structurePromise = await this.httpService
-      .get(`${process.env.STRUCTURE_URL}/${message.value?.referenceKey}`)
-      .pipe(
-        catchError(() => {
-          throw new HttpException('connection refused due to connection lost or wrong data provided', 502);
-        }),
-      )
-      .pipe(map((response) => response.data));
-    const structure = await firstValueFrom(structurePromise);
 
-    if (!structure) {
-      return 'structure not found';
-    }
-    const virtualFacilityStructureObject = message.value;
+    const virtualTypeObject = message.value;
 
-    const { parentKey } = virtualFacilityStructureObject;
+    const { parentKey } = virtualTypeObject;
 
     let virtualNode = new VirtualNode();
 
-    virtualNode = assignDtoPropToEntity(virtualNode, virtualFacilityStructureObject);
+    virtualNode = assignDtoPropToEntity(virtualNode, virtualTypeObject);
 
-    const value = await this.neo4jService.createNode(virtualNode, ['Virtual', 'Structure']);
+    const value = await this.neo4jService.createNode(virtualNode, ['Virtual', 'Type']);
 
-    await this.neo4jService.addRelationWithRelationNameByKey(parentKey, value.properties.key, 'INSIDE_IN');
+    await this.neo4jService.addRelationByLabelsAndFiltersAndRelationName([],{key:parentKey}, [],{key:value.properties.key}, 'MANUFACTUR');
 
-    await this.neo4jService.addRelationWithRelationNameByKey(parentKey, value.properties.key, 'HAS_VIRTUAL_RELATION');
+    await this.neo4jService.addRelationByLabelsAndFiltersAndRelationName([],{key:parentKey}, [],{key:value.properties.key}, 'HAS_VIRTUAL_RELATION');
+   
   }
 
   @EventPattern('deleteStructure')

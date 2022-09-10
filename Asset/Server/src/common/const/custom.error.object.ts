@@ -22,3 +22,10 @@ export function node_not_found(params) {
     params: params,
   };
 }
+
+export function other_microservice_errors(message) {
+  return {
+    message,
+    code: CustomAssetError.OTHER_MICROSERVICE_ERROR,
+  };
+}

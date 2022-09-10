@@ -9,7 +9,7 @@ import { UpdateContactDto } from '../dto/update-contact.dto';
 import { ContactNotFoundException } from 'src/common/notFoundExceptions/not.found.exception';
 import { assignDtoPropToEntity, createDynamicCyperObject, Neo4jService } from 'sgnm-neo4j/dist';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
-import { has_children_error } from 'src/common/const/custom.error.object';
+import { has_children_error, node_not_found } from 'src/common/const/custom.error.object';
 
 @Injectable()
 export class ContactRepository implements GeciciInterface<Contact> {
@@ -160,7 +160,7 @@ export class ContactRepository implements GeciciInterface<Contact> {
     try {
       const node = await this.neo4jService.findOneNodeByKey(key);
       if (!node) {
-        throw new ContactNotFoundException(key);
+        throw new HttpException(node_not_found({key:'string'}),400);
       }
       const createdBy = await this.neo4jService.findNodeAndRelationByRelationNameAndId(
         node.id,
@@ -189,6 +189,10 @@ export class ContactRepository implements GeciciInterface<Contact> {
       const result = { id: node.id, labels: node.labels, properties: node.properties };
       return result;
     } catch (error) {
+      const code =error.response?.code
+      if(code===CustomTreeError.NODE_NOT_FOUND){
+        throw new ContactNotFoundException(key)
+      }
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
