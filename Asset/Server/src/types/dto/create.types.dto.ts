@@ -96,7 +96,7 @@ export class CreateTypesDto {
 
   @ApiProperty()
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
-  parentId: string;
+  parentId: number;
 
   @ApiProperty()
   @IsOptional()

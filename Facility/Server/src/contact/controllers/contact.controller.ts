@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Headers } from '@nestjs/common';
-import { ContactService} from '../services/contact.service';
+import { ContactService } from '../services/contact.service';
 import { Roles, Unprotected } from 'nest-keycloak-connect';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { NoCache } from 'ifmcommon';
@@ -20,7 +20,8 @@ export class ContactController {
   })
   @Post()
   create(@Body() createContactDto: CreateContactDto, @Headers() header) {
-    const {language, realm} = header;
+    console.log(header);
+    const { language, realm } = header;
     return this.contactService.create(createContactDto, realm, language);
   }
 
@@ -29,7 +30,7 @@ export class ContactController {
   @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
   findOne(@Headers() header) {
-    const {language, realm} = header;
+    const { language, realm } = header;
     return this.contactService.findOne(realm, language);
   }
 
@@ -37,7 +38,7 @@ export class ContactController {
   //@Unprotected()
   @Roles({ roles: [UserRoles.ADMIN] })
   update(@Param('id') id: string, @Body() updateContactDto: UpdateContactDto, @Headers() header) {
-    const {language, realm} = header;
+    const { language, realm } = header;
     return this.contactService.update(id, updateContactDto, realm, language);
   }
 
@@ -45,14 +46,14 @@ export class ContactController {
   //@Unprotected()
   @Roles({ roles: [UserRoles.ADMIN] })
   remove(@Param('id') id: string, @Headers() header) {
-    const {language, realm} = header;
+    const { language, realm } = header;
     return this.contactService.remove(id, realm, language);
   }
   //@Unprotected()
   @Roles({ roles: [UserRoles.ADMIN] })
   @Post('/relation/:id/:target_parent_id')
   changeNodeBranch(@Param('id') id: string, @Param('target_parent_id') target_parent_id: string, @Headers() header) {
-    const {language, realm} = header;
+    const { language, realm } = header;
     return this.contactService.changeNodeBranch(id, target_parent_id, realm, language);
   }
 
@@ -61,7 +62,7 @@ export class ContactController {
   @Get('/:key')
   @NoCache()
   findOneNode(@Param('key') key: string, @Headers() header) {
-    const {language, realm} = header;
+    const { language, realm } = header;
     return this.contactService.findOneNode(key, realm, language);
   }
 }

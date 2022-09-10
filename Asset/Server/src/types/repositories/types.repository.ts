@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import {
   AssetNotFoundException,
   FacilityStructureNotFountException,
@@ -10,13 +10,25 @@ import { assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError, Neo4
 import { CreateTypesDto } from '../dto/create.types.dto';
 import { UpdateTypesDto } from '../dto/update.tpes.dto';
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
-import { node_not_found, wrong_parent_error } from 'src/common/const/custom.error.object';
+import { node_not_found, other_microservice_errors, wrong_parent_error } from 'src/common/const/custom.error.object';
 import { CustomAssetError } from 'src/common/const/custom.error.enum';
 import { NodeNotFound, WrongIdProvided } from 'src/common/bad.request.exception';
+import { HttpService } from '@nestjs/axios';
+import { catchError, map, firstValueFrom } from 'rxjs';
+import { VirtualNode } from 'src/common/baseobject/virtual.node';
+import { RelationName } from 'src/common/const/relation.name.enum';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class TypesRepository implements GeciciInterface<Type> {
-  constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) {}
+  @Inject(ConfigService)
+  private config: ConfigService
+  constructor(
+    private readonly neo4jService: Neo4jService,
+    private readonly kafkaService: NestKafkaService,
+    private readonly httpService: HttpService,
+
+  ) {}
   async findByKey(key: string) {
     try {
       const nodes = await this.neo4jService.findByLabelAndFilters(['Type'], { key });
@@ -63,10 +75,10 @@ export class TypesRepository implements GeciciInterface<Type> {
       }
     }
   }
-  async create(createTypesDto: CreateTypesDto, realm) {
+  async create(createTypesDto: CreateTypesDto, realm: string, language: string, authorization: string) {
     try {
       const rootNode = await this.neo4jService.findByIdAndOrLabelsAndFilters(
-        +createTypesDto.parentId,
+        createTypesDto.parentId,
         [Neo4jLabelEnum.TYPES],
         {
           isDeleted: false,
@@ -77,15 +89,64 @@ export class TypesRepository implements GeciciInterface<Type> {
         throw new HttpException(wrong_parent_error(), 400);
       }
 
+      //check if manufacturer exist
+     let manufacturer= await this.httpService
+        .get(`${this.config.get('CONTACT_URL')}/${createTypesDto.manufacturer}`, { headers: { authorization,language } })
+        .pipe(
+          catchError((error) => {
+           const {status,message}=error.response?.data
+            throw new HttpException(other_microservice_errors(message), status);
+          }),
+        )
+        .pipe(map((response) => response.data));
+
+         manufacturer = await firstValueFrom(manufacturer);
+        
+
+
       const type = new Type();
       const typeObject = assignDtoPropToEntity(type, createTypesDto);
-      const value = await this.neo4jService.createNode(typeObject, [Neo4jLabelEnum.TYPE]);
+      const typeNode = await this.neo4jService.createNode(typeObject, [Neo4jLabelEnum.TYPE]);
 
-      value['properties']['id'] = value['identity'].low;
-      const result = { id: value['identity'].low, labels: value['labels'], properties: value['properties'] };
+      typeNode['properties']['id'] = typeNode['identity'].low;
+      const result = { id: typeNode['identity'].low, labels: typeNode['labels'], properties: typeNode['properties'] };
       if (createTypesDto['parentId']) {
-        await this.neo4jService.addRelations(String(result['id']), createTypesDto['parentId']);
+        await this.neo4jService.addParentRelationByIdAndFilters(result['id'], {}, createTypesDto['parentId'], {});
       }
+
+      let virtualNode = new VirtualNode();
+      const createContactRelationDto = { referenceKey: createTypesDto.manufacturer };
+      virtualNode = assignDtoPropToEntity(virtualNode, createContactRelationDto);
+      const contactUrl = `${process.env.CONTACT_URL}/${createTypesDto.manufacturer}`;
+
+      virtualNode.url = contactUrl;
+      const virtualContactNode = await this.neo4jService.createNode(virtualNode, [
+        Neo4jLabelEnum.VIRTUAL,
+        Neo4jLabelEnum.CONTACT,
+      ]);
+
+      await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
+        typeNode.identity.low,
+        {},
+        virtualContactNode.identity.low,
+        {},
+        RelationName.MANUFACTURED_BY,
+      );
+      await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
+        typeNode.identity.low,
+        {},
+        virtualContactNode.identity.low,
+        {},
+        RelationName.HAS_VIRTUAL_RELATION,
+      );
+
+      const typeUrl = `${process.env.TYPE_URL}/${typeNode.properties.key}`;
+      const kafkaObject = {
+        referenceKey: typeNode.properties.key,
+        parentKey: createTypesDto.manufacturer,
+        url: typeUrl,
+      };
+      await this.kafkaService.producerSendMessage('createTypeContactRelation', JSON.stringify(kafkaObject));
       return result;
     } catch (error) {
       const code = error.response?.code;
@@ -96,6 +157,10 @@ export class TypesRepository implements GeciciInterface<Type> {
         }
       } else if (code >= 9500 && code <= 9750) {
         if (error.response?.code == CustomAssetError.WRONG_PARENT) {
+          throw new WrongIdProvided();
+        }
+        if (error.response?.code == CustomAssetError.OTHER_MICROSERVICE_ERROR) {
+          console.log('here')
           throw new WrongIdProvided();
         }
       } else {
@@ -169,27 +234,6 @@ export class TypesRepository implements GeciciInterface<Type> {
       } else {
         throw new HttpException(message, code);
       }
-    }
-  }
-
-  async changeNodeBranch(_id: string, _target_parent_id: string) {
-    try {
-      await this.neo4jService.deleteRelations(_id);
-      await this.neo4jService.addRelations(_id, _target_parent_id);
-    } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
-
-  async deleteRelations(_id: string) {
-    await this.neo4jService.deleteRelations(_id);
-  }
-
-  async addRelations(_id: string, _target_parent_id: string) {
-    try {
-      await this.neo4jService.addRelations(_id, _target_parent_id);
-    } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

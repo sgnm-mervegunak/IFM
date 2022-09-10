@@ -81,7 +81,10 @@ import { ExcelImportExportModule } from './excelExport/excelImportExport.module'
         port: configService.get('NEO4J_PORT'),
         scheme: configService.get('NEO4J_SCHEME'),
         username: configService.get('NEO4J_USERNAME'),
+<<<<<<< HEAD
         //database: 'test',
+=======
+>>>>>>> hydr
       }),
     }),
 
