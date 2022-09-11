@@ -46,7 +46,7 @@ interface Node {
 }
 
 const schema = yup.object({
-    name: yup.string().required("This area is required.").min(2, "This area accepts min 2 characters."),
+    name: yup.string().required("This area is required.").max(50, "This area accepts max 50 characters."),
 });
 
 const BlockForm = ({
@@ -65,7 +65,7 @@ const BlockForm = ({
 
     const [data, setData] = useState<any>();
     const { t } = useTranslation(["common"]);
-    const { toast } = useAppSelector(state => state.toast);  
+    const { toast } = useAppSelector(state => state.toast);
 
     const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
         defaultValues: {
@@ -76,7 +76,7 @@ const BlockForm = ({
 
     useEffect(() => {
         if (submitted) {
-            handleSubmit(onSubmit)();            
+            handleSubmit(onSubmit)();
         }
         setSubmitted(false);
 
@@ -151,8 +151,8 @@ const BlockForm = ({
                     });
                 });
 
-                setAddDia(false);
-                setSelectedFacilityType(undefined);
+            setAddDia(false);
+            setSelectedFacilityType(undefined);
 
         } else {
 
@@ -203,8 +203,8 @@ const BlockForm = ({
                     style={{ width: '100%' }}
                     defaultValue={data?.name || ""}
                 />
+                <p style={{ color: "red" }}>{errors.name?.message}</p>
             </div>
-            <p style={{ color: "red" }}>{errors.name?.message}</p>
 
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>{t("Description")}</h5>
@@ -214,8 +214,8 @@ const BlockForm = ({
                     {...register("description")}
                     style={{ width: "100%" }}
                 />
+                <p style={{ color: "red" }}>{errors.description?.message}</p>
             </div>
-            <p style={{ color: "red" }}>{errors.description?.message}</p>
 
             <div className="field structureChips">
                 <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
@@ -235,8 +235,8 @@ const BlockForm = ({
                         />
                     )}
                 />
+                <p style={{ color: "red" }}>{errors.tag?.message}</p>
             </div>
-            <p style={{ color: "red" }}>{errors.tag?.message}</p>
 
         </form>
     );

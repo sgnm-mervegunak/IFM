@@ -56,9 +56,14 @@ interface Node {
 const schema = yup.object({
   name: yup
     .string()
-    .required("This area is required.").min(2, "This area accepts min 2 characters."),
+    .required("This area is required.").max(50, "This area accepts max 50 characters."),
   category: yup.string().required("This area is required."),
   status: yup.string().required("This area is required."),
+  projectDescription: yup.string().max(255, "This area accepts max 255 characters."),
+  siteDescription: yup.string().max(255, "This area accepts max 255 characters."),
+  phase: yup.string().max(255, "This area accepts max 255 characters."),
+  projectName: yup.string().max(50, "This area accepts max 50 characters."),
+  siteName: yup.string().max(50, "This area accepts max 50 characters."),
 });
 
 const BuildingForm = ({
@@ -442,15 +447,24 @@ const BuildingForm = ({
               <p style={{ color: "red" }}>{errors.name?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Project Name")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("projectName")}
-                style={{ width: '100%' }}
-                defaultValue={data?.projectName || ""}
+            <div className="field col-12 md:col-6 structureChips">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
+              <Controller
+
+                defaultValue={data?.tag || []}
+                name="tag"
+                control={control}
+                render={({ field }) => (
+                  <Chips
+                    value={field.value}
+                    onChange={(e) => {
+                      field.onChange(e.value)
+                    }}
+                    style={{ width: "100%" }}
+                  />
+                )}
               />
-              <p style={{ color: "red" }}>{errors.projectName?.message}</p>
+              <p style={{ color: "red" }}>{errors.tag?.message}</p>
             </div>
 
             <div className="field col-12 md:col-6">
@@ -480,6 +494,17 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Description")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("description")}
+                style={{ width: '100%' }}
+                defaultValue={data?.description || ""}
+              />
+              <p style={{ color: "red" }}>{errors.description?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-3">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Status")}</h5>
               <Controller
                 defaultValue={data?.status || ""}
@@ -614,7 +639,29 @@ const BuildingForm = ({
               <p style={{ color: "red" }}>{errors.warrantyExpireDate?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-3">
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Project Description")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("projectDescription")}
+                style={{ width: '100%' }}
+                defaultValue={data?.projectDescription || ""}
+              />
+              <p style={{ color: "red" }}>{errors.projectDescription?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Site Description")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("siteDescription")}
+                style={{ width: '100%' }}
+                defaultValue={data?.siteDescription || ""}
+              />
+              <p style={{ color: "red" }}>{errors.siteDescription?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Phase")}</h5>
               <InputText
                 autoComplete="off"
@@ -740,35 +787,15 @@ const BuildingForm = ({
               <p style={{ color: "red" }}>{errors.address?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-6 structureChips">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
-              <Controller
-
-                defaultValue={data?.tag || []}
-                name="tag"
-                control={control}
-                render={({ field }) => (
-                  <Chips
-                    value={field.value}
-                    onChange={(e) => {
-                      field.onChange(e.value)
-                    }}
-                    style={{ width: "100%" }}
-                  />
-                )}
-              />
-              <p style={{ color: "red" }}>{errors.tag?.message}</p>
-            </div>
-
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Description")}</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Project Name")}</h5>
               <InputText
                 autoComplete="off"
-                {...register("description")}
+                {...register("projectName")}
                 style={{ width: '100%' }}
-                defaultValue={data?.description || ""}
+                defaultValue={data?.projectName || ""}
               />
-              <p style={{ color: "red" }}>{errors.description?.message}</p>
+              <p style={{ color: "red" }}>{errors.projectName?.message}</p>
             </div>
 
             <div className="field col-12 md:col-6">
@@ -781,28 +808,6 @@ const BuildingForm = ({
                 disabled
               />
               <p style={{ color: "red" }}>{errors.siteName?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Project Description")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("projectDescription")}
-                style={{ width: '100%' }}
-                defaultValue={data?.projectDescription || ""}
-              />
-              <p style={{ color: "red" }}>{errors.projectDescription?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Site Description")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("siteDescription")}
-                style={{ width: '100%' }}
-                defaultValue={data?.siteDescription || ""}
-              />
-              <p style={{ color: "red" }}>{errors.siteDescription?.message}</p>
             </div>
 
           </div>
