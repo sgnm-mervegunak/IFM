@@ -332,6 +332,10 @@ const SetZone = () => {
       } else {
         i.selectable = false;
       }
+
+      if (i.name === "Zones") {
+        i.icon = "pi pi-fw pi-star-fill";
+      }
     }
   };
 

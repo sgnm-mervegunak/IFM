@@ -267,7 +267,7 @@ const SetJointSpace = () => {
       }
 
       if (i.name === "Joint Space") {
-        i.icon = "pi pi-fw pi-download";
+        i.icon = "pi pi-fw pi-star-fill";
       }
 
     }
