@@ -95,8 +95,9 @@ const DisplayNode = ({ displayKey, docTypes }: Params) => {
                   </div>
                 );
               } else if (key === "category") {
-                ClassificationService.findClassificationByCodeAndLanguage(localStorage.getItem("i18nextLng") || "EN", data[key]).then((res) => { //will be refactor
-                  setCategory(res.data[0]?._fields[1]?.properties?.name);
+                ClassificationService.findClassificationByCode(data[key]).then((res) => { //will be refactor
+                  console.log("------------------", res);
+                  setCategory(res.data[0]?._fields[0]?.properties?.name);
                 });
                 return (
                   <div className="field" key={index}>
@@ -105,8 +106,13 @@ const DisplayNode = ({ displayKey, docTypes }: Params) => {
                   </div>
                 );
               } else if (key === "status") {
-                ClassificationService.nodeInfo(data[key]).then((res) => {//will be refactor
-                  setStatus(res.data.properties.name);
+                // ClassificationService.nodeInfo(data[key]).then((res) => {//will be refactor
+                //   setStatus(res.data.properties.name);
+                // });
+                ClassificationService.findClassificationByCode(data[key]).then((res) => { //will be refactor
+                  console.log("------------------2", res.data);
+                  let x = res.data[0]?._fields[0]?.properties?.name;
+                  setStatus(x);
                 });
                 return (
                   <div className="field" key={index}>

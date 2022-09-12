@@ -82,6 +82,10 @@ const findClassificationByCodeAndLanguage = async (label: string, code: string) 
   return axios.get(url + "/getAClassificationNode/" + "info" + "/" + label + "/" + code);
 };
 
+const findClassificationByCode = async (code: string) => {
+  return axios.get(url + "/getAClassificationNodeByCode/" + "info" + "/" + code);
+};
+
 const create = async (classification: ClassificationInterface) => {
   return axios.post(url, classification);
 };
@@ -114,6 +118,6 @@ const setPassive = async (id: string) => {
   return axios.patch(url + "/setIsActiveFalseOfClassificationAndItsChild/" + id);
 };
 
-const service = { findOne, findAll, findAllActive, create, update, remove, relation, nodeInfo, setActive, setPassive, findAllActiveByLabel, findClassificationByCodeAndLanguage };
+const service = { findOne, findAll, findAllActive, create, update, remove, relation, nodeInfo, setActive, setPassive, findAllActiveByLabel, findClassificationByCodeAndLanguage, findClassificationByCode };
 
 export default service;

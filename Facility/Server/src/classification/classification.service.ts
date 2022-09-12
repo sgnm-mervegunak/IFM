@@ -101,4 +101,11 @@ export class ClassificationService {
   async getNodeByClassificationLanguageRealmAndCode( classificationName:string, language:string,realm:string,code:string){
     return await this.classificationRepository.getNodeByClassificationLanguageRealmAndCode( classificationName, language,realm,code);
   }
+
+  
+  @Span('get a classification with language, realm and code')
+  @OtelMethodCounter()
+  async getNodeByLanguageRealmAndCode( language: string, realm: string, code: string) {
+    return await this.classificationRepository.getNodeByLanguageRealmAndCode(language, realm, code);
+  }
 }
