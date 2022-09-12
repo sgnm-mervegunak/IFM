@@ -492,7 +492,6 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
      if (structureRootNode[0]["_fields"][0].properties.realm !== realm) {
        throw new HttpException({ message: 'You dont have permission' }, 403);
      }
-
     ///////////////////////////// parent - child node type relation control ////////////////////////////
  
     const allowedStructureTypeNode = await this.neo4jService.findChildrensByLabelsOneLevel(
@@ -517,8 +516,52 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
     if (!isExist.length) {
       throw new HttpException(wrong_parent_error({node1: structureData['nodeType'], 
                                                       node2: node[0]["_fields"][0].labels[0]}), 400);
-
       }
+
+     //name property uniqueness  control
+    if (node[0]["_fields"][0].labels[0] == 'Building' || node[0]["_fields"][0].labels[0] == 'Block' || node[0]["_fields"][0].labels[0] == 'Floor') {
+      let building;
+       if (node[0]["_fields"][0].labels[0] == 'Building') {
+         building = node;
+       }
+       else {
+        building = await this.neo4jService.findChildrensByChildIdAndFilters(
+          ['Building'],
+          {'isDeleted': false},
+          node[0]["_fields"][0].identity.low,
+          [],
+          {'isDeleted': false},
+          RelationName.PARENT_OF
+         ) 
+        } 
+        let sameNameNode = await this.neo4jService.findChildrensByIdAndFilters(
+          building[0]["_fields"][0].identity.low,
+          {'isDeleted': false},
+          [structureData['nodeType']],
+          {'isDeleted': false, 'name': structureData['name'] },
+          RelationName.PARENT_OF
+        )
+        if (sameNameNode && sameNameNode.length > 0) {
+          throw new HttpException(wrong_parent_error({node1: "1", node2: "1"}), 400);
+        }
+       }
+
+    else  {
+      
+      let sameNameNode = await this.neo4jService.findChildrensByIdAndFilters(
+        structureRootNode[0]["_fields"][0].identity.low,
+        {'isDeleted': false},
+        [structureData['nodeType']],
+        {'isDeleted': false, 'name': structureData['name'] },
+        RelationName.PARENT_OF
+      )
+      if (sameNameNode && sameNameNode.length > 0) {
+        throw new HttpException(wrong_parent_error({node1: "2", node2: "2"}), 400);
+      }
+    }
+    
+
+   
 
     ////////////////////////////// Control of input properties with facility type properties //////////////////////////////////////////////////
     const properties = await this.findChildrenByFacilityTypeNode(
