@@ -716,7 +716,7 @@ export class ClassificationRepository implements classificationInterface<Classif
     const deneme = await this.neo4jService.findByLabelAndFilters([], {
       isDeleted: false,
       code,
-      language: language.toUpperCase(),
+      language
     });
     return deneme;
   }
