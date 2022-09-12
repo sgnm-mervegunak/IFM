@@ -138,7 +138,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       {
         canDelete: true,
         isDeleted: false,
-        name: 'TR',
+        name: 'tr',
         realm: 'Signum',
         isActive: true,
       },
@@ -148,7 +148,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       {
         canDelete: true,
         isDeleted: false,
-        name: 'EN',
+        name: 'en',
         realm: 'Signum',
         isActive: true,
       },
@@ -166,9 +166,9 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         isRoot: true,
         canCopied: true,
         isActive: true,
-        language: 'EN'
+        language: 'en'
       },
-      ['FacilityStatus_EN'],
+      ['FacilityStatus_en'],
     );
     const facilityStatusNodeTR = await this.neo4jService.createNode(
       {
@@ -179,9 +179,9 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         isRoot: true,
         canCopied: true,
         isActive: true,
-        language: 'TR'
+        language: 'tr'
       },
-      ['FacilityStatus_TR'],
+      ['FacilityStatus_tr'],
     );
     const FacilityDocTypesNode = await this.neo4jService.createNode(
       {
@@ -192,9 +192,9 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         isRoot: true,
         canCopied: true,
         isActive: true,
-        language: 'EN'
+        language: 'en'
       },
-      ['FacilityDocTypes_EN'],
+      ['FacilityDocTypes_en'],
     );
     const FacilityDocTypesNodeTR = await this.neo4jService.createNode(
       {
@@ -205,9 +205,9 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         isRoot: true,
         canCopied: true,
         isActive: true,
-        language: 'TR'
+        language: 'tr'
       },
-      ['FacilityDocTypes_TR'],
+      ['FacilityDocTypes_tr'],
     );
     const FacilityZoneTypesNode = await this.neo4jService.createNode(
       {
@@ -218,9 +218,9 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         isRoot: true,
         canCopied: true,
         isActive: true,
-        language: 'EN'
+        language: 'en'
       },
-      ['FacilityZoneTypes_EN'],
+      ['FacilityZoneTypes_en'],
     );
     const FacilityZoneTypesNodeTR = await this.neo4jService.createNode(
       {
@@ -231,9 +231,9 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         isRoot: true,
         canCopied: true,
         isActive: true,
-        language: 'TR'
+        language: 'tr'
       },
-      ['FacilityZoneTypes_TR'],
+      ['FacilityZoneTypes_tr'],
     );
     const FacilityFloorTypesNode = await this.neo4jService.createNode(
       {
@@ -244,9 +244,9 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         isRoot: true,
         canCopied: true,
         isActive: true,
-        language: 'EN'
+        language: 'en'
       },
-      ['FacilityFloorTypes_EN'],
+      ['FacilityFloorTypes_en'],
     );
     const FacilityFloorTypesNodeTR = await this.neo4jService.createNode(
       {
@@ -257,9 +257,9 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         isRoot: true,
         canCopied: true,
         isActive: true,
-        language: 'TR'
+        language: 'tr'
       },
-      ['FacilityFloorTypes_TR'],
+      ['FacilityFloorTypes_tr'],
     );
     await this.neo4jService.addRelations(facilityStatusNode.identity.low, classificationNode.identity.low);
     await this.neo4jService.addRelations(FacilityDocTypesNode.identity.low, classificationNode.identity.low);
@@ -280,9 +280,9 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         isRoot: true,
         canCopied: true,
         isActive: true,
-        language: 'EN'
+        language: 'en'
       },
-      ['FacilityTypes_EN'],
+      ['FacilityTypes_en'],
     );
 
     const facilityTypesNodeTR = await this.neo4jService.createNode(
@@ -294,9 +294,9 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         isRoot: true,
         canCopied: true,
         isActive: true,
-        language: 'TR'
+        language: 'tr'
       },
-      ['FacilityTypes_TR'],
+      ['FacilityTypes_tr'],
     );
 
     await this.neo4jService.addRelations(facilityTypesNode.identity.low, typeNode.identity.low);
@@ -309,7 +309,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Situation plan',
       code: "FacilityDocType1",
       isActive: true,
-      language: 'EN', 
+      language: 'en', 
     },
     ['FacilityDocTypes']
     );
@@ -320,7 +320,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Durum planı',
       code: "FacilityDocType1",
       isActive: true,
-      language: 'TR',
+      language: 'tr',
       
     },
     ['FacilityDocTypes']
@@ -332,7 +332,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Architectural drawings',
       code: "FacilityDocType2",
       isActive: true,
-      language: 'EN',
+      language: 'en',
       
     },
     ['FacilityDocTypes']
@@ -344,7 +344,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Mimari çizimler',
       code: "FacilityDocType2",
       isActive: true,
-      language: 'TR',
+      language: 'tr',
       
     },
     ['FacilityDocTypes']
@@ -356,7 +356,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Other documents',
       code: "FacilityDocType3",
       isActive: true,
-      language: 'EN',
+      language: 'en',
       
     },
     ['FacilityDocTypes']
@@ -368,7 +368,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Diğer dokümanlar',
       code: "FacilityDocType3",
       isActive: true,
-      language: 'TR',
+      language: 'tr',
       
     },
     ['FacilityDocTypes']
@@ -389,7 +389,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Circulation Zone',
       code: "FacilityzoneType1",
       isActive: true,
-      language: 'EN',
+      language: 'en',
       
     },
     ['FacilityZoneTypes']
@@ -401,7 +401,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Lighting Zone',
       code: "FacilityzoneType2",
       isActive: true,
-      language: 'EN',
+      language: 'en',
       
     },
     ['FacilityZoneTypes']
@@ -413,7 +413,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Fire Alarm Zone',
       code: "FacilityzoneType3",
       isActive: true,
-      language: 'EN',
+      language: 'en',
       
     },
     ['FacilityZoneTypes']);
@@ -424,7 +424,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Historical Preservation Zone',
       code: "FacilityzoneType4",
       isActive: true,
-      language: 'EN',
+      language: 'en',
       
     },
     ['FacilityZoneTypes']);
@@ -435,7 +435,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Occupancy Zone',
       code: "FacilityzoneType5",
       isActive: true,
-      language: 'EN',
+      language: 'en',
       
     },
     ['FacilityZoneTypes']);
@@ -446,7 +446,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Ventilation Zone',
       code: "FacilityzoneType6",
       isActive: true,
-      language: 'EN',
+      language: 'en',
       
     },
     ['FacilityZoneTypes']);
@@ -459,7 +459,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Dolaşım Bölgesi',
       code: "FacilityzoneType1",
       isActive: true,
-      language: 'TR',
+      language: 'tr',
       
     },
     ['FacilityZoneTypes']);
@@ -470,7 +470,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Aydınlatma Bölgesi',
       code: "FacilityzoneType2",
       isActive: true,
-      language: 'TR',
+      language: 'tr',
       
     },
     ['FacilityZoneTypes']);
@@ -481,7 +481,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Yangın Alarm Bölgesi',
       code: "FacilityzoneType3",
       isActive: true,
-      language: 'TR',
+      language: 'tr',
       
     },
     ['FacilityZoneTypes']);
@@ -492,7 +492,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Historical Preservation Zone',
       code: "FacilityzoneType4",
       isActive: true,
-      language: 'TR',
+      language: 'tr',
       
     },
     ['FacilityZoneTypes']);
@@ -503,7 +503,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Doluluk Bölgesi',
       code: "FacilityzoneType5",
       isActive: true,
-      language: 'TR',
+      language: 'tr',
     
     },
     ['FacilityZoneTypes']);
@@ -514,7 +514,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Havalandırma Bölgesi',
       code: "FacilityzoneType6",
       isActive: true,
-      language: 'TR',
+      language: 'tr',
       
     },
     ['FacilityZoneTypes']);
@@ -539,7 +539,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Site',
       code: "FacilityFloorType1",
       isActive: true,
-      language: 'EN',
+      language: 'en',
       
     },
     ['FacilityFloorTypes']);
@@ -550,7 +550,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Floor',
       code: "FacilityFloorType2",
       isActive: true,
-      language: 'EN',
+      language: 'en',
       
     },
     ['FacilityFloorTypes']);
@@ -561,7 +561,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Roof',
       code: "FacilityFloorType3",
       isActive: true,
-      language: 'EN',
+      language: 'en',
       
     },
     ['FacilityFloorTypes']);
@@ -573,7 +573,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Alan',
       code: "FacilityFloorType1",
       isActive: true,
-      language: 'TR',
+      language: 'tr',
       
     },
     ['FacilityFloorTypes']);
@@ -584,7 +584,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Kat',
       code: "FacilityFloorType2",
       isActive: true,
-      language: 'TR',
+      language: 'tr',
       
     },
     ['FacilityFloorTypes']);
@@ -595,7 +595,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Çatı',
       code: "FacilityFloorType3",
       isActive: true,
-      language: 'TR',
+      language: 'tr',
     
     },
     ['FacilityFloorTypes']);
@@ -615,7 +615,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'In used',
       code: "FacilityStatus1",
       isActive: true,
-      language: 'EN',
+      language: 'en',
      
     },
     ['FacilityStatus']);
@@ -626,7 +626,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'out of use',
       code: "FacilityStatus2",
       isActive: true,
-      language: 'EN',
+      language: 'en',
    
     },
     ['FacilityStatus']);
@@ -638,7 +638,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'rented',
       code: "FacilityStatus3",
       isActive: true,
-      language: 'EN',
+      language: 'en',
       
     },
     ['FacilityStatus']);
@@ -649,7 +649,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'sold',
       code: "FacilityStatus4",
       isActive: true,
-      language: 'EN',
+      language: 'en',
       
     },
     ['FacilityStatus']);
@@ -661,7 +661,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Kullanımda',
       code: "FacilityStatus1",
       isActive: true,
-      language: 'TR',
+      language: 'tr',
       
     },
     ['FacilityStatus']);
@@ -672,7 +672,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Kullanım dışı',
       code: "FacilityStatus2",
       isActive: true,
-      language: 'TR',
+      language: 'tr',
       
     },
     ['FacilityStatus']);
@@ -684,7 +684,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Kiralık',
       code: "FacilityStatus3",
       isActive: true,
-      language: 'TR',
+      language: 'tr',
       
     },
     ['FacilityStatus']);
@@ -695,7 +695,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       name: 'Satıldı',
       code: "FacilityStatus4",
       isActive: true,
-      language: 'TR',
+      language: 'tr',
       
     },
     ['FacilityStatus']);
