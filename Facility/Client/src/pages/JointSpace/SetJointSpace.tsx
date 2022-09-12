@@ -124,6 +124,7 @@ const SetJointSpace = () => {
   const [uploadFiles, setUploadFiles] = useState<any>({});
   const params = useParams();
   const { t } = useTranslation(["common"]);
+  const [joint, setJoint] = useState<any>();
 
   const { register, handleSubmit, watch, reset, formState: { errors }, control } = useForm({
     defaultValues: {
@@ -263,6 +264,10 @@ const SetJointSpace = () => {
         i.selectable = true;
       } else {
         i.selectable = false;
+      }
+
+      if (i.name === "Joint Space") {
+        i.icon = "pi pi-fw pi-download";
       }
 
     }
@@ -908,7 +913,6 @@ const SetJointSpace = () => {
 
         {selectedKeys.length > 1 &&
           <div className="mt-4">
-
             <Button label={t("Join")} icon="pi pi-check" className="ml-2" onClick={() => setAddDia(true)} />
 
           </div>
@@ -948,7 +952,8 @@ const SetJointSpace = () => {
             <>
               <span className="ml-4 ">
                 {
-                  data.nodeType === "JointSpace" ? <Button
+                  data.nodeType === "JointSpace" ?
+                    <Button
                     icon="pi pi-trash" className="p-button-rounded p-button-secondary p-button-text" aria-label="Delete"
                     onClick={() => {
                       setDeleteNodeKey(data.key);

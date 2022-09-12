@@ -5,7 +5,7 @@ export default [
     icon: "pi pi-fw pi-home",
     items: [
       { label: "Dashboard", icon: "pi pi-fw pi-chart-bar", to: "/" },
-      { label: "Facility", icon: "pi pi-fw pi-pencil", to: "/facility" },
+      { label: "Organization/Realm", icon: "pi pi-fw pi-pencil", to: "/facility" },
       {
         label: "Classifications",
         icon: "pi pi-fw pi-align-left",
