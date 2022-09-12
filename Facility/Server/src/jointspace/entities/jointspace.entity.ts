@@ -4,19 +4,33 @@ import { BaseGraphObject } from 'src/common/baseobject/base.graph.object';
 export class JointSpace extends BaseGraphObject {
   className: string = JointSpace.name;
 
-  ArchitecturalName: string;
+  architecturalName: string;
 
-  ArchitecturalCode: string;
+  architecturalCode: string;
 
   name: string;
 
   code: string;
 
-  m2?: string;
+  operatorName: string;
 
-  spaceType: string;
+  operatorCode: string;
+
+  category: string;
+
+  usage: string;
 
   status: string;
+
+  roomTag: string[];
+
+  images: string[];
+
+  usableHeight: number;
+
+  grossArea: number;
+
+  netArea: number;
 
   jointStartDate: string = moment().format('YYYY-MM-DD HH:mm:ss');
 

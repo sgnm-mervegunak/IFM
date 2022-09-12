@@ -8,6 +8,8 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { TreeSelect } from "primereact/treeselect";
 import { Calendar } from "primereact/calendar";
+import { TabView, TabPanel } from 'primereact/tabview';
+import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
@@ -22,6 +24,7 @@ import JointSpaceService from "../../services/jointSpace";
 import { useAppSelector } from "../../app/hook";
 import FormGenerate from "../FormGenerate/FormGenerate";
 import DisplayNode from "../FacilityStructure/Display/DisplayNode";
+import ImageUploadComponent from "./FileUpload/ImageUpload/ImageUpload";
 
 interface Node {
   cantDeleted: boolean;
@@ -93,6 +96,7 @@ const SetJointSpace = () => {
   const [classificationSpace, setClassificationSpace] = useState<Node[]>([]);
   const [classificationStatus, setclassificationStatus] = useState<Node[]>([]);
   const [codeCategory, setCodeCategory] = useState("");
+  const [codeUsage, setCodeUsage] = useState("");
   const [codeStatus, setCodeStatus] = useState("");
   const [formTypeId, setFormTypeId] = useState<any>(undefined);
   const [labels, setLabels] = useState<string[]>([]);
@@ -116,6 +120,8 @@ const SetJointSpace = () => {
   const [isUpdate, setIsUpdate] = useState(false);
   const [display, setDisplay] = useState(false);
   const [displayKey, setDisplayKey] = useState("");
+  const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
+  const [uploadFiles, setUploadFiles] = useState<any>({});
   const params = useParams();
   const { t } = useTranslation(["common"]);
 
@@ -142,7 +148,7 @@ const SetJointSpace = () => {
   };
 
   const getClassificationSpace = async () => {
-    await ClassificationsService.findAllActiveByLabel({ label: "OmniClass13"}).then((res) => {
+    await ClassificationsService.findAllActiveByLabel({ label: "OmniClass13" }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodesClassification(temp);
       setClassificationSpace(temp);
@@ -150,7 +156,7 @@ const SetJointSpace = () => {
   };
 
   const getClassificationStatus = async () => {
-    await ClassificationsService.findAllActiveByLabel({ label: "FacilityStatus"}).then((res) => {
+    await ClassificationsService.findAllActiveByLabel({ label: "FacilityStatus" }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodesClassification(temp);
       setclassificationStatus(temp);
@@ -262,18 +268,42 @@ const SetJointSpace = () => {
     }
   };
 
+  const UploadAnyFile = (folderName: string, file: any) => {
+    const url = "http://localhost:3004/file-upload/single";
+    const formData = new FormData();
+
+    formData.append("file", file);
+    formData.append("realmName", "ifm");
+    formData.append("folderName", folderName);
+    return axios.post(url, formData);
+  };
+
+  const DeleteAnyFile = (realmName: string, fileName: string) => {
+    const url = "http://localhost:3004/file-upload/removeOne";
+
+    return axios.delete(url, { data: { fileName, realmName } });
+  };
+
   const addItem = handleSubmit((data) => {
     let newNode: any = {};
 
     newNode = {
-      ArchitecturalName: data?.ArchitecturalName,
-      ArchitecturalCode: data?.ArchitecturalCode,
+      architecturalName: data?.architecturalName,
+      architecturalCode: data?.architecturalCode,
       name: data?.name,  //selectedKeysName.toString().replaceAll(",", "-"),
       code: data?.code,
+      operatorName: data?.operatorName,
+      operatorCode: data?.operatorCode,
       tag: data?.tag,
       m2: data?.m2,
-      spaceType: codeCategory,
+      category: codeCategory,
+      usage: codeUsage,
       status: codeStatus,
+      description: data?.description,
+      roomTag: data?.roomTag,
+      usableHeight: data?.usableHeight,
+      grossArea: data?.grossArea,
+      netArea: data?.netArea,
       jointStartDate: data?.jointStartDate,
       jointEndDate: data?.jointEndDate,
       nodeKeys: selectedKeys
@@ -281,7 +311,7 @@ const SetJointSpace = () => {
     console.log(newNode);
 
     JointSpaceService.createJointSpace(newNode)
-      .then((res) => {
+      .then(async(res) => {
         toast.current.show({
           severity: "success",
           summary: t("Successful"),
@@ -289,9 +319,40 @@ const SetJointSpace = () => {
           life: 3000,
         });
 
+        let temp = {} as any;
+        for (let item in uploadFiles) {
+          temp[item] = [];
+          for (let file of uploadFiles[item]) {
+            if (file.isImage) {
+              let resFile = await UploadAnyFile(
+                res.data.key + "/" + item,
+                file.file
+              );
+              delete resFile.data.message;
+              temp[item].push({ ...resFile.data, main: file.main });
+            } else {
+              let resFile = await UploadAnyFile(
+                res.data.key + "/" + item,
+                file.file
+              );
+              delete resFile.data.message;
+              temp[item].push({ ...resFile.data, type: file.type });
+            }
+          }
+        }
+        for (let item in temp) {
+          temp[item] = JSON.stringify(temp[item]);
+        }
+        FacilityStructureService.update(res.data.key, {
+          ...newNode,
+          ...temp,
+        });
+
+        setUploadFiles({});
         getJointSpace();
         setSelectedNodeKey([]);
         setSelectedKeys([]);
+        setSelectedKeysName([]);
 
       })
       .catch((err) => {
@@ -301,6 +362,7 @@ const SetJointSpace = () => {
           detail: err.response ? err.response.data.message : err.message,
           life: 2000,
         });
+        setUploadFiles({});
       });
 
     setAddDia(false);
@@ -372,6 +434,7 @@ const SetJointSpace = () => {
         getJointSpace();
         setSelectedNodeKey([]);
         setSelectedKeys([]);
+        setSelectedKeysName([]);
       })
       .catch((err) => {
         toast.current.show({
@@ -418,12 +481,19 @@ const SetJointSpace = () => {
             reset({
               name: "",
               code: "",
-              ArchitecturalCode: "",
-              ArchitecturalName: "",
+              architecturalCode: "",
+              architecturalName: "",
+              operatorName: "",
+              operatorCode: "",
               tag: "",
-              m2: "",
-              spaceType: "",
+              category: "",
+              usage: "",
               status: "",
+              description: "",
+              roomTag: "",
+              usableHeight: "",
+              grossArea: "",
+              netArea: "",
               jointStartDate: "",
               jointEndDate: ""
             });
@@ -467,9 +537,7 @@ const SetJointSpace = () => {
   //       <Button
   //         label="Cancel"
   //         icon="pi pi-times"
-  //         onClick={() => {
-  //           setFormDia(false);
-  //         }}
+  //         onClick={() => {data?.operatorCode
   //         className="p-button-text"
   //       />
   //     </div>
@@ -512,178 +580,311 @@ const SetJointSpace = () => {
       >
 
         <form>
-          <div className="formgrid grid">
+          <TabView>
+            <TabPanel header={t("Form")}>
+              <div className="formgrid grid">
 
-            <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("code")}
-                style={{ width: '100%' }}
-                defaultValue={data?.code || ""}
-              />
-              <p style={{ color: "red" }}>{errors.code?.message}</p>
-            </div>
+                <div className="field col-12 md:col-6">
+                  <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
+                  <InputText
+                    autoComplete="off"
+                    {...register("name")}
+                    style={{ width: '100%' }}
+                    defaultValue={data?.name || ""}
+                  />
+                  <p style={{ color: "red" }}>{errors.name?.message}</p>
+                </div>
 
-            <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("name")}
-                style={{ width: '100%' }}
-                defaultValue={data?.name || ""}
-              />
-              <p style={{ color: "red" }}>{errors.name?.message}</p>
-            </div>
+                <div className="field col-12 md:col-6">
+                  <h5 style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
+                  <InputText
+                    autoComplete="off"
+                    {...register("code")}
+                    style={{ width: '100%' }}
+                    defaultValue={data?.code || ""}
+                  />
+                  <p style={{ color: "red" }}>{errors.code?.message}</p>
+                </div>
 
-            <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Architectural Code")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("ArchitecturalCode")}
-                style={{ width: '100%' }}
-                defaultValue={data?.ArchitecturalCode || ""}
-              />
-              <p style={{ color: "red" }}>{errors.ArchitecturalCode?.message}</p>
-            </div>
+                <div className="field col-12 md:col-6">
+                  <h5 style={{ marginBottom: "0.5em" }}>{t("Architectural Name")}</h5>
+                  <InputText
+                    autoComplete="off"
+                    {...register("architecturalName")}
+                    style={{ width: '100%' }}
+                    defaultValue={data?.architecturalName || ""}
+                  />
+                  <p style={{ color: "red" }}>{errors.architecturalName?.message}</p>
+                </div>
 
-            <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Architectural Name")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("ArchitecturalName")}
-                style={{ width: '100%' }}
-                defaultValue={data?.ArchitecturalName || ""}
-              />
-              <p style={{ color: "red" }}>{errors.ArchitecturalName?.message}</p>
-            </div>
+                <div className="field col-12 md:col-6">
+                  <h5 style={{ marginBottom: "0.5em" }}>{t("Architectural Code")}</h5>
+                  <InputText
+                    autoComplete="off"
+                    {...register("architecturalCode")}
+                    style={{ width: '100%' }}
+                    defaultValue={data?.architecturalCode || ""}
+                  />
+                  <p style={{ color: "red" }}>{errors.architecturalCode?.message}</p>
+                </div>
 
-            <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
-              <Controller
-                defaultValue={data?.spaceType || []}
-                name="spaceType"
-                control={control}
-                render={({ field }) => (
-                  <TreeSelect
-                    value={field.value}
-                    options={classificationSpace}
-                    onChange={(e) => {
-                      ClassificationsService.nodeInfo(e.value as string)
-                        .then((res) => {
+                <div className="field col-12 md:col-6">
+                  <h5 style={{ marginBottom: "0.5em" }}>{t("Operator Name")}</h5>
+                  <InputText
+                    autoComplete="off"
+                    {...register("operatorName")}
+                    style={{ width: '100%' }}
+                    defaultValue={data?.operatorName || ""}
+                  />
+                  <p style={{ color: "red" }}>{errors.operatorName?.message}</p>
+                </div>
+
+                <div className="field col-12 md:col-6">
+                  <h5 style={{ marginBottom: "0.5em" }}>{t("Operator Code")}</h5>
+                  <InputText
+                    autoComplete="off"
+                    {...register("operatorCode")}
+                    style={{ width: '100%' }}
+                    defaultValue={data?.operatorCode || ""}
+                  />
+                  <p style={{ color: "red" }}>{errors.operatorCode?.message}</p>
+                </div>
+
+                <div className="field col-12 md:col-6 structureChips">
+                  <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
+                  <Controller
+
+                    defaultValue={data?.tag || []}
+                    name="tag"
+                    control={control}
+                    render={({ field }) => (
+                      <Chips
+                        value={field.value}
+                        onChange={(e) => {
                           field.onChange(e.value)
-                          setCodeCategory(res.data.properties.code || "");
-                        })
-                    }}
-                    filter
-                    placeholder="Select Type"
-                    style={{ width: "100%" }}
+                        }}
+                        style={{ width: "100%" }}
+                      />
+                    )}
                   />
-                )}
-              />
-              <p style={{ color: "red" }}>{errors.spaceType?.message}</p>
-            </div>
+                  <p style={{ color: "red" }}>{errors.tag?.message}</p>
+                </div>
 
-            <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Status")}</h5>
-              <Controller
-                defaultValue={data?.status || []}
-                name="status"
-                control={control}
-                render={({ field }) => (
-                  <TreeSelect
-                    value={field.value}
-                    options={classificationStatus}
-                    onChange={(e) => {
-                      ClassificationsService.nodeInfo(e.value as string)
-                        .then((res) => {
+                <div className="field col-12 md:col-6">
+                  <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
+                  <Controller
+                    defaultValue={data?.category || []}
+                    name="category"
+                    control={control}
+                    render={({ field }) => (
+                      <TreeSelect
+                        value={field.value}
+                        options={classificationSpace}
+                        onChange={(e) => {
+                          ClassificationsService.nodeInfo(e.value as string)
+                            .then((res) => {
+                              field.onChange(e.value)
+                              setCodeCategory(res.data.properties.code || "");
+                            })
+                        }}
+                        filter
+                        placeholder="Select Type"
+                        style={{ width: "100%" }}
+                      />
+                    )}
+                  />
+                  <p style={{ color: "red" }}>{errors.category?.message}</p>
+                </div>
+
+                <div className="field col-12 md:col-6">
+                  <h5 style={{ marginBottom: "0.5em" }}>{t("Usage")}</h5>
+                  <Controller
+                    defaultValue={data?.usage || []}
+                    name="usage"
+                    control={control}
+                    render={({ field }) => (
+                      <TreeSelect
+                        value={field.value}
+                        options={classificationSpace}
+                        onChange={(e) => {
+                          ClassificationsService.nodeInfo(e.value as string)
+                            .then((res) => {
+                              field.onChange(e.value)
+                              setCodeUsage(res.data.properties.code || "");
+                            })
+                        }}
+                        filter
+                        placeholder="Select Usage"
+                        style={{ width: "100%" }}
+                      />
+                    )}
+                  />
+                  <p style={{ color: "red" }}>{errors.usage?.message}</p>
+                </div>
+
+                <div className="field col-12 md:col-6">
+                  <h5 style={{ marginBottom: "0.5em" }}>{t("Status")}</h5>
+                  <Controller
+                    defaultValue={data?.status || []}
+                    name="status"
+                    control={control}
+                    render={({ field }) => (
+                      <TreeSelect
+                        value={field.value}
+                        options={classificationStatus}
+                        onChange={(e) => {
+                          ClassificationsService.nodeInfo(e.value as string)
+                            .then((res) => {
+                              field.onChange(e.value)
+                              setCodeStatus(res.data.properties.code || "");
+                            })
+                        }}
+                        filter
+                        placeholder="Select Status"
+                        style={{ width: "100%" }}
+                      />
+                    )}
+                  />
+                  <p style={{ color: "red" }}>{errors.status?.message}</p>
+                </div>
+
+                <div className="field col-12 md:col-6">
+                  <h5 style={{ marginBottom: "0.5em" }}>{t("Description")}</h5>
+                  <InputText
+                    autoComplete="off"
+                    {...register("description")}
+                    style={{ width: '100%' }}
+                    defaultValue={data?.description || ""}
+                  />
+                  <p style={{ color: "red" }}>{errors.description?.message}</p>
+                </div>
+
+                <div className="field col-12 md:col-6 structureChips">
+                  <h5 style={{ marginBottom: "0.5em" }}>{t("Room Tag")}</h5>
+                  <Controller
+
+                    defaultValue={data?.roomTag || []}
+                    name="roomTag"
+                    control={control}
+                    render={({ field }) => (
+                      <Chips
+                        value={field.value}
+                        onChange={(e) => {
                           field.onChange(e.value)
-                          setCodeStatus(res.data.properties.code || "");
-                        })
-                    }}
-                    filter
-                    placeholder="Select Status"
-                    style={{ width: "100%" }}
+                        }}
+                        style={{ width: "100%" }}
+                      />
+                    )}
                   />
-                )}
-              />
-              <p style={{ color: "red" }}>{errors.status?.message}</p>
-            </div>
+                  <p style={{ color: "red" }}>{errors.roomTag?.message}</p>
+                </div>
 
-            <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("M2")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("m2")}
-                style={{ width: '100%' }}
-                defaultValue={data?.m2 || ""}
-              />
-              <p style={{ color: "red" }}>{errors.m2?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-6 structureChips">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
-              <Controller
-
-                defaultValue={data?.tag || []}
-                name="tag"
-                control={control}
-                render={({ field }) => (
-                  <Chips
-                    value={field.value}
-                    onChange={(e) => {
-                      field.onChange(e.value)
-                    }}
-                    style={{ width: "100%" }}
+                <div className="field col-12 md:col-6">
+                  <h5 style={{ marginBottom: "0.5em" }}>{t("Usable Height")}</h5>
+                  <InputText
+                    autoComplete="off"
+                    {...register("usableHeight")}
+                    style={{ width: '100%' }}
+                    defaultValue={data?.usableHeight || ""}
                   />
-                )}
-              />
-              <p style={{ color: "red" }}>{errors.tag?.message}</p>
-            </div>
+                  <p style={{ color: "red" }}>{errors.usableHeight?.message}</p>
+                </div>
 
-            <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Joint Start Date")}</h5>
-              <Controller
-                defaultValue={new Date(data?.jointStartDate)}
-                name="jointStartDate"
-                control={control}
-                render={({ field }) => (
-                  <Calendar
-                    dateFormat="dd/mm/yy"
-                    value={field.value}
-                    showIcon
-                    style={{ width: "100%" }}
-                    onChange={(e) => {
-                      field.onChange(e.value)
-                    }}
+                <div className="field col-12 md:col-6">
+                  <h5 style={{ marginBottom: "0.5em" }}>{t("Gross Area")}</h5>
+                  <InputText
+                    autoComplete="off"
+                    {...register("grossArea")}
+                    style={{ width: '100%' }}
+                    defaultValue={data?.grossArea || ""}
                   />
-                )}
-              />
-              <p style={{ color: "red" }}>{errors.jointStartDate?.message}</p>
-            </div>
+                  <p style={{ color: "red" }}>{errors.grossArea?.message}</p>
+                </div>
 
-            <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Joint End Date")}</h5>
-              <Controller
-                defaultValue={new Date(data?.jointEndDate)}
-                name="jointEndDate"
-                control={control}
-                render={({ field }) => (
-                  <Calendar
-                    dateFormat="dd/mm/yy"
-                    value={field.value}
-                    showIcon
-                    style={{ width: "100%" }}
-                    onChange={(e) => {
-                      field.onChange(e.value)
-                    }}
+                <div className="field col-12 md:col-6">
+                  <h5 style={{ marginBottom: "0.5em" }}>{t("Net Area")}</h5>
+                  <InputText
+                    autoComplete="off"
+                    {...register("netArea")}
+                    style={{ width: '100%' }}
+                    defaultValue={data?.netArea || ""}
                   />
-                )}
-              />
-              <p style={{ color: "red" }}>{errors.jointEndDate?.message}</p>
-            </div>
+                  <p style={{ color: "red" }}>{errors.netArea?.message}</p>
+                </div>
 
-          </div>
+                <div className="field col-12 md:col-6">
+                  <h5 style={{ marginBottom: "0.5em" }}>{t("Joint Start Date")}</h5>
+                  <Controller
+                    defaultValue={new Date(data?.jointStartDate)}
+                    name="jointStartDate"
+                    control={control}
+                    render={({ field }) => (
+                      <Calendar
+                        dateFormat="dd/mm/yy"
+                        value={field.value}
+                        showIcon
+                        style={{ width: "100%" }}
+                        onChange={(e) => {
+                          field.onChange(e.value)
+                        }}
+                      />
+                    )}
+                  />
+                  <p style={{ color: "red" }}>{errors.jointStartDate?.message}</p>
+                </div>
+
+                <div className="field col-12 md:col-6">
+                  <h5 style={{ marginBottom: "0.5em" }}>{t("Joint End Date")}</h5>
+                  <Controller
+                    defaultValue={new Date(data?.jointEndDate)}
+                    name="jointEndDate"
+                    control={control}
+                    render={({ field }) => (
+                      <Calendar
+                        dateFormat="dd/mm/yy"
+                        value={field.value}
+                        showIcon
+                        style={{ width: "100%" }}
+                        onChange={(e) => {
+                          field.onChange(e.value)
+                        }}
+                      />
+                    )}
+                  />
+                  <p style={{ color: "red" }}>{errors.jointEndDate?.message}</p>
+                </div>
+
+              </div>
+            </TabPanel>
+            <TabPanel header={t("Images")}>
+              <div className="formgrid grid">
+                <div className="field col-12">
+                  <h5 style={{ marginBottom: "0.5em" }}>{t("Images")}</h5>
+                  <Controller
+                    defaultValue={data?.images || []}
+                    name="images"
+                    control={control}
+                    render={({ field }) => (
+                      <ImageUploadComponent
+                        label={"images"}
+                        value={field.value}
+                        onChange={(e: any) => {
+                          console.log(e);
+
+                          field.onChange(e)
+                        }}
+                        deleteFiles={deleteFiles}
+                        setDeleteFiles={setDeleteFiles}
+                        uploadFiles={uploadFiles}
+                        setUploadFiles={setUploadFiles}
+                      />
+                    )}
+                  />
+                  <p style={{ color: "red" }}>{errors.images?.message}</p>
+                </div>
+              </div>
+            </TabPanel>
+          </TabView>
         </form>
 
       </Dialog>
@@ -723,13 +924,13 @@ const SetJointSpace = () => {
           filterBy="name,code"
           filterPlaceholder={t("Search")}
           selectionMode="checkbox"
-          onSelect={(e:any)=>{
-            setSelectedKeysName(prev=>([...prev,e.node.name]))
-            
+          onSelect={(e: any) => {
+            setSelectedKeysName(prev => ([...prev, e.node.name]))
+
           }}
-          onUnselect={(e:any)=>{
-            setSelectedKeysName(prev=>prev.filter(item=>item!==e.node.name))
-            
+          onUnselect={(e: any) => {
+            setSelectedKeysName(prev => prev.filter(item => item !== e.node.name))
+
           }}
           onSelectionChange={(event: any) => {
 
@@ -765,7 +966,7 @@ const SetJointSpace = () => {
                     onClick={() => {
                       setDisplay(true);
                       setDisplayKey(data.key);
-                      
+
                     }}
                     title={t("Display")}
                   />

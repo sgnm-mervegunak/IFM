@@ -8,12 +8,12 @@ export class CreateJointSpaceDto {
   @ApiProperty()
   @IsOptional()
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
-  ArchitecturalName: string;
+  architecturalName: string;
 
   @ApiProperty()
   @IsOptional()
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
-  ArchitecturalCode: string;
+  architecturalCode: string;
 
   @ApiProperty()
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
@@ -26,17 +26,43 @@ export class CreateJointSpaceDto {
   code: string;
 
   @ApiProperty()
+  @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
+  @IsOptional()
+  description: string;
+
+  @ApiProperty()
   @IsOptional()
   tag?: string[];
 
   @ApiProperty()
   @IsOptional()
-  m2?: string;
+  roomTag?: string[];
+
+  @ApiProperty()
+  @IsOptional()
+  images?: string[];
+
+  @ApiProperty()
+  @IsOptional()
+  usableHeight?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  grossArea?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  netArea?: number;
 
   @ApiProperty()
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
   @IsOptional()
-  spaceType: string;
+  category: string;
+
+  @ApiProperty()
+  @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
+  @IsOptional()
+  usage: string;
 
   @ApiProperty()
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
