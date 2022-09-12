@@ -14,4 +14,5 @@ export enum Neo4jLabelEnum {
   CONTACT = 'Contact',
   SYSTEM_CONFIG = 'System_Config',
   VIRTUAL = 'Virtual',
+  STRUCTURE = 'Structure',
 }
