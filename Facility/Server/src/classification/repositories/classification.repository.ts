@@ -580,4 +580,19 @@ let labels = [...new Set(lbls)];
 
     return data.records[0]["_fields"][0].properties;
   }
+
+
+  async getNodeByLanguageRealmAndCode(language: string, realm: string, code: string) {
+    console.log(realm)
+    console.log(language)
+    console.log(code)
+    // const x=await this.neo4jService.findChildrenNodesByLabelsAndRelationName([],{key},[],{language,isDeleted:false},'classified_by')
+    const deneme = await this.neo4jService.findByLabelAndFilters(
+      [],
+      { isDeleted: false, code, language: language.toUpperCase() }
+
+    )
+    return deneme;
+
+  }
 }
