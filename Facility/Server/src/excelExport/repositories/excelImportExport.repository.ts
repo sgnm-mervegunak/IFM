@@ -68,20 +68,23 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
       for (let index = 0; index < data.value.parent_of?.length; index++) {
     
         for (let i = 0; i < data.value.parent_of[index].parent_of?.length; i++) {
-          let spaceProperties= data.value.parent_of[index].parent_of[i];
+          let spaceProperties = data.value.parent_of[index].parent_of[i];
             jsonData.push({BuildingName:data.value.name,
               BlockName:"-",
               FloorName:data.value.parent_of[index].name,
               SpaceName:spaceProperties.name,
-              Code:spaceProperties.code ? spaceProperties.code :" ",
+              Code:spaceProperties.code ? spaceProperties.code : " ",
               ArchitecturalName:spaceProperties.architecturalName,
+              ArchitecturalCode:spaceProperties.architecturalCode  ? spaceProperties.architecturalCode : " ",
               Category:spaceProperties.classified_by[0].name,
               GrossArea:spaceProperties.grossArea,
               NetArea:spaceProperties.netArea,
-              Usage:spaceProperties.usage,
+              Usage:spaceProperties.usage ? spaceProperties.usage : " ",
               Tag:spaceProperties.tag.toString(),
+              RoomTag:spaceProperties.roomTag.toString(),
               Status:spaceProperties.status? spaceProperties.status: " ",
-              ArchitecturalCode:spaceProperties.architecturalCode  ? spaceProperties.architecturalCode: " ",
+              OperatorName:spaceProperties.operatorName ? spaceProperties.operatorName : " ", 
+              OperatorCode:spaceProperties.operatorCode ? spaceProperties.operatorCode : " ", 
               Description:spaceProperties.description,
               UsableHeight:spaceProperties.usableHeight,
               ExternalSystem:spaceProperties.externalSystem,
@@ -100,21 +103,24 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
         for (let i = 0; i < data.value.parent_of[index].parent_of?.length; i++) {
           
           for (let a = 0; a < data.value.parent_of[index].parent_of[i].parent_of?.length; a++) {
-            let spaceProperties=data.value.parent_of[index].parent_of[i].parent_of[a];
+            let spaceProperties = data.value.parent_of[index].parent_of[i].parent_of[a];
             
             jsonData.push({BuildingName:data.value.name,
               BlockName:data.value.parent_of[index].name,
               FloorName:data.value.parent_of[index].parent_of[i].name,
               SpaceName:data.value.parent_of[index].parent_of[i].parent_of[a].name,
-              Code:spaceProperties.code ? spaceProperties.code :" ",
+              Code:spaceProperties.code ? spaceProperties.code: " ",
               ArchitecturalName:spaceProperties.architecturalName,
+              ArchitecturalCode:spaceProperties.architecturalCode  ? spaceProperties.architecturalCode: " ",
               Category:spaceProperties.classified_by[0].name,
               GrossArea:spaceProperties.grossArea,
               NetArea:spaceProperties.netArea,
-              Usage:spaceProperties.usage,
+              Usage:spaceProperties.usage ? spaceProperties.usage : " ",
               Tag:spaceProperties.tag.toString(),
+              RoomTag:spaceProperties.roomTag.toString(),
               Status:spaceProperties.status? spaceProperties.status: " ",
-              ArchitecturalCode:spaceProperties.architecturalCode  ? spaceProperties.architecturalCode: " ",
+              OperatorName:spaceProperties.operatorName ? spaceProperties.operatorName : " ", 
+              OperatorCode:spaceProperties.operatorCode ? spaceProperties.operatorCode : " ", 
               Description:spaceProperties.description,
               UsableHeight:spaceProperties.usableHeight,
               ExternalSystem:spaceProperties.externalSystem,
@@ -157,12 +163,22 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
       for (let index = 0; index < data.value.parent_of?.length; index++) {
         
         for (let i = 0; i < data.value.parent_of[index].parent_of?.length; i++) {
-          
+          let jointSpaceProperties=data.value.parent_of[index].parent_of[i]
           jsonData.push({BuildingName:data.value.name,
-            JointSpaceName:data.value.parent_of[index].parent_of[i].name,
-            Category:data.value.parent_of[index].parent_of[i].classified_by[0].name,
-            CreatedBy:data.value.parent_of[index].parent_of[i].created_by[0].name,
-            SpaceNames:data.value.parent_of[index].parent_of[i].jointSpaceTitle})
+            JointSpaceName:jointSpaceProperties.name,
+            Category:jointSpaceProperties.classified_by[0].name,
+            CreatedBy:jointSpaceProperties.created_by[0].name,
+            SpaceNames:jointSpaceProperties.jointSpaceTitle,
+            Description:jointSpaceProperties.description,
+            Tags:jointSpaceProperties.tag.toString(),
+            RoomTags:jointSpaceProperties.roomTag.toString(),
+            Status:jointSpaceProperties.status ? jointSpaceProperties.status : " ",
+            Usage :jointSpaceProperties.usage ? jointSpaceProperties.usage : " ",
+            UsableHeight:jointSpaceProperties.usableHeight ? jointSpaceProperties.usableHeight : " ",
+            GrossArea:jointSpaceProperties.grossArea ? jointSpaceProperties.grossArea : " ",
+            NetArea:jointSpaceProperties.netArea ? jointSpaceProperties.netArea : " ",
+
+          })
         }
       }
     
@@ -204,7 +220,11 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
                 ZoneName:data.value.parent_of[index].parent_of[i].name,
                 Category:data.value.parent_of[index].parent_of[i].classified_by[0].name,
                 CreatedBy:data.value.parent_of[index].parent_of[i].created_by[0].email,
-                SpaceNames:data.value.parent_of[index].parent_of[i].spaceNames})
+                SpaceNames:data.value.parent_of[index].parent_of[i].spaceNames,
+                Description:data.value.parent_of[index].parent_of[i].description,
+                Tags:data.value.parent_of[index].parent_of[i].tag.toString()
+              
+              })
                
             }
           }
@@ -224,7 +244,7 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
           }
            return data;
 
-        }
+  }
 
 
   async getZonesAnExcelFile( {buildingKeys}:ExportExcelDto,{realm,language}:HeaderInterface){
@@ -239,7 +259,7 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
            return data;
         
       
-        }
+  }
 
   async getJointSpacesAnExcelFile( {buildingKeys}:ExportExcelDto,{realm,language}:HeaderInterface){
           let data = []
@@ -287,7 +307,7 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
   
   
   // add digits to code  
-   let getClassificationType=`MATCH (n:OmniClass11_EN {realm:"${realm}"}) return n`
+   let getClassificationType=`MATCH (n:OmniClass11_en {realm:"${realm}"}) return n`
    let codeData= await this.neo4jService.write(getClassificationType)
    console.log(codeData)
    let abc = codeData.records[0]["_fields"][0].properties.code
@@ -320,7 +340,7 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
   
    let value =await this.neo4jService.write(cypher)
   console.log(value)
-   }
+  }
 
   async addFloorsToBuilding(file: Express.Multer.File, header:MainHeaderInterface, buildingKey: string)
 {
@@ -363,7 +383,7 @@ await workbook.xlsx.load(buffer).then(function async(book) {
 
   }
 
-}
+ }
 
 async addSpacesToBuilding( file: Express.Multer.File, header:MainHeaderInterface, buildingKey: string)
 {
@@ -448,7 +468,7 @@ for (let i = 1; i < data.length; i++) {
   MATCH (p {email:"${email}"}) \
    ${createdCypher} \
    MATCH (b)-[:PARENT_OF]->(f:Floor {name:"${data[i][5]}"})\
-   MERGE (s:Space {code:"",name:"${data[i][1]}",createdOn:"${data[i][3]}",architecturalName:"${data[i][6]}",usage:"${data[i][8]}",description:"${data[i][6]}",key:"${this.keyGenerate()}",externalSystem:"${data[i][7]}",externalObject:"${data[i][8]}",externalIdentifier:"${data[i][9]}",tag:["${data[i][10]}"],usableHeight:"${data[i][11]}",grossArea:"${data[i][12]}",netArea:"${data[i][13]}",image:[],canDisplay:true,isDeleted:false,isActive:true,nodeType:"Space",isBlocked:false,canDelete:true})\
+   MERGE (s:Space {operatorCode:"",operatorName:"",code:"",name:"${data[i][1]}",architecturalCode:"",architecturalName:"${data[i][1]}",createdOn:"${data[i][3]}",description:"${data[i][6]}",key:"${this.keyGenerate()}",externalSystem:"${data[i][7]}",externalObject:"${data[i][8]}",externalIdentifier:"${data[i][9]}",tag:[],roomTag:["${data[i][10]}"],usableHeight:"${data[i][11]}",grossArea:"${data[i][12]}",netArea:"${data[i][13]}",images:[],canDisplay:true,isDeleted:false,isActive:true,nodeType:"Space",isBlocked:false,canDelete:true})\
    MERGE (f)-[:PARENT_OF]->(s) MERGE (s)-[:CREATED_BY]->(p) ${createdRelationCypher};`
   await this.neo4jService.write(cypher);
 
@@ -488,7 +508,7 @@ await workbook.xlsx.load(buffer).then(function async(book) {
   MATCH (p {email:"${email}"})\
   ${createdCypher} \
   MERGE (zz:Zone {name:"${data[i][1]}",createdOn:"${data[i][3]}",externalSystem:"${data[i][6]}", externalObject:"${data[i][7]}", externalIdentifier:"${data[i][8]}", description:"${data[i][9]}", tag:[],\
-  nodeKeys:[], nodeType:"Zone", key:"${this.keyGenerate()}", canDisplay:true, isActive:true, isDeleted:false, canDelete:true})\
+  nodeKeys:[], nodeType:"Zone",images:[],documents:[], key:"${this.keyGenerate()}", canDisplay:true, isActive:true, isDeleted:false, canDelete:true})\
   MERGE (z)-[:PARENT_OF]->(zz)  \
   MERGE (c)-[:MERGEDZN]->(zz)  \
   ${createdRelationCypher} \
