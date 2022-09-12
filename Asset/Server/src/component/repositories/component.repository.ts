@@ -10,7 +10,7 @@ import { assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError, Neo4
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
 import { CreateComponentDto } from '../dto/create.component.dto';
 import { UpdateComponentDto } from '../dto/update.component.dto';
-import { catchError, map } from 'rxjs';
+import { catchError, firstValueFrom, map } from 'rxjs';
 import { WrongIdProvided } from 'src/common/bad.request.exception';
 import { VirtualNode } from 'src/common/baseobject/virtual.node';
 import { CustomAssetError } from 'src/common/const/custom.error.enum';
@@ -78,49 +78,41 @@ export class ComponentRepository implements GeciciInterface<Component> {
       }
 
       let structureUrl = '';
+      let structurePromise;
       switch (createComponentDto.spaceType) {
         case SpaceType.JOINTSPACE:
           structureUrl = `${process.env.JOINTSPACE}/${createComponentDto.space}`;
-          const jointSpace = await getRequest(structureUrl, header);
-          // await this.httpService
-          //   .get(`${process.env.JOINTSPACE_URL}/${createComponentDto.space}`, { headers: { authorization } })
-          //   .pipe(
-          //     catchError((error) => {
-          //       const { status, message } = error.response?.data;
-          //       throw new HttpException(other_microservice_errors(message), status);
-          //     }),
-          //   )
-          //   .pipe(map((response) => response.data));
-          // structureUrl = `${process.env.JOINTSPACE}/${createComponentDto.space}`;
+
+          structurePromise = await this.httpService
+            .get(`${process.env.JOINTSPACE_URL}/${createComponentDto.space}`, { headers: { authorization } })
+            .pipe(
+              catchError((error) => {
+                const { status, message } = error.response?.data;
+                throw new HttpException(other_microservice_errors(message), status);
+              }),
+            )
+            .pipe(map((response) => response.data));
+          structurePromise = await firstValueFrom(structurePromise);
           break;
         case SpaceType.SPACE:
           structureUrl = `${process.env.STRUCTURE_URL}/${createComponentDto.space}`;
-          const space = await getRequest(structureUrl, header);
-          // await this.httpService
-          //   .get(`${process.env.STRUCTURE_URL}/${createComponentDto.space}`, { headers: { authorization } })
-          //   .pipe(
-          //     catchError((error) => {
-          //       const { status, message } = error.response?.data;
-          //       throw new HttpException(other_microservice_errors(message), status);
-          //     }),
-          //   )
-          //   .pipe(map((response) => response.data));
+
+          structurePromise = await this.httpService
+            .get(`${process.env.STRUCTURE_URL}/${createComponentDto.space}`, { headers: { authorization } })
+            .pipe(
+              catchError((error) => {
+                const { status, message } = error.response?.data;
+                console.log(message + status);
+                throw new HttpException(other_microservice_errors(message), status);
+              }),
+            )
+            .pipe(map((response) => response.data));
+          structurePromise = await firstValueFrom(structurePromise);
 
           break;
         default:
           throw new HttpException(other_microservice_errors('SpaceType must be valid'), 400);
       }
-
-      //check if manufacturer exist
-      await this.httpService
-        .get(`${process.env.STRUCTURE_URL}/${createComponentDto.space}`, { headers: { authorization } })
-        .pipe(
-          catchError((error) => {
-            const { status, message } = error.response?.data;
-            throw new HttpException(other_microservice_errors(message), status);
-          }),
-        )
-        .pipe(map((response) => response.data));
 
       const component = new Component();
       const componentFinalObject = assignDtoPropToEntity(component, CreateComponentDto);
@@ -181,7 +173,7 @@ export class ComponentRepository implements GeciciInterface<Component> {
           throw new WrongIdProvided();
         }
         if (error.response?.code == CustomAssetError.OTHER_MICROSERVICE_ERROR) {
-          throw new HttpException(error.response.message, error.response.status);
+          throw new HttpException(error.response.message, error.status);
         }
       } else {
         throw new HttpException(error, 500);
