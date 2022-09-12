@@ -167,4 +167,14 @@ export class ClassificationController {
   return this.classificationService.getNodeByClassificationLanguageRealmAndCode(classificationName, language,realm, code);
 
  }
+  
+  @Roles({ roles: [UserRoles.ADMIN] })
+  @NoCache()
+  @Get('getAClassificationNodeByCode/info/:code')
+  async getNodeByLanguageRealmAndCode(@Param('code') code: string, @Headers() header) {
+    const { language, realm } = header;
+    return this.classificationService.getNodeByLanguageRealmAndCode(language, realm, code);
+
+  }
+  
 }

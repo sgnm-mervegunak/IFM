@@ -21,6 +21,8 @@ const DisplayNode = ({ displayKey, docTypes=[] }: Params) => {
     FacilityStructureService.nodeInfo(displayKey).then((res) => {
       setType(res.data.properties.nodeType);
       setData(res.data.properties);
+      console.log("*data", res.data.properties);
+
     });
   }, [displayKey]);
 
@@ -28,7 +30,6 @@ const DisplayNode = ({ displayKey, docTypes=[] }: Params) => {
     <div>
       <h5 className="field">Name</h5>
       <p>{data?.name}</p>
-      {console.log("*********************",data)}
       {data &&
         Object.keys(data)
           .sort()
@@ -95,8 +96,8 @@ const DisplayNode = ({ displayKey, docTypes=[] }: Params) => {
                   </div>
                 );
               } else if (key === "category") {
-                ClassificationService.findClassificationByCodeAndLanguage(localStorage.getItem("i18nextLng") || "EN", data[key]).then((res) => { //will be refactor
-                  setCategory(res.data[0]?._fields[1]?.properties?.name);
+                ClassificationService.findClassificationByCode(data[key]).then((res) => { //will be refactor
+                  setCategory(res.data[0]?._fields[0]?.properties?.name);
                 });
                 return (
                   <div className="field" key={index}>
@@ -105,8 +106,9 @@ const DisplayNode = ({ displayKey, docTypes=[] }: Params) => {
                   </div>
                 );
               } else if (key === "status") {
-                ClassificationService.nodeInfo(data[key]).then((res) => {//will be refactor
-                  setStatus(res.data.properties.name);
+                ClassificationService.findClassificationByCode(data[key]).then((res) => { //will be refactor
+                  let x = res.data[0]?._fields[0]?.properties?.name;
+                  setStatus(x);
                 });
                 return (
                   <div className="field" key={index}>
