@@ -31,4 +31,8 @@ export class Zone extends BaseGraphObject {
   nodeType: string = Zone.name;
 
   canDisplay=false
+
+  images:string[];
+
+  documents:string[];
 }
