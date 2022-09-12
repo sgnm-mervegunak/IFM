@@ -24,6 +24,11 @@ const createZone = async (createData: ZoneInterface) => {
     return axios.post(url, createData);
 };
 
+const update = async (key: string, body: any) => {
+    return axios.patch(url + key, body);
+};
+
+
 const remove = async (key: string) => {
     return axios.delete(url + key);
 };
@@ -31,6 +36,7 @@ const remove = async (key: string) => {
 const service = {
     findBuildingWithKey,
     createZone,
+    update,
     remove
 };
 

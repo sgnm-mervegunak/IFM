@@ -102,42 +102,54 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
     //////////////////////////////////////////////  CREATED_BY and CLASSIFIED_BY relations  ////////////////////////////////////////////////////
     const contactNode = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
       ['Contact'],
-      {"isDeleted": false, "realm": realm},
+      { isDeleted: false, realm: realm },
       [],
-      {"isDeleted": false, "email":  zoneEntity['createdBy']},
-      "PARENT_OF"
+      { isDeleted: false, email: zoneEntity['createdBy'] },
+      'PARENT_OF',
+    );
+    if (contactNode && contactNode.length && contactNode.length == 1) {
+      await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
+        zone.identity.low,
+        { isDeleted: false },
+        contactNode[0]['_fields'][1].identity.low,
+        { isDeleted: false },
+        RelationName.CREATED_BY,
+        RelationDirection.RIGHT,
       );
-      if (contactNode && contactNode.length && contactNode.length == 1) {
-        await this.neo4jService.addRelationByIdAndRelationNameWithFilters(zone.identity.low,{"isDeleted":false},
-                              contactNode[0]["_fields"][1].identity.low, {"isDeleted":false}, RelationName.CREATED_BY, RelationDirection.RIGHT);
-      }
+    }
 
-        const languages = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-         ['Language_Config'],
-         {"isDeleted": false, "realm": realm},
-         [],
-         {"isDeleted": false},
-         "PARENT_OF"
-         );
-         let classificationRootNone='FacilityZoneTypes';
-         languages.map(async (record) => {
-           let lang = record['_fields'][1].properties.name;
- 
-           let nodeClass = await this.neo4jService.findChildrensByLabelsAndFilters(
-               [classificationRootNone+'_'+lang],
-               {"isDeleted": false, "realm": realm},
-               [],
-               {"language": lang, "code": createZoneDto["category"]}
-             );
-           if (nodeClass && nodeClass.length && nodeClass.length == 1) {
-               await this.neo4jService.addRelationByIdAndRelationNameWithFilters(zone.identity.low,{"isDeleted":false},
-                                      nodeClass[0]["_fields"][1].identity.low, {"isDeleted":false}, RelationName.CLASSIFIED_BY, RelationDirection.RIGHT);
-           }
-         });   
-                
+    const languages = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+      ['Language_Config'],
+      { isDeleted: false, realm: realm },
+      [],
+      { isDeleted: false },
+      'PARENT_OF',
+    );
+    let classificationRootNone = 'FacilityZoneTypes';
+    languages.map(async (record) => {
+      let lang = record['_fields'][1].properties.name;
+
+      let nodeClass = await this.neo4jService.findChildrensByLabelsAndFilters(
+        [classificationRootNone + '_' + lang],
+        { isDeleted: false, realm: realm },
+        [],
+        { language: lang, code: createZoneDto['category'] },
+      );
+      if (nodeClass && nodeClass.length && nodeClass.length == 1) {
+        await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
+          zone.identity.low,
+          { isDeleted: false },
+          nodeClass[0]['_fields'][1].identity.low,
+          { isDeleted: false },
+          RelationName.CLASSIFIED_BY,
+          RelationDirection.RIGHT,
+        );
+      }
+    });
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    return zone.properties;
+    return { ...zone.properties, id: zone.identity.low };
   }
   ///////////////////////// Static DTO ////////////////////////////////////////////////////////////////////
   async update(_id: string, updateFacilityStructureDto, realm: string, language: string) {
@@ -148,7 +160,7 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
       }
     });
     const dynamicObject = createDynamicCyperObject(updateFacilityStructureDtoWithoutLabelsAndParentId);
-    const updatedNode = await this.neo4jService.updateById(_id, dynamicObject);
+    const updatedNode = await this.neo4jService.updateById(_id, updateFacilityStructureDto);
     if (!updatedNode) {
       throw new FacilityStructureNotFountException(_id);
     }
@@ -161,7 +173,7 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
       await this.neo4jService.removeLabel(_id, result['labels']);
       await this.neo4jService.updateLabel(_id, updateFacilityStructureDto['labels']);
     }
-    return result;
+    return updatedNode;
   }
 
   async delete(key: string, realm: string, language: string) {
@@ -320,5 +332,4 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
       console.log(data3);
     }
   }
-
 }

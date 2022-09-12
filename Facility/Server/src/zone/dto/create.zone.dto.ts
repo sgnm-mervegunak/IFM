@@ -32,11 +32,11 @@ export class CreateZoneDto {
 
   @ApiProperty()
   @IsOptional()
-  images: string[];
+  images: string;
 
   @ApiProperty()
   @IsOptional()
-  documents: string[];
+  documents: string;
 
   @ApiProperty()
   @IsOptional()

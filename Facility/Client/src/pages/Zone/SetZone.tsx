@@ -8,7 +8,7 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { TreeSelect } from "primereact/treeselect";
 import { useNavigate, useParams } from "react-router-dom";
-import { yupResolver } from '@hookform/resolvers/yup';
+import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useForm, Controller } from "react-hook-form";
 
@@ -22,6 +22,10 @@ import Export, { ExportType } from "../FacilityStructure/Export/Export";
 import ExportService from "../../services/export";
 import DownloadExcel from "../../utils/download-excel";
 import DisplayNode from "../FacilityStructure/Display/DisplayNode";
+import { TabPanel, TabView } from "primereact/tabview";
+import DocumentUploadComponent from "../FacilityStructure/Forms/FileUpload/DocumentUpload/DocumentUpload";
+import ImageUploadComponent from "../FacilityStructure/Forms/FileUpload/ImageUpload/ImageUpload";
+import axios from "axios";
 
 interface Node {
   cantDeleted: boolean;
@@ -59,6 +63,8 @@ interface ZoneInterface {
   createdOn: string;
   externalSystem: string;
   externalObject: string;
+  documents: any;
+  images: any;
   tags: string[];
   nodeKeys: string[];
 }
@@ -92,8 +98,6 @@ interface FormNode {
 const schema = yup.object({
   name: yup.string().required("This area is required."),
   code: yup.string().required("This area is required."),
-
-
 });
 
 const SetZone = () => {
@@ -103,7 +107,11 @@ const SetZone = () => {
   const [deleteNodeKey, setDeleteNodeKey] = useState<any>("");
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
-  const [createZone, setCreateZone] = useState<ZoneInterface>({} as ZoneInterface)
+  const [createZone, setCreateZone] = useState<ZoneInterface>(
+    {} as ZoneInterface
+  );
+  const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
+  const [uploadFiles, setUploadFiles] = useState<any>({});
   const [ArchitecturalName, setArchitecturalName] = useState<string>("");
   const [ArchitecturalCode, setArchitecturalCode] = useState<string>("");
   const [name, setName] = useState<string>("");
@@ -145,10 +153,11 @@ const SetZone = () => {
     ""
   );
   const [facilityType, setFacilityType] = useState<string[]>([]);
-  const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
+  const [selectedFacilityType, setSelectedFacilityType] = useState<
+    string | undefined
+  >("");
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
-
 
   const params = useParams();
 
@@ -165,7 +174,7 @@ const SetZone = () => {
 
   const getClassificationSpace = async () => {
     await ClassificationsService.findAllActiveByLabel({
-      label: "FacilityZoneTypes"
+      label: "FacilityZoneTypes",
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodesClassification(temp);
@@ -175,11 +184,11 @@ const SetZone = () => {
 
   const getClassificationStatus = async () => {
     await ClassificationsService.findAllActiveByLabel({
-      label: "FacilityZoneTypes"
+      label: "FacilityZoneTypes",
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodesClassification(temp);
-      temp[0].selectable = false
+      temp[0].selectable = false;
       setclassificationStatus(temp);
     });
   };
@@ -188,8 +197,6 @@ const SetZone = () => {
     getClassificationSpace();
     getClassificationStatus();
   }, []);
-
-
 
   const getNodeInfoAndEdit = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
@@ -287,22 +294,30 @@ const SetZone = () => {
 
   const [formData, setFormData] = useState<any>();
 
-  const { register, handleSubmit, watch, formState: { errors }, control, reset, formState, formState: { isSubmitSuccessful } } = useForm<ZoneInterface>({
-    resolver: yupResolver(schema)
-  })
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+    control,
+    reset,
+    formState,
+    formState: { isSubmitSuccessful },
+  } = useForm<ZoneInterface>({
+    resolver: yupResolver(schema),
+  });
 
   useEffect(() => {
     watch((value, { name, type }) => console.log(value, name, type));
-  }, [watch])
+  }, [watch]);
 
+  // useEffect(() => {
+  //   if (formState.isSubmitSuccessful) {
+  //     reset({ ...createZone });
 
-  useEffect(() => {
-    if (formState.isSubmitSuccessful) {
-      reset({ ...createZone });
-    } else {
-
-    }
-  }, [formState, createZone, reset]);
+  //   } else {
+  //   }
+  // }, [formState, createZone, reset]);
 
   const fixNodes = (nodes: Node[]) => {
     if (!nodes || nodes.length === 0) {
@@ -320,33 +335,74 @@ const SetZone = () => {
     }
   };
 
+  const UploadAnyFile = (folderName: string, file: any) => {
+    const url = "http://localhost:3004/file-upload/single";
+    const formData = new FormData();
+
+    formData.append("file", file);
+    formData.append("realmName", "ifm");
+    formData.append("folderName", folderName);
+    return axios.post(url, formData);
+  };
+
   const addItem = (createZone: any) => {
     let newNode: any = {};
     newNode = {
       ...createZone,
-      category:codeCategory,
+      category: codeCategory,
       spaceNames: `${selectedKeysName.toString().replaceAll(",", ", ")}` || "",
       nodeKeys: selectedKeys || [],
       credatedBy: "",
-      createdOn: ""
+      createdOn: "",
+      externalSystem: "",
+      externalObject: "",
+      images:"",
+      documents:"",
     };
-    console.log(newNode)
 
     ZoneService.createZone(newNode)
-      .then((res) => {
+      .then(async (res) => {
         toast.current.show({
           severity: "success",
           summary: "Successful",
           detail: "Zone Created",
           life: 3000,
         });
+        // upload files
+        let temp = {} as any;
+        for (let item in uploadFiles) {
+          temp[item] = [];
+          for (let file of uploadFiles[item]) {
+            if (file.isImage) {
+              let resFile = await UploadAnyFile(
+                res.data.key + "/" + item,
+                file.file
+              );
+              delete resFile.data.message;
+              temp[item].push({ ...resFile.data, main: file.main });
+            } else {
+              let resFile = await UploadAnyFile(
+                res.data.key + "/" + item,
+                file.file
+              );
+              delete resFile.data.message;
+              temp[item].push({ ...resFile.data, type: file.type });
+            }
+          }
+        }
+        for (let item in temp) {
+          temp[item] = JSON.stringify(temp[item]);
+        }
+        console.log({ ...newNode,...temp });
+        await ZoneService.update(res.data.id, {...newNode,...temp})
 
+        reset({ ...createZone });
         setSelectedNodeKey([]);
-        setCreateZone({} as ZoneInterface)
+        setCreateZone({} as ZoneInterface);
         setSelectedKeys([]);
         setAddDia(false);
         getZone();
-        setSelectedKeysName([])
+        setSelectedKeysName([]);
       })
       .catch((err) => {
         toast.current.show({
@@ -415,15 +471,14 @@ const SetZone = () => {
 
   const onChange = (e: any) => {
     try {
-
-      setCreateZone(prev => ({
+      setCreateZone((prev) => ({
         ...prev,
-        [e.target?.name]: e.target.value
-      }))
+        [e.target?.name]: e.target.value,
+      }));
     } catch (e) {
       alert(e);
     }
-  }
+  };
 
   const deleteItem = (key: string) => {
     ZoneService.remove(key)
@@ -485,7 +540,7 @@ const SetZone = () => {
 
             setSelectedFacilityType(undefined);
 
-            reset({}) // reset form values after canceling the create zone operation
+            reset({}); // reset form values after canceling the create zone operation
           }}
           className="p-button-text"
         />
@@ -543,10 +598,7 @@ const SetZone = () => {
   // };
 
   return (
-
-
     <div className="container">
-
       {/* {
         (() => {
           if(selectedFacilityType==="Building")
@@ -564,7 +616,7 @@ const SetZone = () => {
         accept={() => deleteItem(deleteNodeKey)}
       />
       <Dialog
-        header={t("Joint Space Detail")}
+        header={t("Zone Detail")}
         visible={display}
         position={"right"}
         modal={false}
@@ -592,114 +644,143 @@ const SetZone = () => {
           setCreateZone({} as ZoneInterface);
 
           setSelectedFacilityType(undefined);
-          reset({ ...createZone })
+          reset({ ...createZone });
         }}
       >
         <form>
-
-          <div className="field">
-            <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
-            <InputText
-              autoComplete="off"
-              {...register("name")}
-              style={{ width: '100%' }}
-            />
-          </div>
-          <p style={{ color: "red" }}>{errors.name?.message}</p>
-
-
-          {/* Type Ayarlanamalı */}
-          <div className="field">
-            <h5 style={{ marginBottom: "0.5em" }}>Category</h5>
-            <Controller
-              defaultValue={createZone?.category}
-              name="category"
-              control={control}
-              render={({ field }) => (
-                <TreeSelect
-                  value={field.value}
-                  options={classificationSpace}
-                  onChange={(e) => {
-                    ClassificationsService.nodeInfo(e.value as string)
-                      .then((res) => {
-                        field.onChange(e.value)
-                        setCodeCategory(res.data.properties.code || "");
-                      })
-                  }}
-                  filter
-                  placeholder="Select Type"
+          <TabView>
+            <TabPanel header={t("Form")}>
+              <div className="field">
+                <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
+                <InputText
+                  autoComplete="off"
+                  {...register("name")}
                   style={{ width: "100%" }}
                 />
-              )}
-            />
-          </div>
+              </div>
+              <p style={{ color: "red" }}>{errors.name?.message}</p>
 
-
-          <div className="field">
-            <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
-            <InputText
-              autoComplete="off"
-              {...register("code")}
-              style={{ width: '100%' }}
-              defaultValue={createZone?.code || ""}
-            />
-          </div>
-          <p style={{ color: "red" }}>{errors.code?.message}</p>
-
-
-          <div className="field">
-            <h5 style={{ marginBottom: "0.5em" }}>Description</h5>
-            <InputText
-              autoComplete="off"
-              {...register("description")}
-              style={{ width: '100%' }}
-              defaultValue={createZone?.description || ""}
-            />
-          </div>
-
-
-          <div className="field structureChips">
-            <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
-            <Controller
-
-              defaultValue={formData?.tags || []}
-              name="tags"
-              control={control}
-              render={({ field }) => (
-                <Chips
-                  value={field.value}
-                  onChange={(e) => {
-                    field.onChange({ target: { name: "tags", value: e.value } })
-                  }}
+              <div className="field">
+                <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
+                <InputText
+                  autoComplete="off"
+                  {...register("code")}
                   style={{ width: "100%" }}
+                  defaultValue={createZone?.code || ""}
                 />
-              )}
-            />
+                <p style={{ color: "red" }}>{errors.code?.message}</p>
+              </div>
 
-          </div>
+              <div className="field structureChips">
+                <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
+                <Controller
+                  defaultValue={formData?.tags || []}
+                  name="tags"
+                  control={control}
+                  render={({ field }) => (
+                    <Chips
+                      value={field.value}
+                      onChange={(e) => {
+                        field.onChange({
+                          target: { name: "tags", value: e.value },
+                        });
+                      }}
+                      style={{ width: "100%" }}
+                    />
+                  )}
+                />
+              </div>
+              <div className="field">
+                <h5 style={{ marginBottom: "0.5em" }}>Description</h5>
+                <InputText
+                  autoComplete="off"
+                  {...register("description")}
+                  style={{ width: "100%" }}
+                  defaultValue={createZone?.description || ""}
+                />
+              </div>
 
+              <div className="field">
+                <h5 style={{ marginBottom: "0.5em" }}>Category</h5>
+                <Controller
+                  defaultValue={createZone?.category}
+                  name="category"
+                  control={control}
+                  render={({ field }) => (
+                    <TreeSelect
+                      value={field.value}
+                      options={classificationSpace}
+                      onChange={(e) => {
+                        ClassificationsService.nodeInfo(e.value as string).then(
+                          (res) => {
+                            field.onChange(e.value);
+                            setCodeCategory(res.data.properties.code || "");
+                          }
+                        );
+                      }}
+                      filter
+                      placeholder="Select Type"
+                      style={{ width: "100%" }}
+                    />
+                  )}
+                />
+              </div>
+            </TabPanel>
+            <TabPanel header={t("Images")}>
+              <div className="formgrid grid">
+                <div className="field col-12">
+                  <h5 style={{ marginBottom: "0.5em" }}>{t("Images")}</h5>
+                  <Controller
+                    name="images"
+                    defaultValue={createZone?.images || []}
+                    control={control}
+                    render={({ field }) => (
+                      <ImageUploadComponent
+                        label={"images"}
+                        value={field.value}
+                        onChange={(e: any) => {
+                          console.log(e);
 
-          <div className="field">
-            <h5 style={{ marginBottom: "0.5em" }}>External System</h5>
-            <InputText
-              autoComplete="off"
-              {...register("externalSystem")}
-              style={{ width: '100%' }}
-              defaultValue={formData?.externalSystem || ""}
-            />
-          </div>
-
-
-          <div className="field">
-            <h5 style={{ marginBottom: "0.5em" }}>External Object</h5>
-            <InputText
-              autoComplete="off"
-              {...register("externalObject")}
-              style={{ width: '100%' }}
-              defaultValue={formData?.externalObject || ""}
-            />
-          </div>
-
+                          field.onChange(e);
+                        }}
+                        deleteFiles={deleteFiles}
+                        setDeleteFiles={setDeleteFiles}
+                        uploadFiles={uploadFiles}
+                        setUploadFiles={setUploadFiles}
+                      />
+                    )}
+                  />
+                  <p style={{ color: "red" }}>{errors.images?.message}</p>
+                </div>
+              </div>
+            </TabPanel>
+            <TabPanel header={t("Documents")}>
+              <div className="formgrid grid">
+                <div className="field col-12">
+                  <h5 style={{ marginBottom: "0.5em" }}>{t("Documents")}</h5>
+                  <Controller
+                    name="documents"
+                    defaultValue={createZone?.documents || []}
+                    control={control}
+                    render={({ field }) => (
+                      <DocumentUploadComponent
+                        label={"documents"}
+                        value={field.value}
+                        onChange={(e: any) => {
+                          field.onChange(e);
+                        }}
+                        deleteFiles={deleteFiles}
+                        setDeleteFiles={setDeleteFiles}
+                        uploadFiles={uploadFiles}
+                        setUploadFiles={setUploadFiles}
+                      />
+                    )}
+                  />
+                  <p style={{ color: "red" }}>{errors.documents?.message}</p>
+                </div>
+              </div>
+            </TabPanel>
+          </TabView>
         </form>
       </Dialog>
 
@@ -751,7 +832,7 @@ const SetZone = () => {
               icon="pi pi-check"
               className="ml-2"
               onClick={() => {
-                setAddDia(true)
+                setAddDia(true);
                 // setCreateZone({} as ZoneInterface)
               }}
             />
@@ -772,12 +853,12 @@ const SetZone = () => {
           filterPlaceholder="Search"
           selectionMode="checkbox"
           onSelect={(e: any) => {
-            setSelectedKeysName(prev => ([...prev, e.node.name]))
-
+            setSelectedKeysName((prev) => [...prev, e.node.name]);
           }}
           onUnselect={(e: any) => {
-            setSelectedKeysName(prev => prev.filter(item => item !== e.node.name))
-
+            setSelectedKeysName((prev) =>
+              prev.filter((item) => item !== e.node.name)
+            );
           }}
           onSelectionChange={(event: any) => {
             console.log(event);
