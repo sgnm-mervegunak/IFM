@@ -7,7 +7,6 @@ import { Component } from '../entities/component.entity';
 import { NestKafkaService, nodeHasChildException } from 'ifmcommon';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
 import { assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError, Neo4jService } from 'sgnm-neo4j/dist';
-
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
 import { CreateComponentDto } from '../dto/create.component.dto';
 import { UpdateComponentDto } from '../dto/update.component.dto';
@@ -19,6 +18,7 @@ import { wrong_parent_error, other_microservice_errors } from 'src/common/const/
 import { RelationName } from 'src/common/const/relation.name.enum';
 import { HttpService } from '@nestjs/axios';
 import { SpaceType } from 'src/common/const/space.type.enum';
+import { getRequest } from 'src/common/func/http.request.func';
 
 @Injectable()
 export class ComponentRepository implements GeciciInterface<Component> {
@@ -27,7 +27,7 @@ export class ComponentRepository implements GeciciInterface<Component> {
     private readonly kafkaService: NestKafkaService,
     private readonly httpService: HttpService,
   ) {}
-  async findByKey(key: string) {
+  async findByKey(key: string, header) {
     try {
       const nodes = await this.neo4jService.findByLabelAndFilters(['Type'], { key });
       if (!nodes.length) {
@@ -39,7 +39,8 @@ export class ComponentRepository implements GeciciInterface<Component> {
     }
   }
 
-  async findRootByRealm(realm: string) {
+  async findRootByRealm(header) {
+    const { realm } = header;
     let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure([Neo4jLabelEnum.TYPES], {
       realm,
       isDeleted: false,
@@ -52,8 +53,9 @@ export class ComponentRepository implements GeciciInterface<Component> {
 
     return node;
   }
-  async create(createComponentDto: CreateComponentDto, realm, language, authorization) {
+  async create(createComponentDto: CreateComponentDto, header) {
     try {
+      const { realm, authorization } = header;
       const typesNode = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.TYPES], {
         isDeleted: false,
         realm,
@@ -78,28 +80,32 @@ export class ComponentRepository implements GeciciInterface<Component> {
       let structureUrl = '';
       switch (createComponentDto.spaceType) {
         case SpaceType.JOINTSPACE:
-          await this.httpService
-            .get(`${process.env.JOINTSPACE_URL}/${createComponentDto.space}`, { headers: { authorization } })
-            .pipe(
-              catchError((error) => {
-                const { status, message } = error.response?.data;
-                throw new HttpException(other_microservice_errors(message), status);
-              }),
-            )
-            .pipe(map((response) => response.data));
           structureUrl = `${process.env.JOINTSPACE}/${createComponentDto.space}`;
+          const jointSpace = await getRequest(structureUrl, header);
+          // await this.httpService
+          //   .get(`${process.env.JOINTSPACE_URL}/${createComponentDto.space}`, { headers: { authorization } })
+          //   .pipe(
+          //     catchError((error) => {
+          //       const { status, message } = error.response?.data;
+          //       throw new HttpException(other_microservice_errors(message), status);
+          //     }),
+          //   )
+          //   .pipe(map((response) => response.data));
+          // structureUrl = `${process.env.JOINTSPACE}/${createComponentDto.space}`;
           break;
         case SpaceType.SPACE:
-          await this.httpService
-            .get(`${process.env.STRUCTURE_URL}/${createComponentDto.space}`, { headers: { authorization } })
-            .pipe(
-              catchError((error) => {
-                const { status, message } = error.response?.data;
-                throw new HttpException(other_microservice_errors(message), status);
-              }),
-            )
-            .pipe(map((response) => response.data));
           structureUrl = `${process.env.STRUCTURE_URL}/${createComponentDto.space}`;
+          const space = await getRequest(structureUrl, header);
+          // await this.httpService
+          //   .get(`${process.env.STRUCTURE_URL}/${createComponentDto.space}`, { headers: { authorization } })
+          //   .pipe(
+          //     catchError((error) => {
+          //       const { status, message } = error.response?.data;
+          //       throw new HttpException(other_microservice_errors(message), status);
+          //     }),
+          //   )
+          //   .pipe(map((response) => response.data));
+
           break;
         default:
           throw new HttpException(other_microservice_errors('SpaceType must be valid'), 400);
@@ -183,7 +189,7 @@ export class ComponentRepository implements GeciciInterface<Component> {
     }
   }
 
-  async update(_id: string, updateAssetDto: UpdateComponentDto) {
+  async update(_id: string, updateAssetDto: UpdateComponentDto, header) {
     const updateAssetDtoWithoutLabelsAndParentId = {};
     Object.keys(updateAssetDto).forEach((element) => {
       if (element != 'labels' && element != 'parentId') {
@@ -213,7 +219,7 @@ export class ComponentRepository implements GeciciInterface<Component> {
     return result;
   }
 
-  async delete(_id: string) {
+  async delete(_id: string, header) {
     try {
       const node = await this.neo4jService.read(`match(n) where id(n)=$id return n`, { id: parseInt(_id) });
       if (!node.records[0]) {

@@ -10,23 +10,23 @@ export class TypesService {
     @Inject(RepositoryEnums.TYPES)
     private readonly assetRepository: GeciciInterface<any>,
   ) {}
-  async create(createAssetDto: CreateTypesDto, realm: string, language, authorization) {
-    return await this.assetRepository.create(createAssetDto, realm, language, authorization);
+  async create(createAssetDto: CreateTypesDto, header) {
+    return await this.assetRepository.create(createAssetDto, header);
   }
 
-  findOne(realm: string) {
-    return this.assetRepository.findRootByRealm(realm);
+  findOne(header) {
+    return this.assetRepository.findRootByRealm(header);
   }
 
-  update(id: string, updateAssetDto: UpdateTypesDto, realm: string) {
-    return this.assetRepository.update(id, updateAssetDto, realm);
+  update(id: string, updateAssetDto: UpdateTypesDto, header) {
+    return this.assetRepository.update(id, updateAssetDto, header);
   }
 
-  remove(id: string, realm: string) {
-    return this.assetRepository.delete(id, realm);
+  remove(id: string, header) {
+    return this.assetRepository.delete(id, header);
   }
 
-  async findOneNode(key: string, realm) {
-    return await this.assetRepository.findByKey(key, realm);
+  async findOneNode(key: string, header) {
+    return await this.assetRepository.findByKey(key, header);
   }
 }

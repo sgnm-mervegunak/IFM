@@ -25,7 +25,7 @@ export class TypesRepository implements GeciciInterface<Type> {
     private readonly kafkaService: NestKafkaService,
     private readonly httpService: HttpService,
   ) {}
-  async findByKey(key: string) {
+  async findByKey(key: string, header) {
     try {
       const nodes = await this.neo4jService.findByLabelAndFilters(['Type'], { key });
       if (!nodes.length) {
@@ -37,8 +37,9 @@ export class TypesRepository implements GeciciInterface<Type> {
     }
   }
 
-  async findRootByRealm(realm: string) {
+  async findRootByRealm(header) {
     try {
+      const { realm } = header;
       const node = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
         [Neo4jLabelEnum.TYPES],
         {
@@ -71,8 +72,9 @@ export class TypesRepository implements GeciciInterface<Type> {
       }
     }
   }
-  async create(createTypesDto: CreateTypesDto, realm: string, language: string, authorization: string) {
+  async create(createTypesDto: CreateTypesDto, header) {
     try {
+      const { realm, language, authorization } = header;
       const rootNode = await this.neo4jService.findByIdAndOrLabelsAndFilters(
         createTypesDto.parentId,
         [Neo4jLabelEnum.TYPES],
@@ -160,7 +162,7 @@ export class TypesRepository implements GeciciInterface<Type> {
     }
   }
 
-  async update(_id: string, updateAssetDto: UpdateTypesDto) {
+  async update(_id: string, updateAssetDto: UpdateTypesDto, header) {
     const updateAssetDtoWithoutLabelsAndParentId = {};
     Object.keys(updateAssetDto).forEach((element) => {
       if (element != 'labels' && element != 'parentId') {
@@ -190,7 +192,7 @@ export class TypesRepository implements GeciciInterface<Type> {
     return result;
   }
 
-  async delete(_id: string) {
+  async delete(_id: string, header) {
     try {
       const node = await this.neo4jService.read(`match(n) where id(n)=$id return n`, { id: parseInt(_id) });
       if (!node.records[0]) {

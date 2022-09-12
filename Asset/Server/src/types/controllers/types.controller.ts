@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Headers } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Headers, Header } from '@nestjs/common';
 import { Roles } from 'nest-keycloak-connect';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { NoCache } from 'ifmcommon';
@@ -20,9 +20,7 @@ export class TypesController {
   })
   @Post()
   create(@Body() createTypesDto: CreateTypesDto, @Headers() header) {
-    const { realm, language, authorization } = header;
-
-    return this.typesService.create(createTypesDto, realm, language, authorization);
+    return this.typesService.create(createTypesDto, header);
   }
 
   @Get('')
@@ -34,20 +32,20 @@ export class TypesController {
 
   @Patch(':id')
   @Roles({ roles: [UserRoles.ADMIN] })
-  update(@Param('id') id: string, @Body() updateAssetDto: UpdateTypesDto, @Headers('realm') realm) {
-    return this.typesService.update(id, updateAssetDto, realm);
+  update(@Param('id') id: string, @Body() updateAssetDto: UpdateTypesDto, @Headers() header) {
+    return this.typesService.update(id, updateAssetDto, header);
   }
 
   @Delete(':id')
   @Roles({ roles: [UserRoles.ADMIN] })
-  remove(@Param('id') id: string, @Headers('realm') realm) {
-    return this.typesService.remove(id, realm);
+  remove(@Param('id') id: string, @Headers() header) {
+    return this.typesService.remove(id, header);
   }
 
   @Roles({ roles: [UserRoles.ADMIN] })
   @Get('/:key')
   @NoCache()
-  findOneNode(@Param('key') key: string, @Headers('realm') realm) {
-    return this.typesService.findOneNode(key, realm);
+  findOneNode(@Param('key') key: string, @Headers() header) {
+    return this.typesService.findOneNode(key, header);
   }
 }

@@ -20,8 +20,7 @@ export class ComponentController {
   })
   @Post()
   create(@Body() createComponentDto: CreateComponentDto, @Headers() header) {
-    const { realm, language, authorization } = header;
-    return this.componentService.create(createComponentDto, realm, language, authorization);
+    return this.componentService.create(createComponentDto, header);
   }
 
   @Get('')
@@ -33,20 +32,20 @@ export class ComponentController {
 
   @Patch(':id')
   @Unprotected()
-  update(@Param('id') id: string, @Body() updateAssetDto: UpdateComponentDto, @Headers('realm') realm) {
-    return this.componentService.update(id, updateAssetDto, realm);
+  update(@Param('id') id: string, @Body() updateAssetDto: UpdateComponentDto, @Headers() header) {
+    return this.componentService.update(id, updateAssetDto, header);
   }
 
   @Delete(':id')
   @Unprotected()
-  remove(@Param('id') id: string, @Headers('realm') realm) {
-    return this.componentService.remove(id, realm);
+  remove(@Param('id') id: string, @Headers() header) {
+    return this.componentService.remove(id, header);
   }
 
   @Unprotected()
   @Get('/:key')
   @NoCache()
-  findOneNode(@Param('key') key: string, @Headers('realm') realm) {
-    return this.componentService.findOneNode(key, realm);
+  findOneNode(@Param('key') key: string, @Headers() header) {
+    return this.componentService.findOneNode(key, header);
   }
 }
