@@ -176,7 +176,7 @@ export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
                  [classificationRootNone+'_'+lang],
                  {"isDeleted": false, "realm": realm},
                  [],
-                 {"language": lang, "code": createJointSpaceDto["spaceType"]}
+                 {"language": lang, "code": createJointSpaceDto["category"]}
                );
              if (nodeClass && nodeClass.length && nodeClass.length == 1) {
                  await this.neo4jService.addRelationByIdAndRelationNameWithFilters(jointSpace.identity.low,{"isDeleted":false},
