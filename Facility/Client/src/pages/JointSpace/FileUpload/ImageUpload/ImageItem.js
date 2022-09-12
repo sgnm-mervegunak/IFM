@@ -28,6 +28,7 @@ const ImageItem = ({
             "p-button-outlined p-button-rounded ml-auto" +
             (main ? " p-button-success" : "")
           }
+          style={{main: true ? "color":"red"}}
           onClick={setMain}
         />
       )}

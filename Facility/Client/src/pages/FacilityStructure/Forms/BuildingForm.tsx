@@ -54,9 +54,7 @@ interface Node {
 }
 
 const schema = yup.object({
-  name: yup
-    .string()
-    .required("This area is required.").max(50, "This area accepts max 50 characters."),
+  name: yup.string().required("This area is required.").max(50, "This area accepts max 50 characters."),
   category: yup.string().required("This area is required."),
   status: yup.string().required("This area is required."),
   projectDescription: yup.string().max(255, "This area accepts max 255 characters."),
@@ -64,6 +62,11 @@ const schema = yup.object({
   phase: yup.string().max(255, "This area accepts max 255 characters."),
   projectName: yup.string().max(50, "This area accepts max 50 characters."),
   siteName: yup.string().max(50, "This area accepts max 50 characters."),
+  areaMeasurement: yup
+    .number()
+    .typeError('Area Measurement must be a number')
+    .nullable().moreThan(-1, "Elevation can not be negative")
+    .transform((_, val) => (val !== "" ? Number(val) : null)),
 });
 
 const BuildingForm = ({
@@ -572,8 +575,10 @@ const BuildingForm = ({
                 {...register("areaMeasurement")}
                 style={{ width: "100%" }}
                 defaultValue={data?.areaMeasurement}
+
               />
               <p style={{ color: "red" }}>{errors.areaMeasurement?.message}</p>
+
             </div>
 
             <div className="field col-12 md:col-3">
