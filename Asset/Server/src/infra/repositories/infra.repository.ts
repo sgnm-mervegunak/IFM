@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { NestKafkaService } from 'ifmcommon';
 import { Neo4jService } from 'sgnm-neo4j/dist';
 import { InfraInterface } from 'src/common/interface/infra.interface';
@@ -11,25 +11,20 @@ export class InfraRepository implements InfraInterface {
     const neo4Transaction = await this.neo4jService.beginTransaction();
     const constraintArr = [
       'CREATE CONSTRAINT IF NOT EXISTS ON (node:Infra) ASSERT  (node.realm) IS UNIQUE',
+      'CREATE CONSTRAINT IF NOT EXISTS ON (node:Types) ASSERT  (node.realm) IS UNIQUE',
+      'CREATE CONSTRAINT IF NOT EXISTS ON (node:Type) ASSERT  (node.name) IS UNIQUE',
       'CREATE CONSTRAINT IF NOT EXISTS ON (node:Root) ASSERT  (node.realm) IS UNIQUE',
       'CREATE CONSTRAINT IF NOT EXISTS ON (node:Classification) ASSERT  (node.realm) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityStructure) ASSERT (node.realm) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityStructure) ASSERT (node.key) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityDocTypes) ASSERT (node.realm) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityDocTypes) ASSERT (node.key) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS ON (node:FacilityTypes) ASSERT (node.realm) IS UNIQUE',
     ];
 
     constraintArr.forEach((element) => {
       neo4Transaction
         .run(element)
-        .then((res) => {
-          console.log(res);
-        })
+        .then((res) => {})
         .catch((err) => {
           console.log(err);
-
           neo4Transaction.rollback();
+          throw new HttpException(err, 400);
         });
     });
     neo4Transaction.commit();
@@ -76,33 +71,6 @@ export class InfraRepository implements InfraInterface {
     await this.neo4jService.addParentRelationByIdAndFilters(typeNode.identity.low, {}, infraNode.identity.low, {});
     await this.neo4jService.addParentRelationByIdAndFilters(configNode.identity.low, {}, infraNode.identity.low, {});
 
-    const spaceConfigNode = await this.neo4jService.createNode(
-      {
-        canDelete: false,
-        isDeleted: false,
-        nodesCanDelete: false,
-        name: 'JointSpaceConfig',
-        realm: 'Signum',
-        isRoot: true,
-        canCopied: true,
-        isActive: true,
-      },
-      ['JointSpace_Config'],
-    );
-
-    const zoneConfigNode = await this.neo4jService.createNode(
-      {
-        canDelete: false,
-        isDeleted: false,
-        nodesCanDelete: true,
-        name: 'ZoneConfig',
-        realm: 'Signum',
-        isRoot: true,
-        canCopied: true,
-        isActive: true,
-      },
-      ['Zone_Config'],
-    );
 
     const languageConfigNode = await this.neo4jService.createNode(
       {
@@ -117,18 +85,7 @@ export class InfraRepository implements InfraInterface {
       },
       ['Language_Config'],
     );
-    await this.neo4jService.addParentRelationByIdAndFilters(
-      spaceConfigNode.identity.low,
-      {},
-      configNode.identity.low,
-      {},
-    );
-    await this.neo4jService.addParentRelationByIdAndFilters(
-      zoneConfigNode.identity.low,
-      {},
-      configNode.identity.low,
-      {},
-    );
+   
     await this.neo4jService.addParentRelationByIdAndFilters(
       languageConfigNode.identity.low,
       {},
@@ -146,6 +103,8 @@ export class InfraRepository implements InfraInterface {
       },
       [],
     );
+
+  
     const languageENNode = await this.neo4jService.createNode(
       {
         canDelete: true,
@@ -168,6 +127,54 @@ export class InfraRepository implements InfraInterface {
       languageConfigNode.identity.low,
       {},
     );
+
+
+    //-----AssetTypes------
+    const assetTypesNode = await this.neo4jService.createNode(
+      { canDelete: false, isDeleted: false, name: 'Types', realm: 'Signum' },
+      ['AssetTypes'],
+    );
+
+    await this.neo4jService.addParentRelationByIdAndFilters(
+      assetTypesNode.identity.low,
+      {},
+      classificationNode.identity.low,
+      {},
+    );
+
+      const fixedAssetTypeNode = await this.neo4jService.createNode(
+      {
+        canDelete: true,
+        isDeleted: false,
+        name: 'fixed',
+        isActive: true,
+      },
+      ['AssetType'],
+    );
+    const moveableAssetTypeNode = await this.neo4jService.createNode(
+      {
+        canDelete: true,
+        isDeleted: false,
+        name: 'moveable',
+        isActive: true,
+      },
+      ['AssetType'],
+    );
+
+    await this.neo4jService.addParentRelationByIdAndFilters(
+      fixedAssetTypeNode.identity.low,
+      {},
+      assetTypesNode.identity.low,
+      {},
+    );
+
+    await this.neo4jService.addParentRelationByIdAndFilters(
+      moveableAssetTypeNode.identity.low,
+      {},
+      assetTypesNode.identity.low,
+      {},
+    );
+
 
     return infraNode;
   }

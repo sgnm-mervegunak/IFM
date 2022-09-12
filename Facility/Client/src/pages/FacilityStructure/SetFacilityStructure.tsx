@@ -25,6 +25,7 @@ import BlockForm from "./Forms/BlockForm";
 import FloorForm from "./Forms/FloorForm";
 import SpaceForm from "./Forms/SpaceForm";
 import DisplayNode from "./Display/DisplayNode";
+import BuildingFileImport from "./ImportPages/BuildingFileImport";
 import FloorFileImport from "./ImportPages/FloorFileImport";
 import BlockFileImport from "./ImportPages/BlockFileImport";
 import SpaceFileImport from "./ImportPages/SpaceFileImport";
@@ -95,6 +96,7 @@ const SetFacilityStructure = () => {
   const [editDia, setEditDia] = useState(false);
   const [delDia, setDelDia] = useState<boolean>(false);
   const [formDia, setFormDia] = useState<boolean>(false);
+  const [buildingImportDia, setBuildingImportDia] = useState<boolean>(false);
   const [blockImportDia, setBlockImportDia] = useState<boolean>(false);
   const [floorImportDia, setFloorImportDia] = useState<boolean>(false);
   const [spaceImportDia, setSpaceImportDia] = useState<boolean>(false);
@@ -183,6 +185,9 @@ const SetFacilityStructure = () => {
       });
   };
 
+  const importBuilding = () => {
+    setBuildingImportDia(true);
+  };
   const importFloor = () => {
     setFloorImportDia(true);
   };
@@ -232,6 +237,52 @@ const SetFacilityStructure = () => {
     },
   ];
 
+  const menuRoot = [
+    {
+      label: t("Add Item"),
+      icon: "pi pi-plus",
+      command: () => {
+        setSelectedFacilityType(undefined);
+        setAddDia(true);
+      },
+    },
+    {
+      label: t("Edit Item"),
+      icon: "pi pi-pencil",
+      command: () => {
+        let key = selectedNodeKey;
+        console.log(key);
+        console.log("test");
+
+        setIsUpdate(true);
+        getNodeInfoAndEdit(selectedNodeKey);
+        setEditDia(true);
+      },
+    },
+    {
+      label: t("Delete"),
+      icon: "pi pi-trash",
+      command: () => {
+        setDelDia(true);
+      },
+    },
+    {
+      label: t("View Data"),
+      icon: "pi pi-eye",
+      command: () => {
+        setDisplay(true);
+        setDisplayKey(selectedNodeKey);
+      },
+    },
+    {
+      label: t("Import Building"),
+      icon: "pi pi-fw pi-upload",
+      command: () => {
+        importBuilding();
+      },
+    },
+  ];
+
   const menuBuilding = [
     {
       label: t("Add Item"),
@@ -270,17 +321,17 @@ const SetFacilityStructure = () => {
       },
     },
     {
-      label: t("Import Block"),
-      icon: "pi pi-fw pi-upload",
-      command: () => {
-        importBlock();
-      },
-    },
-    {
       label: t("Import Floor"),
       icon: "pi pi-fw pi-upload",
       command: () => {
         importFloor();
+      },
+    },
+    {
+      label: t("Import Space"),
+      icon: "pi pi-fw pi-upload",
+      command: () => {
+        importSpace();
       },
     },
   ];
@@ -329,13 +380,6 @@ const SetFacilityStructure = () => {
         importFloor();
       },
     },
-    {
-      label: "Import Space",
-      icon: "pi pi-fw pi-upload",
-      command: () => {
-        importSpace();
-      },
-    },
   ];
 
   const menuFloor = [
@@ -373,13 +417,6 @@ const SetFacilityStructure = () => {
       command: () => {
         setDisplay(true);
         setDisplayKey(selectedNodeKey);
-      },
-    },
-    {
-      label: t("Import Space"),
-      icon: "pi pi-fw pi-upload",
-      command: () => {
-        importSpace();
       },
     },
   ];
@@ -588,7 +625,9 @@ const SetFacilityStructure = () => {
       } */}
 
       {(() => {
-        if (selectedFacilityType === "Building") {
+        if (selectedFacilityType === "FacilityStructure") {
+          return <ContextMenu model={menuRoot} ref={cm} />;
+        } else if (selectedFacilityType === "Building") {
           return <ContextMenu model={menuBuilding} ref={cm} />;
         } else if (selectedFacilityType === "Block") {
           return <ContextMenu model={menuBlock} ref={cm} />;
@@ -941,6 +980,20 @@ const SetFacilityStructure = () => {
         />
       </Dialog>
       <Dialog
+        header={t("Import Building")}
+        visible={buildingImportDia}
+        style={{ width: "25vw" }}
+        // footer={renderFooterForm}
+        onHide={() => {
+          setBuildingImportDia(false);
+        }}
+      >
+        <BuildingFileImport
+          selectedNodeKey={selectedNodeKey}
+          setBuildingImportDia={setBuildingImportDia}
+          getFacilityStructure={getFacilityStructure} />
+      </Dialog>
+      <Dialog
         header={t("Import Block")}
         visible={blockImportDia}
         style={{ width: "25vw" }}
@@ -960,7 +1013,10 @@ const SetFacilityStructure = () => {
           setFloorImportDia(false);
         }}
       >
-        <FloorFileImport selectedNodeKey={selectedNodeKey} />
+        <FloorFileImport
+          selectedNodeKey={selectedNodeKey}
+          setFloorImportDia={setFloorImportDia}
+          getFacilityStructure={getFacilityStructure} />
       </Dialog>
       <Dialog
         header={t("Import Space")}
@@ -971,7 +1027,10 @@ const SetFacilityStructure = () => {
           setSpaceImportDia(false);
         }}
       >
-        <SpaceFileImport selectedNodeKey={selectedNodeKey} />
+        <SpaceFileImport
+          selectedNodeKey={selectedNodeKey}
+          setSpaceImportDia={setSpaceImportDia}
+          getFacilityStructure={getFacilityStructure} />
       </Dialog>
       <Dialog
         header={t("Structure Detail")}
@@ -998,7 +1057,7 @@ const SetFacilityStructure = () => {
             setSelectedNodeKey(event.value);
           }}
           onContextMenu={(event: any) => {
-            setSelectedFacilityType(event.node.nodeType);
+            setSelectedFacilityType(event.node._type);
             cm.current.show(event.originalEvent);
           }}
           onDragDrop={(event: any) => {

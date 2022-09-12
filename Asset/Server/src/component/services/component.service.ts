@@ -10,8 +10,8 @@ export class ComponentService {
     @Inject(RepositoryEnums.COMPONENTS)
     private readonly componentRepository: GeciciInterface<any>,
   ) {}
-  async create(createAssetDto: CreateComponentDto, realm: string) {
-    return await this.componentRepository.create(createAssetDto, realm);
+  async create(createAssetDto: CreateComponentDto, realm: string, language, authorization) {
+    return await this.componentRepository.create(createAssetDto, realm, language, authorization);
   }
 
   findOne(realm: string) {
@@ -24,10 +24,6 @@ export class ComponentService {
 
   remove(id: string, realm: string) {
     return this.componentRepository.delete(id, realm);
-  }
-
-  async changeNodeBranch(id: string, target_parent_id: string) {
-    return await this.componentRepository.changeNodeBranch(id, target_parent_id);
   }
 
   async findOneNode(key: string, realm: string) {

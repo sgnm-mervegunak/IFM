@@ -1,11 +1,10 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Headers } from '@nestjs/common';
-import { Roles, Unprotected } from 'nest-keycloak-connect';
+import { Roles } from 'nest-keycloak-connect';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { NoCache } from 'ifmcommon';
 import { TypesService } from '../services/types.service';
 import { CreateTypesDto } from '../dto/create.types.dto';
 import { UpdateTypesDto } from '../dto/update.tpes.dto';
-import { ChangeBranchDto } from '../dto/change.branch.dto';
 import { UserRoles } from 'src/common/const/keycloak.role.enum';
 
 @ApiTags('types')
@@ -20,8 +19,10 @@ export class TypesController {
     description: 'create  Types ',
   })
   @Post()
-  create(@Body() createTypesDto: CreateTypesDto, @Headers('realm') realm) {
-    return this.typesService.create(createTypesDto, realm);
+  create(@Body() createTypesDto: CreateTypesDto, @Headers() header) {
+    const { realm, language, authorization } = header;
+
+    return this.typesService.create(createTypesDto, realm, language, authorization);
   }
 
   @Get('')
@@ -41,12 +42,6 @@ export class TypesController {
   @Roles({ roles: [UserRoles.ADMIN] })
   remove(@Param('id') id: string, @Headers('realm') realm) {
     return this.typesService.remove(id, realm);
-  }
-  @Unprotected()
-  @Post('/changeBranch')
-  changeNodeBranch(@Body() changeNodeBranch: ChangeBranchDto) {
-    const { id, targetParentId } = changeNodeBranch;
-    return this.typesService.changeNodeBranch(id, targetParentId);
   }
 
   @Roles({ roles: [UserRoles.ADMIN] })

@@ -1,11 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { FacilityStructureNotFountException } from '../../common/notFoundExceptions/not.found.exception';
-import { Neo4jService, assignDtoPropToEntity, createDynamicCyperObject, node_not_found } from 'sgnm-neo4j/dist';
+import { Neo4jService, assignDtoPropToEntity, createDynamicCyperObject, node_not_found, filterArrayForEmptyString, dynamicLabelAdder, dynamicFilterPropertiesAdder, dynamicFilterPropertiesAdderAndAddParameterKey, changeObjectKeyName } from 'sgnm-neo4j/dist';
 import { RelationName } from 'src/common/const/relation.name.enum';
 import { CreateJointSpaceDto } from '../dto/create.jointspace.dto';
 import { JointSpace } from '../entities/jointspace.entity';
 import * as moment from 'moment';
 import { JointSpaceAndZoneInterface } from 'src/common/interface/joint.space.zone.interface';
+import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 
 @Injectable()
 export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
@@ -147,6 +148,44 @@ export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
         );
       });
 
+      //////////////////////////////////////////////  CREATED_BY and CLASSIFIED_BY relations  ////////////////////////////////////////////////////
+      const contactNode = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+        ['Contact'],
+        {"isDeleted": false, "realm": realm},
+        [],
+        {"isDeleted": false, "email":  jointSpaceEntity['createdBy']},
+        "PARENT_OF"
+        );
+        if (contactNode && contactNode.length && contactNode.length == 1) {
+          await this.neo4jService.addRelationByIdAndRelationNameWithFilters(jointSpace.identity.low,{"isDeleted":false},
+                                contactNode[0]["_fields"][1].identity.low, {"isDeleted":false}, RelationName.CREATED_BY, RelationDirection.RIGHT);
+        }
+
+          const languages = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+           ['Language_Config'],
+           {"isDeleted": false, "realm": realm},
+           [],
+           {"isDeleted": false},
+           "PARENT_OF"
+           );
+           let classificationRootNone='OmniClass13';
+           languages.map(async (record) => {
+             let lang = record['_fields'][1].properties.name;
+   
+             let nodeClass = await this.neo4jService.findChildrensByLabelsAndFilters(
+                 [classificationRootNone+'_'+lang],
+                 {"isDeleted": false, "realm": realm},
+                 [],
+                 {"language": lang, "code": createJointSpaceDto["spaceType"]}
+               );
+             if (nodeClass && nodeClass.length && nodeClass.length == 1) {
+                 await this.neo4jService.addRelationByIdAndRelationNameWithFilters(jointSpace.identity.low,{"isDeleted":false},
+                                        nodeClass[0]["_fields"][1].identity.low, {"isDeleted":false}, RelationName.CLASSIFIED_BY, RelationDirection.RIGHT);
+             }
+           });   
+                  
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
       return jointSpace.properties;
     } catch (error) {
       if (error.response?.code) {
@@ -156,7 +195,7 @@ export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
       }
     }
   }
-
+  
   async update(_id: string, updateFacilityStructureDto,realm: string, language: string) {
     const updateFacilityStructureDtoWithoutLabelsAndParentId = {};
     Object.keys(updateFacilityStructureDto).forEach((element) => {

@@ -9,14 +9,14 @@ import React, { useEffect, useState, useRef } from "react";
 // import { save } from "../../features/tree/treeSlice";
 import { Toolbar } from "primereact/toolbar";
 import { useNavigate } from "react-router-dom";
-import { Menu } from 'primereact/menu';
-import { Chips } from 'primereact/chips';
+import { Menu } from "primereact/menu";
+import { Chips } from "primereact/chips";
 
 import FacilityStructureService from "../../services/facilitystructure";
 import { useAppSelector } from "../../app/hook";
 import { useTranslation } from "react-i18next";
 import Export, { ExportType } from "../FacilityStructure/Export/Export";
-
+import ImportZone from "./ImportZone";
 
 interface Node {
   cantDeleted: boolean;
@@ -32,7 +32,7 @@ interface Node {
   _id: {
     low: string;
     high: string;
-  },
+  };
   icon?: string;
   label?: string;
   labels?: string[]; // for form type
@@ -41,10 +41,7 @@ interface Node {
   Name?: string;
 }
 
-
 const Zone = () => {
-
-
   const navigate = useNavigate();
   const [data, setData] = useState<Node[]>([]);
   const [addDia, setAddDia] = useState(false);
@@ -55,6 +52,7 @@ const Zone = () => {
   const [globalFilter, setGlobalFilter] = useState("");
   const [loading, setLoading] = useState(false);
   const [exportDia, setExportDia] = useState(false);
+  const [importDia, setImportDia] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const dt = useRef<any>();
@@ -164,14 +162,33 @@ const Zone = () => {
         right={() => (
           <React.Fragment>
             <Button
-              label={t("Export Zones")}
+              label={t("Import Zones")}
               icon="pi pi-download"
               className="p-button"
+              onClick={() => setImportDia(true)}
+            />
+            <Button
+              label={t("Export Zones")}
+              icon="pi pi-download"
+              className="p-button ml-2"
               onClick={() => setExportDia(true)}
             />
           </React.Fragment>
         )}
       ></Toolbar>
+
+      <Dialog
+        header={t("Import")}
+        visible={importDia}
+        style={{ width: "40vw" }}
+        onHide={() => {
+          setImportDia(false);
+        }}
+      >
+        <ImportZone
+          setImportDia={setImportDia}
+        />
+      </Dialog>
 
       <Dialog
         header={t("Export")}
@@ -199,7 +216,12 @@ const Zone = () => {
           setExportDia(false);
         }}
       >
-        <Export submitted={submitted} setSubmitted={setSubmitted} setExportDia={setExportDia} exportType={ExportType.Zone} />
+        <Export
+          submitted={submitted}
+          setSubmitted={setSubmitted}
+          setExportDia={setExportDia}
+          exportType={ExportType.Zone}
+        />
       </Dialog>
 
       <DataTable
@@ -218,7 +240,6 @@ const Zone = () => {
         onSelectionChange={(e) => {
           navigate("/zone/" + e.value.key);
           console.log(e.value);
-          
         }}
         responsiveLayout="scroll"
       >

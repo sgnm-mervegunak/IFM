@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import Export, { ExportType } from "../FacilityStructure/Export/Export";
 import ExportService from "../../services/export";
 import DownloadExcel from "../../utils/download-excel";
+import DisplayNode from "../FacilityStructure/Display/DisplayNode";
 
 interface Node {
   cantDeleted: boolean;
@@ -116,6 +117,8 @@ const SetZone = () => {
   const [nodeKeys, setNodeKeys] = useState<string[]>([]);
   const [classificationSpace, setClassificationSpace] = useState<Node[]>([]);
   const [classificationStatus, setclassificationStatus] = useState<Node[]>([]);
+  const [codeCategory, setCodeCategory] = useState("");
+  const [codeStatus, setCodeStatus] = useState("");
   const [formTypeId, setFormTypeId] = useState<any>(undefined);
   const [labels, setLabels] = useState<string[]>([]);
   const [isActive, setIsActive] = useState<boolean>(true);
@@ -123,6 +126,8 @@ const SetZone = () => {
   const [editDia, setEditDia] = useState(false);
   const [delDia, setDelDia] = useState<boolean>(false);
   const [formDia, setFormDia] = useState<boolean>(false);
+  const [display, setDisplay] = useState(false);
+  const [displayKey, setDisplayKey] = useState("");
   const [exportDia, setExportDia] = useState(false);
   const { toast } = useAppSelector((state) => state.toast);
   const { t } = useTranslation(["common"]);
@@ -160,7 +165,7 @@ const SetZone = () => {
 
   const getClassificationSpace = async () => {
     await ClassificationsService.findAllActiveByLabel({
-      label: "OmniClass13"
+      label: "FacilityZoneTypes"
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodesClassification(temp);
@@ -236,7 +241,7 @@ const SetZone = () => {
   //             life: 2000,
   //           });
   //         });
-      
+
   //     },
   //   },
   // ];
@@ -285,7 +290,7 @@ const SetZone = () => {
   const { register, handleSubmit, watch, formState: { errors }, control, reset, formState, formState: { isSubmitSuccessful } } = useForm<ZoneInterface>({
     resolver: yupResolver(schema)
   })
- 
+
   useEffect(() => {
     watch((value, { name, type }) => console.log(value, name, type));
   }, [watch])
@@ -293,9 +298,9 @@ const SetZone = () => {
 
   useEffect(() => {
     if (formState.isSubmitSuccessful) {
-      reset({...createZone});
+      reset({ ...createZone });
     } else {
-      
+
     }
   }, [formState, createZone, reset]);
 
@@ -315,10 +320,11 @@ const SetZone = () => {
     }
   };
 
-  const addItem = (createZone:any) => {
+  const addItem = (createZone: any) => {
     let newNode: any = {};
     newNode = {
       ...createZone,
+      category:codeCategory,
       spaceNames: `${selectedKeysName.toString().replaceAll(",", ", ")}` || "",
       nodeKeys: selectedKeys || [],
       credatedBy: "",
@@ -409,7 +415,7 @@ const SetZone = () => {
 
   const onChange = (e: any) => {
     try {
-      
+
       setCreateZone(prev => ({
         ...prev,
         [e.target?.name]: e.target.value
@@ -538,7 +544,7 @@ const SetZone = () => {
 
   return (
 
-   
+
     <div className="container">
 
       {/* {
@@ -557,6 +563,20 @@ const SetZone = () => {
         icon="pi pi-exclamation-triangle"
         accept={() => deleteItem(deleteNodeKey)}
       />
+      <Dialog
+        header={t("Joint Space Detail")}
+        visible={display}
+        position={"right"}
+        modal={false}
+        style={{ width: "30vw" }}
+        onHide={() => {
+          setDisplay(false);
+          setDisplayKey("");
+        }}
+        resizable
+      >
+        <DisplayNode displayKey={displayKey} />
+      </Dialog>
       <Dialog
         header="Add New Item"
         visible={addDia}
@@ -598,9 +618,13 @@ const SetZone = () => {
               render={({ field }) => (
                 <TreeSelect
                   value={field.value}
-                  options={classificationStatus}
+                  options={classificationSpace}
                   onChange={(e) => {
-                    field.onChange({ target: { name: "category", value: e.value } })
+                    ClassificationsService.nodeInfo(e.value as string)
+                      .then((res) => {
+                        field.onChange(e.value)
+                        setCodeCategory(res.data.properties.code || "");
+                      })
                   }}
                   filter
                   placeholder="Select Type"
@@ -747,13 +771,13 @@ const SetZone = () => {
           filterBy="name,code"
           filterPlaceholder="Search"
           selectionMode="checkbox"
-          onSelect={(e:any)=>{
-            setSelectedKeysName(prev=>([...prev,e.node.name]))
-            
+          onSelect={(e: any) => {
+            setSelectedKeysName(prev => ([...prev, e.node.name]))
+
           }}
-          onUnselect={(e:any)=>{
-            setSelectedKeysName(prev=>prev.filter(item=>item!==e.node.name))
-            
+          onUnselect={(e: any) => {
+            setSelectedKeysName(prev => prev.filter(item => item !== e.node.name))
+
           }}
           onSelectionChange={(event: any) => {
             console.log(event);
@@ -782,6 +806,20 @@ const SetZone = () => {
                           setDelDia(true);
                         }}
                         title="Delete Item"
+                      />
+                    ) : null}
+                  </span>
+                  <span>
+                    {data.nodeType === "Zone" ? (
+                      <Button
+                        icon="pi pi-eye"
+                        className="p-button-rounded p-button-secondary p-button-text"
+                        aria-label="Display"
+                        onClick={() => {
+                          setDisplay(true);
+                          setDisplayKey(data.key);
+                        }}
+                        title={t("Display")}
                       />
                     ) : null}
                   </span>

@@ -8,11 +8,11 @@ import { useNavigate } from 'react-router-dom';
 
 interface Params {
     selectedNodeKey: string;
-    setFloorImportDia: React.Dispatch<React.SetStateAction<boolean>>;
+    setBuildingImportDia: React.Dispatch<React.SetStateAction<boolean>>;
     getFacilityStructure: () => void;
 }
 
-const FloorFileImport = ({ selectedNodeKey, setFloorImportDia, getFacilityStructure }: Params) => {
+const BuildingFileImport = ({ setBuildingImportDia, getFacilityStructure }: Params) => {
     const { toast } = useAppSelector((state) => state.toast);
     const refUpload = useRef<any>(null);
     const auth = useAppSelector((state) => state.auth);
@@ -21,7 +21,7 @@ const FloorFileImport = ({ selectedNodeKey, setFloorImportDia, getFacilityStruct
 
     const uploadCSV = (e: any) => {
         const file = e.files[0];
-        const url = `http://localhost:3010/ExcelImportExport/addFloorwithCobie/${selectedNodeKey}`;
+        const url = 'http://localhost:3010/ExcelImportExport/addBuildingwithCobie';
         const formData = new FormData();
 
         formData.append('file', file);
@@ -33,12 +33,12 @@ const FloorFileImport = ({ selectedNodeKey, setFloorImportDia, getFacilityStruct
         };
         axios.post(url, formData, config).then((response) => {
             toast.current.show({ severity: 'success', summary: 'File uploaded', life: 3000 });
-            setFloorImportDia(false);
+            setBuildingImportDia(false);
             getFacilityStructure();
         })
             .catch(error => {
                 toast.current.show({ severity: 'error', summary: 'File not uploaded', life: 3000 });
-                setFloorImportDia(false);
+                setBuildingImportDia(false);
                 getFacilityStructure();
             })
 
@@ -47,6 +47,7 @@ const FloorFileImport = ({ selectedNodeKey, setFloorImportDia, getFacilityStruct
     }
     return (
         <>
+
             <div className="card">
                 <FileUpload
                     name="upfile[]"
@@ -62,4 +63,4 @@ const FloorFileImport = ({ selectedNodeKey, setFloorImportDia, getFacilityStruct
     )
 };
 
-export default FloorFileImport;
+export default BuildingFileImport;

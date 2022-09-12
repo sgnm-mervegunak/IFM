@@ -463,7 +463,10 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
   async create(key: string, structureData: Object, realm: string, language: string) {
    try {
     if (!structureData["category"] || structureData["category"] == null) {
-      throw new HttpException(null_value({"val": "category"}), 400);
+      if (structureData['nodeType'] != 'Block') {
+        throw new HttpException(null_value({"val": "category"}), 400);
+      }
+      
     }
     //is there facility-structure parent node
     const node = await this.neo4jService.findByLabelAndFilters(

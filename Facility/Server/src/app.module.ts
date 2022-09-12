@@ -23,7 +23,7 @@ import { Neo4jModule } from 'sgnm-neo4j/dist';
 import { OrganizationModule } from './init.organization/organization.module';
 import { JointSpaceModule } from './jointspace/jointspace.module';
 import { ZoneModule } from './zone/zone.module';
-import { ExcelExportModule } from './excelExport/excelExport.module';
+import { ExcelImportExportModule } from './excelExport/excelImportExport.module';
 
 @Module({
   imports: [
@@ -81,7 +81,6 @@ import { ExcelExportModule } from './excelExport/excelExport.module';
         port: configService.get('NEO4J_PORT'),
         scheme: configService.get('NEO4J_SCHEME'),
         username: configService.get('NEO4J_USERNAME'),
-        database: 'mrv',
       }),
     }),
 
@@ -119,7 +118,7 @@ import { ExcelExportModule } from './excelExport/excelExport.module';
 
     ZoneModule,
 
-    ExcelExportModule,
+    ExcelImportExportModule,
   ],
   providers: [
     //to cache all get request

@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Toast } from 'primereact/toast';
 import { FileUpload } from 'primereact/fileupload';
+import { ProgressSpinner } from 'primereact/progressspinner';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from "react-i18next";
@@ -8,14 +9,17 @@ import { useTranslation } from "react-i18next";
 import { useAppSelector } from "../../app/hook";
 
 const ClassificationFileImportWithoutCode: React.FC = () => {
-    const toast = useRef<any>();
+    const { toast } = useAppSelector((state) => state.toast);
     const refUpload = useRef<any>(null);
     const auth = useAppSelector((state) => state.auth);
-    const [realm, setRealm] = useState(auth.auth.realm);
     const [token, setToken] = useState(auth.auth.token);
-    const language = useAppSelector((state) => state.language.language);
+    const [spinner, setSpinner] = useState(false);
     const { t } = useTranslation(["common"]);
     const history = useNavigate();
+
+    function backToClassification() {
+        history('/classifications');
+    }
 
     const uploadCSV = (e: any) => {
         const file = e.files[0];
@@ -29,13 +33,16 @@ const ClassificationFileImportWithoutCode: React.FC = () => {
                 'content-type': 'multipart/form-data', Authorization: "Bearer " + token,
             },
         };
+        setSpinner(true);
         axios.post(url, formData, config).then((response) => {
+            setSpinner(false);
             toast.current.show({
                 severity: "success",
                 summary: t("Successful"),
                 detail: t("File uploaded"),
                 life: 4000
             });
+            backToClassification();
         })
             .catch(err => {
                 toast.current.show({
@@ -47,37 +54,36 @@ const ClassificationFileImportWithoutCode: React.FC = () => {
             })
 
         refUpload.current.clear();
-        function backToClassification() {
-            history('/classifications');
-        }
-
-        setTimeout(backToClassification, 1000);
-
     }
     return (
         <>
-            <Toast ref={toast}></Toast>
-
             <div className="card">
-                <h5>{t("Classification File Import Without Code")}</h5>
-                <p
-                    className="mt-4 cursor-pointer"
-                    style={{ color: "red" }}
-                    onClick={() => window.location.href = "http://localhost:3000/documents/classification-without-code.xlsx"}
-                >
-                    {t("Click to download sample classification file")}
-                </p>
-                <FileUpload
-                    name="upfile[]"
-                    accept="csv/*"
-                    maxFileSize={1000000}
-                    chooseLabel={t("Select File")}
-                    uploadLabel={t("Upload")}
-                    cancelLabel={t("Cancel")}
-                    customUpload={true}
-                    uploadHandler={uploadCSV}
-                    ref={refUpload}
-                />
+                {spinner ? (
+                    <ProgressSpinner />
+                )
+                    : (
+                        <>
+                            <h5>{t("Classification File Import Without Code")}</h5>
+                            <p
+                                className="mt-4 cursor-pointer"
+                                style={{ color: "red" }}
+                                onClick={() => window.location.href = "http://localhost:3000/documents/classification-without-code.xlsx"}
+                            >
+                                {t("Click to download sample classification file")}
+                            </p>
+                            <FileUpload
+                                name="upfile[]"
+                                accept="csv/*"
+                                maxFileSize={1000000}
+                                chooseLabel={t("Select File")}
+                                uploadLabel={t("Upload")}
+                                cancelLabel={t("Cancel")}
+                                customUpload={true}
+                                uploadHandler={uploadCSV}
+                                ref={refUpload}
+                            />
+                        </>
+                    )}
             </div>
         </>
     )

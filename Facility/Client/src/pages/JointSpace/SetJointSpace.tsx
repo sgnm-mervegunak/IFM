@@ -21,6 +21,7 @@ import StructureWinformService from "../../services/structureWinform";
 import JointSpaceService from "../../services/jointSpace";
 import { useAppSelector } from "../../app/hook";
 import FormGenerate from "../FormGenerate/FormGenerate";
+import DisplayNode from "../FacilityStructure/Display/DisplayNode";
 
 interface Node {
   cantDeleted: boolean;
@@ -113,6 +114,8 @@ const SetJointSpace = () => {
   const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
+  const [display, setDisplay] = useState(false);
+  const [displayKey, setDisplayKey] = useState("");
   const params = useParams();
   const { t } = useTranslation(["common"]);
 
@@ -269,8 +272,8 @@ const SetJointSpace = () => {
       code: data?.code,
       tag: data?.tag,
       m2: data?.m2,
-      spaceType: data?.spaceType,
-      status: data?.status,
+      spaceType: codeCategory,
+      status: codeStatus,
       jointStartDate: data?.jointStartDate,
       jointEndDate: data?.jointEndDate,
       nodeKeys: selectedKeys
@@ -484,6 +487,20 @@ const SetJointSpace = () => {
         icon="pi pi-exclamation-triangle"
         accept={() => deleteItem(deleteNodeKey)}
       />
+      <Dialog
+        header={t("Joint Space Detail")}
+        visible={display}
+        position={"right"}
+        modal={false}
+        style={{ width: "30vw" }}
+        onHide={() => {
+          setDisplay(false);
+          setDisplayKey("");
+        }}
+        resizable
+      >
+        <DisplayNode displayKey={displayKey} />
+      </Dialog>
       <Dialog
         header={t("Add New Item")}
         visible={addDia}
@@ -737,6 +754,20 @@ const SetJointSpace = () => {
                       setDelDia(true)
                     }}
                     title={t("Delete")}
+                  />
+                    : null
+                }
+              </span>
+              <span>
+                {
+                  data.nodeType === "JointSpace" ? <Button
+                    icon="pi pi-eye" className="p-button-rounded p-button-secondary p-button-text" aria-label="Display"
+                    onClick={() => {
+                      setDisplay(true);
+                      setDisplayKey(data.key);
+                      
+                    }}
+                    title={t("Display")}
                   />
                     : null
                 }

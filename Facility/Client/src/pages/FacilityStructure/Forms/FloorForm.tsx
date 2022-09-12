@@ -48,7 +48,7 @@ interface Node {
 }
 
 const schema = yup.object({
-    name: yup.string().required("This area is required.").min(2, "This area accepts min 2 characters."),
+    name: yup.string().required("This area is required.").max(50, "This area accepts max 50 characters."),
     elevation: yup
         .number()
         .typeError('Elevation must be a number')
@@ -165,7 +165,7 @@ const FloorForm = ({
                 height: data?.height || "",
                 category: codeCategory,
             };
-          
+
             FacilityStructureService.createStructure(selectedNodeKey, newNode)
                 .then((res) => {
                     toast.current.show({
@@ -194,11 +194,8 @@ const FloorForm = ({
 
                 });
 
-            setTimeout(() => {
-                setAddDia(false);
-                setSelectedFacilityType(undefined);
-            }, 1000);
-
+            setAddDia(false);
+            setSelectedFacilityType(undefined);
 
         } else {
 
@@ -253,8 +250,27 @@ const FloorForm = ({
                     style={{ width: '100%' }}
                     defaultValue={data?.name || ""}
                 />
+                <p style={{ color: "red" }}>{errors.name?.message}</p>
             </div>
-            <p style={{ color: "red" }}>{errors.name?.message}</p>
+
+            <div className="field structureChips">
+                <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
+                <Controller
+                    defaultValue={data?.tag || []}
+                    name="tag"
+                    control={control}
+                    render={({ field }) => (
+                        <Chips
+                            value={field.value}
+                            onChange={(e) => {
+                                field.onChange(e.value)
+                            }}
+                            style={{ width: "100%" }}
+                        />
+                    )}
+                />
+                <p style={{ color: "red" }}>{errors.tag?.message}</p>
+            </div>
 
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
@@ -279,24 +295,7 @@ const FloorForm = ({
                         />
                     )}
                 />
-            </div>
-
-            <div className="field structureChips">
-                <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
-                <Controller
-                    defaultValue={data?.tag || []}
-                    name="tag"
-                    control={control}
-                    render={({ field }) => (
-                        <Chips
-                            value={field.value}
-                            onChange={(e) => {
-                                field.onChange(e.value)
-                            }}
-                            style={{ width: "100%" }}
-                        />
-                    )}
-                />
+                <p style={{ color: "red" }}>{errors.category?.message}</p>
             </div>
 
             <div className="field">
@@ -307,8 +306,8 @@ const FloorForm = ({
                     {...register("description")}
                     style={{ width: "100%" }}
                 />
+                <p style={{ color: "red" }}>{errors.description?.message}</p>
             </div>
-            <p style={{ color: "red" }}>{errors.description?.message}</p>
 
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>{t("Elevation")} (cm)</h5>
@@ -318,8 +317,8 @@ const FloorForm = ({
                     {...register("elevation")}
                     style={{ width: "100%" }}
                 />
+                <p style={{ color: "red" }}>{errors.elevation?.message}</p>
             </div>
-            <p style={{ color: "red" }}>{errors.elevation?.message}</p>
 
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>{t("Height")} (cm)</h5>
@@ -329,8 +328,8 @@ const FloorForm = ({
                     {...register("height")}
                     style={{ width: "100%" }}
                 />
+                <p style={{ color: "red" }}>{errors.height?.message}</p>
             </div>
-            <p style={{ color: "red" }}>{errors.height?.message}</p>
 
         </form>
     );

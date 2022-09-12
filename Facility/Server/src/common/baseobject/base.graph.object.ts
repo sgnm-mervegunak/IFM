@@ -13,6 +13,7 @@ export abstract class BaseGraphObject {
   tag: string[] = [];
   formTypeId: string;
   canDisplay:boolean= true;
+  createdBy: string = 'atamer.atalay@signumtte.com'; //kullanıcı session dan alınacak 
 }
 
 function generateUuid() {

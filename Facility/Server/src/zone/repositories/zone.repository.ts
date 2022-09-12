@@ -7,6 +7,7 @@ import { Zone } from '../entities/zone.entity';
 const exceljs = require('exceljs');
 import { generateUuid } from 'src/common/baseobject/base.virtual.node.object';
 import { JointSpaceAndZoneInterface } from 'src/common/interface/joint.space.zone.interface';
+import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 
 @Injectable()
 export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
@@ -97,6 +98,44 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
         RelationName.MERGEDZN,
       );
     });
+
+    //////////////////////////////////////////////  CREATED_BY and CLASSIFIED_BY relations  ////////////////////////////////////////////////////
+    const contactNode = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+      ['Contact'],
+      {"isDeleted": false, "realm": realm},
+      [],
+      {"isDeleted": false, "email":  zoneEntity['createdBy']},
+      "PARENT_OF"
+      );
+      if (contactNode && contactNode.length && contactNode.length == 1) {
+        await this.neo4jService.addRelationByIdAndRelationNameWithFilters(zone.identity.low,{"isDeleted":false},
+                              contactNode[0]["_fields"][1].identity.low, {"isDeleted":false}, RelationName.CREATED_BY, RelationDirection.RIGHT);
+      }
+
+        const languages = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+         ['Language_Config'],
+         {"isDeleted": false, "realm": realm},
+         [],
+         {"isDeleted": false},
+         "PARENT_OF"
+         );
+         let classificationRootNone='FacilityZoneTypes';
+         languages.map(async (record) => {
+           let lang = record['_fields'][1].properties.name;
+ 
+           let nodeClass = await this.neo4jService.findChildrensByLabelsAndFilters(
+               [classificationRootNone+'_'+lang],
+               {"isDeleted": false, "realm": realm},
+               [],
+               {"language": lang, "code": createZoneDto["category"]}
+             );
+           if (nodeClass && nodeClass.length && nodeClass.length == 1) {
+               await this.neo4jService.addRelationByIdAndRelationNameWithFilters(zone.identity.low,{"isDeleted":false},
+                                      nodeClass[0]["_fields"][1].identity.low, {"isDeleted":false}, RelationName.CLASSIFIED_BY, RelationDirection.RIGHT);
+           }
+         });   
+                
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     return zone.properties;
   }
