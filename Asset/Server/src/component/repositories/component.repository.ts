@@ -3,7 +3,7 @@ import {
   AssetNotFoundException,
   FacilityStructureNotFountException,
 } from '../../common/notFoundExceptions/not.found.exception';
-import { Types } from '../entities/component.entity';
+import { Component } from '../entities/component.entity';
 import { NestKafkaService, nodeHasChildException } from 'ifmcommon';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
 import { assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError, Neo4jService } from 'sgnm-neo4j/dist';
@@ -11,10 +11,22 @@ import { assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError, Neo4
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
 import { CreateComponentDto } from '../dto/create.component.dto';
 import { UpdateComponentDto } from '../dto/update.component.dto';
+import { catchError, map } from 'rxjs';
+import { WrongIdProvided } from 'src/common/bad.request.exception';
+import { VirtualNode } from 'src/common/baseobject/virtual.node';
+import { CustomAssetError } from 'src/common/const/custom.error.enum';
+import { wrong_parent_error, other_microservice_errors } from 'src/common/const/custom.error.object';
+import { RelationName } from 'src/common/const/relation.name.enum';
+import { HttpService } from '@nestjs/axios';
+import { SpaceType } from 'src/common/const/space.type.enum';
 
 @Injectable()
-export class ComponentRepository implements GeciciInterface<Types> {
-  constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) {}
+export class ComponentRepository implements GeciciInterface<Component> {
+  constructor(
+    private readonly neo4jService: Neo4jService,
+    private readonly kafkaService: NestKafkaService,
+    private readonly httpService: HttpService,
+  ) {}
   async findByKey(key: string) {
     try {
       const nodes = await this.neo4jService.findByLabelAndFilters(['Type'], { key });
@@ -40,17 +52,135 @@ export class ComponentRepository implements GeciciInterface<Types> {
 
     return node;
   }
-  async create(createAssetDto: CreateComponentDto, realm, language, authorization) {
-    const asset = new Types();
-    const assetObject = assignDtoPropToEntity(asset, createAssetDto);
-    const value = await this.neo4jService.createNode(assetObject, ['Asset']);
+  async create(createComponentDto: CreateComponentDto, realm, language, authorization) {
+    try {
+      const typesNode = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.TYPES], {
+        isDeleted: false,
+        realm,
+      });
+      if (!typesNode.length) {
+        throw new HttpException(wrong_parent_error(), 400);
+      }
 
-    value['properties']['id'] = value['identity'].low;
-    const result = { id: value['identity'].low, labels: value['labels'], properties: value['properties'] };
-    if (createAssetDto['parentId']) {
-      await this.neo4jService.addRelations(String(result['id']), createAssetDto['parentId']);
+      const typeNode = await this.neo4jService.findNodesByIdAndRelationName(
+        typesNode[0].get('n').identity.low,
+        {},
+        createComponentDto.parentId,
+        {
+          isDeleted: false,
+        },
+        'PARENT_OF',
+      );
+      if (!typeNode.length) {
+        throw new HttpException(wrong_parent_error(), 400);
+      }
+
+      let structureUrl = '';
+      switch (createComponentDto.spaceType) {
+        case SpaceType.JOINTSPACE:
+          await this.httpService
+            .get(`${process.env.JOINTSPACE_URL}/${createComponentDto.space}`, { headers: { authorization } })
+            .pipe(
+              catchError((error) => {
+                const { status, message } = error.response?.data;
+                throw new HttpException(other_microservice_errors(message), status);
+              }),
+            )
+            .pipe(map((response) => response.data));
+          structureUrl = `${process.env.JOINTSPACE}/${createComponentDto.space}`;
+          break;
+        case SpaceType.SPACE:
+          await this.httpService
+            .get(`${process.env.STRUCTURE_URL}/${createComponentDto.space}`, { headers: { authorization } })
+            .pipe(
+              catchError((error) => {
+                const { status, message } = error.response?.data;
+                throw new HttpException(other_microservice_errors(message), status);
+              }),
+            )
+            .pipe(map((response) => response.data));
+          structureUrl = `${process.env.STRUCTURE_URL}/${createComponentDto.space}`;
+          break;
+        default:
+          throw new HttpException(other_microservice_errors('SpaceType must be valid'), 400);
+      }
+
+      //check if manufacturer exist
+      await this.httpService
+        .get(`${process.env.STRUCTURE_URL}/${createComponentDto.space}`, { headers: { authorization } })
+        .pipe(
+          catchError((error) => {
+            const { status, message } = error.response?.data;
+            throw new HttpException(other_microservice_errors(message), status);
+          }),
+        )
+        .pipe(map((response) => response.data));
+
+      const component = new Component();
+      const componentFinalObject = assignDtoPropToEntity(component, CreateComponentDto);
+      const componentNode = await this.neo4jService.createNode(componentFinalObject, [Neo4jLabelEnum.TYPE]);
+
+      componentNode['properties']['id'] = componentNode['identity'].low;
+      const result = {
+        id: componentNode['identity'].low,
+        labels: componentNode['labels'],
+        properties: componentNode['properties'],
+      };
+      if (CreateComponentDto['parentId']) {
+        await this.neo4jService.addParentRelationByIdAndFilters(result['id'], {}, CreateComponentDto['parentId'], {});
+      }
+
+      let virtualNode = new VirtualNode();
+      const createStructureRelationDto = { referenceKey: createComponentDto.space };
+      virtualNode = assignDtoPropToEntity(virtualNode, createStructureRelationDto);
+
+      virtualNode.url = structureUrl;
+      const virtualStructureNode = await this.neo4jService.createNode(virtualNode, [
+        Neo4jLabelEnum.VIRTUAL,
+        Neo4jLabelEnum.STRUCTURE,
+      ]);
+
+      await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
+        componentNode.identity.low,
+        {},
+        virtualStructureNode.identity.low,
+        {},
+        RelationName.LOCATED_IN,
+      );
+      await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
+        componentNode.identity.low,
+        {},
+        virtualStructureNode.identity.low,
+        {},
+        RelationName.HAS_VIRTUAL_RELATION,
+      );
+
+      const componentUrl = `${process.env.COMPONENT_URL}/${componentNode.properties.key}`;
+      const kafkaObject = {
+        referenceKey: componentNode.properties.key,
+        parentKey: createComponentDto.space,
+        url: componentUrl,
+      };
+      await this.kafkaService.producerSendMessage('createTypeContactRelation', JSON.stringify(kafkaObject));
+      return result;
+    } catch (error) {
+      const code = error.response?.code;
+
+      if (code >= 1000 && code <= 1999) {
+      } else if (code >= 5000 && code <= 5999) {
+        if (error.response?.code == CustomNeo4jError.ADD_CHILDREN_RELATION_BY_ID_ERROR) {
+        }
+      } else if (code >= 9500 && code <= 9750) {
+        if (error.response?.code == CustomAssetError.WRONG_PARENT) {
+          throw new WrongIdProvided();
+        }
+        if (error.response?.code == CustomAssetError.OTHER_MICROSERVICE_ERROR) {
+          throw new HttpException(error.response.message, error.response.status);
+        }
+      } else {
+        throw new HttpException(error, 500);
+      }
     }
-    return result;
   }
 
   async update(_id: string, updateAssetDto: UpdateComponentDto) {

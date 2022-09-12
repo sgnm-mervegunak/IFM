@@ -1,8 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsOptional, Max, Min } from 'class-validator';
-import { i18nValidationMessageEnum, IsStringWithI18nMessage, LengthWithI18nMessage } from 'ifmcommon';
+import {
+  i18nValidationMessageEnum,
+  IsEnumWithI18nMessage,
+  IsStringWithI18nMessage,
+  LengthWithI18nMessage,
+} from 'ifmcommon';
 import { IsNotEmptyWithI18nMessage } from 'ifmcommon';
 import * as moment from 'moment';
+import { SpaceType } from 'src/common/const/space.type.enum';
 
 export class CreateComponentDto {
   @ApiProperty()
@@ -22,7 +28,12 @@ export class CreateComponentDto {
 
   @ApiProperty()
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
-  parentId: string;
+  @IsEnumWithI18nMessage(SpaceType, i18nValidationMessageEnum.IS_ENUM)
+  spaceType: string;
+
+  @ApiProperty()
+  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
+  parentId: number;
 
   @ApiProperty()
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)

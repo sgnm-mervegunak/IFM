@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import {
   AssetNotFoundException,
   FacilityStructureNotFountException,
@@ -17,17 +17,13 @@ import { HttpService } from '@nestjs/axios';
 import { catchError, map, firstValueFrom } from 'rxjs';
 import { VirtualNode } from 'src/common/baseobject/virtual.node';
 import { RelationName } from 'src/common/const/relation.name.enum';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class TypesRepository implements GeciciInterface<Type> {
-  @Inject(ConfigService)
-  private config: ConfigService
   constructor(
     private readonly neo4jService: Neo4jService,
     private readonly kafkaService: NestKafkaService,
     private readonly httpService: HttpService,
-
   ) {}
   async findByKey(key: string) {
     try {
@@ -90,19 +86,15 @@ export class TypesRepository implements GeciciInterface<Type> {
       }
 
       //check if manufacturer exist
-     let manufacturer= await this.httpService
-        .get(`${this.config.get('CONTACT_URL')}/${createTypesDto.manufacturer}`, { headers: { authorization,language } })
+      await this.httpService
+        .get(`${process.env.CONTACT_URL}/${createTypesDto.manufacturer}`, { headers: { authorization } })
         .pipe(
           catchError((error) => {
-           const {status,message}=error.response?.data
+            const { status, message } = error.response?.data;
             throw new HttpException(other_microservice_errors(message), status);
           }),
         )
         .pipe(map((response) => response.data));
-
-         manufacturer = await firstValueFrom(manufacturer);
-        
-
 
       const type = new Type();
       const typeObject = assignDtoPropToEntity(type, createTypesDto);
@@ -160,8 +152,7 @@ export class TypesRepository implements GeciciInterface<Type> {
           throw new WrongIdProvided();
         }
         if (error.response?.code == CustomAssetError.OTHER_MICROSERVICE_ERROR) {
-          console.log('here')
-          throw new WrongIdProvided();
+          throw new HttpException(error.response.message, error.response.status);
         }
       } else {
         throw new HttpException(error, 500);
