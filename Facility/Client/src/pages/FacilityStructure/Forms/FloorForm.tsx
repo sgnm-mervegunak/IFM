@@ -132,15 +132,16 @@ const FloorForm = ({
     const getNodeInfoForUpdate = (selectedNodeKey: string) => {
         FacilityStructureService.nodeInfo(selectedNodeKey)
             .then(async (res) => {
-                // let temp = {};
+                let temp = {};
                 await ClassificationsService.findClassificationByCodeAndLanguage("FacilityFloorTypes", res.data.properties.category).then(clsf1 => {
+                    setCodeCategory(res.data.properties.category);
                     res.data.properties.category = clsf1.data.key
-                    setData(res.data.properties);
+                    temp = res.data.properties;
                 })
                     .catch((err) => {
                         setData(res.data.properties);
                     })
-
+                setData(temp);
             })
             .catch((err) => {
                 toast.current.show({

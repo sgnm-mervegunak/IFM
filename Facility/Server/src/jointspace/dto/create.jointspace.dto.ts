@@ -40,7 +40,7 @@ export class CreateJointSpaceDto {
 
   @ApiProperty()
   @IsOptional()
-  images?: string[];
+  images?: string;
 
   @ApiProperty()
   @IsOptional()
