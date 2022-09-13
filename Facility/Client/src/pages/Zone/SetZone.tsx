@@ -7,25 +7,26 @@ import { ConfirmDialog } from "primereact/confirmdialog";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { TreeSelect } from "primereact/treeselect";
+import { TabPanel, TabView } from "primereact/tabview";
 import { useNavigate, useParams } from "react-router-dom";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useForm, Controller } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import axios from "axios";
 
 import FacilityStructureService from "../../services/facilitystructure";
 import ClassificationsService from "../../services/classifications";
 import ZoneService from "../../services/zone";
 import { useAppSelector } from "../../app/hook";
 import FormGenerate from "../FormGenerate/FormGenerate";
-import { useTranslation } from "react-i18next";
 import Export, { ExportType } from "../FacilityStructure/Export/Export";
 import ExportService from "../../services/export";
 import DownloadExcel from "../../utils/download-excel";
 import DisplayNode from "../FacilityStructure/Display/DisplayNode";
-import { TabPanel, TabView } from "primereact/tabview";
 import DocumentUploadComponent from "../FacilityStructure/Forms/FileUpload/DocumentUpload/DocumentUpload";
 import ImageUploadComponent from "../FacilityStructure/Forms/FileUpload/ImageUpload/ImageUpload";
-import axios from "axios";
+
 
 interface Node {
   cantDeleted: boolean;
@@ -95,11 +96,6 @@ interface FormNode {
   icon?: string;
 }
 
-const schema = yup.object({
-  name: yup.string().required("This area is required."),
-  code: yup.string().required("This area is required."),
-});
-
 const SetZone = () => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [selectedKeysName, setSelectedKeysName] = useState<string[]>([]);
@@ -146,20 +142,19 @@ const SetZone = () => {
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
   const [generateNodeKey, setGenerateNodeKey] = useState("");
-  const [generateFormTypeKey, setGenerateFormTypeKey] = useState<
-    string | undefined
-  >("");
-  const [generateNodeName, setGenerateNodeName] = useState<string | undefined>(
-    ""
-  );
+  const [generateFormTypeKey, setGenerateFormTypeKey] = useState<string | undefined>("");
+  const [generateNodeName, setGenerateNodeName] = useState<string | undefined>("");
   const [facilityType, setFacilityType] = useState<string[]>([]);
-  const [selectedFacilityType, setSelectedFacilityType] = useState<
-    string | undefined
-  >("");
+  const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
 
   const params = useParams();
+
+  const schema = yup.object({
+    name: yup.string().required(t("This area is required.")).max(50, t("This area accepts max 50 characters.")),
+    category: yup.string().required(t("This area is required.")),
+  });
 
   const fixNodesClassification = (nodes: Node[]) => {
     if (!nodes || nodes.length === 0) {
@@ -400,7 +395,7 @@ const SetZone = () => {
         console.log({ ...newNode, ...temp });
         await ZoneService.update(res.data.id, { ...newNode, ...temp })
 
-        reset({ ...createZone });
+        reset({ name:"", code:"", description:"", tags: [], category: "" });
 
         setSelectedNodeKey([]);
         setCreateZone({} as ZoneInterface);
@@ -445,8 +440,8 @@ const SetZone = () => {
           .then((res) => {
             toast.current.show({
               severity: "success",
-              summary: "Successful",
-              detail: "Structure Updated",
+              summary: t("Successful"),
+              detail: t("Zone Updated"),
               life: 3000,
             });
             getZone();
@@ -454,7 +449,7 @@ const SetZone = () => {
           .catch((err) => {
             toast.current.show({
               severity: "error",
-              summary: "Error",
+              summary: t("Error"),
               detail: err.response ? err.response.data.message : err.message,
               life: 2000,
             });
@@ -463,7 +458,7 @@ const SetZone = () => {
       .catch((err) => {
         toast.current.show({
           severity: "error",
-          summary: "Error",
+          summary: t("Error"),
           detail: err.response ? err.response.data.message : err.message,
           life: 2000,
         });
@@ -491,13 +486,14 @@ const SetZone = () => {
       .then(() => {
         toast.current.show({
           severity: "success",
-          summary: "Success",
-          detail: "Zone Deleted",
+          summary: t("Successful"),
+          detail: t("Zone Deleted"),
           life: 2000,
         });
         getZone();
         setSelectedNodeKey([]);
         setSelectedKeys([]);
+        setDisplay(false);
       })
       .catch((err) => {
         toast.current.show({
@@ -534,37 +530,19 @@ const SetZone = () => {
     return (
       <div>
         <Button
-          label="Cancel"
+          label={t("Cancel")}
           icon="pi pi-times"
           onClick={() => {
             setAddDia(false);
-            // setName("");
-            // setFormTypeId(undefined);
-            // setCreateZone({} as ZoneInterface)
-            // setLabels([]);
-            // setTag([]);
-
-            setSelectedFacilityType(undefined);
-
-            reset({ ...createZone }); // reset form values after canceling the create zone operation
-
+            reset({ ...createZone, tags: [], category: "" }); // reset form values after canceling the create zone operation
           }}
           className="p-button-text"
         />
         <Button
-          label="Add"
+          label={t("Add")}
           icon="pi pi-check"
-          // onClick={() => addItem()}
           onClick={() => {
-            addItem()
-
-
-            // reset({  //will be checked
-            //   ...createZone,
-            //   tags: [],
-            //   category:""
-            // });
-
+            addItem();
           }
           }
           autoFocus
@@ -577,7 +555,7 @@ const SetZone = () => {
     return (
       <div>
         <Button
-          label="Cancel"
+          label={t("Cancel")}
           icon="pi pi-times"
           onClick={() => {
             setEditDia(false);
@@ -588,17 +566,13 @@ const SetZone = () => {
 
             setSelectedFacilityType(undefined);
             reset({
-              name: "",
-              code: "",
-              tags: [],
-              category: "",
-              description: "",
+              ...createZone,
             });
           }}
           className="p-button-text"
         />
         <Button
-          label="Save"
+          label={t("Save")}
           icon="pi pi-check"
           onClick={() => setSubmitted(true)}
           autoFocus
@@ -655,7 +629,7 @@ const SetZone = () => {
         <DisplayNode displayKey={displayKey} />
       </Dialog>
       <Dialog
-        header="Add New Item"
+        header={t("Add New Item")}
         visible={addDia}
         style={{ width: "40vw" }}
         footer={renderFooterAdd}
@@ -676,7 +650,7 @@ const SetZone = () => {
           <TabView>
             <TabPanel header={t("Form")}>
               <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
+                <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
                 <InputText
                   autoComplete="off"
                   {...register("name")}
@@ -686,7 +660,7 @@ const SetZone = () => {
               <p style={{ color: "red" }}>{errors.name?.message}</p>
 
               <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
+                <h5 style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
                 <InputText
                   autoComplete="off"
                   {...register("code")}
@@ -697,7 +671,7 @@ const SetZone = () => {
               </div>
 
               <div className="field structureChips">
-                <h5 style={{ marginBottom: "0.5em" }}>Tag</h5>
+                <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
                 <Controller
                   defaultValue={formData?.tags || []}
                   name="tags"
@@ -716,7 +690,7 @@ const SetZone = () => {
                 />
               </div>
               <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>Description</h5>
+                <h5 style={{ marginBottom: "0.5em" }}>{t("Description")}</h5>
                 <InputText
                   autoComplete="off"
                   {...register("description")}
@@ -726,7 +700,7 @@ const SetZone = () => {
               </div>
 
               <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>Category</h5>
+                <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
                 <Controller
                   defaultValue={createZone?.category}
                   name="category"
@@ -853,7 +827,7 @@ const SetZone = () => {
         {selectedKeys.length > 1 && (
           <div className="mt-4">
             <Button
-              label="Create a Zone"
+              label="Create Zone"
               icon="pi pi-check"
               className="ml-2"
               onClick={() => {

@@ -78,12 +78,7 @@ interface FormNode {
   icon?: string;
 }
 
-const schema = yup.object({
-  name: yup.string().required("This area is required.").min(2, "This area accepts min 2 characters."),
-  // buildingStructure: yup.string().required("This area is required"),
-  // status: yup.string().required("This area is required")
 
-});
 
 const SetJointSpace = () => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
@@ -125,6 +120,37 @@ const SetJointSpace = () => {
   const params = useParams();
   const { t } = useTranslation(["common"]);
   const [joint, setJoint] = useState<any>();
+
+  const schema = yup.object({
+    name: yup.string().required(t("This area is required.")).max(50, t("This area accepts max 50 characters.")),
+    code: yup.string().required(t("This area is required.")).max(50, t("This area accepts max 50 characters.")),
+    architecturalCode: yup.string().max(50, t("This area accepts max 50 characters.")),
+    architecturalName: yup.string().max(50, t("This area accepts max 50 characters.")),
+    operatorCode: yup.string().max(50, t("This area accepts max 50 characters.")),
+    operatorName: yup.string().max(50, t("This area accepts max 50 characters.")),
+    description: yup.string().max(255, t("This area accepts max 255 characters.")),
+    roomTag: yup.array().max(50, t("This area accepts max 50 characters.")),
+    category: yup.string().required(t("This area is required.")),
+    usage: yup.string().required(t("This area is required.")),
+    status: yup.string().required(t("This area is required.")),
+    usableHeight: yup
+      .number()
+      .typeError(t('Usable Height must be a number'))
+      .nullable().moreThan(-1, t("Usable Height can not be negative"))
+      .transform((_, val) => (val !== "" ? Number(val) : null)),
+    grossArea: yup
+      .number()
+      .typeError(t('Gross Area must be a number'))
+      .nullable().moreThan(-1, t("Gross Area can not be negative"))
+      .transform((_, val) => (val !== "" ? Number(val) : null)),
+    netArea: yup
+      .number()
+      .typeError(t('Net Area must be a number'))
+      .nullable()
+      .moreThan(-1, t("Net Area can not be negative"))
+      .transform((_, val) => (val !== "" ? Number(val) : null)),
+
+  });
 
   const { register, handleSubmit, watch, reset, formState: { errors }, control } = useForm({
     defaultValues: {
@@ -317,7 +343,7 @@ const SetJointSpace = () => {
     console.log(newNode);
 
     JointSpaceService.createJointSpace(newNode)
-      .then(async(res) => {
+      .then(async (res) => {
         toast.current.show({
           severity: "success",
           summary: t("Successful"),
@@ -359,6 +385,26 @@ const SetJointSpace = () => {
         setSelectedNodeKey([]);
         setSelectedKeys([]);
         setSelectedKeysName([]);
+
+        reset({
+          name: "",
+          code: "",
+          architecturalCode: "",
+          architecturalName: "",
+          operatorName: "",
+          operatorCode: "",
+          tag: "",
+          category: "",
+          usage: "",
+          status: "",
+          description: "",
+          roomTag: "",
+          usableHeight: "",
+          grossArea: "",
+          netArea: "",
+          jointStartDate: new Date(),
+          jointEndDate: ""
+        });
 
       })
       .catch((err) => {
@@ -512,25 +558,6 @@ const SetJointSpace = () => {
           icon="pi pi-check"
           onClick={() => {
             addItem();
-            /*reset({
-              name: "",
-              code: "",
-              architecturalCode: "",
-              architecturalName: "",
-              operatorName: "",
-              operatorCode: "",
-              tag: "",
-              category: "",
-              usage: "",
-              status: "",
-              description: "",
-              roomTag: "",
-              usableHeight: "",
-              grossArea: "",
-              netArea: "",
-              jointStartDate: new Date(),
-              jointEndDate: ""
-            });*/
           }}
           autoFocus
         />
@@ -720,7 +747,7 @@ const SetJointSpace = () => {
                 <div className="field col-12 md:col-6">
                   <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
                   <Controller
-                    defaultValue={data?.category || []}
+                    defaultValue={data?.category}
                     name="category"
                     control={control}
                     render={({ field }) => (
@@ -746,7 +773,7 @@ const SetJointSpace = () => {
                 <div className="field col-12 md:col-6">
                   <h5 style={{ marginBottom: "0.5em" }}>{t("Usage")}</h5>
                   <Controller
-                    defaultValue={data?.usage || []}
+                    defaultValue={data?.usage}
                     name="usage"
                     control={control}
                     render={({ field }) => (
@@ -772,7 +799,7 @@ const SetJointSpace = () => {
                 <div className="field col-12 md:col-6">
                   <h5 style={{ marginBottom: "0.5em" }}>{t("Status")}</h5>
                   <Controller
-                    defaultValue={data?.status || []}
+                    defaultValue={data?.status}
                     name="status"
                     control={control}
                     render={({ field }) => (
@@ -996,13 +1023,13 @@ const SetJointSpace = () => {
                 {
                   data.nodeType === "JointSpace" ?
                     <Button
-                    icon="pi pi-trash" className="p-button-rounded p-button-secondary p-button-text" aria-label="Delete"
-                    onClick={() => {
-                      setDeleteNodeKey(data.key);
-                      setDelDia(true)
-                    }}
-                    title={t("Delete")}
-                  />
+                      icon="pi pi-trash" className="p-button-rounded p-button-secondary p-button-text" aria-label="Delete"
+                      onClick={() => {
+                        setDeleteNodeKey(data.key);
+                        setDelDia(true)
+                      }}
+                      title={t("Delete")}
+                    />
                     : null
                 }
               </span>

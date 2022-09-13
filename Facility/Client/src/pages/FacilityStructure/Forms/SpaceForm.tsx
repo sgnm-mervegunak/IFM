@@ -78,11 +78,17 @@ const SpaceForm = ({
   const { t } = useTranslation(["common"]);
 
   const schema = yup.object({
-    name: yup.string().required(t("This area is required.")),
-    code: yup.string().required(t("This area is required.")),
-    category: yup.string().required(t("This area is required.")),
-    usage: yup.string().required(t("This area is required.")),
-    status: yup.string().required(t("This area is required.")),
+    name: yup.string().required("This area is required.").max(50, "This area accepts max 50 characters."),
+    code: yup.string().required("This area is required.").max(50, "This area accepts max 50 characters."),
+    architecturalCode: yup.string().max(50, "This area accepts max 50 characters."),
+    architecturalName: yup.string().max(50, "This area accepts max 50 characters."),
+    operatorCode: yup.string().max(50, "This area accepts max 50 characters."),
+    operatorName: yup.string().max(50, "This area accepts max 50 characters."),
+    description: yup.string().max(255, "This area accepts max 255 characters."),
+    roomTag: yup.string().max(50, "This area accepts max 50 characters."),
+    category: yup.string().required("This area is required."),
+    usage: yup.string().required("This area is required."),
+    status: yup.string().required("This area is required."),
     usableHeight: yup
       .number()
       .typeError(t('Usable Height must be a number'))
@@ -307,9 +313,9 @@ const SpaceForm = ({
           });
         });
 
-        setAddDia(false);
-        setSelectedFacilityType(undefined);
-        setUploadFiles({});
+      setAddDia(false);
+      setSelectedFacilityType(undefined);
+      setUploadFiles({});
 
     } else {
       let updateNode: any = {};
@@ -416,7 +422,7 @@ const SpaceForm = ({
         <TabPanel header={t("Form")}>
           <div className="formgrid grid">
 
-          <div className="field col-12 md:col-6">
+            <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
               <InputText
                 autoComplete="off"
