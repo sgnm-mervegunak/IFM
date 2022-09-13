@@ -31,3 +31,11 @@ export function null_value(params) {
   params: params,
   }
 };
+
+export function not_unique(params) {
+  return {
+  message: 'Uniqueness error',
+  code: CustomTreeError.NOT_UNIQUE,
+  params: params,
+  }
+};
