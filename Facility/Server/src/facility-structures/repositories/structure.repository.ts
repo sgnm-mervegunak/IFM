@@ -81,6 +81,57 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
      if (structureRootNode[0]["_fields"][0].properties.realm !== realm) {
       throw new HttpException({ message: 'You dont have permission' }, 403);
     }
+
+
+
+         //name property uniqueness  control
+        //  if (node[0]["_fields"][0].labels[0] == 'Building' || node[0]["_fields"][0].labels[0] == 'Block' || node[0]["_fields"][0].labels[0] == 'Floor') {
+        //   let building;
+        //    if (node[0]["_fields"][0].labels[0] == 'Building') {
+        //      building = node;
+        //    }
+        //    else {
+        //     building = await this.neo4jService.findChildrensByChildIdAndFilters(
+        //       ['Building'],
+        //       {'isDeleted': false},
+        //       node[0]["_fields"][0].identity.low,
+        //       [],
+        //       {'isDeleted': false},
+        //       RelationName.PARENT_OF
+        //      ) 
+        //     } 
+        //     let sameNameNode = await this.neo4jService.findChildrensByIdAndFilters(
+        //       building[0]["_fields"][0].identity.low,
+        //       {'isDeleted': false},
+        //       [structureData['nodeType']],
+        //       {'isDeleted': false, 'name': structureData['name'] },
+        //       RelationName.PARENT_OF
+        //     )
+        //     if (sameNameNode && sameNameNode.length > 0) {
+        //       if (sameNameNode[0]["_fields"][1].properties.key !=  key) {
+        //         throw new HttpException(wrong_parent_error({node1: "1", node2: "1"}), 400);
+        //       }
+              
+        //     }
+        //    }
+    
+        // else  {
+          
+        //   let sameNameNode = await this.neo4jService.findChildrensByIdAndFilters(
+        //     structureRootNode[0]["_fields"][0].identity.low,
+        //     {'isDeleted': false},
+        //     [structureData['nodeType']],
+        //     {'isDeleted': false, 'name': structureData['name'] },
+        //     RelationName.PARENT_OF
+        //   )
+        //   if (sameNameNode && sameNameNode.length > 0) {
+        //     throw new HttpException(wrong_parent_error({node1: "2", node2: "2"}), 400);
+        //   }
+        // }
+
+
+
+
     const properties = await this.findChildrenByFacilityTypeNode(
       structureData['nodeType'],
       structureRootNode[0]["_fields"][0].properties.realm,
@@ -143,7 +194,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
               RelationDirection.RIGHT       
         )
       }
-      for (let i=0; i<categories.length; i++) {
+      for (let i=0; i<newCategories.length; i++) {
         await this.neo4jService.addRelationByIdAndRelationNameWithFilters(node[0]["_fields"][0].identity.low,{"isDeleted":false},
         newCategories[i]['_fields'][1].identity.low, {"isDeleted":false}, RelationName.CLASSIFIED_BY, RelationDirection.RIGHT);
       }
@@ -459,6 +510,46 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
     return [];
   }
 
+  //////////////////////////////////////
+  async findChildrensByLabelsOneLevel(
+    root_labels: Array<string> = [],
+    root_filters: object = {},
+    children_labels: Array<string> = [],
+    children_filters: object = {},
+    databaseOrTransaction?: string | Transaction
+  ) {
+    try {
+      const rootLabelsWithoutEmptyString =
+        filterArrayForEmptyString(root_labels);
+      const childrenLabelsWithoutEmptyString =
+        filterArrayForEmptyString(children_labels);
+
+      const cypher =
+        `MATCH p=(n` +
+        dynamicLabelAdder(rootLabelsWithoutEmptyString) +
+        dynamicFilterPropertiesAdder(root_filters) +
+        `-[:PARENT_OF]->(m` +
+        dynamicLabelAdder(childrenLabelsWithoutEmptyString) +
+        dynamicFilterPropertiesAdderAndAddParameterKey(children_filters) +
+        ` RETURN n as parent,m as children`;
+
+      children_filters = changeObjectKeyName(children_filters);
+      const parameters = { ...root_filters, ...children_filters };
+      const result = await this.neo4jService.read(cypher, parameters, databaseOrTransaction);
+      return result["records"];
+    } catch (error) {
+      if (error.response?.code) {
+        throw new HttpException(
+          { message: error.response?.message, code: error.response?.code },
+          error.status
+        );
+      } else {
+        throw new HttpException(error, 500);
+      }
+    }
+  }
+  /////////////////////////////////////
+
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
   async create(key: string, structureData: Object, realm: string, language: string) {
    try {
@@ -494,7 +585,7 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
      }
     ///////////////////////////// parent - child node type relation control ////////////////////////////
  
-    const allowedStructureTypeNode = await this.neo4jService.findChildrensByLabelsOneLevel(
+    const allowedStructureTypeNode = await this.findChildrensByLabelsOneLevel(
       ['FacilityTypes_'+language],
       {"isDeleted": false, "realm": structureRootNode[0]['_fields'][0].properties.realm},
       [],
