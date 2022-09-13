@@ -25,7 +25,7 @@ const AppMenu = (props) => {
           src={process.env.PUBLIC_URL+"/assets/layout/images/logo-white.svg"}
           alt="diamond layout"
         />
-        <span className="app-name">DIAMOND</span>
+        <span className="app-name">IFM</span>
       </Link>
 
       <div className="layout-menu-container">

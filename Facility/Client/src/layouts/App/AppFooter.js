@@ -9,9 +9,9 @@ const AppFooter = () => {
           src={process.env.PUBLIC_URL+"/assets/layout/images/logo-dark.svg"}
           alt="diamond-layout"
         />
-        <span className="app-name">DIAMOND</span>
+        <span className="app-name">IFM</span>
       </div>
-      <span className="copyright">&#169; Your Organization - 2021</span>
+      <span className="copyright">&#169; Signum TTE - 2022</span>
     </div>
   );
 };
