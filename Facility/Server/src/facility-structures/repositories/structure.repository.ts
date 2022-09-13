@@ -164,9 +164,17 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
         }
       }
     });
+
+ 
+
     //update facility structure node
     const updatedOn = moment().format('YYYY-MM-DD HH:mm:ss');
     structureData['updatedOn'] = updatedOn;
+    Object.entries(structureData).forEach((element) => {
+      if (element[1] === null || element[1] === undefined) {
+        structureData[element[0]] = 0;
+      }
+    }); 
     const dynamicObject = createDynamicCyperObject(structureData);
     //const updatedNode = await this.neo4jService.updateById(node[0]["_fields"][0].identity.low, dynamicObject);
     const updatedNode = await this.neo4jService.updateByIdAndFilter(
@@ -750,7 +758,7 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
       }
     }); 
 
-    baseFacilityObject = this.assignDtoPropToEntity(baseFacilityObject, structureData);
+    baseFacilityObject = assignDtoPropToEntity(baseFacilityObject, structureData);
 
     let createdBy=baseFacilityObject["createdBy"];
     delete baseFacilityObject["createdBy"];
@@ -855,24 +863,7 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
         }
    } 
   }
-  ////////////////////////////////////
-  assignDtoPropToEntity(entity, dto) {
-    Object.entries(dto).forEach((element) => {
-      if (element[1] === null || element[1] === undefined) {
-        throw new HttpException(undefined_value_recieved, 400);
-      }
-      if (
-        element[0] != "parentId" &&
-        element[0] != "labels" &&
-        element[0] != "parentKey"
-      ) {
-        entity[element[0]] = dto[element[0]];
-      }
-    });
   
-    return entity;
-  }
-  ////////////////////////////////////
  //REVISED FOR NEW NEO4J
   async findStructureFirstLevelNodes(label: string, realm: string, language: string) {
     try {
