@@ -17,7 +17,8 @@ import {
   dynamicFilterPropertiesAdder,
   dynamicNotLabelAdder,
   dynamicFilterPropertiesAdderAndAddParameterKey,
-  changeObjectKeyName
+  changeObjectKeyName,
+  undefined_value_recieved
 } from 'sgnm-neo4j/dist';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 import { RelationName } from 'src/common/const/relation.name.enum';
@@ -743,7 +744,14 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
       baseFacilityObject = new BaseFacilityObject();
     }
     
-    baseFacilityObject = assignDtoPropToEntity(baseFacilityObject, structureData);
+    Object.entries(structureData).forEach((element) => {
+      if (element[1] === null || element[1] === undefined) {
+        element[1] = 0;
+      }
+    }); 
+
+    baseFacilityObject = this.assignDtoPropToEntity(baseFacilityObject, structureData);
+
     let createdBy=baseFacilityObject["createdBy"];
     delete baseFacilityObject["createdBy"];
     delete baseFacilityObject['category'];
@@ -847,7 +855,24 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
         }
    } 
   }
-
+  ////////////////////////////////////
+  assignDtoPropToEntity(entity, dto) {
+    Object.entries(dto).forEach((element) => {
+      if (element[1] === null || element[1] === undefined) {
+        throw new HttpException(undefined_value_recieved, 400);
+      }
+      if (
+        element[0] != "parentId" &&
+        element[0] != "labels" &&
+        element[0] != "parentKey"
+      ) {
+        entity[element[0]] = dto[element[0]];
+      }
+    });
+  
+    return entity;
+  }
+  ////////////////////////////////////
  //REVISED FOR NEW NEO4J
   async findStructureFirstLevelNodes(label: string, realm: string, language: string) {
     try {
