@@ -101,7 +101,7 @@ const SetFacilityStructure = () => {
   const [generateNodeKey, setGenerateNodeKey] = useState("");
   const [generateFormTypeKey, setGenerateFormTypeKey] = useState<string | undefined>("");
   const [generateNodeName, setGenerateNodeName] = useState<string | undefined>("");
-  const [facilityType, setFacilityType] = useState<string[]>([]);
+  const [facilityType, setFacilityType] = useState<{name: string,code:string}[]>([]);
   const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
@@ -115,7 +115,10 @@ const SetFacilityStructure = () => {
   useEffect(() => {
     FacilityStructureService.getFacilityTypes("FacilityTypes")
       .then((res) => {
-        setFacilityType(res.data.map((item: any) => item.name));
+        setFacilityType(res.data.map((item: any) => ({
+          name: t(item.name),
+          code:item.name
+        })));
       })
       .catch((err) => {
         toast.current.show({
@@ -700,6 +703,8 @@ const SetFacilityStructure = () => {
           <Dropdown
             value={selectedFacilityType}
             options={facilityType}
+            optionValue="code"
+            optionLabel="name"
             onChange={(event) => setSelectedFacilityType(event.value)}
             style={{ width: "100%" }}
           />
@@ -831,8 +836,10 @@ const SetFacilityStructure = () => {
         <div className="field">
           <h5 style={{ marginBottom: "0.5em" }}>{t("Facility Type")}</h5>
           <Dropdown
-            value={t(selectedFacilityType as string)}
+            value={selectedFacilityType}
             options={facilityType}
+            optionValue="code"
+            optionLabel="name"
             disabled
             style={{ width: "100%" }}
           />
