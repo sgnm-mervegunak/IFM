@@ -746,7 +746,7 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
     
     Object.entries(structureData).forEach((element) => {
       if (element[1] === null || element[1] === undefined) {
-        element[1] = 0;
+        structureData[element[0]] = 0;
       }
     }); 
 
