@@ -242,7 +242,9 @@ const SpaceForm = ({
         usableHeight: data?.usableHeight,
         grossArea: data?.grossArea,
         netArea: data?.netArea,
-
+        operatorName: data?.operatorName,
+        operatorCode: data?.operatorCode,
+        roomTag: data?.roomTag,
       };
 
       FacilityStructureService.createStructure(selectedNodeKey, newNode)
@@ -322,6 +324,9 @@ const SpaceForm = ({
         usableHeight: data?.usableHeight,
         grossArea: data?.grossArea,
         netArea: data?.netArea,
+        operatorName: data?.operatorName,
+        operatorCode: data?.operatorCode,
+        roomTag: data?.roomTag,
       };
 
       FacilityStructureService.update(selectedNodeKey, updateNode)
@@ -406,18 +411,7 @@ const SpaceForm = ({
         <TabPanel header={t("Form")}>
           <div className="formgrid grid">
 
-            <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("code")}
-                style={{ width: '100%' }}
-                defaultValue={data?.code || ""}
-              />
-              <p style={{ color: "red" }}>{errors.code?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-6">
+          <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
               <InputText
                 autoComplete="off"
@@ -429,6 +423,28 @@ const SpaceForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("code")}
+                style={{ width: '100%' }}
+                defaultValue={data?.code || ""}
+              />
+              <p style={{ color: "red" }}>{errors.code?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-3">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Architectural Name")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("architecturalName")}
+                style={{ width: '100%' }}
+                defaultValue={data?.architecturalName || ""}
+              />
+              <p style={{ color: "red" }}>{errors.architecturalName?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-3">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Architectural Code")}</h5>
               <InputText
                 autoComplete="off"
@@ -439,15 +455,46 @@ const SpaceForm = ({
               <p style={{ color: "red" }}>{errors.architecturalCode?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Architectural Name")}</h5>
+            <div className="field col-12 md:col-3">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Operator Name")}</h5>
               <InputText
                 autoComplete="off"
-                {...register("architecturalName")}
+                {...register("operatorName")}
                 style={{ width: '100%' }}
-                defaultValue={data?.architecturalName || ""}
+                defaultValue={data?.operatorName || ""}
               />
-              <p style={{ color: "red" }}>{errors.architecturalName?.message}</p>
+              <p style={{ color: "red" }}>{errors.operatorName?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-3">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Operator Code")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("operatorCode")}
+                style={{ width: '100%' }}
+                defaultValue={data?.operatorCode || ""}
+              />
+              <p style={{ color: "red" }}>{errors.operatorCode?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6 structureChips">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
+              <Controller
+
+                defaultValue={data?.tag || []}
+                name="tag"
+                control={control}
+                render={({ field }) => (
+                  <Chips
+                    value={field.value}
+                    onChange={(e) => {
+                      field.onChange(e.value)
+                    }}
+                    style={{ width: "100%" }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.tag?.message}</p>
             </div>
 
             <div className="field col-12 md:col-6">
@@ -503,48 +550,6 @@ const SpaceForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Description")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("description")}
-                style={{ width: '100%' }}
-                defaultValue={data?.description || ""}
-              />
-              <p style={{ color: "red" }}>{errors.description?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-6 structureChips">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
-              <Controller
-
-                defaultValue={data?.tag || []}
-                name="tag"
-                control={control}
-                render={({ field }) => (
-                  <Chips
-                    value={field.value}
-                    onChange={(e) => {
-                      field.onChange(e.value)
-                    }}
-                    style={{ width: "100%" }}
-                  />
-                )}
-              />
-              <p style={{ color: "red" }}>{errors.tag?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Usable Height")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("usableHeight")}
-                style={{ width: '100%' }}
-                defaultValue={data?.usableHeight || ""}
-              />
-              <p style={{ color: "red" }}>{errors.usableHeight?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Status")}</h5>
               <Controller
                 defaultValue={data?.status || ""}
@@ -568,6 +573,48 @@ const SpaceForm = ({
                 )}
               />
               <p style={{ color: "red" }}>{errors.status?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Description")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("description")}
+                style={{ width: '100%' }}
+                defaultValue={data?.description || ""}
+              />
+              <p style={{ color: "red" }}>{errors.description?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6 structureChips">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Room Tag")}</h5>
+              <Controller
+
+                defaultValue={data?.roomTag || []}
+                name="roomTag"
+                control={control}
+                render={({ field }) => (
+                  <Chips
+                    value={field.value}
+                    onChange={(e) => {
+                      field.onChange(e.value)
+                    }}
+                    style={{ width: "100%" }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.roomTag?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-6">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Usable Height")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("usableHeight")}
+                style={{ width: '100%' }}
+                defaultValue={data?.usableHeight || ""}
+              />
+              <p style={{ color: "red" }}>{errors.usableHeight?.message}</p>
             </div>
 
             <div className="field col-12 md:col-6">
