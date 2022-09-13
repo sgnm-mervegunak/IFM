@@ -128,7 +128,8 @@ const SetJointSpace = () => {
 
   const { register, handleSubmit, watch, reset, formState: { errors }, control } = useForm({
     defaultValues: {
-      ...data
+      ...data,
+      jointStartDate: new Date()
     },
     resolver: yupResolver(schema)
   });
@@ -499,7 +500,7 @@ const SetJointSpace = () => {
               usableHeight: "",
               grossArea: "",
               netArea: "",
-              jointStartDate: "",
+              jointStartDate: new Date(),
               jointEndDate: ""
             });
           }}
@@ -508,7 +509,28 @@ const SetJointSpace = () => {
         <Button
           label={t("Add")}
           icon="pi pi-check"
-          onClick={() => addItem()}
+          onClick={() => {
+            addItem();
+            reset({
+              name: "",
+              code: "",
+              architecturalCode: "",
+              architecturalName: "",
+              operatorName: "",
+              operatorCode: "",
+              tag: "",
+              category: "",
+              usage: "",
+              status: "",
+              description: "",
+              roomTag: "",
+              usableHeight: "",
+              grossArea: "",
+              netArea: "",
+              jointStartDate: new Date(),
+              jointEndDate: ""
+            });
+          }}
           autoFocus
         />
       </div>
@@ -581,6 +603,25 @@ const SetJointSpace = () => {
         footer={renderFooterAdd}
         onHide={() => {
           setAddDia(false);
+          reset({
+            name: "",
+            code: "",
+            architecturalCode: "",
+            architecturalName: "",
+            operatorName: "",
+            operatorCode: "",
+            tag: "",
+            category: "",
+            usage: "",
+            status: "",
+            description: "",
+            roomTag: "",
+            usableHeight: "",
+            grossArea: "",
+            netArea: "",
+            jointStartDate: new Date(),
+            jointEndDate: ""
+          });
         }}
       >
 
