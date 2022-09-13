@@ -38,4 +38,8 @@ export class ExcelImportExportService {
   async addZonesToBuilding(file: Express.Multer.File, header: MainHeaderInterface, buildingKey: string) {
     return await this.excelImportExportRepository.addZonesToBuilding(file, header, buildingKey);
   }
+
+  async addContacts( file: Express.Multer.File,header:MainHeaderInterface){
+    return await this.excelImportExportRepository.addContacts(file, header)
+  }
 }

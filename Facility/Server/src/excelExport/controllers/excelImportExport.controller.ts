@@ -140,4 +140,27 @@ export class ExcelImportExportController {
   async addZonesToBuilding(@UploadedFile() file: Express.Multer.File,@Headers() header,@Param('buildingKey') buildingKey: string){
     return this.excelImportExport.addZonesToBuilding(file,header,buildingKey);
   }
+
+  @Unprotected()
+  //@Roles({ roles: [UserRoles.ADMIN] })
+  @Post('addContacts')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        }
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({
+    summary: 'Upload a single excel file',
+  })
+  @ApiConsumes('multipart/form-data')
+  async addContacts(@UploadedFile() file: Express.Multer.File, @Headers() header){
+    return this.excelImportExport.addContacts(file,header);
+  }
 }

@@ -25,6 +25,7 @@ export interface ExcelImportExportInterface<T> {
     addSpacesToBuilding( file: Express.Multer.File, header:MainHeaderInterface, buildingKey: string)
     addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface,buildingKey: string)
 
+    addContacts( file: Express.Multer.File,header:MainHeaderInterface);
 
     createCypherForClassification(realm:string,classificationLabel:string,categoryCode:string,nodeName:string)
     keyGenerate();
