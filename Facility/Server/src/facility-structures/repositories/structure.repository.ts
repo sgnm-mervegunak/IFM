@@ -139,7 +139,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     const properties = await this.findChildrenByFacilityTypeNode(
       structureData['nodeType'],
       structureRootNode[0]["_fields"][0].properties.realm,
-      language
+      'en'
     );
     let proper = {};
     Object.keys(properties).forEach((element) => {
@@ -491,6 +491,9 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
 
   //REVISED FOR NEW NEO4J
   async findOneFirstLevelByRealm(label: string, realm: string, language: string) {
+    if (label == 'FacilityTypes') {
+      language = 'en';
+    }
     let node = await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructureOneLevel(
       [label + '_' + language],
       ['Virtual'],
@@ -511,7 +514,7 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
   //REVISED FOR NEW NEO4J
   async findChildrenByFacilityTypeNode(typename: string, realm: string, language: string) {
     let parent_node = await this.neo4jService.findByLabelAndFilters(
-      ['FacilityTypes_' + language],
+      ['FacilityTypes_en'],
       { isDeleted: false, realm: realm },
       [],
     );
@@ -619,9 +622,9 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
        throw new HttpException({ message: 'You dont have permission' }, 403);
      }
     ///////////////////////////// parent - child node type relation control ////////////////////////////
- 
+   
     const allowedStructureTypeNode = await this.findChildrensByLabelsOneLevel(
-      ['FacilityTypes_'+language],
+      ['FacilityTypes_en'],
       {"isDeleted": false, "realm": structureRootNode[0]['_fields'][0].properties.realm},
       [],
       {"isDeleted": false,"name": node[0]["_fields"][0].labels[0]}
@@ -693,7 +696,7 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
     const properties = await this.findChildrenByFacilityTypeNode(
       structureData['nodeType'],
       structureRootNode[0]["_fields"][0].properties.realm,
-      language,
+      'en',
       
     );
     let proper = {};
@@ -776,7 +779,7 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
         if (structureData['nodeType'] == 'Space') {
           classificationRootNone = 'OmniClass13';
         }
-
+        
         languages.map(async (record) => {
           let lang = record['_fields'][1].properties.name;
 
