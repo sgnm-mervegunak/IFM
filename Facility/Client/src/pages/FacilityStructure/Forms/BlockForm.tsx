@@ -45,9 +45,7 @@ interface Node {
     className?: string;
 }
 
-const schema = yup.object({
-    name: yup.string().required("This area is required.").max(50, "This area accepts max 50 characters."),
-});
+
 
 const BlockForm = ({
     selectedFacilityType,
@@ -67,12 +65,18 @@ const BlockForm = ({
     const { t } = useTranslation(["common"]);
     const { toast } = useAppSelector(state => state.toast);
 
+    const schema = yup.object({
+        name: yup.string().required(t("This area is required.")).max(50, t("This area accepts max 50 characters.")),
+    });
+
+
     const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
         defaultValues: {
             ...data,
         },
         resolver: yupResolver(schema)
     });
+
 
     useEffect(() => {
         if (submitted) {
@@ -89,17 +93,11 @@ const BlockForm = ({
         setIsUpdate(false);
     }, [isUpdate]);
 
-    useEffect(
-        () => {
-            console.log("useEffect'ten gelen data: ", data);
-        }
-        , [data])
 
     const getNodeInfoForUpdate = (selectedNodeKey: string) => {
         FacilityStructureService.nodeInfo(selectedNodeKey)
             .then((res) => {
                 setData(res.data.properties);
-                console.log("getNodeIndfo'dan gelen data:", res.data.properties);
             })
             .catch((err) => {
                 toast.current.show({
@@ -112,7 +110,6 @@ const BlockForm = ({
     }
 
     const onSubmit = (data: any) => {
-        console.log("onSubmit'ten gelen data", data);
         if (editDia === false) {
             let newNode: any = {};
 
@@ -227,8 +224,6 @@ const BlockForm = ({
                         <Chips
                             value={field.value}
                             onChange={(e) => {
-                                console.log("field value: ", e.value);
-                                console.log("data tag:", data?.tag);
                                 field.onChange(e.value)
                             }}
                             style={{ width: "100%" }}

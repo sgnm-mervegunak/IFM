@@ -51,25 +51,6 @@ interface Node {
   className?: string;
 }
 
-const schema = yup.object({
-  name: yup.string().required("This area is required."),
-  code: yup.string().required("This area is required."),
-  category: yup.string().required("This area is required."),
-  usage: yup.string().required("This area is required."),
-  status: yup.string().required("This area is required"),
-  grossArea: yup
-    .number()
-    .typeError('Gross Area must be a number')
-    .nullable().moreThan(-1, "Gross Area can not be negative")
-    .transform((_, val) => (val !== "" ? Number(val) : null)),
-  netArea: yup
-    .number()
-    .typeError('Net Area must be a number')
-    .nullable()
-    .moreThan(-1, "Net Area can not be negative")
-    .transform((_, val) => (val !== "" ? Number(val) : null)),
-});
-
 const SpaceForm = ({
   selectedFacilityType,
   submitted,
@@ -95,6 +76,30 @@ const SpaceForm = ({
   const { toast } = useAppSelector(state => state.toast);
   const [data, setData] = useState<any>();
   const { t } = useTranslation(["common"]);
+
+  const schema = yup.object({
+    name: yup.string().required(t("This area is required.")),
+    code: yup.string().required(t("This area is required.")),
+    category: yup.string().required(t("This area is required.")),
+    usage: yup.string().required(t("This area is required.")),
+    status: yup.string().required(t("This area is required.")),
+    usableHeight: yup
+      .number()
+      .typeError(t('Usable Height must be a number'))
+      .nullable().moreThan(-1, t("Usable Height can not be negative"))
+      .transform((_, val) => (val !== "" ? Number(val) : null)),
+    grossArea: yup
+      .number()
+      .typeError(t('Gross Area must be a number'))
+      .nullable().moreThan(-1, t("Gross Area can not be negative"))
+      .transform((_, val) => (val !== "" ? Number(val) : null)),
+    netArea: yup
+      .number()
+      .typeError(t('Net Area must be a number'))
+      .nullable()
+      .moreThan(-1, t("Net Area can not be negative"))
+      .transform((_, val) => (val !== "" ? Number(val) : null)),
+  });
 
   const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
     defaultValues: {
