@@ -1007,7 +1007,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         type: 'text',
         dataType: 'string',
         defaultValue: '',
-        rules: ['not null'],
+        rules: [],
         options: [],
         placeHolder: 'Project Name',
         index: 2,
@@ -1024,7 +1024,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         type: 'text',
         dataType: 'string',
         defaultValue: '',
-        rules: ['not null'],
+        rules: [],
         options: [],
         placeHolder: 'Site Name',
         index: 3,
@@ -1120,7 +1120,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         type: 'text',
         dataType: 'string',
         defaultValue: '',
-        rules: ['not null'],
+        rules: [],
         options: [],
         placeHolder: 'Area Measurement',
         index: 8,
@@ -1908,7 +1908,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         type: 'text',
         dataType: 'string',
         defaultValue: '',
-        rules: [],
+        rules: ['not null'],
         options: [],
         placeHolder: 'Name',
         index: 1,
@@ -1944,7 +1944,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         type: 'treeselect',
         dataType: 'string',
         defaultValue: '',
-        rules: [],
+        rules: ['not null'],
         options: [],
         placeHolder: 'Category',
         index: 3,
@@ -1997,7 +1997,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         type: 'treeselect',
         dataType: 'string',
         defaultValue: '',
-        rules: [],
+        rules: ['not null'],
         options: [],
         placeHolder: 'Usage',
         index: 6,
@@ -2035,7 +2035,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         defaultValue: '',
         rules: [],
         options: [],
-        placeHolder: 'Tag',
+        placeHolder: 'Images',
         index: 8,
       },
       ['FacilityTypeProperty'],
@@ -2051,7 +2051,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         type: 'treeselect',
         dataType: 'string',
         defaultValue: '',
-        rules: [],
+        rules: ['not null'],
         options: [],
         placeHolder: 'Status',
         index: 9,
@@ -2164,6 +2164,59 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       ['FacilityTypeProperty'],
     ); 
 
+    const facilityTypesNode5property17 = await this.neo4jService.createNode(
+      {
+        canDelete: true,
+        canDisplay: true,
+        isDeleted: false,
+        isActive: true,
+        label: 'room Tag',
+        type: 'textarray',
+        dataType: 'string',
+        defaultValue: '',
+        rules: [],
+        options: [],
+        placeHolder: 'Room Tag',
+        index: 16,
+      },
+      ['FacilityTypeProperty'],
+    );
+    
+    const facilityTypesNode5property18 = await this.neo4jService.createNode(
+      {
+        canDelete: true,
+        canDisplay: true,
+        isDeleted: false,
+        isActive: true,
+        label: 'operator Code',
+        type: 'text',
+        dataType: 'string',
+        defaultValue: '',
+        rules: [],
+        options: [],
+        placeHolder: 'Operator Code',
+        index: 17,
+      },
+      ['FacilityTypeProperty'],
+    ); 
+
+    const facilityTypesNode5property19 = await this.neo4jService.createNode(
+      {
+        canDelete: true,
+        canDisplay: true,
+        isDeleted: false,
+        isActive: true,
+        label: 'operator Name',
+        type: 'text',
+        dataType: 'string',
+        defaultValue: '',
+        rules: [],
+        options: [],
+        placeHolder: 'Operator Name',
+        index: 18,
+      },
+      ['FacilityTypeProperty'],
+    ); 
     await this.neo4jService.addRelations(facilityTypesNode5property1.identity.low, facilityTypesNode5.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode5property2.identity.low, facilityTypesNode5.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode5property3.identity.low, facilityTypesNode5.identity.low);
@@ -2180,6 +2233,10 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     await this.neo4jService.addRelations(facilityTypesNode5property14.identity.low, facilityTypesNode5.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode5property15.identity.low, facilityTypesNode5.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode5property16.identity.low, facilityTypesNode5.identity.low);
+    await this.neo4jService.addRelations(facilityTypesNode5property17.identity.low, facilityTypesNode5.identity.low);
+    await this.neo4jService.addRelations(facilityTypesNode5property18.identity.low, facilityTypesNode5.identity.low);
+    await this.neo4jService.addRelations(facilityTypesNode5property19.identity.low, facilityTypesNode5.identity.low);
+
 
     //TR
     await this.neo4jService.addRelations(facilityTypesNode5property1.identity.low, facilityTypesNodeTR5.identity.low);
@@ -2198,6 +2255,9 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     await this.neo4jService.addRelations(facilityTypesNode5property14.identity.low, facilityTypesNodeTR5.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode5property15.identity.low, facilityTypesNodeTR5.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode5property16.identity.low, facilityTypesNodeTR5.identity.low);
+    await this.neo4jService.addRelations(facilityTypesNode5property17.identity.low, facilityTypesNodeTR5.identity.low);
+    await this.neo4jService.addRelations(facilityTypesNode5property18.identity.low, facilityTypesNodeTR5.identity.low);
+    await this.neo4jService.addRelations(facilityTypesNode5property19.identity.low, facilityTypesNodeTR5.identity.low);
 
 
     return facilityTypesNode;
