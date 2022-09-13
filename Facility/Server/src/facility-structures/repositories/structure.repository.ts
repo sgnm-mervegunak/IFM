@@ -31,12 +31,13 @@ import {
   FacilityNodeNotFoundException,
   FacilityStructureCanNotDeleteExceptions,
   FacilityStructureDeleteExceptions,
+  NotUniqueException,
   ValueNotNullException,
   WrongClassificationParentExceptions,
   WrongFacilityStructurePropsExceptions,
   WrongFacilityStructurePropsRulesExceptions,
 } from 'src/common/badRequestExceptions/bad.request.exception';
-import { has_children_error, node_not_found, null_value, wrong_parent_error } from 'src/common/const/custom.error.object';
+import { has_children_error, node_not_found, not_unique, null_value, wrong_parent_error } from 'src/common/const/custom.error.object';
 import { CustomTreeError } from 'src/common/const/custom.error.enum';
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
 import { BaseFacilitySpaceObject } from 'src/common/baseobject/base.facility.space.object';
@@ -66,6 +67,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
   async update(key: string, structureData: Object, realm: string, language: string) {
     //is there facility-structure node
+   try { 
     const node = await this.neo4jService.findByLabelAndFilters(
       [],
       {"isDeleted": false, "key": key},
@@ -85,12 +87,12 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
 
 
          //name property uniqueness  control
-         if (node[0]["_fields"][0].labels[0] == 'Building' || node[0]["_fields"][0].labels[0] == 'Block' || node[0]["_fields"][0].labels[0] == 'Floor') {
+         if (node[0]["_fields"][0].labels[0] == 'Space' || node[0]["_fields"][0].labels[0] == 'Block' || node[0]["_fields"][0].labels[0] == 'Floor') {
           let building;
-           if (node[0]["_fields"][0].labels[0] == 'Building') {
-             building = node;
-           }
-           else {
+          //  if (node[0]["_fields"][0].labels[0] == 'Building') {
+          //    building = node;
+          //  }
+          //  else {
             building = await this.neo4jService.findChildrensByChildIdAndFilters(
               ['Building'],
               {'isDeleted': false},
@@ -99,7 +101,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
               {'isDeleted': false},
               RelationName.PARENT_OF
              ) 
-            } 
+            // } 
             let sameNameNode = await this.neo4jService.findChildrensByIdAndFilters(
               building[0]["_fields"][0].identity.low,
               {'isDeleted': false},
@@ -109,7 +111,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
             )
             if (sameNameNode && sameNameNode.length > 0) {
               if (sameNameNode[0]["_fields"][1].properties.key !=  key) {
-                throw new HttpException(wrong_parent_error({node1: "1", node2: "1"}), 400);
+                throw new HttpException(not_unique({val: structureData['name']}), 400);
               }
               
             }
@@ -125,7 +127,9 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
             RelationName.PARENT_OF
           )
           if (sameNameNode && sameNameNode.length > 0) {
-            throw new HttpException(wrong_parent_error({node1: "2", node2: "2"}), 400);
+            if (sameNameNode[0]["_fields"][1].properties.key !=  key) {
+              throw new HttpException(not_unique({val: structureData['name']}), 400);
+            }
           }
         }
 
@@ -212,8 +216,32 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       properties: updatedNode['properties'],
     };
     return response;
-  }
+  } catch (error) {
+    let code = error.response?.code;
+      if (code >= 1000 && code<=1999) {
+        if (error.response?.code == CustomIfmCommonError.EXAMPLE1) {
 
+        }
+      }
+      else if (code >= 5000 && code<=5999) {
+        
+      }
+      else if (code >= 9000 && code<=9999) {
+        if (error.response?.code == CustomTreeError.WRONG_PARENT) {
+          throw new  WrongClassificationParentExceptions(error.response?.params['node1'],error.response?.params['node2'])
+        }
+        if (error.response?.code == CustomTreeError.NULL_VALUE) {
+          throw new  ValueNotNullException(error.response?.params['val'])
+        }
+        if (error.response?.code == CustomTreeError.NOT_UNIQUE) {
+          throw new  NotUniqueException(error.response?.params['val'])
+        }
+      }
+      else {
+        throw new HttpException("", 500);
+      }
+   }
+  }
    //REVISED FOR NEW NEO4J
   async delete(_id: string, realm: string, language: string) {
     try {
@@ -640,7 +668,7 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
           RelationName.PARENT_OF
         )
         if (sameNameNode && sameNameNode.length > 0) {
-          throw new HttpException(wrong_parent_error({node1: "1", node2: "1"}), 400);
+          throw new HttpException(not_unique({val: structureData['name']}), 400);
         }
        }
 
@@ -654,7 +682,7 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
         RelationName.PARENT_OF
       )
       if (sameNameNode && sameNameNode.length > 0) {
-        throw new HttpException(wrong_parent_error({node1: "2", node2: "2"}), 400);
+        throw new HttpException(not_unique({val: structureData['name']}), 400);
       }
     }
     
@@ -806,6 +834,9 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
           }
           if (error.response?.code == CustomTreeError.NULL_VALUE) {
             throw new  ValueNotNullException(error.response?.params['val'])
+          }
+          if (error.response?.code == CustomTreeError.NOT_UNIQUE) {
+            throw new  NotUniqueException(error.response?.params['val'])
           }
         }
         else {
