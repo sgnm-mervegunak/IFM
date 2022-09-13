@@ -349,7 +349,7 @@ const SetZone = () => {
     return axios.post(url, formData);
   };
 
-  const addItem = (createZone: any) => {
+  const addItem = handleSubmit((createZone) => {
     let newNode: any = {};
     newNode = {
       ...createZone,
@@ -360,8 +360,8 @@ const SetZone = () => {
       createdOn: "",
       externalSystem: "",
       externalObject: "",
-      images:"",
-      documents:"",
+      images: "",
+      documents: "",
     };
 
     ZoneService.createZone(newNode)
@@ -397,10 +397,11 @@ const SetZone = () => {
         for (let item in temp) {
           temp[item] = JSON.stringify(temp[item]);
         }
-        console.log({ ...newNode,...temp });
-        await ZoneService.update(res.data.id, {...newNode,...temp})
+        console.log({ ...newNode, ...temp });
+        await ZoneService.update(res.data.id, { ...newNode, ...temp })
 
         reset({ ...createZone });
+
         setSelectedNodeKey([]);
         setCreateZone({} as ZoneInterface);
         setSelectedKeys([]);
@@ -416,7 +417,8 @@ const SetZone = () => {
           life: 2000,
         });
       });
-  };
+  }
+  );
 
   const editItem = (key: string) => {
     let updateNode: any = {};
@@ -544,7 +546,8 @@ const SetZone = () => {
 
             setSelectedFacilityType(undefined);
 
-            reset({}); // reset form values after canceling the create zone operation
+            reset({ ...createZone }); // reset form values after canceling the create zone operation
+
           }}
           className="p-button-text"
         />
@@ -552,7 +555,18 @@ const SetZone = () => {
           label="Add"
           icon="pi pi-check"
           // onClick={() => addItem()}
-          onClick={() => handleSubmit(addItem)()}
+          onClick={() => {
+            addItem()
+
+
+            reset({  //will be checked
+              ...createZone,
+              tags: [],
+              category:""
+            });
+
+          }
+          }
           autoFocus
         />
       </div>
@@ -573,6 +587,13 @@ const SetZone = () => {
             setFormTypeId(undefined);
 
             setSelectedFacilityType(undefined);
+            reset({
+              name: "",
+              code: "",
+              tags: [],
+              category: "",
+              description: "",
+            });
           }}
           className="p-button-text"
         />

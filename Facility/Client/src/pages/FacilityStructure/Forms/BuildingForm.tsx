@@ -62,11 +62,7 @@ const schema = yup.object({
   phase: yup.string().max(255, "This area accepts max 255 characters."),
   projectName: yup.string().max(50, "This area accepts max 50 characters."),
   siteName: yup.string().max(50, "This area accepts max 50 characters."),
-  areaMeasurement: yup
-    .number()
-    .typeError('Area Measurement must be a number')
-    .nullable().moreThan(-1, "Elevation can not be negative")
-    .transform((_, val) => (val !== "" ? Number(val) : null)),
+
 });
 
 const BuildingForm = ({
