@@ -512,7 +512,7 @@ const SetJointSpace = () => {
           icon="pi pi-check"
           onClick={() => {
             addItem();
-            reset({
+            /*reset({
               name: "",
               code: "",
               architecturalCode: "",
@@ -530,7 +530,7 @@ const SetJointSpace = () => {
               netArea: "",
               jointStartDate: new Date(),
               jointEndDate: ""
-            });
+            });*/
           }}
           autoFocus
         />
