@@ -163,7 +163,7 @@ const Zone = () => {
           <React.Fragment>
             <Button
               label={t("Import Zones")}
-              icon="pi pi-download"
+              icon="pi pi-upload"
               className="p-button"
               onClick={() => setImportDia(true)}
             />
