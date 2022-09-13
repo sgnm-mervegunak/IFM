@@ -24,6 +24,10 @@ const createJointSpace = async (jointData: JointSpaceInterface) => {
     return axios.post(url, jointData);
 };
 
+const update = async (key: string, body: any) => {
+    return axios.patch(url + key, body);
+};
+
 const remove = async (key: string) => {
     return axios.delete(url + key);
 };
@@ -31,7 +35,8 @@ const remove = async (key: string) => {
 const service = {
     findBuildingWithKey,
     createJointSpace,
-    remove
+    remove,
+    update
 };
 
 export default service;

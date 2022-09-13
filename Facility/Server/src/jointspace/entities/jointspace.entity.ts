@@ -24,7 +24,7 @@ export class JointSpace extends BaseGraphObject {
 
   roomTag: string[];
 
-  images: string[];
+  images: string;
 
   usableHeight: number;
 

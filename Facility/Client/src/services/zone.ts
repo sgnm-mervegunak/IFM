@@ -28,7 +28,6 @@ const update = async (key: string, body: any) => {
     return axios.patch(url + key, body);
 };
 
-
 const remove = async (key: string) => {
     return axios.delete(url + key);
 };
