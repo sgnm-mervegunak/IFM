@@ -441,6 +441,7 @@ const SetJointSpace = () => {
         setSelectedNodeKey([]);
         setSelectedKeys([]);
         setSelectedKeysName([]);
+        setDisplay(false);
       })
       .catch((err) => {
         toast.current.show({
@@ -511,7 +512,7 @@ const SetJointSpace = () => {
           icon="pi pi-check"
           onClick={() => {
             addItem();
-            reset({
+            /*reset({
               name: "",
               code: "",
               architecturalCode: "",
@@ -529,7 +530,7 @@ const SetJointSpace = () => {
               netArea: "",
               jointStartDate: new Date(),
               jointEndDate: ""
-            });
+            });*/
           }}
           autoFocus
         />
@@ -599,7 +600,7 @@ const SetJointSpace = () => {
       <Dialog
         header={t("Add New Item")}
         visible={addDia}
-        style={{ width: "40vw" }}
+        style={{ width: "60vw" }}
         footer={renderFooterAdd}
         onHide={() => {
           setAddDia(false);
@@ -652,7 +653,7 @@ const SetJointSpace = () => {
                   <p style={{ color: "red" }}>{errors.code?.message}</p>
                 </div>
 
-                <div className="field col-12 md:col-6">
+                <div className="field col-12 md:col-3">
                   <h5 style={{ marginBottom: "0.5em" }}>{t("Architectural Name")}</h5>
                   <InputText
                     autoComplete="off"
@@ -663,7 +664,7 @@ const SetJointSpace = () => {
                   <p style={{ color: "red" }}>{errors.architecturalName?.message}</p>
                 </div>
 
-                <div className="field col-12 md:col-6">
+                <div className="field col-12 md:col-3">
                   <h5 style={{ marginBottom: "0.5em" }}>{t("Architectural Code")}</h5>
                   <InputText
                     autoComplete="off"
@@ -674,7 +675,7 @@ const SetJointSpace = () => {
                   <p style={{ color: "red" }}>{errors.architecturalCode?.message}</p>
                 </div>
 
-                <div className="field col-12 md:col-6">
+                <div className="field col-12 md:col-3">
                   <h5 style={{ marginBottom: "0.5em" }}>{t("Operator Name")}</h5>
                   <InputText
                     autoComplete="off"
@@ -685,7 +686,7 @@ const SetJointSpace = () => {
                   <p style={{ color: "red" }}>{errors.operatorName?.message}</p>
                 </div>
 
-                <div className="field col-12 md:col-6">
+                <div className="field col-12 md:col-3">
                   <h5 style={{ marginBottom: "0.5em" }}>{t("Operator Code")}</h5>
                   <InputText
                     autoComplete="off"

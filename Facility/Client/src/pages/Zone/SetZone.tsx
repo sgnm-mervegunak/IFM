@@ -559,11 +559,11 @@ const SetZone = () => {
             addItem()
 
 
-            reset({  //will be checked
-              ...createZone,
-              tags: [],
-              category:""
-            });
+            // reset({  //will be checked
+            //   ...createZone,
+            //   tags: [],
+            //   category:""
+            // });
 
           }
           }
