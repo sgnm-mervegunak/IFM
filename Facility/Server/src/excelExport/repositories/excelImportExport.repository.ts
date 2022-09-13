@@ -620,7 +620,7 @@ await workbook.xlsx.load(buffer).then(function async(book) {
   
     let cypher=`MATCH (c:Contact {realm:"${realm}"}) ${createdCypher} \
     MERGE (p {email:"${email}",createdOn:"${data[i][3]}",company:"${data[i][5]}", phone:"${data[i][6]}",externalSystem:"${data[i][7]}",externalObject:"${data[i][8]}",externalIdentifier:"${data[i][9]}",department:"${data[i][10]}",organizationCode:"${data[i][11]}", \
-    givenName:"${data[i][12]}",familyName:"${data[i][13]}",street:"${data[i][14]}",postalBox:"${data[i][15]}",town:"${data[i][16]}",stateRegion:"${data[i][17]}",postalCode:"${data[i][18]}",country:"${data[i][19]}",canDisplay:true,isDeleted:false,isActive:true,nodeType:"Contact",canDelete:true} )\
+    givenName:"${data[i][12]}",familyName:"${data[i][13]}",street:"${data[i][14]}",postalBox:"${data[i][15]}",town:"${data[i][16]}",stateRegion:"${data[i][17]}",postalCode:"${data[i][18]}",country:"${data[i][19]}",canDisplay:true,isDeleted:false,isActive:true,className:"Contact",key:"${this.keyGenerate()}",canDelete:true} )\
     MERGE (c)-[:PARENT_OF]->(p)  ${createdRelationCypher}`
     let data2 =await this.neo4jService.write(cypher);
   console.log(data2)
