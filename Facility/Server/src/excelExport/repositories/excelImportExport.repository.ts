@@ -508,7 +508,7 @@ await workbook.xlsx.load(buffer).then(function async(book) {
   MATCH (p {email:"${email}"})\
   ${createdCypher} \
   MERGE (zz:Zone {name:"${data[i][1]}",createdOn:"${data[i][3]}",externalSystem:"${data[i][6]}", externalObject:"${data[i][7]}", externalIdentifier:"${data[i][8]}", description:"${data[i][9]}", tag:[],\
-  nodeKeys:[], nodeType:"Zone",images:[],documents:[], key:"${this.keyGenerate()}", canDisplay:true, isActive:true, isDeleted:false, canDelete:true})\
+  nodeKeys:[], nodeType:"Zone",images:[],documents:[],spaceNames:"${data[i][5]}", key:"${this.keyGenerate()}", canDisplay:true, isActive:true, isDeleted:false, canDelete:true})\
   MERGE (z)-[:PARENT_OF]->(zz)  \
   MERGE (c)-[:MERGEDZN]->(zz)  \
   ${createdRelationCypher} \
