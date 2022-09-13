@@ -53,18 +53,6 @@ interface Node {
   className?: string;
 }
 
-const schema = yup.object({
-  name: yup.string().required("This area is required.").max(50, "This area accepts max 50 characters."),
-  category: yup.string().required("This area is required."),
-  status: yup.string().required("This area is required."),
-  projectDescription: yup.string().max(255, "This area accepts max 255 characters."),
-  siteDescription: yup.string().max(255, "This area accepts max 255 characters."),
-  phase: yup.string().max(255, "This area accepts max 255 characters."),
-  projectName: yup.string().max(50, "This area accepts max 50 characters."),
-  siteName: yup.string().max(50, "This area accepts max 50 characters."),
-
-});
-
 const BuildingForm = ({
   selectedFacilityType,
   submitted,
@@ -96,6 +84,18 @@ const BuildingForm = ({
 
   const [data, setData] = useState<any>();
   const language = useAppSelector((state) => state.language.language);
+
+  const schema = yup.object({
+    name: yup.string().required(t("This area is required.")).max(50, t("This area accepts max 50 characters.")),
+    category: yup.string().required(t("This area is required.")),
+    status: yup.string().required(t("This area is required.")),
+    projectDescription: yup.string().max(255,t("This area accepts max 255 characters.")),
+    siteDescription: yup.string().max(255, t("This area accepts max 255 characters.")),
+    phase: yup.string().max(255, t("This area accepts max 255 characters.")),
+    projectName: yup.string().max(50, t("This area accepts max 50 characters.")),
+    siteName: yup.string().max(50, t("This area accepts max 50 characters.")),
+
+  });
 
   const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
     defaultValues: {
@@ -150,12 +150,6 @@ const BuildingForm = ({
     getClassificationCategory();
     getClassificationStatus();
   }, []);
-
-  useEffect(
-    () => {
-      console.log("dataaaa: ", data);
-    }
-    , [data])
 
   useEffect(() => {
     if (submitted) {

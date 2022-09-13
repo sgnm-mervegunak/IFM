@@ -133,7 +133,26 @@
 	"State Region": "State Region",
 	"Postal Code": "Postal Code",
 	"Postal Box": "Postal Box",
-	"Created By": "Created By"
+	"Created By": "Created By",
+	"This area is required.": "This area is required.",
+	"This area accepts max 50 characters.": "This area accepts max 50 characters.",
+	"This area accepts max 255 characters.":"This area accepts max 255 characters.",
+	"Elevation must be a number":"Elevation must be a number",
+	"Elevation can not be negative":"Elevation can not be negative",
+	"Height must be a number": "Height must be a number",
+	"Height can not be negative": "Height can not be negative",
+	"Gross Area must be a number":"Gross Area must be a number",
+	"Gross Area can not be negative":"Gross Area can not be negative",
+	"Net Area must be a number":"Net Area must be a number",
+	"Net Area can not be negative":"Net Area can not be negative",
+	"Usable Height must be a number":"Usable Height must be a number",
+	"Usable Height can not be negative":"Usable Height can not be negative"
+
+
+
+
+
+
 }
 
 

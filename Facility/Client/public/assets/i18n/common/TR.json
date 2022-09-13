@@ -133,5 +133,19 @@
 	"State Region": "Bölge",
 	"Postal Code": "Posta Kodu",
 	"Postal Box": "Posta Kutusu",
-	"Created By": "Oluşturan"
+	"Created By": "Oluşturan",
+	"This area is required.": "Zorunlu alan.",
+	"This area accepts max 50 characters.": "Bu alana en fazla 50 karakter girebilirsiniz",
+	"This area accepts max 255 characters.": "Bu alana en fazla 255 karakter girebilirsiniz",
+	"Elevation must be a number": "Yükseklik (elevation) sayısal bir değer olmak zorundadır",
+	"Elevation can not be negative": "Yükseklik (elevation) negatif bir değer alamaz.",
+	"Height must be a number": "Yükseklik (height) sayısal bir değer olmak zorundadır",
+	"Height can not be negative": "Yükseklik (height) negatif bir değer alamaz.",
+	"Gross Area must be a number": "Brüt alan sayısal bir değer almak zorundadır",
+	"Gross Area can not be negative": "Brüt alan negatif bir değer alamaz.",
+	"Net Area must be a number": "Net alan sayısal bir değer almak zorundadır",
+	"Net Area can not be negative": "Net alan negatif bir değer alamaz.",
+	"Usable Height must be a number": "Kullanılabilir yükseklik sayısal bir değer almak zorundadır",
+	"Usable Height can not be negative": "Kullanılabilir yükseklik negatif bir değer alamaz."
+
 }

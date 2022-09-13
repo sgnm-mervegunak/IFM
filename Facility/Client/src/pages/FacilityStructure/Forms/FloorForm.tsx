@@ -47,20 +47,7 @@ interface Node {
     className?: string;
 }
 
-const schema = yup.object({
-    name: yup.string().required("This area is required.").max(50, "This area accepts max 50 characters."),
-    elevation: yup
-        .number()
-        .typeError('Elevation must be a number')
-        .nullable().moreThan(-1, "Elevation can not be negative")
-        .transform((_, val) => (val !== "" ? Number(val) : null)),
-    height: yup
-        .number()
-        .typeError('Elevation must be a number')
-        .nullable()
-        .moreThan(-1, "Elevation can not be negative")
-        .transform((_, val) => (val !== "" ? Number(val) : null)),
-});
+
 
 const FloorForm = ({
     selectedFacilityType,
@@ -81,6 +68,22 @@ const FloorForm = ({
     const [data, setData] = useState<any>();
     const { t } = useTranslation(["common"]);
     const { toast } = useAppSelector(state => state.toast);
+
+    const schema = yup.object({
+        name: yup.string().required(t("This area is required.")).max(50, t("This area accepts max 50 characters.")),
+        category: yup.string().required(t("This area is required.")),
+        elevation: yup
+            .number()
+            .typeError(t('Elevation must be a number'))
+            .nullable().moreThan(-1, t("Elevation can not be negative"))
+            .transform((_, val) => (val !== "" ? Number(val) : null)),
+        height: yup
+            .number()
+            .typeError(t('Height must be a number'))
+            .nullable()
+            .moreThan(-1, t("Height can not be negative"))
+            .transform((_, val) => (val !== "" ? Number(val) : null)),
+    });
 
     const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
         defaultValues: {
@@ -276,7 +279,7 @@ const FloorForm = ({
             <div className="field">
                 <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
                 <Controller
-                    defaultValue={data?.category || []}
+                    defaultValue={data?.category || ""}
                     name="category"
                     control={control}
                     render={({ field }) => (
