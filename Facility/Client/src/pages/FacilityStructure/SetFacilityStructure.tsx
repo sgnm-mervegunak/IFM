@@ -91,6 +91,7 @@ const SetFacilityStructure = () => {
   const [labels, setLabels] = useState<string[]>([]);
   const [tag, setTag] = useState<string[]>([]);
   const [isActive, setIsActive] = useState<boolean>(true);
+  const [canDelete, setCanDelete] = useState<boolean>(true);
   const [addDia, setAddDia] = useState(false);
   const [exportDia, setExportDia] = useState(false);
   const [editDia, setEditDia] = useState(false);
@@ -625,7 +626,7 @@ const SetFacilityStructure = () => {
       } */}
 
       {(() => {
-        if (selectedFacilityType === "FacilityStructure") {
+        if (canDelete === false) {
           return <ContextMenu model={menuRoot} ref={cm} />;
         } else if (selectedFacilityType === "Building") {
           return <ContextMenu model={menuBuilding} ref={cm} />;
@@ -703,7 +704,7 @@ const SetFacilityStructure = () => {
             } else if (selectedFacilityType === "Floor" || selectedFacilityType === "Kat") {
               return "40vw";
             } else if (selectedFacilityType === "Space" || selectedFacilityType === "Alan") {
-              return "40vw";
+              return "60vw";
             } else {
               return "40vw";
             }
@@ -839,7 +840,7 @@ const SetFacilityStructure = () => {
             } else if (selectedFacilityType === "Floor" || selectedFacilityType === "Kat") {
               return "40vw";
             } else if (selectedFacilityType === "Space" || selectedFacilityType === "Alan") {
-              return "40vw";
+              return "60vw";
             }
           })()
         }}
@@ -1057,6 +1058,7 @@ const SetFacilityStructure = () => {
             setSelectedNodeKey(event.value);
           }}
           onContextMenu={(event: any) => {
+            setCanDelete(event.node.canDelete); // for use import building control on context menu
             setSelectedFacilityType(event.node._type);
             cm.current.show(event.originalEvent);
           }}
