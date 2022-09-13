@@ -214,11 +214,11 @@ const Facility2 = () => {
       <div className="col-12">
         <div className="card">
           <Toast ref={toast} />
-          <Toolbar
+          {/* <Toolbar
             className="mb-4"
             left={leftToolbarTemplate}
             right={rightToolbarTemplate}
-          ></Toolbar>
+          ></Toolbar> */}
 
           <DataTable
             ref={dt}
@@ -237,7 +237,7 @@ const Facility2 = () => {
             // totalRecords={countFacilities}
             // globalFilter={globalFilter}
             emptyMessage="No facilities found."
-            header={header}
+            // header={header}
             responsiveLayout="scroll"
             // onSort={onSort}
             // sortField={lazyParams.sortField}
@@ -246,12 +246,12 @@ const Facility2 = () => {
           >
             <Column
               field="facility_name"
-              header="Facility Name"
+              header="Organization Name"
               // sortable
               body={facilityNameBodyTemplate}
-              headerStyle={{ width: "14%", minWidth: "10rem" }}
+              headerStyle={{ width: "14%", minWidth: "10rem", fontSize: "1.5rem" }}
             ></Column>
-            <Column body={actionBodyTemplate}></Column>
+            {/* <Column body={actionBodyTemplate}></Column> */}
           </DataTable>
 
           <Dialog
