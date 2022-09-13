@@ -85,7 +85,7 @@ const SpaceForm = ({
     operatorCode: yup.string().max(50, "This area accepts max 50 characters."),
     operatorName: yup.string().max(50, "This area accepts max 50 characters."),
     description: yup.string().max(255, "This area accepts max 255 characters."),
-    roomTag: yup.string().max(50, "This area accepts max 50 characters."),
+    roomTag: yup.array().max(50, "This area accepts max 50 characters."),
     category: yup.string().required("This area is required."),
     usage: yup.string().required("This area is required."),
     status: yup.string().required("This area is required."),
