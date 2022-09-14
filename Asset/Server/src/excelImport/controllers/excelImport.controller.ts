@@ -6,8 +6,8 @@ import { ExcelImportService } from '../services/excelImport.service';
 import { UserRoles } from 'src/common/const/keycloak.role.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-@ApiTags('ExcelImport')
-@Controller('ExcelImport')
+@ApiTags('excelImport')
+@Controller('excelImport')
 export class ExcelImportController { 
   constructor(private readonly excelImport: ExcelImportService) {}
 

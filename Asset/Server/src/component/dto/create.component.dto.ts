@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional, Max, Min } from 'class-validator';
+import { IsNumber, IsOptional, IsUUID, Max, Min } from 'class-validator';
 import {
   i18nValidationMessageEnum,
   IsEnumWithI18nMessage,
@@ -19,12 +19,12 @@ export class CreateComponentDto {
   @ApiProperty()
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
-  componentTypeName: string;
+  space: string;
 
   @ApiProperty()
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
-  space: string;
+  createdBy: string;
 
   @ApiProperty()
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
@@ -33,10 +33,11 @@ export class CreateComponentDto {
 
   @ApiProperty()
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
-  parentId: number;
+  @IsUUID('4')
+  parentKey: string;
 
   @ApiProperty()
-  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
+  @IsOptional()
   @LengthWithI18nMessage(i18nValidationMessageEnum.LENGTH, 0, 256)
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
   description: string;
