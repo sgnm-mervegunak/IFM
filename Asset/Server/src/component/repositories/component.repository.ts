@@ -29,7 +29,7 @@ export class ComponentRepository implements GeciciInterface<Component> {
   ) {}
   async findByKey(key: string, header) {
     try {
-      const nodes = await this.neo4jService.findByLabelAndFilters(['Type'], { key });
+      const nodes = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.TYPE], { key });
       if (!nodes.length) {
         throw new AssetNotFoundException(key);
       }
@@ -64,15 +64,17 @@ export class ComponentRepository implements GeciciInterface<Component> {
         throw new HttpException(wrong_parent_error(), 400);
       }
 
-      const typeNode = await this.neo4jService.findNodesByIdAndRelationName(
+      const typeNode = await this.neo4jService.findChildrensByIdAndFilters(
         typesNode[0].get('n').identity.low,
         {},
-        createComponentDto.parentId,
+        [Neo4jLabelEnum.TYPE],
         {
+          key: createComponentDto.parentKey,
           isDeleted: false,
         },
         'PARENT_OF',
       );
+
       if (!typeNode.length) {
         throw new HttpException(wrong_parent_error(), 400);
       }
@@ -115,8 +117,8 @@ export class ComponentRepository implements GeciciInterface<Component> {
       }
 
       const component = new Component();
-      const componentFinalObject = assignDtoPropToEntity(component, CreateComponentDto);
-      const componentNode = await this.neo4jService.createNode(componentFinalObject, [Neo4jLabelEnum.TYPE]);
+      const componentFinalObject = assignDtoPropToEntity(component, createComponentDto);
+      const componentNode = await this.neo4jService.createNode(componentFinalObject, [Neo4jLabelEnum.COMPONENT]);
 
       componentNode['properties']['id'] = componentNode['identity'].low;
       const result = {
@@ -124,9 +126,13 @@ export class ComponentRepository implements GeciciInterface<Component> {
         labels: componentNode['labels'],
         properties: componentNode['properties'],
       };
-      if (CreateComponentDto['parentId']) {
-        await this.neo4jService.addParentRelationByIdAndFilters(result['id'], {}, CreateComponentDto['parentId'], {});
-      }
+
+      await this.neo4jService.addParentRelationByIdAndFilters(
+        result['id'],
+        {},
+        typeNode[0].get('children').identity.low,
+        {},
+      );
 
       let virtualNode = new VirtualNode();
       const createStructureRelationDto = { referenceKey: createComponentDto.space };
@@ -159,7 +165,7 @@ export class ComponentRepository implements GeciciInterface<Component> {
         parentKey: createComponentDto.space,
         url: componentUrl,
       };
-      await this.kafkaService.producerSendMessage('createTypeContactRelation', JSON.stringify(kafkaObject));
+      await this.kafkaService.producerSendMessage('createStructureRelation', JSON.stringify(kafkaObject));
       return result;
     } catch (error) {
       const code = error.response?.code;
