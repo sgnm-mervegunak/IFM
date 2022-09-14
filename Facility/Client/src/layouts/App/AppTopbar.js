@@ -111,7 +111,7 @@ const AppTopbar = (props) => {
         <ul className="topbar-menu">
           {auth.auth.auth ? (
             <>
-              <li className="search-item">
+              {/* <li className="search-item">
                 <button
                   type="button"
                   className="p-link"
@@ -119,7 +119,8 @@ const AppTopbar = (props) => {
                 >
                   <i className="pi pi-search"></i>
                 </button>
-              </li>
+              </li> */}
+
               <li className="language-item">
                 <Dropdown
                   value={localStorage.getItem("i18nextLng")}
@@ -130,7 +131,8 @@ const AppTopbar = (props) => {
                   <i class="pi pi-globe"></i>
                 </Dropdown>
               </li>
-              <li className={notificationsItemClassName}>
+
+              {/* <li className={notificationsItemClassName}>
                 <button
                   type="button"
                   className="p-link"
@@ -202,7 +204,7 @@ const AppTopbar = (props) => {
                     </button>
                   </li>
                 </ul>
-              </li>
+              </li> */}
 
               <li className={profileItemClassName}>
                 <button
@@ -213,7 +215,7 @@ const AppTopbar = (props) => {
                   <img
                     src={
                       process.env.PUBLIC_URL +
-                      "/assets/demo/images/avatar/profile.jpg"
+                      "/assets/demo/images/avatar/atamer.png"
                     }
                     alt="diamond-layout"
                     className="profile-image"
@@ -258,7 +260,7 @@ const AppTopbar = (props) => {
                 </ul>
               </li>
 
-              <li className="right-sidebar-item">
+              {/* <li className="right-sidebar-item">
                 <button
                   type="button"
                   className="p-link"
@@ -266,7 +268,8 @@ const AppTopbar = (props) => {
                 >
                   <i className="pi pi-align-right"></i>
                 </button>
-              </li>
+              </li> */}
+
             </>
           ) : (
             <li className="right-sidebar-item">

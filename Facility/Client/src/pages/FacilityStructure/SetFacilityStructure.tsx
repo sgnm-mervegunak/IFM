@@ -2,16 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Tree } from "primereact/tree";
 import { ContextMenu } from "primereact/contextmenu";
 import { Dialog } from "primereact/dialog";
-import { Chips } from "primereact/chips";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Button } from "primereact/button";
 import { Toolbar } from "primereact/toolbar";
-import { InputText } from "primereact/inputtext";
-import { Checkbox } from "primereact/checkbox";
-import { TreeSelect } from "primereact/treeselect";
 import { Dropdown } from "primereact/dropdown";
-import { useNavigate, useParams } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
+import { useNavigate} from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import FacilityStructureService from "../../services/facilitystructure";
@@ -86,11 +81,9 @@ const SetFacilityStructure = () => {
   const [selectedNode, setSelectedNode] = useState<Node>({} as Node);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
-  const [name, setName] = useState("");
   const [formTypeId, setFormTypeId] = useState<any>(undefined);
   const [labels, setLabels] = useState<string[]>([]);
-  const [tag, setTag] = useState<string[]>([]);
-  const [isActive, setIsActive] = useState<boolean>(true);
+  const [canDelete, setCanDelete] = useState<boolean>(true);
   const [addDia, setAddDia] = useState(false);
   const [exportDia, setExportDia] = useState(false);
   const [editDia, setEditDia] = useState(false);
@@ -108,7 +101,7 @@ const SetFacilityStructure = () => {
   const [generateNodeKey, setGenerateNodeKey] = useState("");
   const [generateFormTypeKey, setGenerateFormTypeKey] = useState<string | undefined>("");
   const [generateNodeName, setGenerateNodeName] = useState<string | undefined>("");
-  const [facilityType, setFacilityType] = useState<string[]>([]);
+  const [facilityType, setFacilityType] = useState<{name: string,code:string}[]>([]);
   const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
@@ -122,7 +115,10 @@ const SetFacilityStructure = () => {
   useEffect(() => {
     FacilityStructureService.getFacilityTypes("FacilityTypes")
       .then((res) => {
-        setFacilityType(res.data.map((item: any) => item.name));
+        setFacilityType(res.data.map((item: any) => ({
+          name: t(item.name),
+          code:item.name
+        })));
       })
       .catch((err) => {
         toast.current.show({
@@ -608,24 +604,9 @@ const SetFacilityStructure = () => {
 
   return (
     <div className="container">
-      {/* <ContextMenu model={menuBuilding} ref={cm} />
-      {
-        selectedFacilityType === "Building" && (
-          <ContextMenu model={menuBuilding} ref={cm} />)
-      }
-      {
-        selectedFacilityType === "Block" ? (
-          <ContextMenu model={menuBlock} ref={cm} />) : (
-          <ContextMenu model={menu} ref={cm} />)
-      }
-      {
-        selectedFacilityType === "Floor" ? (
-          <ContextMenu model={menuFloor} ref={cm} />) : (
-          <ContextMenu model={menu} ref={cm} />)
-      } */}
-
+  
       {(() => {
-        if (selectedFacilityType === "FacilityStructure") {
+        if (canDelete === false) {
           return <ContextMenu model={menuRoot} ref={cm} />;
         } else if (selectedFacilityType === "Building") {
           return <ContextMenu model={menuBuilding} ref={cm} />;
@@ -637,6 +618,7 @@ const SetFacilityStructure = () => {
           return <ContextMenu model={menu} ref={cm} />;
         }
       })()}
+      
       <ConfirmDialog
         visible={delDia}
         onHide={() => setDelDia(false)}
@@ -703,7 +685,7 @@ const SetFacilityStructure = () => {
             } else if (selectedFacilityType === "Floor" || selectedFacilityType === "Kat") {
               return "40vw";
             } else if (selectedFacilityType === "Space" || selectedFacilityType === "Alan") {
-              return "40vw";
+              return "60vw";
             } else {
               return "40vw";
             }
@@ -721,6 +703,8 @@ const SetFacilityStructure = () => {
           <Dropdown
             value={selectedFacilityType}
             options={facilityType}
+            optionValue="code"
+            optionLabel="name"
             onChange={(event) => setSelectedFacilityType(event.value)}
             style={{ width: "100%" }}
           />
@@ -832,14 +816,14 @@ const SetFacilityStructure = () => {
         visible={editDia}
         style={{
           width: (() => {
-            if (selectedFacilityType === "Building" || selectedFacilityType === "Bİna") {
+            if (selectedFacilityType === "Building" || selectedFacilityType === "Bina") {
               return "60vw";
             } else if (selectedFacilityType === "Block" || selectedFacilityType === "Blok") {
               return "40vw";
             } else if (selectedFacilityType === "Floor" || selectedFacilityType === "Kat") {
               return "40vw";
             } else if (selectedFacilityType === "Space" || selectedFacilityType === "Alan") {
-              return "40vw";
+              return "60vw";
             }
           })()
         }}
@@ -852,8 +836,10 @@ const SetFacilityStructure = () => {
         <div className="field">
           <h5 style={{ marginBottom: "0.5em" }}>{t("Facility Type")}</h5>
           <Dropdown
-            value={t(selectedFacilityType as string)}
+            value={selectedFacilityType}
             options={facilityType}
+            optionValue="code"
+            optionLabel="name"
             disabled
             style={{ width: "100%" }}
           />
@@ -1057,6 +1043,7 @@ const SetFacilityStructure = () => {
             setSelectedNodeKey(event.value);
           }}
           onContextMenu={(event: any) => {
+            setCanDelete(event.node.canDelete); // for use import building control on context menu
             setSelectedFacilityType(event.node._type);
             cm.current.show(event.originalEvent);
           }}

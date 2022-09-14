@@ -26,8 +26,8 @@ export class ExcelImportExportService {
     return await this.excelImportExportRepository.getZonesAnExcelFile(body, header);
   }
 
-  async addBuildingwithCobie(file: Express.Multer.File, header: MainHeaderInterface) {
-    return await this.excelImportExportRepository.addBuildingwithCobie(file, header);
+  async addBuildingWithCobie(file: Express.Multer.File, header: MainHeaderInterface) {
+    return await this.excelImportExportRepository.addBuildingWithCobie(file, header);
   }
   async addFloorsToBuilding(file: Express.Multer.File, header: MainHeaderInterface, buildingKey: string) {
     return await this.excelImportExportRepository.addFloorsToBuilding(file, header, buildingKey);
@@ -37,5 +37,20 @@ export class ExcelImportExportService {
   }
   async addZonesToBuilding(file: Express.Multer.File, header: MainHeaderInterface, buildingKey: string) {
     return await this.excelImportExportRepository.addZonesToBuilding(file, header, buildingKey);
+  }
+
+  async addContacts( file: Express.Multer.File,header:MainHeaderInterface){
+    return await this.excelImportExportRepository.addContacts(file, header)
+  }
+
+
+  async addTypesWithCobie(file: Express.Multer.File,header:MainHeaderInterface){
+    return await this.excelImportExportRepository.addTypesWithCobie(file, header);
+  }
+  async addComponentsWithCobie(file: Express.Multer.File,header:MainHeaderInterface){
+    return await this.excelImportExportRepository.addComponentsWithCobie(file, header);
+  }
+  async addSystemWithCobie(file: Express.Multer.File,header:MainHeaderInterface){
+    return await this.excelImportExportRepository.addSystemWithCobie(file, header);
   }
 }

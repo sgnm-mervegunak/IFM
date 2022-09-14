@@ -30,6 +30,7 @@
   "NODE_NOT_FOUND": "Uygun düğüm bulunamadı ",
   "WRONG_CLASSIFICATION_PARENT": "{node1}, {node2} numaralı düğümün altına taşınamaz.",
   "FIND_WITH_CHILDREN_BY_REALM_AS_TREE_ERROR": "{realm} de {label} ağacı bulunamadı",
-  "NULL_VALUE": "{val} boş geçilemez.."
+  "NULL_VALUE": "{val} boş geçilemez..",
+  "NOT_UNIQUE":"{val} zaten mevcut."
 
 }

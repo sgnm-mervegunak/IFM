@@ -133,5 +133,18 @@
 	"State Region": "الدولة / المنطقة",
 	"Postal Code": "الرمز البريدي",
 	"Postal Box": "صندوق بريدي",
-	"Created By": "صنع من قبل"
+	"Created By": "صنع من قبل",
+	"This area is required.": "هذه المنطقة مطلوبة.",
+	"This area accepts max 50 characters.": "تقبل هذه المنطقة بحد أقصى 50 حرفًا.",
+	"This area accepts max 255 characters.": "تقبل هذه المنطقة 255 حرفًا كحد أقصى.",
+	"Elevation must be a number": "يجب أن يكون الارتفاع رقمًا",
+	"Elevation can not be negative": "لا يمكن أن يكون الارتفاع سالبًا",
+	"Height must be a number": "يجب أن يكون الارتفاع رقمًا",
+	"Height can not be negative": "لا يمكن أن يكون الارتفاع سالبًا",
+	"Gross Area must be a number": "يجب أن تكون المساحة الإجمالية رقمًا",
+	"Gross Area can not be negative": "لا يمكن أن تكون المساحة الإجمالية سالبة",
+	"Net Area must be a number": "يجب أن يكون صافي المساحة رقمًا",
+	"Net Area can not be negative": "لا يمكن أن تكون صافي المساحة سالبة",
+	"Usable Height must be a number": "يجب أن يكون الارتفاع القابل للاستخدام رقمًا",
+	"Usable Height can not be negative": "لا يمكن أن يكون الارتفاع القابل للاستخدام سالبًا"
 }

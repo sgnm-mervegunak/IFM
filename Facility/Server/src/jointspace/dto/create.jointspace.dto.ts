@@ -56,17 +56,17 @@ export class CreateJointSpaceDto {
 
   @ApiProperty()
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
-  @IsOptional()
+  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
   category: string;
 
   @ApiProperty()
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
-  @IsOptional()
+  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
   usage: string;
 
   @ApiProperty()
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
-  @IsOptional()
+  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
   status: string;
 
   @ApiProperty()
@@ -83,4 +83,13 @@ export class CreateJointSpaceDto {
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
   @IsArray()
   nodeKeys: [];
+
+  @ApiProperty()
+  @IsOptional()
+  operatorCode?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  operatorName?: string;
 }
+
