@@ -66,7 +66,7 @@ interface ZoneInterface {
   externalObject: string;
   documents: any;
   images: any;
-  tags: string[];
+  tag: string[];
   nodeKeys: string[];
 }
 
@@ -395,7 +395,7 @@ const SetZone = () => {
         console.log({ ...newNode, ...temp });
         await ZoneService.update(res.data.id, { ...newNode, ...temp })
 
-        reset({ name:"", code:"", description:"", tags: [], category: "" });
+        reset({ name:"", code:"", description:"", tag: [], category: "" });
 
         setSelectedNodeKey([]);
         setCreateZone({} as ZoneInterface);
@@ -534,7 +534,7 @@ const SetZone = () => {
           icon="pi pi-times"
           onClick={() => {
             setAddDia(false);
-            reset({ ...createZone, tags: [], category: "" }); // reset form values after canceling the create zone operation
+            reset({ ...createZone, tag: [], category: "" }); // reset form values after canceling the create zone operation
           }}
           className="p-button-text"
         />
@@ -673,15 +673,15 @@ const SetZone = () => {
               <div className="field structureChips">
                 <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
                 <Controller
-                  defaultValue={formData?.tags || []}
-                  name="tags"
+                  defaultValue={formData?.tag || []}
+                  name="tag"
                   control={control}
                   render={({ field }) => (
                     <Chips
                       value={field.value}
                       onChange={(e) => {
                         field.onChange({
-                          target: { name: "tags", value: e.value },
+                          target: { name: "tag", value: e.value },
                         });
                       }}
                       style={{ width: "100%" }}
