@@ -427,33 +427,33 @@ export class InfraRepository implements InfraInterface {
    
 
     /////////////////////////////////////////////////////////////// process of classfications without code ////////////////////////////////////////////////////////////////
-    // let deneme4 = []
-    // const realmName="Signum"
+    let deneme4 = []
+    const realmName="Signum"
   
 
-    //   for(let i=0;i<classificationsWithoutCode.length;i++){
-    //     let deneme5=[];
-    //      let dto ={}
-    //     for (let index = 1; index < classificationsWithoutCode[i].length; index++) {
+      for(let i=0;i<classificationsWithoutCode.length;i++){
+        let deneme5=[];
+         let dto ={}
+        for (let index = 1; index < classificationsWithoutCode[i].length; index++) {
 
-    //       dto={name:classificationsWithoutCode[i][index],isDeleted:false,isActive:true,canDelete:true,canDisplay:true,code:`${classificationsWithoutCode[i][1]}${index-1}`}
-    //       deneme5.push(dto);
+          dto={name:classificationsWithoutCode[i][index],isDeleted:false,isActive:true,canDelete:true,canDisplay:true,code:`${classificationsWithoutCode[i][1]}${index-1}`}
+          deneme5.push(dto);
 
-    //     }
-    //    deneme4.push(deneme5);
-    //     }
+        }
+       deneme4.push(deneme5);
+        }
 
-    //     for(let i=0;i < deneme4.length;i++){
-    //       let cypher= `MATCH (n:Classification {realm:"${realmName}"}) MERGE (b:${deneme4[i][0].name}_${language} {name:"${deneme4[i][0].name}",isDeleted:${deneme4[i][0].isDeleted},key:"${generateUuid()}",realm:"${realmName}",canDelete:false,isActive:true,canCopied:true,isRoot:true,canDisplay:true,language:"${language}"})  MERGE (n)-[:PARENT_OF]->(b)`;
-    //       await this.neo4jService.write(cypher);
+        for(let i=0;i < deneme4.length;i++){
+          let cypher= `MATCH (n:Classification {realm:"${realmName}"}) MERGE (b:${deneme4[i][0].name}_${language} {name:"${deneme4[i][0].name}",isDeleted:${deneme4[i][0].isDeleted},key:"${generateUuid()}",realm:"${realmName}",canDelete:false,isActive:true,canCopied:true,isRoot:true,canDisplay:true,language:"${language}"})  MERGE (n)-[:PARENT_OF]->(b)`;
+          await this.neo4jService.write(cypher);
 
-    //       for (let index = 1; index < deneme4[i].length; index++) {
+          for (let index = 1; index < deneme4[i].length; index++) {
 
-    //     let cypher3= `MATCH (n:${deneme4[i][0].name}_${language} {isDeleted:false}) MERGE (b {code:"${deneme4[i][index].code}",name:"${deneme4[i][index].name}",isDeleted:${deneme4[i][index].isDeleted},key:"${generateUuid()}",canDelete:${deneme4[i][index].canDelete},canDisplay:${deneme4[i][index].canDisplay}})  MERGE (n)-[:PARENT_OF]->(b)`;
-    //      let data =await this.neo4jService.write(cypher3)
-    //      console.log(data);
-    //       }
-    //     }
+        let cypher3= `MATCH (n:${deneme4[i][0].name}_${language} {isDeleted:false}) MERGE (b {code:"${deneme4[i][index].code}",name:"${deneme4[i][index].name}",isDeleted:${deneme4[i][index].isDeleted},key:"${generateUuid()}",canDelete:${deneme4[i][index].canDelete},canDisplay:${deneme4[i][index].canDisplay},language:"${language}"})  MERGE (n)-[:PARENT_OF]->(b)`;
+         let data =await this.neo4jService.write(cypher3)
+         console.log(data);
+          }
+        }
 
       }
     
