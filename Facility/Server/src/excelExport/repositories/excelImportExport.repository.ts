@@ -274,7 +274,7 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
  }
 
 
- async addBuildingwithCobie( file: Express.Multer.File,header:MainHeaderInterface){
+ async addBuildingWithCobie( file: Express.Multer.File,header:MainHeaderInterface){
    
     let email:string;
     const {realm}= header;
@@ -630,6 +630,12 @@ await workbook.xlsx.load(buffer).then(function async(book) {
   let data3 =await this.neo4jService.write(cypher2);
   console.log(data3)
   };
+
+
+  async addTypesWithCobie(file: Express.Multer.File,header:MainHeaderInterface){}
+  async addComponentsWithCobie(file: Express.Multer.File,header:MainHeaderInterface){}
+  async addSystemWithCobie(file: Express.Multer.File,header:MainHeaderInterface){}
+
   ////common functions for this page
 
   async createCypherForClassification(realm:string,classificationLabel:string,categoryCode:string,nodeName:string){
