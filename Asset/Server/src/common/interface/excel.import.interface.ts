@@ -1,4 +1,4 @@
-import { ExportExcelDto } from "src/excelExport/dto/excel.export.dto"
+
 
 
 export interface MainHeaderInterface {
@@ -8,7 +8,7 @@ export interface HeaderInterface extends MainHeaderInterface {
   language: string;
   
 }
-export interface ExcelImportExportInterface<T> {
+export interface ExcelImportInterface<T> {
 
    
 

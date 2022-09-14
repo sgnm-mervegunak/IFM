@@ -1,15 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete,Headers, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, Body,Headers, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { Roles, Unprotected } from 'nest-keycloak-connect';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NoCache } from 'ifmcommon';
-import { ExcelImportExportService } from '../services/excelImportExport.service';
+import { ExcelImportService } from '../services/excelImport.service';
 import { UserRoles } from 'src/common/const/keycloak.role.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-@ApiTags('ExcelImportExport')
-@Controller('ExcelImportExport')
-export class ExcelImportExportController { 
-  constructor(private readonly excelImportExport: ExcelImportExportService) {}
+@ApiTags('ExcelImport')
+@Controller('ExcelImport')
+export class ExcelImportController { 
+  constructor(private readonly excelImport: ExcelImportService) {}
 
   
   @Unprotected()
@@ -32,7 +32,7 @@ export class ExcelImportExportController {
   })
   @ApiConsumes('multipart/form-data')
   async addTypesWithCobie(@UploadedFile() file: Express.Multer.File, @Headers() header){
-    return this.excelImportExport.addTypesWithCobie(file,header);
+    return this.excelImport.addTypesWithCobie(file,header);
   }
 
   @Unprotected()
@@ -55,7 +55,7 @@ export class ExcelImportExportController {
   })
   @ApiConsumes('multipart/form-data')
   async addComponentsWithCobie(@UploadedFile() file: Express.Multer.File, @Headers() header){
-    return this.excelImportExport.addComponentsWithCobie(file,header);
+    return this.excelImport.addComponentsWithCobie(file,header);
   }
 
 
@@ -79,7 +79,7 @@ export class ExcelImportExportController {
   })
   @ApiConsumes('multipart/form-data')
   async addSystemWithCobie(@UploadedFile() file: Express.Multer.File, @Headers() header){
-    return this.excelImportExport.addSystemWithCobie(file,header);
+    return this.excelImport.addSystemWithCobie(file,header);
   }
 
 

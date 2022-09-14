@@ -1,11 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Neo4jService } from 'sgnm-neo4j/dist';
-import { ExcelImportExportInterface, HeaderInterface, MainHeaderInterface } from 'src/common/interface/excel.import.export.interface';
+import { ExcelImportInterface, MainHeaderInterface } from 'src/common/interface/excel.import.interface';
 const exceljs = require('exceljs');
 const { v4: uuidv4 } = require('uuid');
 
 @Injectable()
-export class ExcelImportExportRepository implements ExcelImportExportInterface<any> {
+export class ExcelImportRepository implements ExcelImportInterface<any> {
   constructor(private readonly neo4jService: Neo4jService) {}
  
 
