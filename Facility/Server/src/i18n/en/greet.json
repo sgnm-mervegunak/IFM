@@ -32,7 +32,8 @@
   "WRONG_CLASSIFICATION_PARENT": "{node1} can not move under {node2}.",
   "FIND_WITH_CHILDREN_BY_REALM_AS_TREE_ERROR": "In {realm}, tree of {label} not found.",
   "NULL_VALUE": "{val} can not be null..",
-  "NOT_UNIQUE":"{val} already exist."
+  "NOT_UNIQUE":"{val} already exist.",
+  "CONTACT_HAS_CHILDREN_ERROR": "{email} can not be deleted, because it is creator of else users."
 
 }
 
