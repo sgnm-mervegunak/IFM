@@ -28,5 +28,4 @@ export function FacilityNodeNotFoundException() {
 }
 export function NotUniqueException(val) {
   throw new HttpException({key: I18NEnums.NOT_UNIQUE, args: {val:val} }, HttpStatus.BAD_REQUEST);  
-
 }
