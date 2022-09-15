@@ -8,11 +8,9 @@ import { Checkbox } from "primereact/checkbox";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
-import axios from "axios";
 import { useTranslation } from "react-i18next";
 
 import ClassificationsService from "../../../services/classifications";
-import FacilityStructureService from "../../../services/facilitystructure";
 import ContactService from "../../../services/contact";
 import { useAppSelector } from "../../../app/hook";
 
@@ -130,21 +128,11 @@ const ContactForm = ({
   }, [isUpdate]);
 
   const getNodeInfoForUpdate = (selectedNodeKey: string) => {
-    FacilityStructureService.nodeInfo(selectedNodeKey)
+    ContactService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
-        console.log(res.data);
-
-        let temp = {};
-        await ClassificationsService.findClassificationByCodeAndLanguage("OmniClass34", res.data.properties.category).then(clsf1 => {
-          setCodeCategory(res.data.properties.category);
-          res.data.properties.category = clsf1.data.key
-          temp = res.data.properties;
-        })
-          .catch((err) => {
-            setData(res.data.properties);
-          })
-
-        setData(temp);
+        res.data.properties.category=res.data.properties.classificationKey;
+        res.data.properties.createdBy=res.data.properties.createdByKey;
+        setData(res.data.properties);
       })
       .catch((err) => {
         toast.current.show({
