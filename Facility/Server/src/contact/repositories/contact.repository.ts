@@ -310,7 +310,7 @@ catch (error) {
         []
       )
       if (!node || node.length == 0) {
-        //throw new HttpException(node_not_found({key:'string'}),400);
+        throw new HttpException(node_not_found({email:'string'}),404);
       }
       
       // get createdby person key and set it to return object 
@@ -353,7 +353,10 @@ catch (error) {
      
          }
        else if (code >= 9000 && code<=9999) {
-     
+        if (error.response?.code == CustomTreeError.NODE_NOT_FOUND) {
+          throw new  ContactNotFoundException(error.response?.params["email"]);
+          
+        } 
         }
       else {
          throw new HttpException("", 500);
