@@ -6,7 +6,7 @@ import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Button } from "primereact/button";
 import { Toolbar } from "primereact/toolbar";
 import { Dropdown } from "primereact/dropdown";
-import { Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import FacilityStructureService from "../../services/facilitystructure";
@@ -116,10 +116,12 @@ const SetFacilityStructure = () => {
   const [display, setDisplay] = useState(false);
   const [displayKey, setDisplayKey] = useState("");
   const [docTypes, setDocTypes] = React.useState([]);
+  const [search,setSearch] = useState("");
+  const [searchParams,setSearchParams] = useSearchParams()
   const { toast } = useAppSelector((state) => state.toast);
   const { t } = useTranslation(["common"]);
   const language = useAppSelector((state) => state.language.language);
-
+  
   useEffect(() => {
     FacilityStructureService.getFacilityTypes("FacilityTypes")
       .then((res) => {
@@ -175,6 +177,12 @@ const SetFacilityStructure = () => {
   useEffect(() => {
     getForms();
   }, []);
+
+  useEffect(()=>{
+    if(searchParams.get("search")){
+      setSearch(searchParams.get("search") as string)
+    }
+  },[])
 
   const getNodeInfoAndEdit = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
@@ -1104,9 +1112,14 @@ const SetFacilityStructure = () => {
             dragConfirm(event.dragNode._id.low, event.dropNode._id.low);
           }}
           filter
-          filterBy="label,name,description,tag"
+          filterBy="label,name,description,tag,key"
           filterPlaceholder={t("Search")}
           filterMode="strict"
+          filterValue={search}
+          onFilterValueChange={e=>{
+            setSearchParams({search: e.value})
+            setSearch(e.value)
+          }}
           nodeTemplate={(data: Node, options) => (
             <span className="flex align-items-center font-bold">
               {data.code ? data.code + " / " : ""}
