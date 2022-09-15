@@ -20,12 +20,17 @@ export interface ExcelImportExportInterface<T> {
     getJointSpacesAnExcelFile(body:ExportExcelDto ,header:HeaderInterface)
 
 
-    addBuildingwithCobie(file: Express.Multer.File,header:MainHeaderInterface)
+    addBuildingWithCobie(file: Express.Multer.File,header:MainHeaderInterface)
     addFloorsToBuilding(file: Express.Multer.File, header:MainHeaderInterface ,buildingKey: string)
     addSpacesToBuilding( file: Express.Multer.File, header:MainHeaderInterface, buildingKey: string)
     addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface,buildingKey: string)
 
     addContacts( file: Express.Multer.File,header:MainHeaderInterface);
+
+    addTypesWithCobie(file: Express.Multer.File,header:MainHeaderInterface)
+    addComponentsWithCobie(file: Express.Multer.File,header:MainHeaderInterface)
+    addSystemWithCobie(file: Express.Multer.File,header:MainHeaderInterface)
+
 
     createCypherForClassification(realm:string,classificationLabel:string,categoryCode:string,nodeName:string)
     keyGenerate();

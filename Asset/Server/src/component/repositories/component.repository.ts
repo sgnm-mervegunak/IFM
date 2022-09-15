@@ -10,42 +10,66 @@ import { assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError, Neo4
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
 import { CreateComponentDto } from '../dto/create.component.dto';
 import { UpdateComponentDto } from '../dto/update.component.dto';
-import { catchError, firstValueFrom, map } from 'rxjs';
 import { WrongIdProvided } from 'src/common/bad.request.exception';
-import { VirtualNode } from 'src/common/baseobject/virtual.node';
 import { CustomAssetError } from 'src/common/const/custom.error.enum';
-import { wrong_parent_error, other_microservice_errors } from 'src/common/const/custom.error.object';
+import { wrong_parent_error, other_microservice_errors, node_not_found } from 'src/common/const/custom.error.object';
 import { RelationName } from 'src/common/const/relation.name.enum';
-import { HttpService } from '@nestjs/axios';
 import { SpaceType } from 'src/common/const/space.type.enum';
-import { getRequest } from 'src/common/func/http.request.func';
+import { HttpRequestHandler } from 'src/common/class/http.request.helper.class';
+import { VirtualNodeCreator } from 'src/common/class/virtual.node.creator';
+import { ComponentInterface } from 'src/common/interface/component.interface';
 
 @Injectable()
-export class ComponentRepository implements GeciciInterface<Component> {
+export class ComponentRepository implements ComponentInterface<Component> {
   constructor(
     private readonly neo4jService: Neo4jService,
     private readonly kafkaService: NestKafkaService,
-    private readonly httpService: HttpService,
+    private readonly httpService: HttpRequestHandler,
   ) {}
   async findByKey(key: string, header) {
     try {
-      const nodes = await this.neo4jService.findByLabelAndFilters(['Type'], { key });
+      const nodes = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.COMPONENT], { key });
       if (!nodes.length) {
-        throw new AssetNotFoundException(key);
+        throw new HttpException(node_not_found(), 400);
       }
       return nodes[0]['_fields'][0];
     } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      const code = error.response?.code;
+
+      if (code >= 1000 && code <= 1999) {
+      } else if (code >= 9500 && code <= 9750) {
+        if (error.response?.code == CustomAssetError.NODE_NOT_FOUND) {
+          throw new AssetNotFoundException(key);
+        }
+      } else {
+        throw new HttpException(error, 500);
+      }
     }
   }
 
-  async findRootByRealm(header) {
+  async findRootByRealm(key, header) {
+    console.log(key);
+
     const { realm } = header;
-    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure([Neo4jLabelEnum.TYPES], {
-      realm,
+    console.log(realm);
+    const typeNode = await this.neo4jService.findChildrensByLabelsOneLevel(
+      [Neo4jLabelEnum.TYPES],
+      { realm },
+      [Neo4jLabelEnum.TYPE],
+      { key },
+    );
+    console.log(typeNode);
+    if (!typeNode.length) {
+      throw new HttpException(wrong_parent_error(), 400);
+    }
+    console.log(typeNode);
+
+    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure([Neo4jLabelEnum.TYPE], {
+      key,
       isDeleted: false,
       isActive: true,
     });
+    console.log(node);
     if (!node) {
       throw new FacilityStructureNotFountException(realm);
     }
@@ -56,7 +80,7 @@ export class ComponentRepository implements GeciciInterface<Component> {
   async create(createComponentDto: CreateComponentDto, header) {
     try {
       const { realm, authorization } = header;
-      const typesNode = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.TYPES], {
+      const typesNode = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.TYPE], {
         isDeleted: false,
         realm,
       });
@@ -64,102 +88,170 @@ export class ComponentRepository implements GeciciInterface<Component> {
         throw new HttpException(wrong_parent_error(), 400);
       }
 
-      const typeNode = await this.neo4jService.findNodesByIdAndRelationName(
+      const typeNode = await this.neo4jService.findChildrensByIdAndFilters(
         typesNode[0].get('n').identity.low,
         {},
-        createComponentDto.parentId,
+        [Neo4jLabelEnum.TYPE],
         {
+          key: createComponentDto.parentKey,
           isDeleted: false,
         },
         'PARENT_OF',
       );
+
       if (!typeNode.length) {
         throw new HttpException(wrong_parent_error(), 400);
       }
 
       let structureUrl = '';
-      let structurePromise;
+      let structure;
       switch (createComponentDto.spaceType) {
         case SpaceType.JOINTSPACE:
           structureUrl = `${process.env.JOINTSPACE}/${createComponentDto.space}`;
 
-          structurePromise = await this.httpService
-            .get(`${process.env.JOINTSPACE_URL}/${createComponentDto.space}`, { headers: { authorization } })
-            .pipe(
-              catchError((error) => {
-                const { status, message } = error.response?.data;
-                throw new HttpException(other_microservice_errors(message), status);
-              }),
-            )
-            .pipe(map((response) => response.data));
-          structurePromise = await firstValueFrom(structurePromise);
+          structure = await this.httpService.get(`${process.env.JOINTSPACE_URL}/${createComponentDto.space}`, {
+            authorization,
+          });
+
           break;
         case SpaceType.SPACE:
+          console.log('space');
           structureUrl = `${process.env.STRUCTURE_URL}/${createComponentDto.space}`;
 
-          structurePromise = await this.httpService
-            .get(`${process.env.STRUCTURE_URL}/${createComponentDto.space}`, { headers: { authorization } })
-            .pipe(
-              catchError((error) => {
-                const { status, message } = error.response?.data;
-                console.log(message + status);
-                throw new HttpException(other_microservice_errors(message), status);
-              }),
-            )
-            .pipe(map((response) => response.data));
-          structurePromise = await firstValueFrom(structurePromise);
+          structure = await this.httpService.get(`${process.env.STRUCTURE_URL}/${createComponentDto.space}`, {
+            authorization,
+          });
 
           break;
         default:
           throw new HttpException(other_microservice_errors('SpaceType must be valid'), 400);
       }
 
+      //check if creater exist exist
+      await this.httpService.get(`${process.env.CONTACT_URL}/${createComponentDto.createdBy}`, {
+        authorization,
+      });
+
+      //check if warrantyGuarantorParts exist exist
+      await this.httpService.get(`${process.env.CONTACT_URL}/${createComponentDto.warrantyGuarantorParts}`, {
+        authorization,
+      });
+
+      //check if warrantyGuarantorLabor exist exist
+      await this.httpService.get(`${process.env.CONTACT_URL}/${createComponentDto.warrantyGuarantorLabor}`, {
+        authorization,
+      });
+
+      if (!createComponentDto.name || createComponentDto.name.trim() === '') {
+        createComponentDto.name = typeNode[0].get('children').properties.name;
+      }
+
       const component = new Component();
-      const componentFinalObject = assignDtoPropToEntity(component, CreateComponentDto);
-      const componentNode = await this.neo4jService.createNode(componentFinalObject, [Neo4jLabelEnum.TYPE]);
+      const componentFinalObject = assignDtoPropToEntity(component, createComponentDto);
+      const componentNode = await this.neo4jService.createNode(componentFinalObject, [Neo4jLabelEnum.COMPONENT]);
+      const uniqName = componentNode.properties.name + ' ' + componentNode.identity.low;
+      await this.neo4jService.updateByIdAndFilter(componentNode.identity.low, {}, [], { name: uniqName });
 
       componentNode['properties']['id'] = componentNode['identity'].low;
+      const componentUrl = `${process.env.COMPONENT_URL}/${componentNode.properties.key}`;
       const result = {
         id: componentNode['identity'].low,
         labels: componentNode['labels'],
         properties: componentNode['properties'],
       };
-      if (CreateComponentDto['parentId']) {
-        await this.neo4jService.addParentRelationByIdAndFilters(result['id'], {}, CreateComponentDto['parentId'], {});
-      }
 
-      let virtualNode = new VirtualNode();
-      const createStructureRelationDto = { referenceKey: createComponentDto.space };
-      virtualNode = assignDtoPropToEntity(virtualNode, createStructureRelationDto);
-
-      virtualNode.url = structureUrl;
-      const virtualStructureNode = await this.neo4jService.createNode(virtualNode, [
-        Neo4jLabelEnum.VIRTUAL,
-        Neo4jLabelEnum.STRUCTURE,
-      ]);
-
-      await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
-        componentNode.identity.low,
+      await this.neo4jService.addParentRelationByIdAndFilters(
+        result['id'],
         {},
-        virtualStructureNode.identity.low,
+        typeNode[0].get('children').identity.low,
         {},
+      );
+      const virtualNodeCreator = new VirtualNodeCreator(this.neo4jService);
+      const createContactUrl = `${process.env.CONTACT_URL}/${createComponentDto.createdBy}`;
+      const virtualContactDto = { referenceKey: createComponentDto.createdBy, url: createContactUrl };
+
+      virtualNodeCreator.createVirtualNode(
+        componentNode['identity'].low,
+        [Neo4jLabelEnum.VIRTUAL, Neo4jLabelEnum.CONTACT],
+        virtualContactDto,
+        RelationName.CREATED_BY,
+      );
+      const createdByKafkaObject = {
+        parentKey: createComponentDto.createdBy,
+        referenceKey: componentNode.properties.key,
+        url: componentUrl,
+        relationName: RelationName.CREATED_BY,
+        virtualNodeLabels: [Neo4jLabelEnum.COMPONENT, Neo4jLabelEnum.VIRTUAL],
+      };
+
+      await this.kafkaService.producerSendMessage('createContactRelation', JSON.stringify(createdByKafkaObject));
+
+      const createStructureRelationDto = { referenceKey: createComponentDto.space, url: structureUrl };
+      virtualNodeCreator.createVirtualNode(
+        componentNode['identity'].low,
+        [Neo4jLabelEnum.VIRTUAL, Neo4jLabelEnum.STRUCTURE],
+        createStructureRelationDto,
         RelationName.LOCATED_IN,
       );
-      await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
-        componentNode.identity.low,
-        {},
-        virtualStructureNode.identity.low,
-        {},
-        RelationName.HAS_VIRTUAL_RELATION,
+
+      const structureKafkaObject = {
+        parentKey: createComponentDto.space,
+        referenceKey: componentNode.properties.key,
+        url: componentUrl,
+        relationName: RelationName.HAS,
+        virtualNodeLabels: [Neo4jLabelEnum.COMPONENT, Neo4jLabelEnum.VIRTUAL],
+      };
+
+      await this.kafkaService.producerSendMessage('createStructureRelation', JSON.stringify(structureKafkaObject));
+      const warrantyGuarantorPartsUrl = `${process.env.CONTACT_URL}/${createComponentDto.warrantyGuarantorParts}`;
+      const virtualwarrantyGuarantorPartsDto = {
+        referenceKey: createComponentDto.warrantyGuarantorParts,
+        url: warrantyGuarantorPartsUrl,
+      };
+
+      virtualNodeCreator.createVirtualNode(
+        typeNode['identity'].low,
+        [Neo4jLabelEnum.VIRTUAL, Neo4jLabelEnum.CONTACT],
+        virtualwarrantyGuarantorPartsDto,
+        RelationName.WARRANTY_GUARANTOR_PARTS,
+      );
+      const warrantyGuarantorPartsKafkaObject = {
+        parentKey: createComponentDto.warrantyGuarantorParts,
+        referenceKey: typeNode.properties.key,
+        url: warrantyGuarantorPartsUrl,
+        relationName: RelationName.WARRANTY_GUARANTOR_PARTS,
+        virtualNodeLabels: [Neo4jLabelEnum.TYPE, Neo4jLabelEnum.VIRTUAL],
+      };
+
+      await this.kafkaService.producerSendMessage(
+        'createContactRelation',
+        JSON.stringify(warrantyGuarantorPartsKafkaObject),
       );
 
-      const componentUrl = `${process.env.COMPONENT_URL}/${componentNode.properties.key}`;
-      const kafkaObject = {
-        referenceKey: componentNode.properties.key,
-        parentKey: createComponentDto.space,
-        url: componentUrl,
+      const warrantyGuarantorLaborUrl = `${process.env.CONTACT_URL}/${createComponentDto.warrantyGuarantorLabor}`;
+      const virtualwarrantyGuarantorLaborDto = {
+        referenceKey: createComponentDto.warrantyGuarantorLabor,
+        url: warrantyGuarantorLaborUrl,
       };
-      await this.kafkaService.producerSendMessage('createTypeContactRelation', JSON.stringify(kafkaObject));
+
+      virtualNodeCreator.createVirtualNode(
+        typeNode['identity'].low,
+        [Neo4jLabelEnum.VIRTUAL, Neo4jLabelEnum.CONTACT],
+        virtualwarrantyGuarantorLaborDto,
+        RelationName.WARRANTY_GUARANTOR_LABOR,
+      );
+      const warrantyGuarantorLaborKafkaObject = {
+        parentKey: createComponentDto.warrantyGuarantorLabor,
+        referenceKey: typeNode.properties.key,
+        url: warrantyGuarantorLaborUrl,
+        relationName: RelationName.WARRANTY_GUARANTOR_LABOR,
+        virtualNodeLabels: [Neo4jLabelEnum.TYPE, Neo4jLabelEnum.VIRTUAL],
+      };
+
+      await this.kafkaService.producerSendMessage(
+        'createContactRelation',
+        JSON.stringify(warrantyGuarantorLaborKafkaObject),
+      );
       return result;
     } catch (error) {
       const code = error.response?.code;

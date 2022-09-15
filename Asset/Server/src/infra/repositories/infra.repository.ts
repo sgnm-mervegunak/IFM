@@ -71,7 +71,6 @@ export class InfraRepository implements InfraInterface {
     await this.neo4jService.addParentRelationByIdAndFilters(typeNode.identity.low, {}, infraNode.identity.low, {});
     await this.neo4jService.addParentRelationByIdAndFilters(configNode.identity.low, {}, infraNode.identity.low, {});
 
-
     const languageConfigNode = await this.neo4jService.createNode(
       {
         canDelete: false,
@@ -85,7 +84,7 @@ export class InfraRepository implements InfraInterface {
       },
       ['Language_Config'],
     );
-   
+
     await this.neo4jService.addParentRelationByIdAndFilters(
       languageConfigNode.identity.low,
       {},
@@ -104,7 +103,6 @@ export class InfraRepository implements InfraInterface {
       [],
     );
 
-  
     const languageENNode = await this.neo4jService.createNode(
       {
         canDelete: true,
@@ -128,7 +126,6 @@ export class InfraRepository implements InfraInterface {
       {},
     );
 
-
     //-----AssetTypes------
     const assetTypesNode = await this.neo4jService.createNode(
       { canDelete: false, isDeleted: false, name: 'Types', realm: 'Signum' },
@@ -142,7 +139,7 @@ export class InfraRepository implements InfraInterface {
       {},
     );
 
-      const fixedAssetTypeNode = await this.neo4jService.createNode(
+    const fixedAssetTypeNode = await this.neo4jService.createNode(
       {
         canDelete: true,
         isDeleted: false,
@@ -174,7 +171,6 @@ export class InfraRepository implements InfraInterface {
       assetTypesNode.identity.low,
       {},
     );
-
 
     return infraNode;
   }

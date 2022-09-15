@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional, Max, Min } from 'class-validator';
+import { IsNumber, IsOptional, IsUUID, Max, Min } from 'class-validator';
 import {
   i18nValidationMessageEnum,
   IsEnumWithI18nMessage,
@@ -12,14 +12,9 @@ import { SpaceType } from 'src/common/const/space.type.enum';
 
 export class CreateComponentDto {
   @ApiProperty()
-  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
+  @IsOptional()
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
   name: string;
-
-  @ApiProperty()
-  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
-  @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
-  componentTypeName: string;
 
   @ApiProperty()
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
@@ -28,15 +23,21 @@ export class CreateComponentDto {
 
   @ApiProperty()
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
+  @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
+  createdBy: string;
+
+  @ApiProperty()
+  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
   @IsEnumWithI18nMessage(SpaceType, i18nValidationMessageEnum.IS_ENUM)
   spaceType: string;
 
   @ApiProperty()
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
-  parentId: number;
+  @IsUUID('4')
+  parentKey: string;
 
   @ApiProperty()
-  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
+  @IsOptional()
   @LengthWithI18nMessage(i18nValidationMessageEnum.LENGTH, 0, 256)
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
   description: string;
@@ -107,4 +108,12 @@ export class CreateComponentDto {
   @ApiProperty()
   @IsOptional()
   tag?: string[];
+
+  @ApiProperty()
+  @IsOptional()
+  documents: string;
+
+  @ApiProperty()
+  @IsOptional()
+  images: string;
 }

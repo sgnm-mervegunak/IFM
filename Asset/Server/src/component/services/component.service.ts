@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { RepositoryEnums } from 'src/common/const/repository.enum';
-import { GeciciInterface } from 'src/common/interface/gecici.interface';
+import { ComponentInterface } from 'src/common/interface/component.interface';
 import { CreateComponentDto } from '../dto/create.component.dto';
 import { UpdateComponentDto } from '../dto/update.component.dto';
 
@@ -8,14 +8,14 @@ import { UpdateComponentDto } from '../dto/update.component.dto';
 export class ComponentService {
   constructor(
     @Inject(RepositoryEnums.COMPONENTS)
-    private readonly componentRepository: GeciciInterface<any>,
+    private readonly componentRepository: ComponentInterface<any>,
   ) {}
   async create(createAssetDto: CreateComponentDto, header) {
     return await this.componentRepository.create(createAssetDto, header);
   }
 
-  findOne(header) {
-    return this.componentRepository.findRootByRealm(header);
+  findOne(key, header) {
+    return this.componentRepository.findRootByRealm(key, header);
   }
 
   update(id: string, updateAssetDto: UpdateComponentDto, header) {

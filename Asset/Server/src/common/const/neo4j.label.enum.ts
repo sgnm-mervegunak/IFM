@@ -8,6 +8,7 @@ export enum Neo4jLabelEnum {
   ASSET = 'Asset',
   TYPES = 'Types',
   COMPONENTS = 'Components',
+  COMPONENT = 'Component',
   TYPE = 'Type',
   ASSET_TYPES = 'Asset_Types',
   ASSET_TYPE = 'Asset_Type',

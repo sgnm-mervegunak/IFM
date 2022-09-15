@@ -5,7 +5,7 @@ import { IsNotEmptyWithI18nMessage } from 'ifmcommon';
 
 export class CreateTypesDto {
   @ApiProperty()
-  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
+  @IsOptional()
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
   name: string;
 
@@ -18,6 +18,11 @@ export class CreateTypesDto {
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
   category: string;
+
+  @ApiProperty()
+  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
+  @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
+  createdBy: string;
 
   @ApiProperty()
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
@@ -163,4 +168,12 @@ export class CreateTypesDto {
   @IsOptional()
   @LengthWithI18nMessage(i18nValidationMessageEnum.LENGTH, 0, 256)
   sustainabilityPerformance: string;
+
+  @ApiProperty()
+  @IsOptional()
+  documents: string;
+
+  @ApiProperty()
+  @IsOptional()
+  images: string;
 }

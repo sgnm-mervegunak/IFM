@@ -48,6 +48,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
     "csv-parser": "^3.0.0",
+    "exceljs": "^4.3.0",
     "ifmcommon": "^0.0.47",
     "joi": "^17.6.0",
     "kafkajs": "^1.16.0",
@@ -67,9 +68,10 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
-    "sgnm-neo4j": "^0.0.200",
+    "sgnm-neo4j": "^0.0.203",
     "swagger-ui-express": "^4.3.0",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "webpack": "5.74.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^8.0.0",
