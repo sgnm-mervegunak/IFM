@@ -28,7 +28,7 @@ export class TypesRepository implements GeciciInterface<Type> {
   ) {}
   async findByKey(key: string, header) {
     try {
-      const nodes = await this.neo4jService.findByLabelAndFilters(['Type'], { key });
+      const nodes = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.TYPE], { key });
       if (!nodes.length) {
         throw new AssetNotFoundException(key);
       }
@@ -238,33 +238,37 @@ export class TypesRepository implements GeciciInterface<Type> {
   }
 
   async update(_id: string, updateAssetDto: UpdateTypesDto, header) {
-    const updateAssetDtoWithoutLabelsAndParentId = {};
-    Object.keys(updateAssetDto).forEach((element) => {
-      if (element != 'labels' && element != 'parentId') {
-        updateAssetDtoWithoutLabelsAndParentId[element] = updateAssetDto[element];
-      }
-    });
-    const dynamicObject = createDynamicCyperObject(updateAssetDtoWithoutLabelsAndParentId);
-    const updatedNode = await this.neo4jService.updateByIdAndFilter(
-      +_id,
-      { isDeleted: false, isActive: true },
-      [],
-      dynamicObject,
-    );
+    // const virtualNodes = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+    //   [Neo4jLabelEnum.TYPE],
+    //   {
+    //     _id,
+    //   },
+    //   [],
+    //   { isDeleted: false },
+    //   RelationName.HAS_VIRTUAL_RELATION,
+    // );
+    // consol
 
-    if (!updatedNode) {
-      throw new FacilityStructureNotFountException(_id);
-    }
-    const result = {
-      id: updatedNode['identity'].low,
-      labels: updatedNode['labels'],
-      properties: updatedNode['properties'],
-    };
-    if (updateAssetDto['labels'] && updateAssetDto['labels'].length > 0) {
-      await this.neo4jService.removeLabel(_id, result['labels']);
-      await this.neo4jService.updateLabel(_id, updateAssetDto['labels']);
-    }
-    return result;
+    // const dynamicObject = createDynamicCyperObject(updateAssetDtoWithoutLabelsAndParentId);
+    // const updatedNode = await this.neo4jService.updateByIdAndFilter(
+    //   +_id,
+    //   { isDeleted: false, isActive: true },
+    //   [],
+    //   dynamicObject,
+    // );
+    // if (!updatedNode) {
+    //   throw new FacilityStructureNotFountException(_id);
+    // }
+    // const result = {
+    //   id: updatedNode['identity'].low,
+    //   labels: updatedNode['labels'],
+    //   properties: updatedNode['properties'],
+    // };
+    // if (updateAssetDto['labels'] && updateAssetDto['labels'].length > 0) {
+    //   await this.neo4jService.removeLabel(_id, result['labels']);
+    //   await this.neo4jService.updateLabel(_id, updateAssetDto['labels']);
+    // }
+    // return result;
   }
 
   async delete(_id: string, header) {

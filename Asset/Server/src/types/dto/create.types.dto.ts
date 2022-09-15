@@ -100,10 +100,6 @@ export class CreateTypesDto {
   modelReference: string;
 
   @ApiProperty()
-  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
-  parentId: number;
-
-  @ApiProperty()
   @IsOptional()
   @LengthWithI18nMessage(i18nValidationMessageEnum.LENGTH, 0, 256)
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
