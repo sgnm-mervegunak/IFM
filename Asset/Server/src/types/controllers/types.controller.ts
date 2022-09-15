@@ -26,8 +26,8 @@ export class TypesController {
   @Get('')
   @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
-  findOne(@Headers('realm') realm) {
-    return this.typesService.findOne(realm);
+  findOne(@Headers() header) {
+    return this.typesService.findOne(header);
   }
 
   @Patch(':id')
