@@ -12,6 +12,7 @@ import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.e
 import { has_children_error, node_not_found } from 'src/common/const/custom.error.object';
 import { RelationName } from 'src/common/const/relation.name.enum';
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
+import { ContactHasChildrenException } from 'src/common/badRequestExceptions/bad.request.exception';
 
 @Injectable()
 export class ContactRepository implements GeciciInterface<Contact> {
@@ -251,14 +252,28 @@ catch (error) {
 
   async delete(_id: string, realm: string, language: string) {
     try {
-      let deletedNode;
-      deletedNode = await this.neo4jService.updateByIdAndFilter(
+
+      const createdByChilds = await this.neo4jService.findChildrensByChildIdAndFilters(
+        [],
+        {"isDeleted": false},
+        +_id,
+        [],
+        {"isDeleted": false},
+        RelationName.CREATED_BY
+      )
+      if (createdByChilds && createdByChilds.length > 0)  {
+        throw new HttpException(has_children_error({email: createdByChilds[0]['_fields'][0]['properties'].email}),400);
+      } 
+      else {
+        let deletedNode;
+        deletedNode = await this.neo4jService.updateByIdAndFilter(
         +_id,
         {"isDeleted": false},
         [],
         {"isDeleted": true}
       )
       return deletedNode;
+      } 
     } 
     catch (error) {
       let code = error.response?.code;
@@ -269,12 +284,16 @@ catch (error) {
       }
       else if (code >= 5000 && code<=5999) {
         if (error.response?.code == CustomNeo4jError.NOT_FOUND) {
-          throw new  ContactNotFoundException(error.response?.id);
+          throw new  ContactNotFoundException(_id);
           
         }
       }
       else if (code >= 9000 && code<=9999) {
-        
+        if (error.response?.code == CustomTreeError.HAS_CHILDREN) {
+          console.log(error.response?.email)
+          throw new  ContactHasChildrenException(error.response?.params["email"]);
+          
+        } 
       }
       else {
         throw new HttpException("", 500);

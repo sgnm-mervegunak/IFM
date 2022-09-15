@@ -31,6 +31,7 @@
   "WRONG_CLASSIFICATION_PARENT": "{node1}, {node2} numaralı düğümün altına taşınamaz.",
   "FIND_WITH_CHILDREN_BY_REALM_AS_TREE_ERROR": "{realm} de {label} ağacı bulunamadı",
   "NULL_VALUE": "{val} boş geçilemez..",
-  "NOT_UNIQUE":"{val} zaten mevcut."
+  "NOT_UNIQUE":"{val} zaten mevcut.",
+  "CONTACT_HAS_CHILDREN_ERROR": "{email} başka kullanıcıların yaratıcısı olduğundan silinemez"
 
 }
