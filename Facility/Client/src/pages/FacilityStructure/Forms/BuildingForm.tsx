@@ -89,7 +89,7 @@ const BuildingForm = ({
     name: yup.string().required(t("This area is required.")).max(50, t("This area accepts max 50 characters.")),
     category: yup.string().required(t("This area is required.")),
     status: yup.string().required(t("This area is required.")),
-    projectDescription: yup.string().max(255,t("This area accepts max 255 characters.")),
+    projectDescription: yup.string().max(255, t("This area accepts max 255 characters.")),
     siteDescription: yup.string().max(255, t("This area accepts max 255 characters.")),
     phase: yup.string().max(255, t("This area accepts max 255 characters.")),
     projectName: yup.string().max(50, t("This area accepts max 50 characters.")),
@@ -307,9 +307,9 @@ const BuildingForm = ({
           });
         });
 
-        setAddDia(false);
-        setSelectedFacilityType(undefined);
-        setUploadFiles({});
+      setAddDia(false);
+      setSelectedFacilityType(undefined);
+      setUploadFiles({});
 
     } else {
       let updateNode: any = {};

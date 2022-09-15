@@ -57,8 +57,8 @@ export class ContactController {
     return this.contactService.changeNodeBranch(id, target_parent_id, realm, language);
   }
 
-  //@Unprotected()
-  @Roles({ roles: [UserRoles.ADMIN] })
+  @Unprotected()
+  //@Roles({ roles: [UserRoles.ADMIN] })
   @Get('/:key')
   @NoCache()
   findOneNode(@Param('key') key: string, @Headers() header) {
