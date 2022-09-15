@@ -12,7 +12,7 @@ import { SpaceType } from 'src/common/const/space.type.enum';
 
 export class CreateComponentDto {
   @ApiProperty()
-  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
+  @IsOptional()
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
   name: string;
 
@@ -108,4 +108,12 @@ export class CreateComponentDto {
   @ApiProperty()
   @IsOptional()
   tag?: string[];
+
+  @ApiProperty()
+  @IsOptional()
+  documents: string;
+
+  @ApiProperty()
+  @IsOptional()
+  images: string;
 }

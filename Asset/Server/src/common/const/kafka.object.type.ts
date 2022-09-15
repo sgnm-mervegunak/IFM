@@ -3,5 +3,5 @@ export type KafkaObject = {
   parentKey: string;
   url: string;
   relationName: string;
-  virtualNodeLabel: string;
+  virtualNodeLabel: string[];
 };

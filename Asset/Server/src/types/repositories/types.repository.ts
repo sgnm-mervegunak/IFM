@@ -15,17 +15,16 @@ import { CustomAssetError } from 'src/common/const/custom.error.enum';
 import { NodeNotFound, WrongIdProvided } from 'src/common/bad.request.exception';
 import { HttpService } from '@nestjs/axios';
 import { catchError, map, firstValueFrom } from 'rxjs';
-
 import { RelationName } from 'src/common/const/relation.name.enum';
-
 import { VirtualNodeCreator } from 'src/common/class/virtual.node.creator';
+import { HttpRequestHandler } from 'src/common/class/http.request.helper.class';
 
 @Injectable()
 export class TypesRepository implements GeciciInterface<Type> {
   constructor(
     private readonly neo4jService: Neo4jService,
     private readonly kafkaService: NestKafkaService,
-    private readonly httpService: HttpService,
+    private readonly httpService: HttpRequestHandler,
   ) {}
   async findByKey(key: string, header) {
     try {
@@ -76,7 +75,7 @@ export class TypesRepository implements GeciciInterface<Type> {
   }
   async create(createTypesDto: CreateTypesDto, header) {
     try {
-      const { realm, language, authorization } = header;
+      const { realm, authorization } = header;
       const rootNode = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.TYPES], {
         isDeleted: false,
         realm,
@@ -86,54 +85,36 @@ export class TypesRepository implements GeciciInterface<Type> {
       }
 
       //check if manufacturer exist
-      const manufacturerPromise = await this.httpService
-        .get(`${process.env.CONTACT_URL}/${createTypesDto.manufacturer}`, { headers: { authorization } })
-        .pipe(
-          catchError((error) => {
-            const { status, message } = error.response?.data;
-            throw new HttpException(other_microservice_errors(message), status);
-          }),
-        )
-        .pipe(map((response) => response.data));
-
-      const manufacturer = await firstValueFrom(manufacturerPromise);
-
-      //check if creater exist exist
-      await this.httpService
-        .get(`${process.env.CONTACT_URL}/${createTypesDto.createdBy}`, { headers: { authorization } })
-        .pipe(
-          catchError((error) => {
-            const { status, message } = error.response?.data;
-            throw new HttpException(other_microservice_errors(message), status);
-          }),
-        )
-        .pipe(map((response) => response.data));
-
-      //check if warrantyGuarantorParts exist exist
-      await this.httpService
-        .get(`${process.env.CONTACT_URL}/${createTypesDto.warrantyGuarantorParts}`, { headers: { authorization } })
-        .pipe(
-          catchError((error) => {
-            const { status, message } = error.response?.data;
-            throw new HttpException(other_microservice_errors(message), status);
-          }),
-        )
-        .pipe(map((response) => response.data));
-
-      //check if warrantyGuarantorParts exist exist
-      await this.httpService
-        .get(`${process.env.CONTACT_URL}/${createTypesDto.warrantyGuarantorLabor}`, { headers: { authorization } })
-        .pipe(
-          catchError((error) => {
-            const { status, message } = error.response?.data;
-            throw new HttpException(other_microservice_errors(message), status);
-          }),
-        )
-        .pipe(map((response) => response.data));
+      const manufacturer = await this.httpService.get(`${process.env.CONTACT_URL}/${createTypesDto.manufacturer}`, {
+        authorization,
+      });
 
       if (!createTypesDto.name || createTypesDto.name.trim() === '') {
         createTypesDto['name'] = manufacturer.properties.company + ' ' + createTypesDto.modelNo;
       }
+
+      const uniqnessCheck = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.TYPE], {
+        name: createTypesDto.name,
+      });
+
+      if (uniqnessCheck.length) {
+        throw new HttpException('name musb be uniq', 400);
+      }
+
+      //check if creater exist exist
+      await this.httpService.get(`${process.env.CONTACT_URL}/${createTypesDto.createdBy}`, {
+        authorization,
+      });
+
+      //check if warrantyGuarantorParts exist exist
+      await this.httpService.get(`${process.env.CONTACT_URL}/${createTypesDto.warrantyGuarantorParts}`, {
+        authorization,
+      });
+
+      //check if warrantyGuarantorLabor exist exist
+      await this.httpService.get(`${process.env.CONTACT_URL}/${createTypesDto.warrantyGuarantorLabor}`, {
+        authorization,
+      });
       const virtualNodeCreator = new VirtualNodeCreator(this.neo4jService);
       const type = new Type();
       const typeObject = assignDtoPropToEntity(type, createTypesDto);
@@ -149,6 +130,13 @@ export class TypesRepository implements GeciciInterface<Type> {
 
       const manufacturerContactUrl = `${process.env.CONTACT_URL}/${createTypesDto.manufacturer}`;
       const virtualManufacturerNodeDto = { referenceKey: createTypesDto.manufacturer, url: manufacturerContactUrl };
+
+      virtualNodeCreator.createVirtualNode(
+        typeNode['identity'].low,
+        [Neo4jLabelEnum.VIRTUAL, Neo4jLabelEnum.CONTACT],
+        virtualManufacturerNodeDto,
+        RelationName.MANUFACTURED_BY,
+      );
       const manufacturerKafkaObject = {
         parentKey: createTypesDto.manufacturer,
         referenceKey: typeNode.properties.key,
@@ -157,17 +145,17 @@ export class TypesRepository implements GeciciInterface<Type> {
         virtualNodeLabel: [Neo4jLabelEnum.TYPE, Neo4jLabelEnum.VIRTUAL],
       };
 
-      virtualNodeCreator.createVirtualNode(
-        typeNode['identity'].low,
-        [Neo4jLabelEnum.VIRTUAL, Neo4jLabelEnum.CONTACT],
-        virtualManufacturerNodeDto,
-        RelationName.MANUFACTURED_BY,
-      );
-
       await this.kafkaService.producerSendMessage('createContactRelation', JSON.stringify(manufacturerKafkaObject));
 
       const createContactUrl = `${process.env.CONTACT_URL}/${createTypesDto.createdBy}`;
       const virtualContactDto = { referenceKey: createTypesDto.manufacturer, url: createContactUrl };
+
+      virtualNodeCreator.createVirtualNode(
+        typeNode['identity'].low,
+        [Neo4jLabelEnum.VIRTUAL, Neo4jLabelEnum.CONTACT],
+        virtualContactDto,
+        RelationName.CREATED_BY,
+      );
       const createdByKafkaObject = {
         parentKey: createTypesDto.createdBy,
         referenceKey: typeNode.properties.key,
@@ -176,26 +164,12 @@ export class TypesRepository implements GeciciInterface<Type> {
         virtualNodeLabels: [Neo4jLabelEnum.TYPE, Neo4jLabelEnum.VIRTUAL],
       };
 
-      virtualNodeCreator.createVirtualNode(
-        typeNode['identity'].low,
-        [Neo4jLabelEnum.VIRTUAL, Neo4jLabelEnum.CONTACT],
-        virtualContactDto,
-        RelationName.CREATED_BY,
-      );
-
       await this.kafkaService.producerSendMessage('createContactRelation', JSON.stringify(createdByKafkaObject));
 
       const warrantyGuarantorPartsUrl = `${process.env.CONTACT_URL}/${createTypesDto.warrantyGuarantorParts}`;
       const virtualwarrantyGuarantorPartsDto = {
         referenceKey: createTypesDto.warrantyGuarantorParts,
         url: warrantyGuarantorPartsUrl,
-      };
-      const warrantyGuarantorPartsKafkaObject = {
-        parentKey: createTypesDto.warrantyGuarantorParts,
-        referenceKey: typeNode.properties.key,
-        url: warrantyGuarantorPartsUrl,
-        relationName: RelationName.WARRANTY_GUARANTOR_PARTS,
-        virtualNodeLabels: [Neo4jLabelEnum.TYPE, Neo4jLabelEnum.VIRTUAL],
       };
 
       virtualNodeCreator.createVirtualNode(
@@ -204,6 +178,13 @@ export class TypesRepository implements GeciciInterface<Type> {
         virtualwarrantyGuarantorPartsDto,
         RelationName.WARRANTY_GUARANTOR_PARTS,
       );
+      const warrantyGuarantorPartsKafkaObject = {
+        parentKey: createTypesDto.warrantyGuarantorParts,
+        referenceKey: typeNode.properties.key,
+        url: warrantyGuarantorPartsUrl,
+        relationName: RelationName.WARRANTY_GUARANTOR_PARTS,
+        virtualNodeLabels: [Neo4jLabelEnum.TYPE, Neo4jLabelEnum.VIRTUAL],
+      };
 
       await this.kafkaService.producerSendMessage(
         'createContactRelation',
@@ -215,6 +196,13 @@ export class TypesRepository implements GeciciInterface<Type> {
         referenceKey: createTypesDto.warrantyGuarantorLabor,
         url: warrantyGuarantorLaborUrl,
       };
+
+      virtualNodeCreator.createVirtualNode(
+        typeNode['identity'].low,
+        [Neo4jLabelEnum.VIRTUAL, Neo4jLabelEnum.CONTACT],
+        virtualwarrantyGuarantorLaborDto,
+        RelationName.WARRANTY_GUARANTOR_LABOR,
+      );
       const warrantyGuarantorLaborKafkaObject = {
         parentKey: createTypesDto.warrantyGuarantorLabor,
         referenceKey: typeNode.properties.key,
@@ -223,40 +211,11 @@ export class TypesRepository implements GeciciInterface<Type> {
         virtualNodeLabels: [Neo4jLabelEnum.TYPE, Neo4jLabelEnum.VIRTUAL],
       };
 
-      virtualNodeCreator.createVirtualNode(
-        typeNode['identity'].low,
-        [Neo4jLabelEnum.VIRTUAL, Neo4jLabelEnum.CONTACT],
-        virtualwarrantyGuarantorLaborDto,
-        RelationName.WARRANTY_GUARANTOR_LABOR,
-      );
-
       await this.kafkaService.producerSendMessage(
         'createContactRelation',
         JSON.stringify(warrantyGuarantorLaborKafkaObject),
       );
-      // let virtualNode = new VirtualNode();
-      // const createContactRelationDto = { referenceKey: createTypesDto.manufacturer };
-      // virtualNode = assignDtoPropToEntity(virtualNode, createContactRelationDto);
-      // virtualNode.url = manufacturerContactUrl;
-      // const virtualContactNode = await this.neo4jService.createNode(virtualNode, [
-      //   Neo4jLabelEnum.VIRTUAL,
-      //   Neo4jLabelEnum.CONTACT,
-      // ]);
 
-      // await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
-      //   typeNode.identity.low,
-      //   {},
-      //   virtualContactNode.identity.low,
-      //   {},
-      //   RelationName.MANUFACTURED_BY,
-      // );
-      // await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
-      //   typeNode.identity.low,
-      //   {},
-      //   virtualContactNode.identity.low,
-      //   {},
-      //   RelationName.HAS_VIRTUAL_RELATION,
-      // );
       return result;
     } catch (error) {
       const code = error.response?.code;

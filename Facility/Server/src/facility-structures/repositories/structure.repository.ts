@@ -37,7 +37,7 @@ import {
   WrongFacilityStructurePropsExceptions,
   WrongFacilityStructurePropsRulesExceptions,
 } from 'src/common/badRequestExceptions/bad.request.exception';
-import { has_children_error, node_not_found, null_value, wrong_parent_error } from 'src/common/const/custom.error.object';
+import { has_children_error, node_not_found, not_unique, null_value, wrong_parent_error } from 'src/common/const/custom.error.object';
 import { CustomTreeError } from 'src/common/const/custom.error.enum';
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
 import { BaseFacilitySpaceObject } from 'src/common/baseobject/base.facility.space.object';

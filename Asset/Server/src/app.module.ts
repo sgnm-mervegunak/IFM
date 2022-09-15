@@ -61,7 +61,7 @@ import { ExcelImportModule } from './excelImport/excelImport.module';
         port: configService.get('NEO4J_PORT'),
         scheme: configService.get('NEO4J_SCHEME'),
         username: configService.get('NEO4J_USERNAME'),
-        database: 'asset',
+        database: 'test',
       }),
     }),
 
@@ -79,7 +79,7 @@ import { ExcelImportModule } from './excelImport/excelImport.module';
     InfraModule,
     OrganizationModule,
     TypesModule,
-    ExcelImportModule
+    ExcelImportModule,
   ],
   providers: [
     //to cache all get request

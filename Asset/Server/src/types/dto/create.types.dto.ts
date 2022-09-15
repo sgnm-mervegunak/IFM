@@ -171,9 +171,9 @@ export class CreateTypesDto {
 
   @ApiProperty()
   @IsOptional()
-  documents: object[];
+  documents: string;
 
   @ApiProperty()
   @IsOptional()
-  images: object[];
+  images: string;
 }
