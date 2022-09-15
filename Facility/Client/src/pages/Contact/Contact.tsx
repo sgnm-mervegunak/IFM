@@ -188,45 +188,24 @@ const Contact = () => {
   const deleteItem = (key: string) => {
     ContactService.nodeInfo(key)
       .then((res) => {
-        if (res.data.properties.hasParent === false) {
-          ContactService.remove(res.data.id)
-            .then(() => {
-              toast.current.show({
-                severity: "success",
-                summary: t("Successful"),
-                detail: t("Contact Deleted"),
-                life: 2000,
-              });
-              navigate("/facilitystructure");
-            })
-            .catch((err) => {
-              toast.current.show({
-                severity: "error",
-                summary: t("Error"),
-                detail: err.response ? err.response.data.message : err.message,
-                life: 2000,
-              });
+        ContactService.remove(res.data.id)
+          .then(() => {
+            toast.current.show({
+              severity: "success",
+              summary: t("Successful"),
+              detail: t("Contact Deleted"),
+              life: 2000,
             });
-        } else {
-          ContactService.remove(res.data.id)
-            .then(() => {
-              toast.current.show({
-                severity: "success",
-                summary: t("Successful"),
-                detail: t("Contact Deleted"),
-                life: 2000,
-              });
-              getContact();
-            })
-            .catch((err) => {
-              toast.current.show({
-                severity: "error",
-                summary: t("Error"),
-                detail: err.response ? err.response.data.message : err.message,
-                life: 2000,
-              });
+            getContact();
+          })
+          .catch((err) => {
+            toast.current.show({
+              severity: "error",
+              summary: t("Error"),
+              detail: err.response ? err.response.data.message : err.message,
+              life: 2000,
             });
-        }
+          });
       })
       .catch((err) => {
         toast.current.show({
@@ -235,6 +214,7 @@ const Contact = () => {
           detail: err.response ? err.response.data.message : err.message,
           life: 2000,
         });
+        getContact();
       });
   };
 
