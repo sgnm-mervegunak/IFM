@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Headers } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Headers, Header } from '@nestjs/common';
 import { Roles, Unprotected } from 'nest-keycloak-connect';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { NoCache } from 'ifmcommon';
@@ -23,11 +23,11 @@ export class ComponentController {
     return this.componentService.create(createComponentDto, header);
   }
 
-  @Get('')
+  @Get('/type/:key')
   @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
-  findOne(@Headers('realm') realm) {
-    return this.componentService.findOne(realm);
+  findOne(@Param('key') key: string, @Headers() header) {
+    return this.componentService.findOne(key, header);
   }
 
   @Patch(':id')

@@ -15,11 +15,10 @@ export function wrong_parent_error() {
   };
 }
 
-export function node_not_found(params) {
+export function node_not_found() {
   return {
     message: 'Node not found',
     code: CustomAssetError.NODE_NOT_FOUND,
-    params: params,
   };
 }
 
