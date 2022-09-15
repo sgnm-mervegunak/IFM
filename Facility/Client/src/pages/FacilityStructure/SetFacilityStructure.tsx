@@ -6,7 +6,7 @@ import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Button } from "primereact/button";
 import { Toolbar } from "primereact/toolbar";
 import { Dropdown } from "primereact/dropdown";
-import { useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import FacilityStructureService from "../../services/facilitystructure";
@@ -99,10 +99,18 @@ const SetFacilityStructure = () => {
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
   const [generateNodeKey, setGenerateNodeKey] = useState("");
-  const [generateFormTypeKey, setGenerateFormTypeKey] = useState<string | undefined>("");
-  const [generateNodeName, setGenerateNodeName] = useState<string | undefined>("");
-  const [facilityType, setFacilityType] = useState<{name: string,code:string}[]>([]);
-  const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
+  const [generateFormTypeKey, setGenerateFormTypeKey] = useState<
+    string | undefined
+  >("");
+  const [generateNodeName, setGenerateNodeName] = useState<string | undefined>(
+    ""
+  );
+  const [facilityType, setFacilityType] = useState<
+    { name: string; code: string }[]
+  >([]);
+  const [selectedFacilityType, setSelectedFacilityType] = useState<
+    string | undefined
+  >("");
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const [display, setDisplay] = useState(false);
@@ -115,10 +123,12 @@ const SetFacilityStructure = () => {
   useEffect(() => {
     FacilityStructureService.getFacilityTypes("FacilityTypes")
       .then((res) => {
-        setFacilityType(res.data.map((item: any) => ({
-          name: t(item.name),
-          code:item.name
-        })));
+        setFacilityType(
+          res.data.map((item: any) => ({
+            name: t(item.name),
+            code: item.name,
+          }))
+        );
       })
       .catch((err) => {
         toast.current.show({
@@ -129,7 +139,7 @@ const SetFacilityStructure = () => {
         });
       });
     ClassificationsService.findAllActiveByLabel({
-      label: "FacilityDocTypes"
+      label: "FacilityDocTypes",
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodes(temp);
@@ -433,6 +443,7 @@ const SetFacilityStructure = () => {
           fixNodes(temp);
           setData(temp);
         }
+
         setLoading(false);
       })
       .catch((err) => {
@@ -604,7 +615,6 @@ const SetFacilityStructure = () => {
 
   return (
     <div className="container">
-  
       {(() => {
         if (canDelete === false) {
           return <ContextMenu model={menuRoot} ref={cm} />;
@@ -618,7 +628,7 @@ const SetFacilityStructure = () => {
           return <ContextMenu model={menu} ref={cm} />;
         }
       })()}
-      
+
       <ConfirmDialog
         visible={delDia}
         onHide={() => setDelDia(false)}
@@ -670,7 +680,12 @@ const SetFacilityStructure = () => {
           setExportDia(false);
         }}
       >
-        <Export submitted={submitted} setSubmitted={setSubmitted} setExportDia={setExportDia} exportType={ExportType.Space} />
+        <Export
+          submitted={submitted}
+          setSubmitted={setSubmitted}
+          setExportDia={setExportDia}
+          exportType={ExportType.Space}
+        />
       </Dialog>
 
       <Dialog
@@ -678,19 +693,30 @@ const SetFacilityStructure = () => {
         visible={addDia}
         style={{
           width: (() => {
-            if (selectedFacilityType === "Building" || selectedFacilityType === "Bina") {
+            if (
+              selectedFacilityType === "Building" ||
+              selectedFacilityType === "Bina"
+            ) {
               return "60vw";
-            } else if (selectedFacilityType === "Block" || selectedFacilityType === "Blok") {
+            } else if (
+              selectedFacilityType === "Block" ||
+              selectedFacilityType === "Blok"
+            ) {
               return "40vw";
-            } else if (selectedFacilityType === "Floor" || selectedFacilityType === "Kat") {
+            } else if (
+              selectedFacilityType === "Floor" ||
+              selectedFacilityType === "Kat"
+            ) {
               return "40vw";
-            } else if (selectedFacilityType === "Space" || selectedFacilityType === "Alan") {
+            } else if (
+              selectedFacilityType === "Space" ||
+              selectedFacilityType === "Alan"
+            ) {
               return "60vw";
             } else {
               return "40vw";
             }
-
-          })()
+          })(),
         }}
         footer={renderFooterAdd}
         onHide={() => {
@@ -709,7 +735,8 @@ const SetFacilityStructure = () => {
             style={{ width: "100%" }}
           />
         </div>
-        {selectedFacilityType === "Building" || selectedFacilityType === "Bina" ? (
+        {selectedFacilityType === "Building" ||
+        selectedFacilityType === "Bina" ? (
           <BuildingForm
             selectedFacilityType={selectedFacilityType}
             submitted={submitted}
@@ -816,16 +843,28 @@ const SetFacilityStructure = () => {
         visible={editDia}
         style={{
           width: (() => {
-            if (selectedFacilityType === "Building" || selectedFacilityType === "Bina") {
+            if (
+              selectedFacilityType === "Building" ||
+              selectedFacilityType === "Bina"
+            ) {
               return "60vw";
-            } else if (selectedFacilityType === "Block" || selectedFacilityType === "Blok") {
+            } else if (
+              selectedFacilityType === "Block" ||
+              selectedFacilityType === "Blok"
+            ) {
               return "40vw";
-            } else if (selectedFacilityType === "Floor" || selectedFacilityType === "Kat") {
+            } else if (
+              selectedFacilityType === "Floor" ||
+              selectedFacilityType === "Kat"
+            ) {
               return "40vw";
-            } else if (selectedFacilityType === "Space" || selectedFacilityType === "Alan") {
+            } else if (
+              selectedFacilityType === "Space" ||
+              selectedFacilityType === "Alan"
+            ) {
               return "60vw";
             }
-          })()
+          })(),
         }}
         footer={renderFooterEdit}
         onHide={() => {
@@ -844,7 +883,8 @@ const SetFacilityStructure = () => {
             style={{ width: "100%" }}
           />
         </div>
-        {selectedFacilityType === "Building" || selectedFacilityType === "Bina" ? (
+        {selectedFacilityType === "Building" ||
+        selectedFacilityType === "Bina" ? (
           <BuildingForm
             selectedFacilityType={selectedFacilityType}
             submitted={submitted}
@@ -977,7 +1017,8 @@ const SetFacilityStructure = () => {
         <BuildingFileImport
           selectedNodeKey={selectedNodeKey}
           setBuildingImportDia={setBuildingImportDia}
-          getFacilityStructure={getFacilityStructure} />
+          getFacilityStructure={getFacilityStructure}
+        />
       </Dialog>
       <Dialog
         header={t("Import Block")}
@@ -1002,7 +1043,8 @@ const SetFacilityStructure = () => {
         <FloorFileImport
           selectedNodeKey={selectedNodeKey}
           setFloorImportDia={setFloorImportDia}
-          getFacilityStructure={getFacilityStructure} />
+          getFacilityStructure={getFacilityStructure}
+        />
       </Dialog>
       <Dialog
         header={t("Import Space")}
@@ -1016,7 +1058,8 @@ const SetFacilityStructure = () => {
         <SpaceFileImport
           selectedNodeKey={selectedNodeKey}
           setSpaceImportDia={setSpaceImportDia}
-          getFacilityStructure={getFacilityStructure} />
+          getFacilityStructure={getFacilityStructure}
+        />
       </Dialog>
       <Dialog
         header={t("Structure Detail")}
@@ -1137,9 +1180,23 @@ const SetFacilityStructure = () => {
                         setSelectedNodeKey(data.key);
                         setDisplay(true);
                         setDisplayKey(data.key);
+                        
                       }}
                       title={t("View Data")}
                     />
+                    {process.env.REACT_APP_API_PLANNER_URL && data.nodeType === "Floor" &&
+                      <a
+                        href={process.env.REACT_APP_API_PLANNER_URL + "?key=" + data.key}
+                      >
+                        <Button
+                          icon="pi pi-map"
+                          className="p-button-rounded p-button-secondary p-button-text"
+                          aria-label="Go Plan"
+                          title={"Go Plan"}
+                        />
+                      </a>
+                    }
+
                     {/* <Button
                   icon="pi pi-book" className="p-button-rounded p-button-secondary p-button-text" aria-label="Edit Form"
                   // onClick={(e) => navigate(`/formgenerate/${data.key}?id=${data._id.low}`, 
