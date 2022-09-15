@@ -39,6 +39,6 @@ async function bootstrap() {
   app.useGlobalInterceptors(new LoggingInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter(i18NService, kafkaConf, MinioTopis.MINIO_EXCEPTIONS));
   await app.startAllMicroservices();
-  await app.listen(3004);
+  await app.listen(3013);
 }
 bootstrap();
