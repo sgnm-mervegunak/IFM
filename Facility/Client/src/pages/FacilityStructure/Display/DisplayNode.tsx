@@ -116,7 +116,7 @@ const DisplayNode = ({ displayKey, docTypes=[] }: Params) => {
                     <p>{status}</p>
                   </div>
                 );
-              } else if (typeof data[key] === "string" && key != "name") {
+              } else if ((typeof data[key] === "string" || "number") && key != "name" && key != "isActive" && key != "canDelete" && key != "canDisplay") {
                 const parsed = key.replace(/([A-Z])/g, " $1"); //parse key value
                 const title = parsed.charAt(0).toUpperCase() + parsed.slice(1); //toUpperCase
                 return (
