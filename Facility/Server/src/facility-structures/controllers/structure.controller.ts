@@ -18,12 +18,8 @@ export class StructureController {
     description: 'create  facility structure',
   })
   @Post(':parent_key')
-  create(
-    @Param('parent_key') key: string,
-    @Body() createFacilityStructureDto: object,
-    @Headers() header,
-  ) {
-    const {language, realm} = header;
+  create(@Param('parent_key') key: string, @Body() createFacilityStructureDto: object, @Headers() header) {
+    const { language, realm } = header;
     return this.facilityStructuresService.create(key, createFacilityStructureDto, realm, language);
   }
 
@@ -35,7 +31,7 @@ export class StructureController {
   //@Unprotected()
   @Roles({ roles: [UserRoles.ADMIN] })
   update(@Param('key') key: string, @Body() updateFacilityStructureDto: object, @Headers() header) {
-    const {language, realm} = header;
+    const { language, realm } = header;
     return this.facilityStructuresService.update(key, updateFacilityStructureDto, realm, language);
   }
 
@@ -44,21 +40,21 @@ export class StructureController {
   @Get('/:key')
   @NoCache()
   findOneNode(@Param('key') key: string, @Headers() header) {
-    const {language, realm} = header;
+    const { language, realm } = header;
     return this.facilityStructuresService.findOneNode(key, realm, language);
   }
 
   @Delete(':id')
   @Roles({ roles: [UserRoles.ADMIN] })
   remove(@Param('id') id: string, @Headers() header) {
-    const {language, realm} = header;
-    return this.facilityStructuresService.remove(id,realm, language);
+    const { language, realm } = header;
+    return this.facilityStructuresService.remove(id, realm, language);
   }
 
   @Unprotected()
   @Post('/relation/:id/:target_parent_id')
-  changeNodeBranch(@Param('id') id: string, @Param('target_parent_id') target_parent_id: string,  @Headers() header) {
-    const {language, realm} = header;
+  changeNodeBranch(@Param('id') id: string, @Param('target_parent_id') target_parent_id: string, @Headers() header) {
+    const { language, realm } = header;
     return this.facilityStructuresService.changeNodeBranch(id, target_parent_id, realm, language);
   }
 
@@ -67,7 +63,7 @@ export class StructureController {
   //@Unprotected()
   @NoCache()
   findOneFirstLevel(@Param('label') label: string, @Headers() header) {
-    const {language, realm} = header;
+    const { language, realm } = header;
     return this.facilityStructuresService.findOneFirstLevel(label, realm, language);
   }
 
@@ -75,11 +71,8 @@ export class StructureController {
   @Roles({ roles: [UserRoles.ADMIN] })
   //@Unprotected()
   @NoCache()
-  findChildrenByFacilityTypeNode(
-    @Param('typename') typename: string,
-    @Headers() header
-  ) {
-    const {language, realm} = header;
+  findChildrenByFacilityTypeNode(@Param('typename') typename: string, @Headers() header) {
+    const { language, realm } = header;
     return this.facilityStructuresService.findChildrenByFacilityTypeNode(typename, realm, language);
   }
 
@@ -87,7 +80,7 @@ export class StructureController {
   @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
   findOne(@Headers() header) {
-    const {language, realm} = header;
+    const { language, realm } = header;
     return this.facilityStructuresService.findOne(realm, language);
   }
 
@@ -96,7 +89,16 @@ export class StructureController {
   //@Unprotected()
   @NoCache()
   findStructureFirstLevelNodes(@Param('label') label: string, @Headers() header) {
-    const {language, realm} = header;
+    const { language, realm } = header;
     return this.facilityStructuresService.findStructureFirstLevelNodes(label, realm, language);
+  }
+
+  // @Unprotected()
+  @Patch('/addPlanToFloor/:key')
+  @Roles({ roles: [UserRoles.ADMIN] })
+  @NoCache()
+  addPlanToFloor(@Param('key') key: string, @Headers() header) {
+    const { language, realm } = header;
+    return this.facilityStructuresService.addPlanToFloor(key, realm, language);
   }
 }

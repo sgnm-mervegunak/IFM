@@ -17,7 +17,7 @@ import {
   dynamicFilterPropertiesAdder,
   dynamicNotLabelAdder,
   dynamicFilterPropertiesAdderAndAddParameterKey,
-  changeObjectKeyName
+  changeObjectKeyName,
 } from 'sgnm-neo4j/dist';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 import { RelationName } from 'src/common/const/relation.name.enum';
@@ -37,7 +37,13 @@ import {
   WrongFacilityStructurePropsExceptions,
   WrongFacilityStructurePropsRulesExceptions,
 } from 'src/common/badRequestExceptions/bad.request.exception';
-import { has_children_error, node_not_found, not_unique, null_value, wrong_parent_error } from 'src/common/const/custom.error.object';
+import {
+  has_children_error,
+  node_not_found,
+  not_unique,
+  null_value,
+  wrong_parent_error,
+} from 'src/common/const/custom.error.object';
 import { CustomTreeError } from 'src/common/const/custom.error.enum';
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
 import { BaseFacilitySpaceObject } from 'src/common/baseobject/base.facility.space.object';
@@ -65,12 +71,8 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
   async update(key: string, structureData: Object, realm: string, language: string) {
     //is there facility-structure node
-    const node = await this.neo4jService.findByLabelAndFilters(
-      [],
-      {"isDeleted": false, "key": key},
-      ["Virtual"]
-    )
-    const  structureRootNode = await this.neo4jService.findChildrensByLabelsAndFilters(
+    const node = await this.neo4jService.findByLabelAndFilters([], { isDeleted: false, key: key }, ['Virtual']);
+    const structureRootNode = await this.neo4jService.findChildrensByLabelsAndFilters(
       ['FacilityStructure'],
       { isDeleted: false },
       [],
@@ -81,57 +83,55 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       throw new HttpException({ message: 'You dont have permission' }, 403);
     }
 
+    //name property uniqueness  control
+    //  if (node[0]["_fields"][0].labels[0] == 'Building' || node[0]["_fields"][0].labels[0] == 'Block' || node[0]["_fields"][0].labels[0] == 'Floor') {
+    //   let building;
+    //    if (node[0]["_fields"][0].labels[0] == 'Building') {
+    //      building = node;
+    //    }
+    //    else {
+    //     building = await this.neo4jService.findChildrensByChildIdAndFilters(
+    //       ['Building'],
+    //       {'isDeleted': false},
+    //       node[0]["_fields"][0].identity.low,
+    //       [],
+    //       {'isDeleted': false},
+    //       RelationName.PARENT_OF
+    //      )
+    //     }
+    //     let sameNameNode = await this.neo4jService.findChildrensByIdAndFilters(
+    //       building[0]["_fields"][0].identity.low,
+    //       {'isDeleted': false},
+    //       [structureData['nodeType']],
+    //       {'isDeleted': false, 'name': structureData['name'] },
+    //       RelationName.PARENT_OF
+    //     )
+    //     if (sameNameNode && sameNameNode.length > 0) {
+    //       if (sameNameNode[0]["_fields"][1].properties.key !=  key) {
+    //         throw new HttpException(wrong_parent_error({node1: "1", node2: "1"}), 400);
+    //       }
 
+    //     }
+    //    }
 
-         //name property uniqueness  control
-        //  if (node[0]["_fields"][0].labels[0] == 'Building' || node[0]["_fields"][0].labels[0] == 'Block' || node[0]["_fields"][0].labels[0] == 'Floor') {
-        //   let building;
-        //    if (node[0]["_fields"][0].labels[0] == 'Building') {
-        //      building = node;
-        //    }
-        //    else {
-        //     building = await this.neo4jService.findChildrensByChildIdAndFilters(
-        //       ['Building'],
-        //       {'isDeleted': false},
-        //       node[0]["_fields"][0].identity.low,
-        //       [],
-        //       {'isDeleted': false},
-        //       RelationName.PARENT_OF
-        //      ) 
-        //     } 
-        //     let sameNameNode = await this.neo4jService.findChildrensByIdAndFilters(
-        //       building[0]["_fields"][0].identity.low,
-        //       {'isDeleted': false},
-        //       [structureData['nodeType']],
-        //       {'isDeleted': false, 'name': structureData['name'] },
-        //       RelationName.PARENT_OF
-        //     )
-        //     if (sameNameNode && sameNameNode.length > 0) {
-        //       if (sameNameNode[0]["_fields"][1].properties.key !=  key) {
-        //         throw new HttpException(wrong_parent_error({node1: "1", node2: "1"}), 400);
-        //       }
-              
-        //     }
-        //    }
-    
-        // else  {
-          
-        //   let sameNameNode = await this.neo4jService.findChildrensByIdAndFilters(
-        //     structureRootNode[0]["_fields"][0].identity.low,
-        //     {'isDeleted': false},
-        //     [structureData['nodeType']],
-        //     {'isDeleted': false, 'name': structureData['name'] },
-        //     RelationName.PARENT_OF
-        //   )
-        //   if (sameNameNode && sameNameNode.length > 0) {
-        //     throw new HttpException(wrong_parent_error({node1: "2", node2: "2"}), 400);
-        //   }
-        // }
+    // else  {
+
+    //   let sameNameNode = await this.neo4jService.findChildrensByIdAndFilters(
+    //     structureRootNode[0]["_fields"][0].identity.low,
+    //     {'isDeleted': false},
+    //     [structureData['nodeType']],
+    //     {'isDeleted': false, 'name': structureData['name'] },
+    //     RelationName.PARENT_OF
+    //   )
+    //   if (sameNameNode && sameNameNode.length > 0) {
+    //     throw new HttpException(wrong_parent_error({node1: "2", node2: "2"}), 400);
+    //   }
+    // }
 
     const properties = await this.findChildrenByFacilityTypeNode(
       structureData['nodeType'],
-      structureRootNode[0]["_fields"][0].properties.realm,
-      language
+      structureRootNode[0]['_fields'][0].properties.realm,
+      language,
     );
     let proper = {};
     Object.keys(properties).forEach((element) => {
@@ -156,8 +156,6 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       }
     });
 
- 
-
     //update facility structure node
     const updatedOn = moment().format('YYYY-MM-DD HH:mm:ss');
     structureData['updatedOn'] = updatedOn;
@@ -165,8 +163,10 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       if (element[1] === null || element[1] === undefined) {
         structureData[element[0]] = 0;
       }
-    }); 
+    });
     const dynamicObject = createDynamicCyperObject(structureData);
+    console.log(dynamicObject);
+
     //const updatedNode = await this.neo4jService.updateById(node[0]["_fields"][0].identity.low, dynamicObject);
     const updatedNode = await this.neo4jService.updateByIdAndFilter(
       node[0]['_fields'][0].identity.low,
@@ -186,21 +186,27 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       ['Classification'],
       { isDeleted: false, realm: structureRootNode[0]['_fields'][0].properties.realm },
       [],
-      {"isDeleted": false, "code": structureData["category"] }
-    )
+      { isDeleted: false, code: structureData['category'] },
+    );
 
-    if (categories[0]['_fields'][1]['properties'].code != structureData["category"]) {
-      for (let i=0; i<categories.length; i++) {
-         await this.neo4jService.deleteRelationByIdAndRelationNameWithoutFilters(
-              node[0]["_fields"][0].identity.low,
-              categories[i]['_fields'][1].identity.low,
-              RelationName.CLASSIFIED_BY,
-              RelationDirection.RIGHT       
-        )
+    if (categories[0]['_fields'][1]['properties'].code != structureData['category']) {
+      for (let i = 0; i < categories.length; i++) {
+        await this.neo4jService.deleteRelationByIdAndRelationNameWithoutFilters(
+          node[0]['_fields'][0].identity.low,
+          categories[i]['_fields'][1].identity.low,
+          RelationName.CLASSIFIED_BY,
+          RelationDirection.RIGHT,
+        );
       }
-      for (let i=0; i<newCategories.length; i++) {
-        await this.neo4jService.addRelationByIdAndRelationNameWithFilters(node[0]["_fields"][0].identity.low,{"isDeleted":false},
-        newCategories[i]['_fields'][1].identity.low, {"isDeleted":false}, RelationName.CLASSIFIED_BY, RelationDirection.RIGHT);
+      for (let i = 0; i < newCategories.length; i++) {
+        await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
+          node[0]['_fields'][0].identity.low,
+          { isDeleted: false },
+          newCategories[i]['_fields'][1].identity.low,
+          { isDeleted: false },
+          RelationName.CLASSIFIED_BY,
+          RelationDirection.RIGHT,
+        );
       }
     }
     const response = {
@@ -211,7 +217,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     return response;
   }
 
-   //REVISED FOR NEW NEO4J
+  //REVISED FOR NEW NEO4J
   async delete(_id: string, realm: string, language: string) {
     try {
       const node = await this.neo4jService.findByIdAndFilters(+_id, { isDeleted: false }, ['Virtual']);
@@ -423,26 +429,22 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
   //REVISED FOR NEW NEO4J
   async findOneNodeByKey(key: string, realm: string, language: string) {
     try {
-    let node = await this.neo4jService.findByLabelAndFilters(
-      [],
-      {"isDeleted":false, "key":key},
-      ["Virtual"]
-    ) 
-    if (!node || node.length == 0) {
-      throw new HttpException(node_not_found({node1:"", node2:""}),404);
-    }
-    const classNode =  await this.neo4jService.findChildrensByIdOneLevel(
-      node[0]["_fields"][0].identity.low,
-      {"isDeleted": false},
-      [],
-      {"isDeleted": false, "language": "EN"},
-      RelationName.CLASSIFIED_BY
-      )
-    node = node[0]["_fields"][0];
-    if (classNode && classNode.length) {
-      node["properties"]["category"] = classNode[0]["_fields"][1]['properties'].code;
-    }
-    
+      let node = await this.neo4jService.findByLabelAndFilters([], { isDeleted: false, key: key }, ['Virtual']);
+      if (!node || node.length == 0) {
+        throw new HttpException(node_not_found({ node1: '', node2: '' }), 404);
+      }
+      const classNode = await this.neo4jService.findChildrensByIdOneLevel(
+        node[0]['_fields'][0].identity.low,
+        { isDeleted: false },
+        [],
+        { isDeleted: false, language: 'EN' },
+        RelationName.CLASSIFIED_BY,
+      );
+      node = node[0]['_fields'][0];
+      if (classNode && classNode.length) {
+        node['properties']['category'] = classNode[0]['_fields'][1]['properties'].code;
+      }
+
       const result = {
         id: node['identity'].low,
         labels: node['labels'],
@@ -452,24 +454,18 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       return result;
     } catch (error) {
       let code = error.response?.code;
-        if (code >= 1000 && code<=1999) {
-          if (error.response?.code == CustomIfmCommonError.EXAMPLE1) {
-  
-          }
+      if (code >= 1000 && code <= 1999) {
+        if (error.response?.code == CustomIfmCommonError.EXAMPLE1) {
         }
-        else if (code >= 5000 && code<=5999) {
-         
+      } else if (code >= 5000 && code <= 5999) {
+      } else if (code >= 9000 && code <= 9999) {
+        if (error.response?.code == CustomTreeError.NODE_NOT_FOUND) {
+          throw new FacilityNodeNotFoundException();
         }
-        else if (code >= 9000 && code<=9999) {
-          if (error.response?.code == CustomTreeError.NODE_NOT_FOUND) {
-            throw new  FacilityNodeNotFoundException();
-          }
-        }
-        else {
-          throw new HttpException("", 500);
-        }
-   }
-
+      } else {
+        throw new HttpException('', 500);
+      }
+    }
   }
 
   //REVISED FOR NEW NEO4J
@@ -568,107 +564,101 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
 
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
   async create(key: string, structureData: Object, realm: string, language: string) {
-   try {
-    if (!structureData["category"] || structureData["category"] == null) {
-      if (structureData['nodeType'] != 'Block') {
-        throw new HttpException(null_value({"val": "category"}), 400);
-      }
-      
-    }
-    //is there facility-structure parent node
-    const node = await this.neo4jService.findByLabelAndFilters(
-      [],
-      {"isDeleted":false, "key": key},
-      ["Virtual"]
-    )
-    
-    //////////////////////////// Control of childnode type which will be added to parent node. /////////////////////////////////////////
-    let structureRootNode;
-    if (node[0]["_fields"][0].labels[0] === 'FacilityStructure') {
-      structureRootNode = node;
-    } else {
-      structureRootNode = await this.neo4jService.findChildrensByLabelsAndFilters(
-       ['FacilityStructure'],
-       {'isDeleted': false},
-       [],
-       {'isDeleted': false, 'key': node[0]["_fields"][0].properties.key}
-     ); 
-    }
-    //!!!!!!!!!!!!
-    //check if rootNode realm equal to keyclock token realm
-     if (structureRootNode[0]["_fields"][0].properties.realm !== realm) {
-       throw new HttpException({ message: 'You dont have permission' }, 403);
-     }
-    ///////////////////////////// parent - child node type relation control ////////////////////////////
- 
-    const allowedStructureTypeNode = await this.findChildrensByLabelsOneLevel(
-      ['FacilityTypes_'+language],
-      {"isDeleted": false, "realm": structureRootNode[0]['_fields'][0].properties.realm},
-      [],
-      {"isDeleted": false,"name": node[0]["_fields"][0].labels[0]}
-    );
-    
-    const allowedStructures = await this.neo4jService.findChildrensByLabelsOneLevel(
-      [],
-      {"isDeleted": false, "key":allowedStructureTypeNode[0]['_fields'][1].properties.key},
-      ['AllowedStructure'],
-      {"isDeleted": false}
-    )
-    
-    const isExist = allowedStructures.filter((allowedStructure) => {
-      if (allowedStructure['_fields'][1].properties.name === structureData['nodeType']) {
-        return allowedStructure;
-      }
-    });
-    if (!isExist.length) {
-      throw new HttpException(wrong_parent_error({node1: structureData['nodeType'], 
-                                                      node2: node[0]["_fields"][0].labels[0]}), 400);
-      }
-
-     //name property uniqueness  control
-    if (node[0]["_fields"][0].labels[0] == 'Building' || node[0]["_fields"][0].labels[0] == 'Block' || node[0]["_fields"][0].labels[0] == 'Floor') {
-      let building;
-       if (node[0]["_fields"][0].labels[0] == 'Building') {
-         building = node;
-       }
-       else {
-        building = await this.neo4jService.findChildrensByChildIdAndFilters(
-          ['Building'],
-          {'isDeleted': false},
-          node[0]["_fields"][0].identity.low,
-          [],
-          {'isDeleted': false},
-          RelationName.PARENT_OF
-         ) 
-        } 
-        let sameNameNode = await this.neo4jService.findChildrensByIdAndFilters(
-          building[0]["_fields"][0].identity.low,
-          {'isDeleted': false},
-          [structureData['nodeType']],
-          {'isDeleted': false, 'name': structureData['name'] },
-          RelationName.PARENT_OF
-        )
-        if (sameNameNode && sameNameNode.length > 0) {
-          throw new HttpException(not_unique({val: structureData['name']}), 400);
+    try {
+      if (!structureData['category'] || structureData['category'] == null) {
+        if (structureData['nodeType'] != 'Block') {
+          throw new HttpException(null_value({ val: 'category' }), 400);
         }
-       }
-
-    else  {
-      
-      let sameNameNode = await this.neo4jService.findChildrensByIdAndFilters(
-        structureRootNode[0]["_fields"][0].identity.low,
-        {'isDeleted': false},
-        [structureData['nodeType']],
-        {'isDeleted': false, 'name': structureData['name'] },
-        RelationName.PARENT_OF
-      )
-      if (sameNameNode && sameNameNode.length > 0) {
-        throw new HttpException(wrong_parent_error({node1: "2", node2: "2"}), 400);
       }
-    }
-    
+      //is there facility-structure parent node
+      const node = await this.neo4jService.findByLabelAndFilters([], { isDeleted: false, key: key }, ['Virtual']);
 
-   
+      //////////////////////////// Control of childnode type which will be added to parent node. /////////////////////////////////////////
+      let structureRootNode;
+      if (node[0]['_fields'][0].labels[0] === 'FacilityStructure') {
+        structureRootNode = node;
+      } else {
+        structureRootNode = await this.neo4jService.findChildrensByLabelsAndFilters(
+          ['FacilityStructure'],
+          { isDeleted: false },
+          [],
+          { isDeleted: false, key: node[0]['_fields'][0].properties.key },
+        );
+      }
+      //!!!!!!!!!!!!
+      //check if rootNode realm equal to keyclock token realm
+      if (structureRootNode[0]['_fields'][0].properties.realm !== realm) {
+        throw new HttpException({ message: 'You dont have permission' }, 403);
+      }
+      ///////////////////////////// parent - child node type relation control ////////////////////////////
+
+      const allowedStructureTypeNode = await this.findChildrensByLabelsOneLevel(
+        ['FacilityTypes_' + language],
+        { isDeleted: false, realm: structureRootNode[0]['_fields'][0].properties.realm },
+        [],
+        { isDeleted: false, name: node[0]['_fields'][0].labels[0] },
+      );
+
+      const allowedStructures = await this.neo4jService.findChildrensByLabelsOneLevel(
+        [],
+        { isDeleted: false, key: allowedStructureTypeNode[0]['_fields'][1].properties.key },
+        ['AllowedStructure'],
+        { isDeleted: false },
+      );
+
+      const isExist = allowedStructures.filter((allowedStructure) => {
+        if (allowedStructure['_fields'][1].properties.name === structureData['nodeType']) {
+          return allowedStructure;
+        }
+      });
+      if (!isExist.length) {
+        throw new HttpException(
+          wrong_parent_error({ node1: structureData['nodeType'], node2: node[0]['_fields'][0].labels[0] }),
+          400,
+        );
+      }
+
+      //name property uniqueness  control
+      if (
+        node[0]['_fields'][0].labels[0] == 'Building' ||
+        node[0]['_fields'][0].labels[0] == 'Block' ||
+        node[0]['_fields'][0].labels[0] == 'Floor'
+      ) {
+        let building;
+        if (node[0]['_fields'][0].labels[0] == 'Building') {
+          building = node;
+        } else {
+          building = await this.neo4jService.findChildrensByChildIdAndFilters(
+            ['Building'],
+            { isDeleted: false },
+            node[0]['_fields'][0].identity.low,
+            [],
+            { isDeleted: false },
+            RelationName.PARENT_OF,
+          );
+        }
+        let sameNameNode = await this.neo4jService.findChildrensByIdAndFilters(
+          building[0]['_fields'][0].identity.low,
+          { isDeleted: false },
+          [structureData['nodeType']],
+          { isDeleted: false, name: structureData['name'] },
+          RelationName.PARENT_OF,
+        );
+        if (sameNameNode && sameNameNode.length > 0) {
+          throw new HttpException(not_unique({ val: structureData['name'] }), 400);
+        }
+      } else {
+        let sameNameNode = await this.neo4jService.findChildrensByIdAndFilters(
+          structureRootNode[0]['_fields'][0].identity.low,
+          { isDeleted: false },
+          [structureData['nodeType']],
+          { isDeleted: false, name: structureData['name'] },
+          RelationName.PARENT_OF,
+        );
+        if (sameNameNode && sameNameNode.length > 0) {
+          throw new HttpException(wrong_parent_error({ node1: '2', node2: '2' }), 400);
+        }
+      }
 
       ////////////////////////////// Control of input properties with facility type properties //////////////////////////////////////////////////
       const properties = await this.findChildrenByFacilityTypeNode(
@@ -712,26 +702,25 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
         }
       });
 
-    let baseFacilityObject;
-    if (structureData['nodeType'] === 'Space') {
-       baseFacilityObject = new BaseFacilitySpaceObject();
-    }
-    else {
-      baseFacilityObject = new BaseFacilityObject();
-    }
-    
-    baseFacilityObject = assignDtoPropToEntity(baseFacilityObject, structureData);
-    let createdBy=baseFacilityObject["createdBy"];
-    delete baseFacilityObject["createdBy"];
-    delete baseFacilityObject['category'];
-    
-    const createNode = await this.neo4jService.createNode(baseFacilityObject, [structureData['nodeType']]);
-    const contactNode = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-      ['Contact'],
-      {"isDeleted": false, "realm": realm},
-      [],
-      {"isDeleted": false, "email":  createdBy},
-      "PARENT_OF"
+      let baseFacilityObject;
+      if (structureData['nodeType'] === 'Space') {
+        baseFacilityObject = new BaseFacilitySpaceObject();
+      } else {
+        baseFacilityObject = new BaseFacilityObject();
+      }
+
+      baseFacilityObject = assignDtoPropToEntity(baseFacilityObject, structureData);
+      let createdBy = baseFacilityObject['createdBy'];
+      delete baseFacilityObject['createdBy'];
+      delete baseFacilityObject['category'];
+
+      const createNode = await this.neo4jService.createNode(baseFacilityObject, [structureData['nodeType']]);
+      const contactNode = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+        ['Contact'],
+        { isDeleted: false, realm: realm },
+        [],
+        { isDeleted: false, email: createdBy },
+        'PARENT_OF',
       );
       if (contactNode && contactNode.length && contactNode.length == 1) {
         await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
@@ -761,7 +750,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
         if (structureData['nodeType'] == 'Space') {
           classificationRootNone = 'OmniClass13';
         }
-        
+
         languages.map(async (record) => {
           let lang = record['_fields'][1].properties.name;
 
@@ -826,29 +815,27 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       return response;
     } catch (error) {
       let code = error.response?.code;
-        if (code >= 1000 && code<=1999) {
-          if (error.response?.code == CustomIfmCommonError.EXAMPLE1) {
-  
-          }
+      if (code >= 1000 && code <= 1999) {
+        if (error.response?.code == CustomIfmCommonError.EXAMPLE1) {
         }
-        else if (code >= 5000 && code<=5999) {
-          
+      } else if (code >= 5000 && code <= 5999) {
+      } else if (code >= 9000 && code <= 9999) {
+        if (error.response?.code == CustomTreeError.WRONG_PARENT) {
+          throw new WrongClassificationParentExceptions(
+            error.response?.params['node1'],
+            error.response?.params['node2'],
+          );
         }
-        else if (code >= 9000 && code<=9999) {
-          if (error.response?.code == CustomTreeError.WRONG_PARENT) {
-            throw new  WrongClassificationParentExceptions(error.response?.params['node1'],error.response?.params['node2'])
-          }
-          if (error.response?.code == CustomTreeError.NULL_VALUE) {
-            throw new  ValueNotNullException(error.response?.params['val'])
-          }
+        if (error.response?.code == CustomTreeError.NULL_VALUE) {
+          throw new ValueNotNullException(error.response?.params['val']);
         }
-        else {
-          throw new HttpException("", 500);
-        }
-   } 
+      } else {
+        throw new HttpException('', 500);
+      }
+    }
   }
 
- //REVISED FOR NEW NEO4J
+  //REVISED FOR NEW NEO4J
   async findStructureFirstLevelNodes(label: string, realm: string, language: string) {
     try {
       let node = await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructureOneLevel(
@@ -881,5 +868,39 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
         throw new HttpException('', 500);
       }
     }
+  }
+
+  async addPlanToFloor(key: string, realm: string, language: string) {
+    //is there facility-structure node
+    const node = await this.neo4jService.findByLabelAndFilters([], { isDeleted: false, key: key }, ['Virtual']);
+    const structureRootNode = await this.neo4jService.findChildrensByLabelsAndFilters(
+      ['FacilityStructure'],
+      { isDeleted: false },
+      [],
+      { isDeleted: false, key: node[0]['_fields'][0].properties.key },
+    );
+
+    //check if rootNode realm equal to keyclock token realm
+    if (structureRootNode[0]['_fields'][0].properties.realm !== realm) {
+      throw new HttpException({ message: 'You dont have permission' }, 403);
+    }
+
+    if (node[0]['_fields'][0].properties.nodeType !== 'Floor') {
+      throw new HttpException({ message: 'You can add plan only to floor' }, 403);
+    }
+
+    node[0]['_fields'][0].properties.hasPlan = true;
+    const updatedNode = await this.neo4jService.updateByIdAndFilter(
+      node[0]['_fields'][0].identity.low,
+      { isDeleted: false },
+      [],
+      node[0]['_fields'][0].properties,
+    );
+    const response = {
+      id: updatedNode['identity'].low,
+      labels: updatedNode['labels'],
+      properties: updatedNode['properties'],
+    };
+    return response;
   }
 }
