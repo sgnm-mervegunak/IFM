@@ -4,5 +4,6 @@ export enum CustomTreeError {
   HAS_CHILDREN = 9000,
   WRONG_PARENT = 9001,
   NODE_NOT_FOUND = 9002,
-  NULL_VALUE = 9003
+  NULL_VALUE = 9003,
+  NOT_UNIQUE = 9004
 }

@@ -274,7 +274,7 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
  }
 
 
- async addBuildingwithCobie( file: Express.Multer.File,header:MainHeaderInterface){
+ async addBuildingWithCobie( file: Express.Multer.File,header:MainHeaderInterface){
    
     let email:string;
     const {realm}= header;
@@ -508,7 +508,7 @@ await workbook.xlsx.load(buffer).then(function async(book) {
   MATCH (p {email:"${email}"})\
   ${createdCypher} \
   MERGE (zz:Zone {name:"${data[i][1]}",createdOn:"${data[i][3]}",externalSystem:"${data[i][6]}", externalObject:"${data[i][7]}", externalIdentifier:"${data[i][8]}", description:"${data[i][9]}", tag:[],\
-  nodeKeys:[], nodeType:"Zone",images:[],documents:[], key:"${this.keyGenerate()}", canDisplay:true, isActive:true, isDeleted:false, canDelete:true})\
+  nodeKeys:[], nodeType:"Zone",images:[],documents:[],spaceNames:"${data[i][5]}", key:"${this.keyGenerate()}", canDisplay:true, isActive:true, isDeleted:false, canDelete:true})\
   MERGE (z)-[:PARENT_OF]->(zz)  \
   MERGE (c)-[:MERGEDZN]->(zz)  \
   ${createdRelationCypher} \
@@ -521,6 +521,120 @@ await workbook.xlsx.load(buffer).then(function async(book) {
 
  }
 
+ async addContacts( file: Express.Multer.File,header:MainHeaderInterface)  {
+  
+  
+  let email:string;
+  let createdByEmail:string;
+  const {realm}= header;
+
+
+    let data=[]
+    let categoryColumn=[];
+    let values:[string];
+    let buffer = new Uint8Array(file.buffer);
+    const workbook = new exceljs.Workbook();
+  
+  
+  await workbook.xlsx.load(buffer).then(function async(book) {
+      const firstSheet =  book.getWorksheet(2);
+      firstSheet.eachRow({ includeEmpty: false }, function(row) {
+        data.push(row.values);
+      });
+  
+      values= firstSheet.getColumn(4).values;
+      
+   })
+  
+  
+   for (let index = 2; index < values.length; index++) {
+       
+    const element = values[index].split(new RegExp(/\s{3,}|:\s{1,}/g));
+   
+    categoryColumn.push(element);
+  }
+    for(let i=0;i<categoryColumn.length;i++){
+  
+      categoryColumn[i][0]=categoryColumn[i][0].replace(/ /g, '-')
+    }
+  
+  
+  
+  let long=12
+  
+  for (let index = 0; index < categoryColumn.length; index++) {
+    categoryColumn[index][0] = categoryColumn[index][0].replaceAll('-', '');
+  }
+  //
+  for (let index = 0; index < categoryColumn.length; index++) {
+    if (categoryColumn[index][0].length == 4) {
+      categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
+      for (let i = 0; i < (long - 4) / 2; i++) {
+        categoryColumn[index][0].push(['00']);
+      }
+      categoryColumn[index][0] = categoryColumn[index][0].join('-');
+    } else if (categoryColumn[index][0].length == 6) {
+      categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
+      for (let i = 0; i < (long - 6) / 2; i++) {
+        categoryColumn[index][0].push(['00']);
+      }
+      categoryColumn[index][0] = categoryColumn[index][0].join('-');
+    } else if (categoryColumn[index][0].length == 8) {
+      categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
+      for (let i = 0; i < (long - 8) / 2; i++) {
+        categoryColumn[index][0].push(['00']);
+      }
+      categoryColumn[index][0] = categoryColumn[index][0].join('-');
+    } else if (categoryColumn[index][0].length == 10) {
+      categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
+      for (let i = 0; i < (long - 10) / 2; i++) {
+        categoryColumn[index][0].push(['00']);
+      }
+      categoryColumn[index][0] = categoryColumn[index][0].join('-');
+    } 
+    else if (categoryColumn[index][0].length == 12) {
+      categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
+      for (let i = 0; i < (long - 12) / 2; i++) {
+        categoryColumn[index][0].push(['00']);
+      }
+      categoryColumn[index][0] = categoryColumn[index][0].join('-');
+    } 
+  }
+  
+  for (let i = 1; i < data.length; i++) {
+  
+    let {createdCypher,createdRelationCypher} =await this.createCypherForClassification(realm,'OmniClass34',categoryColumn[i-1][0],"p")
+
+    if(typeof data[i][1]=='object'){
+      email=await data[i][1].text;
+    }else {
+      email= await data[i][1];
+    }
+
+    if(typeof data[i][2]=='object'){
+      createdByEmail=await data[i][2].text;
+    }else {
+      createdByEmail= await data[i][2];
+    }
+  
+  
+    let cypher=`MATCH (c:Contact {realm:"${realm}"}) ${createdCypher} \
+    MERGE (p {email:"${email}",createdOn:"${data[i][3]}",company:"${data[i][5]}", phone:"${data[i][6]}",externalSystem:"${data[i][7]}",externalObject:"${data[i][8]}",externalIdentifier:"${data[i][9]}",department:"${data[i][10]}",organizationCode:"${data[i][11]}", \
+    givenName:"${data[i][12]}",familyName:"${data[i][13]}",street:"${data[i][14]}",postalBox:"${data[i][15]}",town:"${data[i][16]}",stateRegion:"${data[i][17]}",postalCode:"${data[i][18]}",country:"${data[i][19]}",canDisplay:true,isDeleted:false,isActive:true,className:"Contact",key:"${this.keyGenerate()}",canDelete:true} )\
+    MERGE (c)-[:PARENT_OF]->(p)  ${createdRelationCypher}`
+    let data2 =await this.neo4jService.write(cypher);
+  console.log(data2)
+  }
+
+  let cypher2 = `MATCH (p {email:"${email}"}) MATCH (p2 {email:"${createdByEmail}"}) MERGE (p)-[:CREATED_BY]->(p2)`
+  let data3 =await this.neo4jService.write(cypher2);
+  console.log(data3)
+  };
+
+
+  async addTypesWithCobie(file: Express.Multer.File,header:MainHeaderInterface){}
+  async addComponentsWithCobie(file: Express.Multer.File,header:MainHeaderInterface){}
+  async addSystemWithCobie(file: Express.Multer.File,header:MainHeaderInterface){}
 
   ////common functions for this page
 

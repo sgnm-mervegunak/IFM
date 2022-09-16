@@ -64,8 +64,8 @@ export class ExcelImportExportController {
     summary: 'Upload a single excel file',
   })
   @ApiConsumes('multipart/form-data')
-  async addBuildingwithCobie(@UploadedFile() file: Express.Multer.File, @Headers() header){
-    return this.excelImportExport.addBuildingwithCobie(file,header);
+  async addBuildingWithCobie(@UploadedFile() file: Express.Multer.File, @Headers() header){
+    return this.excelImportExport.addBuildingWithCobie(file,header);
   }
 
   // @Unprotected()
@@ -140,4 +140,100 @@ export class ExcelImportExportController {
   async addZonesToBuilding(@UploadedFile() file: Express.Multer.File,@Headers() header,@Param('buildingKey') buildingKey: string){
     return this.excelImportExport.addZonesToBuilding(file,header,buildingKey);
   }
+
+  @Unprotected()
+  //@Roles({ roles: [UserRoles.ADMIN] })
+  @Post('addContacts')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        }
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({
+    summary: 'Upload a single excel file',
+  })
+  @ApiConsumes('multipart/form-data')
+  async addContacts(@UploadedFile() file: Express.Multer.File, @Headers() header){
+    return this.excelImportExport.addContacts(file,header);
+  }
+
+  @Unprotected()
+  //@Roles({ roles: [UserRoles.ADMIN] })
+  @Post('addTypesWithCobie')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        }
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({
+    summary: 'Upload a single excel file',
+  })
+  @ApiConsumes('multipart/form-data')
+  async addTypesWithCobie(@UploadedFile() file: Express.Multer.File, @Headers() header){
+    return this.excelImportExport.addTypesWithCobie(file,header);
+  }
+
+  @Unprotected()
+  //@Roles({ roles: [UserRoles.ADMIN] })
+  @Post('addComponentsWithCobie')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        }
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({
+    summary: 'Upload a single excel file',
+  })
+  @ApiConsumes('multipart/form-data')
+  async addComponentsWithCobie(@UploadedFile() file: Express.Multer.File, @Headers() header){
+    return this.excelImportExport.addComponentsWithCobie(file,header);
+  }
+
+
+  @Unprotected()
+  //@Roles({ roles: [UserRoles.ADMIN] })
+  @Post('addSystemWithCobie')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        }
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({
+    summary: 'Upload a single excel file',
+  })
+  @ApiConsumes('multipart/form-data')
+  async addSystemWithCobie(@UploadedFile() file: Express.Multer.File, @Headers() header){
+    return this.excelImportExport.addSystemWithCobie(file,header);
+  }
+
+
+
 }

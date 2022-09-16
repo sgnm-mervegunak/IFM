@@ -5,6 +5,7 @@ import { ComponentListenerController } from './controllers/component.listener';
 import { ComponentController } from './controllers/component.controller';
 import { ComponentRepository } from './repositories/component.repository';
 import { ComponentService } from './services/component.service';
+import { HttpRequestHandler } from 'src/common/class/http.request.helper.class';
 
 @Module({
   imports: [HttpModule],
@@ -14,6 +15,10 @@ import { ComponentService } from './services/component.service';
     {
       provide: RepositoryEnums.COMPONENTS,
       useClass: ComponentRepository,
+    },
+    {
+      provide: HttpRequestHandler,
+      useClass: HttpRequestHandler,
     },
   ],
   exports: [ComponentService],

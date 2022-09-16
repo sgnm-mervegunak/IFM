@@ -761,68 +761,68 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       ['FacilityType'],
     );
 
-    const facilityTypesNodeTR1 = await this.neo4jService.createNode(
-      {
-        canDelete: true,
-        isDeleted: false,
-        name: 'Bina',
-        isActive: true,
-        canDisplay: true,
-      },
-      ['FacilityType'],
-    );
-    const facilityTypesNodeTR2 = await this.neo4jService.createNode(
-      {
-        canDelete: true,
-        isDeleted: false,
-        name: 'Kat',
-        isActive: true,
-        canDisplay: true,
-      },
-      ['FacilityType'],
-    );
-    const facilityTypesNodeTR3 = await this.neo4jService.createNode(
-      {
-        canDelete: true,
-        isDeleted: false,
-        name: 'Blok',
-        isActive: true,
-        canDisplay: true,
-      },
-      ['FacilityType'],
-    );
-    const facilityTypesNodeTR4 = await this.neo4jService.createNode(
-      {
-        canDelete: true,
-        isDeleted: false,
-        name: 'Tesis Yapısı',
-        isActive: true,
-        canDisplay: false,
-      },
-      ['FacilityType'],
-    );
-    const facilityTypesNodeTR5 = await this.neo4jService.createNode(
-      {
-        canDelete: true,
-        isDeleted: false,
-        isBlocked: false,
-        name: 'Alan',
-        isActive: true,
-        canDisplay: true,
-      },
-      ['FacilityType'],
-    );
+    // const facilityTypesNodeTR1 = await this.neo4jService.createNode(
+    //   {
+    //     canDelete: true,
+    //     isDeleted: false,
+    //     name: 'Bina',
+    //     isActive: true,
+    //     canDisplay: true,
+    //   },
+    //   ['FacilityType'],
+    // );
+    // const facilityTypesNodeTR2 = await this.neo4jService.createNode(
+    //   {
+    //     canDelete: true,
+    //     isDeleted: false,
+    //     name: 'Kat',
+    //     isActive: true,
+    //     canDisplay: true,
+    //   },
+    //   ['FacilityType'],
+    // );
+    // const facilityTypesNodeTR3 = await this.neo4jService.createNode(
+    //   {
+    //     canDelete: true,
+    //     isDeleted: false,
+    //     name: 'Blok',
+    //     isActive: true,
+    //     canDisplay: true,
+    //   },
+    //   ['FacilityType'],
+    // );
+    // const facilityTypesNodeTR4 = await this.neo4jService.createNode(
+    //   {
+    //     canDelete: true,
+    //     isDeleted: false,
+    //     name: 'Tesis Yapısı',
+    //     isActive: true,
+    //     canDisplay: false,
+    //   },
+    //   ['FacilityType'],
+    // );
+    // const facilityTypesNodeTR5 = await this.neo4jService.createNode(
+    //   {
+    //     canDelete: true,
+    //     isDeleted: false,
+    //     isBlocked: false,
+    //     name: 'Alan',
+    //     isActive: true,
+    //     canDisplay: true,
+    //   },
+    //   ['FacilityType'],
+    // );
     await this.neo4jService.addRelations(facilityTypesNode1.identity.low, facilityTypesNode.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode2.identity.low, facilityTypesNode.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode3.identity.low, facilityTypesNode.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode4.identity.low, facilityTypesNode.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode5.identity.low, facilityTypesNode.identity.low);
 
-    await this.neo4jService.addRelations(facilityTypesNodeTR1.identity.low, facilityTypesNodeTR.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNodeTR2.identity.low, facilityTypesNodeTR.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNodeTR3.identity.low, facilityTypesNodeTR.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNodeTR4.identity.low, facilityTypesNodeTR.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNodeTR5.identity.low, facilityTypesNodeTR.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNodeTR1.identity.low, facilityTypesNodeTR.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNodeTR2.identity.low, facilityTypesNodeTR.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNodeTR3.identity.low, facilityTypesNodeTR.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNodeTR4.identity.low, facilityTypesNodeTR.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNodeTR5.identity.low, facilityTypesNodeTR.identity.low);
 
     const allowedForFacilityStructureBuilding = await this.neo4jService.createNode(
       {
@@ -838,22 +838,22 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       allowedForFacilityStructureBuilding.identity.low,
       facilityTypesNode4.identity.low,
     );
-    const allowedForFacilityStructureBuildingTR = await this.neo4jService.createNode(
-      {
-        canDelete: false,
-        isDeleted: false,
-        name: 'Bina',
-        isActive: true,
-        canDisplay: false,
-      },
-      ['AllowedStructure'],
-    );
+    // const allowedForFacilityStructureBuildingTR = await this.neo4jService.createNode(
+    //   {
+    //     canDelete: false,
+    //     isDeleted: false,
+    //     name: 'Bina',
+    //     isActive: true,
+    //     canDisplay: false,
+    //   },
+    //   ['AllowedStructure'],
+    // );
    
 
-    await this.neo4jService.addRelations(
-      allowedForFacilityStructureBuildingTR.identity.low,
-      facilityTypesNodeTR4.identity.low,
-    );
+    // await this.neo4jService.addRelations(
+    //   allowedForFacilityStructureBuildingTR.identity.low,
+    //   facilityTypesNodeTR4.identity.low,
+    // );
 
     const allowedForBuildingStructureBlock = await this.neo4jService.createNode(
       {
@@ -876,26 +876,26 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       ['AllowedStructure'],
     );
     
-    const allowedForBuildingStructureBlockTR = await this.neo4jService.createNode(
-      {
-        canDelete: false,
-        isDeleted: false,
-        name: 'Blok',
-        isActive: true,
-        canDisplay: false,
-      },
-      ['AllowedStructure'],
-    );
-    const allowedForBuildingStructureFloorTR = await this.neo4jService.createNode(
-      {
-        canDelete: false,
-        isDeleted: false,
-        name: 'KAt',
-        isActive: true,
-        canDisplay: false,
-      },
-      ['AllowedStructure'],
-    );
+    // const allowedForBuildingStructureBlockTR = await this.neo4jService.createNode(
+    //   {
+    //     canDelete: false,
+    //     isDeleted: false,
+    //     name: 'Blok',
+    //     isActive: true,
+    //     canDisplay: false,
+    //   },
+    //   ['AllowedStructure'],
+    // );
+    // const allowedForBuildingStructureFloorTR = await this.neo4jService.createNode(
+    //   {
+    //     canDelete: false,
+    //     isDeleted: false,
+    //     name: 'KAt',
+    //     isActive: true,
+    //     canDisplay: false,
+    //   },
+    //   ['AllowedStructure'],
+    // );
 
     await this.neo4jService.addRelations(
       allowedForBuildingStructureBlock.identity.low,
@@ -906,14 +906,14 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       facilityTypesNode1.identity.low,
     );
 
-    await this.neo4jService.addRelations(
-      allowedForBuildingStructureBlockTR.identity.low,
-      facilityTypesNodeTR1.identity.low,
-    );
-    await this.neo4jService.addRelations(
-      allowedForBuildingStructureFloorTR.identity.low,
-      facilityTypesNodeTR1.identity.low,
-    );
+    // await this.neo4jService.addRelations(
+    //   allowedForBuildingStructureBlockTR.identity.low,
+    //   facilityTypesNodeTR1.identity.low,
+    // );
+    // await this.neo4jService.addRelations(
+    //   allowedForBuildingStructureFloorTR.identity.low,
+    //   facilityTypesNodeTR1.identity.low,
+    // );
 
     const allowedForFloorStructureSpace = await this.neo4jService.createNode(
       {
@@ -926,18 +926,18 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       ['AllowedStructure'],
     );
 
-    const allowedForFloorStructureSpaceTR = await this.neo4jService.createNode(
-      {
-        canDelete: false,
-        isDeleted: false,
-        name: 'Alan',
-        isActive: true,
-        canDisplay: false,
-      },
-      ['AllowedStructure'],
-    );
+    // const allowedForFloorStructureSpaceTR = await this.neo4jService.createNode(
+    //   {
+    //     canDelete: false,
+    //     isDeleted: false,
+    //     name: 'Alan',
+    //     isActive: true,
+    //     canDisplay: false,
+    //   },
+    //   ['AllowedStructure'],
+    // );
     await this.neo4jService.addRelations(allowedForFloorStructureSpace.identity.low, facilityTypesNode2.identity.low);
-    await this.neo4jService.addRelations(allowedForFloorStructureSpaceTR.identity.low, facilityTypesNodeTR2.identity.low);
+    // await this.neo4jService.addRelations(allowedForFloorStructureSpaceTR.identity.low, facilityTypesNodeTR2.identity.low);
 
     const allowedForBlockStructureFloor = await this.neo4jService.createNode(
       {
@@ -949,17 +949,17 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       },
       ['AllowedStructure'],
     );
-    const allowedForBlockStructureFloorTR = await this.neo4jService.createNode(
-      {
-        canDelete: false,
-        isDeleted: false,
-        name: 'Kat',
-        isActive: true,
-        canDisplay: false,
-      },
-      ['AllowedStructure'],
-    );
-    await this.neo4jService.addRelations(allowedForBlockStructureFloorTR.identity.low, facilityTypesNodeTR3.identity.low);
+    // const allowedForBlockStructureFloorTR = await this.neo4jService.createNode(
+    //   {
+    //     canDelete: false,
+    //     isDeleted: false,
+    //     name: 'Kat',
+    //     isActive: true,
+    //     canDisplay: false,
+    //   },
+    //   ['AllowedStructure'],
+    // );
+    // await this.neo4jService.addRelations(allowedForBlockStructureFloorTR.identity.low, facilityTypesNodeTR3.identity.low);
     await this.neo4jService.addRelations(allowedForBlockStructureFloor.identity.low, facilityTypesNode3.identity.low);
     //Building
     const facilityTypesNode1property1 = await this.neo4jService.createNode(
@@ -1007,7 +1007,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         type: 'text',
         dataType: 'string',
         defaultValue: '',
-        rules: ['not null'],
+        rules: [],
         options: [],
         placeHolder: 'Project Name',
         index: 2,
@@ -1024,7 +1024,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         type: 'text',
         dataType: 'string',
         defaultValue: '',
-        rules: ['not null'],
+        rules: [],
         options: [],
         placeHolder: 'Site Name',
         index: 3,
@@ -1120,7 +1120,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         type: 'text',
         dataType: 'string',
         defaultValue: '',
-        rules: ['not null'],
+        rules: [],
         options: [],
         placeHolder: 'Area Measurement',
         index: 8,
@@ -1552,34 +1552,34 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     await this.neo4jService.addRelations(facilityTypesNode1property32.identity.low, facilityTypesNode1.identity.low);
 
     //TR
-    await this.neo4jService.addRelations(facilityTypesNode1property1.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property2.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property3.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property4.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property9.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property10.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property11.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property12.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property13.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property14.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property15.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property16.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property17.identity.low, facilityTypesNodeTR1.identity.low);
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    await this.neo4jService.addRelations(facilityTypesNode1property18.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property20.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property21.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property22.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property23.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property24.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property25.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property26.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property27.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property28.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property29.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property30.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property31.identity.low, facilityTypesNodeTR1.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode1property32.identity.low, facilityTypesNodeTR1.identity.low)
+    // await this.neo4jService.addRelations(facilityTypesNode1property1.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property2.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property3.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property4.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property9.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property10.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property11.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property12.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property13.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property14.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property15.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property16.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property17.identity.low, facilityTypesNodeTR1.identity.low);
+    // ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // await this.neo4jService.addRelations(facilityTypesNode1property18.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property20.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property21.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property22.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property23.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property24.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property25.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property26.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property27.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property28.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property29.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property30.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property31.identity.low, facilityTypesNodeTR1.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode1property32.identity.low, facilityTypesNodeTR1.identity.low)
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //Floor
     const facilityTypesNode2property1 = await this.neo4jService.createNode(
@@ -1748,15 +1748,15 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     await this.neo4jService.addRelations(facilityTypesNode2property10.identity.low, facilityTypesNode2.identity.low);
 
     //TR
-    await this.neo4jService.addRelations(facilityTypesNode2property1.identity.low, facilityTypesNodeTR2.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode2property3.identity.low, facilityTypesNodeTR2.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode2property4.identity.low, facilityTypesNodeTR2.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode2property5.identity.low, facilityTypesNodeTR2.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode2property6.identity.low, facilityTypesNodeTR2.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode2property7.identity.low, facilityTypesNodeTR2.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode2property8.identity.low, facilityTypesNodeTR2.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode2property9.identity.low, facilityTypesNodeTR2.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode2property10.identity.low, facilityTypesNodeTR2.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode2property1.identity.low, facilityTypesNodeTR2.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode2property3.identity.low, facilityTypesNodeTR2.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode2property4.identity.low, facilityTypesNodeTR2.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode2property5.identity.low, facilityTypesNodeTR2.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode2property6.identity.low, facilityTypesNodeTR2.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode2property7.identity.low, facilityTypesNodeTR2.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode2property8.identity.low, facilityTypesNodeTR2.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode2property9.identity.low, facilityTypesNodeTR2.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode2property10.identity.low, facilityTypesNodeTR2.identity.low);
 
     //block
     const facilityTypesNode3property1 = await this.neo4jService.createNode(
@@ -1872,12 +1872,12 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     await this.neo4jService.addRelations(facilityTypesNode3property5.identity.low, facilityTypesNode3.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode3property6.identity.low, facilityTypesNode3.identity.low);
 
-    await this.neo4jService.addRelations(facilityTypesNode3property1.identity.low, facilityTypesNodeTR3.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode3property2.identity.low, facilityTypesNodeTR3.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode3property3.identity.low, facilityTypesNodeTR3.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode3property4.identity.low, facilityTypesNodeTR3.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode3property5.identity.low, facilityTypesNodeTR3.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode3property6.identity.low, facilityTypesNodeTR3.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode3property1.identity.low, facilityTypesNodeTR3.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode3property2.identity.low, facilityTypesNodeTR3.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode3property3.identity.low, facilityTypesNodeTR3.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode3property4.identity.low, facilityTypesNodeTR3.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode3property5.identity.low, facilityTypesNodeTR3.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode3property6.identity.low, facilityTypesNodeTR3.identity.low);
 
     //space
     const facilityTypesNode5property1 = await this.neo4jService.createNode(
@@ -1908,7 +1908,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         type: 'text',
         dataType: 'string',
         defaultValue: '',
-        rules: [],
+        rules: ['not null'],
         options: [],
         placeHolder: 'Name',
         index: 1,
@@ -1944,7 +1944,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         type: 'treeselect',
         dataType: 'string',
         defaultValue: '',
-        rules: [],
+        rules: ['not null'],
         options: [],
         placeHolder: 'Category',
         index: 3,
@@ -1997,7 +1997,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         type: 'treeselect',
         dataType: 'string',
         defaultValue: '',
-        rules: [],
+        rules: ['not null'],
         options: [],
         placeHolder: 'Usage',
         index: 6,
@@ -2035,7 +2035,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         defaultValue: '',
         rules: [],
         options: [],
-        placeHolder: 'Tag',
+        placeHolder: 'Images',
         index: 8,
       },
       ['FacilityTypeProperty'],
@@ -2051,7 +2051,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
         type: 'treeselect',
         dataType: 'string',
         defaultValue: '',
-        rules: [],
+        rules: ['not null'],
         options: [],
         placeHolder: 'Status',
         index: 9,
@@ -2164,6 +2164,59 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       ['FacilityTypeProperty'],
     ); 
 
+    const facilityTypesNode5property17 = await this.neo4jService.createNode(
+      {
+        canDelete: true,
+        canDisplay: true,
+        isDeleted: false,
+        isActive: true,
+        label: 'room Tag',
+        type: 'textarray',
+        dataType: 'string',
+        defaultValue: '',
+        rules: [],
+        options: [],
+        placeHolder: 'Room Tag',
+        index: 16,
+      },
+      ['FacilityTypeProperty'],
+    );
+    
+    const facilityTypesNode5property18 = await this.neo4jService.createNode(
+      {
+        canDelete: true,
+        canDisplay: true,
+        isDeleted: false,
+        isActive: true,
+        label: 'operator Code',
+        type: 'text',
+        dataType: 'string',
+        defaultValue: '',
+        rules: [],
+        options: [],
+        placeHolder: 'Operator Code',
+        index: 17,
+      },
+      ['FacilityTypeProperty'],
+    ); 
+
+    const facilityTypesNode5property19 = await this.neo4jService.createNode(
+      {
+        canDelete: true,
+        canDisplay: true,
+        isDeleted: false,
+        isActive: true,
+        label: 'operator Name',
+        type: 'text',
+        dataType: 'string',
+        defaultValue: '',
+        rules: [],
+        options: [],
+        placeHolder: 'Operator Name',
+        index: 18,
+      },
+      ['FacilityTypeProperty'],
+    ); 
     await this.neo4jService.addRelations(facilityTypesNode5property1.identity.low, facilityTypesNode5.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode5property2.identity.low, facilityTypesNode5.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode5property3.identity.low, facilityTypesNode5.identity.low);
@@ -2180,24 +2233,31 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     await this.neo4jService.addRelations(facilityTypesNode5property14.identity.low, facilityTypesNode5.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode5property15.identity.low, facilityTypesNode5.identity.low);
     await this.neo4jService.addRelations(facilityTypesNode5property16.identity.low, facilityTypesNode5.identity.low);
+    await this.neo4jService.addRelations(facilityTypesNode5property17.identity.low, facilityTypesNode5.identity.low);
+    await this.neo4jService.addRelations(facilityTypesNode5property18.identity.low, facilityTypesNode5.identity.low);
+    await this.neo4jService.addRelations(facilityTypesNode5property19.identity.low, facilityTypesNode5.identity.low);
+
 
     //TR
-    await this.neo4jService.addRelations(facilityTypesNode5property1.identity.low, facilityTypesNodeTR5.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode5property2.identity.low, facilityTypesNodeTR5.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode5property3.identity.low, facilityTypesNodeTR5.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode5property4.identity.low, facilityTypesNodeTR5.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode5property5.identity.low, facilityTypesNodeTR5.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode5property6.identity.low, facilityTypesNodeTR5.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode5property7.identity.low, facilityTypesNodeTR5.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode5property8.identity.low, facilityTypesNodeTR5.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode5property9.identity.low, facilityTypesNodeTR5.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode5property10.identity.low, facilityTypesNodeTR5.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode5property11.identity.low, facilityTypesNodeTR5.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode5property12.identity.low, facilityTypesNodeTR5.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode5property13.identity.low, facilityTypesNodeTR5.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode5property14.identity.low, facilityTypesNodeTR5.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode5property15.identity.low, facilityTypesNodeTR5.identity.low);
-    await this.neo4jService.addRelations(facilityTypesNode5property16.identity.low, facilityTypesNodeTR5.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode5property1.identity.low, facilityTypesNodeTR5.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode5property2.identity.low, facilityTypesNodeTR5.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode5property3.identity.low, facilityTypesNodeTR5.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode5property4.identity.low, facilityTypesNodeTR5.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode5property5.identity.low, facilityTypesNodeTR5.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode5property6.identity.low, facilityTypesNodeTR5.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode5property7.identity.low, facilityTypesNodeTR5.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode5property8.identity.low, facilityTypesNodeTR5.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode5property9.identity.low, facilityTypesNodeTR5.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode5property10.identity.low, facilityTypesNodeTR5.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode5property11.identity.low, facilityTypesNodeTR5.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode5property12.identity.low, facilityTypesNodeTR5.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode5property13.identity.low, facilityTypesNodeTR5.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode5property14.identity.low, facilityTypesNodeTR5.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode5property15.identity.low, facilityTypesNodeTR5.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode5property16.identity.low, facilityTypesNodeTR5.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode5property17.identity.low, facilityTypesNodeTR5.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode5property18.identity.low, facilityTypesNodeTR5.identity.low);
+    // await this.neo4jService.addRelations(facilityTypesNode5property19.identity.low, facilityTypesNodeTR5.identity.low);
 
 
     return facilityTypesNode;

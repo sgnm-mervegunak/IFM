@@ -26,3 +26,9 @@ export function FacilityNodeNotFoundException() {
     throw new HttpException({key: I18NEnums.NULL_VALUE, args: {val:val} }, HttpStatus.BAD_REQUEST);  
   
 }
+export function NotUniqueException(val) {
+  throw new HttpException({key: I18NEnums.NOT_UNIQUE, args: {val:val} }, HttpStatus.BAD_REQUEST);  
+}
+export function ContactHasChildrenException(email) {
+  throw new HttpException({ key: I18NEnums.CONTACT_HAS_CHILDREN_ERROR, args: {email:email} }, HttpStatus.BAD_REQUEST);
+}

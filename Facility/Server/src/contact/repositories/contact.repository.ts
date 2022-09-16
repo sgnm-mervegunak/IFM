@@ -7,24 +7,47 @@ import { Contact } from '../entities/contact.entity';
 import { CreateContactDto } from '../dto/create-contact.dto';
 import { UpdateContactDto } from '../dto/update-contact.dto';
 import { ContactNotFoundException } from 'src/common/notFoundExceptions/not.found.exception';
-import { assignDtoPropToEntity, createDynamicCyperObject, Neo4jService } from 'sgnm-neo4j/dist';
+import { assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError, dynamicFilterPropertiesAdder, dynamicLabelAdder, dynamicNotLabelAdder, filterArrayForEmptyString, find_with_children_by_realm_as_tree__find_by_realm_error, Neo4jService, required_fields_must_entered } from 'sgnm-neo4j/dist';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 import { has_children_error, node_not_found } from 'src/common/const/custom.error.object';
+import { RelationName } from 'src/common/const/relation.name.enum';
+import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
+import { ContactHasChildrenException } from 'src/common/badRequestExceptions/bad.request.exception';
 
 @Injectable()
 export class ContactRepository implements GeciciInterface<Contact> {
   constructor(private readonly neo4jService: Neo4jService) {}
 
+  
+  //REVISED FOR NEW NEO4J
   async findOneByRealm(realm: string, language: string) {
-    let node = await this.neo4jService.findByRealmWithTreeStructure('Contact', realm);
+    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
+      ['Contact'],
+      { realm: realm, isDeleted: false },
+      [],
+      { isDeleted: false, canDisplay: true },
+    );
     if (!node) {
-      throw new ContactNotFoundException(realm);
+     //throw new FacilityStructureNotFountException(realm);
     }
     node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
 
     return node;
   }
+
+  //REVISED FOR NEW NEO4J
   async create(createContactDto: CreateContactDto, realm: string, language: string) {
+   try {
+    const  structureRootNode = await this.neo4jService.findByIdAndFilters(
+      +createContactDto.parentId,
+      {"isDeleted": false},
+      []
+    )
+    //check if rootNode realm equal to keyclock token realm
+    if (structureRootNode.properties.realm !== realm) {
+      throw new HttpException({ message: 'You dont have permission' }, 403);
+    }
+
     const contact = new Contact();
     const contactObject = assignDtoPropToEntity(contact, createContactDto);
     delete contactObject['createdById'];
@@ -39,22 +62,75 @@ export class ContactRepository implements GeciciInterface<Contact> {
     value['properties']['id'] = value['identity'].low;
     const result = { id: value['identity'].low, labels: value['labels'], properties: value['properties'] };
     if (createContactDto['parentId']) {
-      await this.neo4jService.addRelations(result['id'], createContactDto['parentId']);
-    }
-    if (createContactDto['createdById']) {
-      await this.neo4jService.addRelationWithRelationName(result['id'], createContactDto['createdById'], 'CREATED_BY');
-    }
-    if (createContactDto['classificationId']) {
-      await this.neo4jService.addRelationWithRelationName(
-        createContactDto['classificationId'],
+      
+      await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
+        +createContactDto['parentId'],
         result['id'],
-        'CLASSIFICATION_OF',
-      );
+        RelationName.PARENT_OF,
+        RelationDirection.RIGHT
+      )
+    }
+    // CREATED BY relation create
+    if (createContactDto['createdById']) {
+      await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
+        result['id'],
+        +createContactDto['createdById'],
+        RelationName.CREATED_BY,
+        RelationDirection.RIGHT
+      )
+    }
+    // CLASSIFIED BY relation create
+    const newClassificationCode = await this.neo4jService.findByIdAndFilters(
+      +createContactDto["classificationId"],
+      {"isDeleted": false},
+      []
+    )
+    const newCategories = await this.neo4jService.findChildrensByLabelsAndFilters(
+      ['Classification'],
+      {"isDeleted": false, "realm": structureRootNode.properties.realm},
+      [],
+      {"isDeleted": false, "code": newClassificationCode['properties'].code }
+    )
+    for (let i=0; i<newCategories.length; i++) {
+      await this.neo4jService.addRelationByIdAndRelationNameWithFilters(result.id,{"isDeleted":false},
+      newCategories[i]['_fields'][1].identity.low, {"isDeleted":false}, RelationName.CLASSIFIED_BY, RelationDirection.RIGHT);
     }
     return result;
-  }
+   }
+   catch (error) {
+    let code = error.response?.code;
+      if (code >= 1000 && code<=1999) {
+        if (error.response?.code == CustomIfmCommonError.EXAMPLE1) {
 
+        }
+      }
+      else if (code >= 5000 && code<=5999) {
+        
+      }
+      else if (code >= 9000 && code<=9999) {
+        
+      }
+      else {
+        throw new HttpException("", 500);
+      }
+   }  
+  }
+  //REVISED FOR NEW NEO4J
   async update(_id: string, updateContactDto: UpdateContactDto, realm: string, language: string) {
+  try {  
+    const  structureRootNode = await this.neo4jService.findChildrensByChildIdAndFilters(
+      ['Contact'],
+      {'isDeleted': false},
+      +_id,
+      [],
+      {'isDeleted': false},
+      RelationName.PARENT_OF
+    )
+    //check if rootNode realm equal to keyclock token realm
+     if (structureRootNode[0]["_fields"][0].properties.realm !== realm) {
+      throw new HttpException({ message: 'You dont have permission' }, 403);
+    }
+
     const updateContactDtoWithoutLabelsAndParentId = {};
     Object.keys(updateContactDto).forEach((element) => {
       if (element != 'labels' && element != 'parentId' && element != 'createdById' && element != 'classificationId') {
@@ -62,145 +138,261 @@ export class ContactRepository implements GeciciInterface<Contact> {
       }
     });
     const dynamicObject = createDynamicCyperObject(updateContactDtoWithoutLabelsAndParentId);
-    const updatedNode = await this.neo4jService.updateById(_id, dynamicObject);
-
+    
+    const updatedNode = await this.neo4jService.updateByIdAndFilter(
+      +_id,
+      {},
+      [],
+      dynamicObject
+    )
     if (!updatedNode) {
       throw new ContactNotFoundException(_id);
     }
-    const result = {
+    let result = {
       id: updatedNode['identity'].low,
       labels: updatedNode['labels'],
       properties: updatedNode['properties'],
     };
     if (updateContactDto['labels'] && updateContactDto['labels'].length > 0) {
-      await this.neo4jService.removeLabel(_id, result['labels']);
-      await this.neo4jService.updateLabel(_id, updateContactDto['labels']);
+      await this.neo4jService.removeLabel(_id, result['labels']);                            //neo4j library de yenisi yazılacak
+      const updateNodeLabels = await this.neo4jService.updateByIdAndFilter(
+        +_id,
+        {},
+        updateContactDto['labels'],
+        {}
+      );
+      result['labels'] = updateNodeLabels['labels'];
     }
+   
+    // CREATED BY relation update, if necessary
     if (updateContactDto['createdById']) {
-      const result = await this.neo4jService.findNodeAndRelationByRelationNameAndId(_id, 'CREATED_BY', RelationDirection.RIGHT);
+      const createdByResult = await this.neo4jService.findChildrensByIdAndNotLabelsOneLevel(
+        +_id,
+        {'isDeleted': false},
+        [],
+        ['Virtual'],
+        {'isDeleted': false},
+        RelationName.CREATED_BY
+      )
       //if there is a "CREATED_BY" relation
-      if (result['records'][0] && result['records'][0]['_fields'] && result['records'][0]['_fields'].length > 0) {
-        if (result['records'][0]['_fields'][0]['identity'].low != updateContactDto['createdById']) {
-          await this.neo4jService.deleteRelationByRelationId(result['records'][0]['_fields'][1]['identity'].low);
-          await this.neo4jService.addRelationWithRelationName(_id, updateContactDto['createdById'], 'CREATED_BY');
+      if (createdByResult && createdByResult.length > 0) {
+        if (createdByResult[0]['_fields'][1]['identity'].low != updateContactDto['createdById']) {
+          await this.neo4jService.deleteRelationByRelationId(createdByResult[0]['_fields'][2]['identity'].low);
+          await this.neo4jService.addRelationWithRelationName(_id, updateContactDto['createdById'], RelationName.CREATED_BY);
         }
       }
-      //if there is not "CREATED_BY" relation
+      //if there is no "CREATED_BY" relation
       else {
-        await this.neo4jService.addRelationWithRelationName(_id, updateContactDto['createdById'], 'CREATED_BY');
+        await this.neo4jService.addRelationWithRelationName(_id, updateContactDto['createdById'], RelationName.CREATED_BY);
       }
     }
-    if (updateContactDto['classificationId']) {
-      const result = await this.neo4jService.findNodeAndRelationByRelationNameAndId(_id, 'CLASSIFICATION_OF', RelationDirection.LEFT);
-      //if there is a "CLASSIFICATION_OF" relation
-      if (result['records'][0] && result['records'][0]['_fields'] && result['records'][0]['_fields'].length > 0) {
-        if (result['records'][0]['_fields'][0]['identity'].low != updateContactDto['classificationId']) {
-          await this.neo4jService.deleteRelationByRelationId(result['records'][0]['_fields'][1]['identity'].low);
-          await this.neo4jService.addRelationWithRelationName(
-            updateContactDto['classificationId'],
-            _id,
-            'CLASSIFICATION_OF',
-          );
-        }
+
+    // CLASSIFIED_BY relation update, if necessary
+    const categories =  await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+      [],
+      {"isDeleted": false, "key": result['properties'].key},
+      [],
+      {"isDeleted": false},
+      RelationName.CLASSIFIED_BY,
+      RelationDirection.RIGHT
+    )
+    const newClassificationCode = await this.neo4jService.findByIdAndFilters(
+      +updateContactDto["classificationId"],
+      {"isDeleted": false},
+      []
+    )
+    const newCategories = await this.neo4jService.findChildrensByLabelsAndFilters(
+      ['Classification'],
+      {"isDeleted": false, "realm": structureRootNode[0]["_fields"][0].properties.realm},
+      [],
+      {"isDeleted": false, "code": newClassificationCode['properties'].code }
+    )
+   if (categories && categories.length>0)  {
+    if (categories[0]['_fields'][1]['properties'].code != newClassificationCode['properties'].code) {
+      for (let i=0; i<categories.length; i++) {
+         await this.neo4jService.deleteRelationByIdAndRelationNameWithoutFilters(
+            result.id,
+              categories[i]['_fields'][1].identity.low,
+              RelationName.CLASSIFIED_BY,
+              RelationDirection.RIGHT       
+        )
       }
-      //if there is not "CLASSIFICATION_OF" relation
-      else {
-        await this.neo4jService.addRelationWithRelationName(
-          updateContactDto['classificationId'],
-          _id,
-          'CLASSIFICATION_OF',
-        );
+      for (let i=0; i<newCategories.length; i++) {
+        await this.neo4jService.addRelationByIdAndRelationNameWithFilters(result.id,{"isDeleted":false},
+        newCategories[i]['_fields'][1].identity.low, {"isDeleted":false}, RelationName.CLASSIFIED_BY, RelationDirection.RIGHT);
       }
     }
-    return result;
-  }
+   }
+   else {
+      for (let i=0; i<newCategories.length; i++) {
+        await this.neo4jService.addRelationByIdAndRelationNameWithFilters(result.id,{"isDeleted":false},
+        newCategories[i]['_fields'][1].identity.low, {"isDeleted":false}, RelationName.CLASSIFIED_BY, RelationDirection.RIGHT);
+      }
+   }
+  return result;
+}
+catch (error) {
+ let code = error.response?.code;
+   if (code >= 1000 && code<=1999) {
+     if (error.response?.code == CustomIfmCommonError.EXAMPLE1) {
+
+     }
+   }
+   else if (code >= 5000 && code<=5999) {
+     
+   }
+   else if (code >= 9000 && code<=9999) {
+     
+   }
+   else {
+     throw new HttpException("", 500);
+   }
+  }  
+ }
 
   async delete(_id: string, realm: string, language: string) {
     try {
-      let deletedNode;
 
-      const hasChildren = await this.neo4jService.findChildrenById(_id);
-      if (hasChildren['records'].length == 0) {
-        deletedNode = await this.neo4jService.delete(_id);
-      } else {
-        throw new HttpException(has_children_error({}), 400);
-      }
+      const createdByChilds = await this.neo4jService.findChildrensByChildIdAndFilters(
+        [],
+        {"isDeleted": false},
+        +_id,
+        [],
+        {"isDeleted": false},
+        RelationName.CREATED_BY
+      )
+      if (createdByChilds && createdByChilds.length > 0)  {
+        throw new HttpException(has_children_error({email: createdByChilds[0]['_fields'][0]['properties'].email}),400);
+      } 
+      else {
+        let deletedNode;
+        deletedNode = await this.neo4jService.updateByIdAndFilter(
+        +_id,
+        {"isDeleted": false},
+        [],
+        {"isDeleted": true}
+      )
       return deletedNode;
-    } catch (error) {
-      if (error.response?.code == CustomTreeError.HAS_CHILDREN) {
-        throw new HttpException(has_children_error({}), 400);
-      } else {
-        throw new HttpException(error.response?.message, error.response?.code);
+      } 
+    } 
+    catch (error) {
+      let code = error.response?.code;
+      if (code >= 1000 && code<=1999) {
+        if (error.response?.code == CustomIfmCommonError.EXAMPLE1) {
+   
+        }
+      }
+      else if (code >= 5000 && code<=5999) {
+        if (error.response?.code == CustomNeo4jError.NOT_FOUND) {
+          throw new  ContactNotFoundException(_id);
+          
+        }
+      }
+      else if (code >= 9000 && code<=9999) {
+        if (error.response?.code == CustomTreeError.HAS_CHILDREN) {
+          console.log(error.response?.email)
+          throw new  ContactHasChildrenException(error.response?.params["email"]);
+          
+        } 
+      }
+      else {
+        throw new HttpException("", 500);
       }
     }
   }
 
-  async changeNodeBranch(_id: string, _target_parent_id: string, realm: string, language: string) {
-    try {
-      await this.neo4jService.deleteRelations(_id);
-      await this.neo4jService.addRelations(_id, _target_parent_id);
-    } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
-
-  async deleteRelations(_id: string) {
-    await this.neo4jService.deleteRelations(_id);
-  }
-
-  async addRelations(_id: string, _target_parent_id: string) {
-    try {
-      await this.neo4jService.addRelations(_id, _target_parent_id);
-    } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
-
+  //REVISED FOR NEW NEO4J
   async findOneNodeByKey(key: string, realm: string, language: string) {
     try {
-      const node = await this.neo4jService.findOneNodeByKey(key);
-      if (!node) {
-        throw new HttpException(node_not_found({key:'string'}),400);
+      const node = await this.neo4jService.findByLabelAndFilters(
+        [],
+        {"isDeleted": false, "key": key},
+        []
+      )
+      if (!node || node.length == 0) {
+        throw new HttpException(node_not_found({email:'string'}),404);
       }
-      const createdBy = await this.neo4jService.findNodeAndRelationByRelationNameAndId(
-        node.id,
-        'CREATED_BY',
-        RelationDirection.RIGHT,
-      );
-      const classification = await this.neo4jService.findNodeAndRelationByRelationNameAndId(
-        node.id,
-        'CLASSIFICATION_OF',
-        RelationDirection.LEFT,
-      );
-      if (
-        createdBy['records'][0] &&
-        createdBy['records'][0]['_fields'] &&
-        createdBy['records'][0]['_fields'].length > 0
-      ) {
-        node.properties['createdByKey'] = createdBy['records'][0]['_fields'][0]['properties'].key;
+      
+      // get createdby person key and set it to return object 
+      const createdBy = await this.neo4jService.findChildrensByIdOneLevel(
+        node[0]['_fields'][0]['identity'].low,
+        {"isDeleted": false},
+        [],
+        {"isDeleted": false},
+        RelationName.CREATED_BY
+      )
+       
+      if (createdBy && createdBy.length > 0)    {
+        node[0]['_fields'][0]['properties'].createdByKey = createdBy[0]['_fields'][1]['properties'].key;
       }
-      if (
-        classification['records'][0] &&
-        classification['records'][0]['_fields'] &&
-        classification['records'][0]['_fields'].length > 0
-      ) {
-        node.properties['classificationKey'] = classification['records'][0]['_fields'][0]['properties'].key;
+   
+       // get classification  key and set it to return object  
+      const classification = await this.neo4jService.findChildrensByIdOneLevel(
+        node[0]['_fields'][0]['identity'].low,
+        {"isDeleted": false},
+        ['OmniClass34'],
+        {"isDeleted": false, "language": language },
+        RelationName.CLASSIFIED_BY
+      )
+
+      if (classification && classification.length > 0) {
+        node[0]['_fields'][0]['properties']['classificationKey'] = classification[0]['_fields'][1]['properties'].key;
       }
-      const result = { id: node.id, labels: node.labels, properties: node.properties };
+      const result = { id:  node[0]['_fields'][0]['identity'].low,
+                       labels:  node[0]['_fields'][0]['labels'],
+                       properties:  node[0]['_fields'][0]['properties'] };
       return result;
     } catch (error) {
-      const code =error.response?.code
-      if(code===CustomTreeError.NODE_NOT_FOUND){
-        throw new ContactNotFoundException(key)
-      }
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      let code = error.response?.code;
+      if (code >= 1000 && code<=1999) {
+         if (error.response?.code == CustomIfmCommonError.EXAMPLE1) {
+
+         }
+       }
+       else if (code >= 5000 && code<=5999) {
+     
+         }
+       else if (code >= 9000 && code<=9999) {
+        if (error.response?.code == CustomTreeError.NODE_NOT_FOUND) {
+          throw new  ContactNotFoundException(error.response?.params["email"]);
+          
+        } 
+        }
+      else {
+         throw new HttpException("", 500);
+       }
     }
   }
+
+
+
+  async changeNodeBranch(_id: string, _target_parent_id: string, realm: string, language: string) {
+    // try {
+    //   await this.neo4jService.deleteRelations(_id);
+    //   await this.neo4jService.addRelations(_id, _target_parent_id);
+    // } catch (error) {
+    //   throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    // }
+  }
+
+  // async deleteRelations(_id: string) {
+  //   await this.neo4jService.deleteRelations(_id);
+  // }
+
+  // async addRelations(_id: string, _target_parent_id: string) {
+  //   try {
+  //     await this.neo4jService.addRelations(_id, _target_parent_id);
+  //   } catch (error) {
+  //     throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+  //   }
+  // }
+
+
   async findOneFirstLevelByRealm(label: string, realm: string, language: string) {
-    return null;
+    
   }
 
   async findChildrenByFacilityTypeNode(language: string,realm: string, typename:string){
-      return null;
+     
     }
 }

@@ -16,6 +16,7 @@ import { InfraModule } from './infra/infra.module';
 import { OrganizationModule } from './organization/organization.module';
 import { TypesModule } from './types/types.module';
 import { ComponentModule } from './component/component.module';
+import { ExcelImportModule } from './excelImport/excelImport.module';
 
 @Module({
   imports: [
@@ -78,6 +79,7 @@ import { ComponentModule } from './component/component.module';
     InfraModule,
     OrganizationModule,
     TypesModule,
+    ExcelImportModule,
   ],
   providers: [
     //to cache all get request
