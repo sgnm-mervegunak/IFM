@@ -30,8 +30,9 @@ const AddPlan = ({
   React.useEffect(() => {
     if (submitted) {
       const url = process.env.REACT_APP_API_URL + "structure";
+      const plannerUrl = process.env.REACT_APP_API_PLANNER_SERVER_URL+"/plan/"
       axios
-        .post("http://localhost:9001/plan/", { key: selectedNodeKey })
+        .post(plannerUrl, { key: selectedNodeKey })
         .then((res) => {
           axios
             .patch(url + "/addPlanToFloor/" + selectedNodeKey)
@@ -46,25 +47,41 @@ const AddPlan = ({
               });
             })
             .catch((err) => {
-              console.log(err.response);
-              axios.delete("http://localhost:9001/plan/" + selectedNodeKey);
+              toast.current.show({
+                severity: "error",
+                summary: "Error",
+                detail: "Error adding plan",
+                life: 3000,
+              });
+              axios.delete(plannerUrl + selectedNodeKey);
             });
         })
         .catch((err) => {
-          if (err.response.data.message === "Plan already exist") {
-            axios
-            .patch(url + "/addPlanToFloor/" + selectedNodeKey)
-            .then((res) => {
-              getFacilityStructure();
-              setPlanDia(false);
+          if(err.response){
+            if (err.response.data.message === "Plan already exist") {
+              axios
+              .patch(url + "/addPlanToFloor/" + selectedNodeKey)
+              .then((res) => {
+                getFacilityStructure();
+                setPlanDia(false);
+                toast.current.show({
+                  severity: "success",
+                  summary: "Success",
+                  detail: "Plan added successfully",
+                  life: 3000,
+                });
+              })
+            }
+            else{
               toast.current.show({
-                severity: "success",
-                summary: "Success",
-                detail: "Plan added successfully",
+                severity: "error",
+                summary: "Error",
+                detail: err.response.data.message,
                 life: 3000,
               });
-            })
-          } else {
+            }
+          }
+          else {
             toast.current.show({
               severity: "error",
               summary: "Error",

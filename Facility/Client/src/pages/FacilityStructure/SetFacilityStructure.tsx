@@ -1239,12 +1239,12 @@ const SetFacilityStructure = () => {
                       }}
                       title={t("View Data")}
                     />
-                    {process.env.REACT_APP_API_PLANNER_URL &&
+                    {process.env.REACT_APP_API_PLANNER_CLIENT_URL &&
                     data.nodeType === "Floor" &&
                     (data.hasPlan ? (
                       <a
                         href={
-                          process.env.REACT_APP_API_PLANNER_URL +
+                          process.env.REACT_APP_API_PLANNER_CLIENT_URL +
                           "?key=" +
                           data.key
                         }
@@ -1265,8 +1265,6 @@ const SetFacilityStructure = () => {
                         onClick={() => {
                           setSelectedNodeKey(data.key);
                           setPlanDia(true);
-
-                          // window.location.href= process.env.REACT_APP_API_PLANNER_URL + "?key=" + data.key
                         }}
                       />
                     ))}
