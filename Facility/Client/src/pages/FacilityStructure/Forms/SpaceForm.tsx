@@ -218,7 +218,11 @@ const SpaceForm = ({
   };
 
   const UploadAnyFile = (folderName: string, file: any) => {
+<<<<<<< HEAD
     const url = process.env.REACT_APP_API_MINIO_URL+"file-upload/single";
+=======
+    const url = "http://localhost:3013/file-upload/single";
+>>>>>>> mustafa
     const formData = new FormData();
 
     formData.append("file", file);
@@ -228,7 +232,11 @@ const SpaceForm = ({
   };
 
   const DeleteAnyFile = (realmName: string, fileName: string) => {
+<<<<<<< HEAD
     const url = process.env.REACT_APP_API_MINIO_URL+"file-upload/removeOne";
+=======
+    const url = "http://localhost:3013/file-upload/removeOne";
+>>>>>>> mustafa
 
     return axios.delete(url, { data: { fileName, realmName } });
   };
