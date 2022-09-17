@@ -81,10 +81,11 @@ export class ComponentRepository implements ComponentInterface<Component> {
   async create(createComponentDto: CreateComponentDto, header) {
     try {
       const { realm, authorization } = header;
-      const typesNode = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.TYPE], {
+      const typesNode = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.TYPES], {
         isDeleted: false,
         realm,
       });
+      console.log(typesNode)
       if (!typesNode.length) {
         throw new HttpException(wrong_parent_error(), 400);
       }
@@ -99,7 +100,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
         },
         'PARENT_OF',
       );
-
+      console.log(typeNode)
       if (!typeNode.length) {
         throw new HttpException(wrong_parent_error(), 400);
       }
@@ -218,10 +219,10 @@ export class ComponentRepository implements ComponentInterface<Component> {
       );
       const warrantyGuarantorPartsKafkaObject = {
         parentKey: createComponentDto.warrantyGuarantorParts,
-        referenceKey: typeNode.properties.key,
+        referenceKey: componentNode.properties.key,
         url: warrantyGuarantorPartsUrl,
         relationName: RelationName.WARRANTY_GUARANTOR_PARTS,
-        virtualNodeLabels: [Neo4jLabelEnum.TYPE, Neo4jLabelEnum.VIRTUAL],
+        virtualNodeLabels: [Neo4jLabelEnum.COMPONENT, Neo4jLabelEnum.VIRTUAL],
       };
 
       await this.kafkaService.producerSendMessage(
@@ -243,10 +244,10 @@ export class ComponentRepository implements ComponentInterface<Component> {
       );
       const warrantyGuarantorLaborKafkaObject = {
         parentKey: createComponentDto.warrantyGuarantorLabor,
-        referenceKey: typeNode.properties.key,
+        referenceKey: componentNode.properties.key,
         url: warrantyGuarantorLaborUrl,
         relationName: RelationName.WARRANTY_GUARANTOR_LABOR,
-        virtualNodeLabels: [Neo4jLabelEnum.TYPE, Neo4jLabelEnum.VIRTUAL],
+        virtualNodeLabels: [Neo4jLabelEnum.COMPONENT, Neo4jLabelEnum.VIRTUAL],
       };
 
       await this.kafkaService.producerSendMessage(
@@ -278,6 +279,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
     const { realm, authorization } = header;
 
     const node = await this.neo4jService.findChildrensByChildIdAndFilters([Neo4jLabelEnum.TYPES], { realm }, +_id, { isDeleted: false, isActive: true }, RelationName.PARENT_OF)
+    console.log(node)
     if (!node.length) {
       throw new HttpException(node_not_found(), 400);
     }
@@ -327,16 +329,16 @@ export class ComponentRepository implements ComponentInterface<Component> {
       const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName([Neo4jLabelEnum.COMPONENT], { key: node[0].get('children').properties.key }, [], { isDeleted: false }, RelationName.LOCATED_IN)
       if (virtualNode[0].get('children').properties.referenceKey !== updateComponentDto.space) {
         
-        const createdByKafkaObject = {
+        const spaceKafkaObject = {
           exParentKey: virtualNode[0].get('children').properties.referenceKey,
-          newParentKey: updateComponentDto.createdBy,
+          newParentKey: updateComponentDto.space,
           referenceKey: virtualNode[0].get('parent').properties.key,
           url: componentUrl,
           relationName: RelationName.HAS,
           virtualNodeLabels: [Neo4jLabelEnum.COMPONENT, Neo4jLabelEnum.VIRTUAL],
         };
 
-        await this.kafkaService.producerSendMessage('updateStructureRelation', JSON.stringify(createdByKafkaObject));
+        await this.kafkaService.producerSendMessage('updateStructureRelation', JSON.stringify(spaceKafkaObject));
         await this.neo4jService.updateByIdAndFilter(virtualNode[0].get('children').identity.low, {}, [], { url: structureUrl, referenceKey: updateComponentDto.space, updatedAt: moment().format('YYYY-MM-DD HH:mm:ss') })
 
       }
@@ -367,7 +369,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
       if (virtualNode[0].get('children').properties.referenceKey !== updateComponentDto.warrantyGuarantorLabor) {
         const warrantyGuarantorLaborUrl = `${process.env.CONTACT_URL}/${updateComponentDto.warrantyGuarantorLabor}`;
 
-        const createdByKafkaObject = {
+        const warrantyGuarantorLaborKafkaObject = {
           exParentKey: virtualNode[0].get('children').properties.referenceKey,
           newParentKey: updateComponentDto.warrantyGuarantorLabor,
           referenceKey: virtualNode[0].get('parent').properties.key,
@@ -376,7 +378,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
           virtualNodeLabels: [Neo4jLabelEnum.COMPONENT, Neo4jLabelEnum.VIRTUAL],
         };
 
-        await this.kafkaService.producerSendMessage('updateContactRelation', JSON.stringify(createdByKafkaObject));
+        await this.kafkaService.producerSendMessage('updateContactRelation', JSON.stringify(warrantyGuarantorLaborKafkaObject));
         await this.neo4jService.updateByIdAndFilter(virtualNode[0].get('children').identity.low, {}, [], { url: warrantyGuarantorLaborUrl, referenceKey: updateComponentDto.warrantyGuarantorLabor, updatedAt: moment().format('YYYY-MM-DD HH:mm:ss') })
 
       }
@@ -386,7 +388,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
       if (virtualNode[0].get('children').properties.referenceKey !== updateComponentDto.warrantyGuarantorParts) {
         const warrantyGuarantorPartsUrl = `${process.env.CONTACT_URL}/${updateComponentDto.warrantyGuarantorParts}`;
 
-        const createdByKafkaObject = {
+        const warrantyGuarantorPartsKafkaObject = {
           exParentKey: virtualNode[0].get('children').properties.referenceKey,
           newParentKey: updateComponentDto.warrantyGuarantorParts,
           referenceKey: virtualNode[0].get('parent').properties.key,
@@ -395,7 +397,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
           virtualNodeLabels: [Neo4jLabelEnum.COMPONENT, Neo4jLabelEnum.VIRTUAL],
         };
 
-        await this.kafkaService.producerSendMessage('updateContactRelation', JSON.stringify(createdByKafkaObject));
+        await this.kafkaService.producerSendMessage('updateContactRelation', JSON.stringify(warrantyGuarantorPartsKafkaObject));
         await this.neo4jService.updateByIdAndFilter(virtualNode[0].get('children').identity.low, {}, [], { url: warrantyGuarantorPartsUrl, referenceKey: updateComponentDto.warrantyGuarantorParts, updatedAt: moment().format('YYYY-MM-DD HH:mm:ss') })
 
       }

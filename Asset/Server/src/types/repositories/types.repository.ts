@@ -53,10 +53,13 @@ export class TypesRepository implements GeciciInterface<Type> {
         'PARENT_OF',
       );
       if (!node.length) {
-        throw new HttpException(node_not_found, 400);
+        throw new HttpException(node_not_found(), 400);
       }
-
-      return node;
+      const typeArray = node.map(element => {
+        element.get('children').properties['id'] = element.get('children').identity.low
+        return element.get('children').properties
+      })
+      return typeArray;
     } catch (error) {
       const code = error.response?.code;
 
