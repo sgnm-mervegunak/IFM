@@ -12,4 +12,5 @@ export interface FacilityInterface<T> {
   findOneByRealm(realm: string, language: string): any;
 
   findStructureFirstLevelNodes(label: string, realm: string, language: string): any;
+  addPlanToFloor(key: string, realm: string, language: string): any;
 }

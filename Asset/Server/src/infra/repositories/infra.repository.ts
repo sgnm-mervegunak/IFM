@@ -96,7 +96,7 @@ export class InfraRepository implements InfraInterface {
       {
         canDelete: true,
         isDeleted: false,
-        name: 'TR',
+        name: 'tr',
         realm: 'Signum',
         isActive: true,
       },
@@ -107,7 +107,7 @@ export class InfraRepository implements InfraInterface {
       {
         canDelete: true,
         isDeleted: false,
-        name: 'EN',
+        name: 'en',
         realm: 'Signum',
         isActive: true,
       },

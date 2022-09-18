@@ -6,7 +6,12 @@ import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Button } from "primereact/button";
 import { Toolbar } from "primereact/toolbar";
 import { Dropdown } from "primereact/dropdown";
-import { useParams, useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import {
+  useParams,
+  useNavigate,
+  useLocation,
+  useSearchParams,
+} from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import FacilityStructureService from "../../services/facilitystructure";
@@ -25,6 +30,7 @@ import FloorFileImport from "./ImportPages/FloorFileImport";
 import BlockFileImport from "./ImportPages/BlockFileImport";
 import SpaceFileImport from "./ImportPages/SpaceFileImport";
 import Export, { ExportType } from "./Export/Export";
+import AddPlan from "./Plan/AddPlan";
 
 interface Node {
   cantDeleted: boolean;
@@ -37,6 +43,7 @@ interface Node {
   realm: string;
   tag: string[];
   formTypeId?: string;
+  hasPlan?: boolean;
   _id: {
     low: string;
     high: string;
@@ -86,6 +93,7 @@ const SetFacilityStructure = () => {
   const [canDelete, setCanDelete] = useState<boolean>(true);
   const [addDia, setAddDia] = useState(false);
   const [exportDia, setExportDia] = useState(false);
+  const [planDia, setPlanDia] = useState(false);
   const [editDia, setEditDia] = useState(false);
   const [delDia, setDelDia] = useState<boolean>(false);
   const [formDia, setFormDia] = useState<boolean>(false);
@@ -116,12 +124,12 @@ const SetFacilityStructure = () => {
   const [display, setDisplay] = useState(false);
   const [displayKey, setDisplayKey] = useState("");
   const [docTypes, setDocTypes] = React.useState([]);
-  const [search,setSearch] = useState("");
-  const [searchParams,setSearchParams] = useSearchParams()
+  const [search, setSearch] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useAppSelector((state) => state.toast);
   const { t } = useTranslation(["common"]);
   const language = useAppSelector((state) => state.language.language);
-  
+
   useEffect(() => {
     FacilityStructureService.getFacilityTypes("FacilityTypes")
       .then((res) => {
@@ -178,11 +186,11 @@ const SetFacilityStructure = () => {
     getForms();
   }, []);
 
-  useEffect(()=>{
-    if(searchParams.get("search")){
-      setSearch(searchParams.get("search") as string)
+  useEffect(() => {
+    if (searchParams.get("search")) {
+      setSearch(searchParams.get("search") as string);
     }
-  },[])
+  }, []);
 
   const getNodeInfoAndEdit = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)
@@ -663,6 +671,41 @@ const SetFacilityStructure = () => {
       ></Toolbar>
 
       <Dialog
+        header={t("Add Plan To Floor")}
+        visible={planDia}
+        style={{ width: "40vw" }}
+        footer={() => (
+          <div>
+            <Button
+              label={t("Cancel")}
+              icon="pi pi-times"
+              onClick={() => {
+                setPlanDia(false);
+              }}
+              className="p-button-text"
+            />
+            <Button
+              label={t("Add")}
+              icon="pi pi-check"
+              onClick={() => setSubmitted(true)}
+              autoFocus
+            />
+          </div>
+        )}
+        onHide={() => {
+          setPlanDia(false);
+        }}
+      >
+        <AddPlan
+          submitted={submitted}
+          setSubmitted={setSubmitted}
+          setPlanDia={setPlanDia}
+          selectedNodeKey={selectedNodeKey}
+          getFacilityStructure={getFacilityStructure}
+        />
+      </Dialog>
+
+      <Dialog
         header={t("Export")}
         visible={exportDia}
         style={{ width: "40vw" }}
@@ -1116,9 +1159,9 @@ const SetFacilityStructure = () => {
           filterPlaceholder={t("Search")}
           filterMode="strict"
           filterValue={search}
-          onFilterValueChange={e=>{
-            setSearchParams({search: e.value})
-            setSearch(e.value)
+          onFilterValueChange={(e) => {
+            setSearchParams({ search: e.value });
+            setSearch(e.value);
           }}
           nodeTemplate={(data: Node, options) => (
             <span className="flex align-items-center font-bold">
@@ -1193,22 +1236,38 @@ const SetFacilityStructure = () => {
                         setSelectedNodeKey(data.key);
                         setDisplay(true);
                         setDisplayKey(data.key);
-                        
                       }}
                       title={t("View Data")}
                     />
-                    {process.env.REACT_APP_API_PLANNER_URL && data.nodeType === "Floor" &&
+                    {process.env.REACT_APP_API_PLANNER_CLIENT_URL &&
+                    data.nodeType === "Floor" &&
+                    (data.hasPlan ? (
                       <a
-                        href={process.env.REACT_APP_API_PLANNER_URL + "?key=" + data.key}
+                        href={
+                          process.env.REACT_APP_API_PLANNER_CLIENT_URL +
+                          "?key=" +
+                          data.key
+                        }
                       >
                         <Button
                           icon="pi pi-map"
-                          className="p-button-rounded p-button-secondary p-button-text"
+                          className="p-button-rounded p-button-info p-button-outlined"
                           aria-label="Go Plan"
                           title={"Go Plan"}
                         />
                       </a>
-                    }
+                    ) : (
+                      <Button
+                        icon="pi pi-map"
+                        className="p-button-rounded p-button-help p-button-outlined"
+                        aria-label="Add Plan"
+                        title={"Add Plan"}
+                        onClick={() => {
+                          setSelectedNodeKey(data.key);
+                          setPlanDia(true);
+                        }}
+                      />
+                    ))}
 
                     {/* <Button
                   icon="pi pi-book" className="p-button-rounded p-button-secondary p-button-text" aria-label="Edit Form"
