@@ -20,35 +20,28 @@ export default [
       { label: "Zone", icon: "pi pi-flag-fill", to: "/zone" },
       { label: "Contact", icon: "pi pi-id-card", to: "/contact" },
       {
-        label: "Structure-Asset",
+        label: "Structure-Component",
         icon: "pi pi-share-alt",
         to: "/structure-asset",
       },
       {
-        label: "Submenu 2",
-        icon: "pi pi-fw pi-align-left",
+        label: "Asset",
+        icon: "pi pi-fw pi-database",
         items: [
           {
-            label: "Submenu 2.1",
-            icon: "pi pi-fw pi-align-left",
-            items: [
-              { label: "Submenu 2.1.1", icon: "pi pi-fw pi-align-left" },
-              { label: "Submenu 2.1.2", icon: "pi pi-fw pi-align-left" },
-            ],
+            label: "Types",
+            icon: "pi pi-fw pi-angle-right",
+            to: "/asset-types",
           },
           {
-            label: "Submenu 2.2",
-            icon: "pi pi-fw pi-align-left",
-            items: [
-              {
-                label: "Submenu 2.2.1",
-                icon: "pi pi-fw pi-align-left",
-                items: [
-                  { label: "Submenu 2.2.1.1", icon: "pi pi-fw pi-align-left" },
-                  { label: "Submenu 2.2.1.2", icon: "pi pi-fw pi-align-left" },
-                ],
-              },
-            ],
+            label: "Components",
+            icon: "pi pi-fw pi-angle-right",
+            to: "/asset-components",
+          },
+          {
+            label: "System",
+            icon: "pi pi-fw pi-angle-right",
+            to: "/asset-system",
           },
         ],
       },

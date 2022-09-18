@@ -5,12 +5,12 @@ import { Unprotected } from 'nest-keycloak-connect';
 import { catchError, firstValueFrom, map } from 'rxjs';
 import { assignDtoPropToEntity, Neo4jService } from 'sgnm-neo4j/dist';
 import { VirtualNode } from 'src/common/baseobject/virtual.node';
-import { KafkaObject } from 'src/common/const/kafka.object.type';
+import { CreateKafkaObject, UpdateKafkaObject } from 'src/common/const/kafka.object.type';
 
 @Controller('contactListener')
 @Unprotected()
 export class ContactListenerController {
-  constructor(private readonly neo4jService: Neo4jService, private readonly httpService: HttpService) {}
+  constructor(private readonly neo4jService: Neo4jService, private readonly httpService: HttpService) { }
 
   @EventPattern('createContactRelation')
   async createAssetListener(@Payload() message) {
@@ -19,7 +19,7 @@ export class ContactListenerController {
       throw new HttpException('key is not available on kafka object', 400);
     }
 
-    const virtualObject: KafkaObject = message.value;
+    const virtualObject: CreateKafkaObject = message.value;
 
     const { parentKey } = virtualObject;
 
@@ -38,6 +38,29 @@ export class ContactListenerController {
     );
 
     await this.neo4jService.addRelationWithRelationNameByKey(parentKey, value.properties.key, 'HAS_VIRTUAL_RELATION');
+  }
+
+  @EventPattern('updateContactRelation')
+  async updateContactListener(@Payload() message) {
+    if (!message.value?.referenceKey) {
+      throw new HttpException('key is not provided by service', 400);
+    }
+    const virtualObject: UpdateKafkaObject = message.value;
+    // const component = await this.componentService.findOneNode(message.value?.key, realm);
+    const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName([], { key: virtualObject.exParentKey }, virtualObject.virtualNodeLabels, { referenceKey: virtualObject.referenceKey, isDeleted: false }, virtualObject.relationName)
+
+    await this.neo4jService.updateByIdAndFilter(virtualNode[0].get('children').identity.low, {}, [], { isDeleted: true })
+    let newVirtualNodeObject = new VirtualNode();
+    newVirtualNodeObject['referenceKey'] = virtualObject.referenceKey
+    newVirtualNodeObject['url'] = virtualObject.url
+
+    const newVirtualNode = await this.neo4jService.createNode(newVirtualNodeObject, virtualObject.virtualNodeLabels)
+    console.log(newVirtualNode)
+
+    await this.neo4jService.addRelationByLabelsAndFiltersAndRelationName([], { key: virtualObject.newParentKey }, [], { key: newVirtualNode.properties.key }, virtualObject.relationName)
+    await this.neo4jService.addRelationByLabelsAndFiltersAndRelationName([], { key: virtualObject.newParentKey }, [], { key: newVirtualNode.properties.key }, 'HAS_VIRTUAL_RELATION')
+
+
   }
 
   @EventPattern('deleteStructure')

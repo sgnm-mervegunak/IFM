@@ -31,18 +31,18 @@ export class ComponentController {
   }
 
   @Patch(':id')
-  @Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
   update(@Param('id') id: string, @Body() updateAssetDto: UpdateComponentDto, @Headers() header) {
     return this.componentService.update(id, updateAssetDto, header);
   }
 
   @Delete(':id')
-  @Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
   remove(@Param('id') id: string, @Headers() header) {
     return this.componentService.remove(id, header);
   }
 
-  @Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
   @Get('/:key')
   @NoCache()
   findOneNode(@Param('key') key: string, @Headers() header) {

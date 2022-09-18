@@ -48,4 +48,7 @@ export class StructureService {
   findStructureFirstLevelNodes(label: string, realm: string, language: string) {
     return this.facilityStructureRepository.findStructureFirstLevelNodes(label, realm, language);
   }
+  addPlanToFloor(key: string, realm: string, language: string) {
+    return this.facilityStructureRepository.addPlanToFloor(key, realm, language);
+  }
 }
