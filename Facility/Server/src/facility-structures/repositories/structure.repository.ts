@@ -903,4 +903,38 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
         }
    } 
   }
+
+  async addPlanToFloor(key: string, realm: string, language: string) {
+    //is there facility-structure node
+    const node = await this.neo4jService.findByLabelAndFilters([], { isDeleted: false, key: key }, ['Virtual']);
+    const structureRootNode = await this.neo4jService.findChildrensByLabelsAndFilters(
+      ['FacilityStructure'],
+      { isDeleted: false },
+      [],
+      { isDeleted: false, key: node[0]['_fields'][0].properties.key },
+    );
+
+    //check if rootNode realm equal to keyclock token realm
+    if (structureRootNode[0]['_fields'][0].properties.realm !== realm) {
+      throw new HttpException({ message: 'You dont have permission' }, 403);
+    }
+
+    if (node[0]['_fields'][0].properties.nodeType !== 'Floor') {
+      throw new HttpException({ message: 'You can add plan only to floor' }, 403);
+    }
+
+    node[0]['_fields'][0].properties.hasPlan = true;
+    const updatedNode = await this.neo4jService.updateByIdAndFilter(
+      node[0]['_fields'][0].identity.low,
+      { isDeleted: false },
+      [],
+      node[0]['_fields'][0].properties,
+    );
+    const response = {
+      id: updatedNode['identity'].low,
+      labels: updatedNode['labels'],
+      properties: updatedNode['properties'],
+    };
+    return response;
+  }
 }
