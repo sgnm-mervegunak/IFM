@@ -25,7 +25,8 @@ export class AssetRelationRepository implements VirtualNodeInterface<FacilityStr
     private readonly structureService: StructureService,
   ) {}
 
-  async findOneNodeByKey(key: string) {
+  async findOneNodeByKey(key: string, headers) {
+    const { authorization } = headers;
     const node = await this.neo4jService.findOneNodeByKey(key);
     if (!node) {
       //throw new HttpException('uygun node id si giriniz', 400);
@@ -44,7 +45,7 @@ export class AssetRelationRepository implements VirtualNodeInterface<FacilityStr
     const assetArray = await Promise.all(
       relations.map(async (virtualAsset) => {
         const asset = await this.httpService
-          .get(virtualAsset['_fields'][0].properties.url)
+          .get(virtualAsset['_fields'][0].properties.url, { headers: { authorization } })
           .pipe(
             catchError(() => {
               throw new HttpException('connection refused due to connection lost or wrong data provided', 502);
@@ -101,7 +102,7 @@ export class AssetRelationRepository implements VirtualNodeInterface<FacilityStr
     const assetUrl = `${process.env.ASSET_URL}/${createAssetRelationDto.referenceKey}`;
 
     virtualNode.url = assetUrl;
-    const value = await this.neo4jService.createNode(virtualNode, [Neo4jLabelEnum.VIRTUAL , Neo4jLabelEnum.ASSET]);
+    const value = await this.neo4jService.createNode(virtualNode, [Neo4jLabelEnum.VIRTUAL, Neo4jLabelEnum.ASSET]);
 
     await this.neo4jService.addRelationWithRelationNameByKey(key, value.properties.key, RelationName.HAS);
     await this.neo4jService.addRelationWithRelationNameByKey(
@@ -121,7 +122,7 @@ export class AssetRelationRepository implements VirtualNodeInterface<FacilityStr
 
   async delete(key: string, referenceKey: string) {
     try {
-      await this.structureService.findOneNode(key, "", "");
+      await this.structureService.findOneNode(key, '', '');
 
       const assetObservableObject = await this.httpService
         .get(`${process.env.ASSET_URL}/${referenceKey}`)

@@ -26,7 +26,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
     private readonly neo4jService: Neo4jService,
     private readonly kafkaService: NestKafkaService,
     private readonly httpService: HttpRequestHandler,
-  ) { }
+  ) {}
   async findByKey(key: string, header) {
     try {
       const nodes = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.COMPONENT], { key });
@@ -64,7 +64,6 @@ export class ComponentRepository implements ComponentInterface<Component> {
       throw new HttpException(wrong_parent_error(), 400);
     }
 
-
     let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure([Neo4jLabelEnum.TYPE], {
       key,
       isDeleted: false,
@@ -85,7 +84,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
         isDeleted: false,
         realm,
       });
-      console.log(typesNode)
+      console.log(typesNode);
       if (!typesNode.length) {
         throw new HttpException(wrong_parent_error(), 400);
       }
@@ -100,7 +99,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
         },
         'PARENT_OF',
       );
-      console.log(typeNode)
+      console.log(typeNode);
       if (!typeNode.length) {
         throw new HttpException(wrong_parent_error(), 400);
       }
@@ -276,144 +275,208 @@ export class ComponentRepository implements ComponentInterface<Component> {
   }
 
   async update(_id: string, updateComponentDto: UpdateComponentDto, header) {
-    const { realm, authorization } = header;
+    try {
+      const { realm, authorization } = header;
 
-    const node = await this.neo4jService.findChildrensByChildIdAndFilters([Neo4jLabelEnum.TYPES], { realm }, +_id, { isDeleted: false, isActive: true }, RelationName.PARENT_OF)
-    console.log(node)
-    if (!node.length) {
-      throw new HttpException(node_not_found(), 400);
-    }
-    const componentUrl = `${process.env.TYPE_URL}/${node[0].get('children').properties.key}`;
-    let structureUrl = '';
-    let structure;
-    if(updateComponentDto.spaceType && updateComponentDto.spaceType){
-      switch (updateComponentDto.spaceType) {
-        case SpaceType.JOINTSPACE:
-          structureUrl = `${process.env.JOINTSPACE_URL}/${updateComponentDto.space}`;
-  
-          structure = await this.httpService.get(`${process.env.JOINTSPACE_URL}/${updateComponentDto.space}`, {
-            authorization,
+      const node = await this.neo4jService.findChildrensByChildIdAndFilters(
+        [Neo4jLabelEnum.TYPES],
+        { realm },
+        +_id,
+        { isDeleted: false, isActive: true },
+        RelationName.PARENT_OF,
+      );
+      console.log(node);
+      if (!node.length) {
+        throw new HttpException(node_not_found(), 400);
+      }
+      const componentUrl = `${process.env.TYPE_URL}/${node[0].get('children').properties.key}`;
+      let structureUrl = '';
+      let structure;
+      if (updateComponentDto.spaceType && updateComponentDto.spaceType) {
+        switch (updateComponentDto.spaceType) {
+          case SpaceType.JOINTSPACE:
+            structureUrl = `${process.env.JOINTSPACE_URL}/${updateComponentDto.space}`;
+
+            structure = await this.httpService.get(`${process.env.JOINTSPACE_URL}/${updateComponentDto.space}`, {
+              authorization,
+            });
+
+            break;
+          case SpaceType.SPACE:
+            structureUrl = `${process.env.STRUCTURE_URL}/${updateComponentDto.space}`;
+
+            structure = await this.httpService.get(`${process.env.STRUCTURE_URL}/${updateComponentDto.space}`, {
+              authorization,
+            });
+
+            break;
+          default:
+            throw new HttpException(other_microservice_errors('SpaceType must be valid'), 400);
+        }
+      }
+
+      if (updateComponentDto.createdBy) {
+        await this.httpService.get(`${process.env.CONTACT_URL}/${updateComponentDto.createdBy}`, {
+          authorization,
+        });
+      }
+      if (updateComponentDto.warrantyGuarantorLabor) {
+        await this.httpService.get(`${process.env.CONTACT_URL}/${updateComponentDto.warrantyGuarantorLabor}`, {
+          authorization,
+        });
+      }
+      if (updateComponentDto.warrantyGuarantorParts) {
+        await this.httpService.get(`${process.env.CONTACT_URL}/${updateComponentDto.warrantyGuarantorParts}`, {
+          authorization,
+        });
+      }
+
+      if (updateComponentDto.space && updateComponentDto.spaceType) {
+        const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+          [Neo4jLabelEnum.COMPONENT],
+          { key: node[0].get('children').properties.key },
+          [],
+          { isDeleted: false },
+          RelationName.LOCATED_IN,
+        );
+        if (virtualNode[0].get('children').properties.referenceKey !== updateComponentDto.space) {
+          const spaceKafkaObject = {
+            exParentKey: virtualNode[0].get('children').properties.referenceKey,
+            newParentKey: updateComponentDto.space,
+            referenceKey: virtualNode[0].get('parent').properties.key,
+            url: componentUrl,
+            relationName: RelationName.HAS,
+            virtualNodeLabels: [Neo4jLabelEnum.COMPONENT, Neo4jLabelEnum.VIRTUAL],
+          };
+
+          await this.kafkaService.producerSendMessage('updateStructureRelation', JSON.stringify(spaceKafkaObject));
+          await this.neo4jService.updateByIdAndFilter(virtualNode[0].get('children').identity.low, {}, [], {
+            url: structureUrl,
+            referenceKey: updateComponentDto.space,
+            updatedAt: moment().format('YYYY-MM-DD HH:mm:ss'),
           });
-  
-          break;
-        case SpaceType.SPACE:
-          structureUrl = `${process.env.STRUCTURE_URL}/${updateComponentDto.space}`;
-  
-          structure = await this.httpService.get(`${process.env.STRUCTURE_URL}/${updateComponentDto.space}`, {
-            authorization,
+        }
+      }
+
+      if (updateComponentDto.createdBy) {
+        const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+          [Neo4jLabelEnum.COMPONENT],
+          { key: node[0].get('children').properties.key },
+          [],
+          { isDeleted: false },
+          RelationName.CREATED_BY,
+        );
+        if (virtualNode[0].get('children').properties.referenceKey !== updateComponentDto.createdBy) {
+          const createContactUrl = `${process.env.CONTACT_URL}/${updateComponentDto.createdBy}`;
+
+          const createdByKafkaObject = {
+            exParentKey: virtualNode[0].get('children').properties.referenceKey,
+            newParentKey: updateComponentDto.createdBy,
+            referenceKey: virtualNode[0].get('parent').properties.key,
+            url: componentUrl,
+            relationName: RelationName.CREATED_BY,
+            virtualNodeLabels: [Neo4jLabelEnum.COMPONENT, Neo4jLabelEnum.VIRTUAL],
+          };
+
+          await this.kafkaService.producerSendMessage('updateContactRelation', JSON.stringify(createdByKafkaObject));
+          await this.neo4jService.updateByIdAndFilter(virtualNode[0].get('children').identity.low, {}, [], {
+            url: createContactUrl,
+            referenceKey: updateComponentDto.createdBy,
+            updatedAt: moment().format('YYYY-MM-DD HH:mm:ss'),
           });
-  
-          break;
-        default:
-          throw new HttpException(other_microservice_errors('SpaceType must be valid'), 400);
-      }
-    }
-   
-    if (updateComponentDto.createdBy) {
-      await this.httpService.get(`${process.env.CONTACT_URL}/${updateComponentDto.createdBy}`, {
-        authorization,
-      })
-    }
-    if (updateComponentDto.warrantyGuarantorLabor) {
-      await this.httpService.get(`${process.env.CONTACT_URL}/${updateComponentDto.warrantyGuarantorLabor}`, {
-        authorization,
-      })
-    }
-    if (updateComponentDto.warrantyGuarantorParts) {
-      await this.httpService.get(`${process.env.CONTACT_URL}/${updateComponentDto.warrantyGuarantorParts}`, {
-        authorization,
-      })
-    }
-
-    if (updateComponentDto.space && updateComponentDto.spaceType) {
-      const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName([Neo4jLabelEnum.COMPONENT], { key: node[0].get('children').properties.key }, [], { isDeleted: false }, RelationName.LOCATED_IN)
-      if (virtualNode[0].get('children').properties.referenceKey !== updateComponentDto.space) {
-        
-        const spaceKafkaObject = {
-          exParentKey: virtualNode[0].get('children').properties.referenceKey,
-          newParentKey: updateComponentDto.space,
-          referenceKey: virtualNode[0].get('parent').properties.key,
-          url: componentUrl,
-          relationName: RelationName.HAS,
-          virtualNodeLabels: [Neo4jLabelEnum.COMPONENT, Neo4jLabelEnum.VIRTUAL],
-        };
-
-        await this.kafkaService.producerSendMessage('updateStructureRelation', JSON.stringify(spaceKafkaObject));
-        await this.neo4jService.updateByIdAndFilter(virtualNode[0].get('children').identity.low, {}, [], { url: structureUrl, referenceKey: updateComponentDto.space, updatedAt: moment().format('YYYY-MM-DD HH:mm:ss') })
-
-      }
-    }
-
-    if (updateComponentDto.createdBy) {
-      const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName([Neo4jLabelEnum.COMPONENT], { key: node[0].get('children').properties.key }, [], { isDeleted: false }, RelationName.CREATED_BY)
-      if (virtualNode[0].get('children').properties.referenceKey !== updateComponentDto.createdBy) {
-        const createContactUrl = `${process.env.CONTACT_URL}/${updateComponentDto.createdBy}`;
-
-        const createdByKafkaObject = {
-          exParentKey: virtualNode[0].get('children').properties.referenceKey,
-          newParentKey: updateComponentDto.createdBy,
-          referenceKey: virtualNode[0].get('parent').properties.key,
-          url: componentUrl,
-          relationName: RelationName.CREATED_BY,
-          virtualNodeLabels: [Neo4jLabelEnum.COMPONENT, Neo4jLabelEnum.VIRTUAL],
-        };
-
-        await this.kafkaService.producerSendMessage('updateContactRelation', JSON.stringify(createdByKafkaObject));
-        await this.neo4jService.updateByIdAndFilter(virtualNode[0].get('children').identity.low, {}, [], { url: createContactUrl, referenceKey: updateComponentDto.createdBy, updatedAt: moment().format('YYYY-MM-DD HH:mm:ss') })
-
-      }
-    }
-  
-    if (updateComponentDto.warrantyGuarantorLabor) {
-      const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName([Neo4jLabelEnum.COMPONENT], { key: node[0].get('children').properties.key }, [], { isDeleted: false }, RelationName.WARRANTY_GUARANTOR_LABOR)
-      if (virtualNode[0].get('children').properties.referenceKey !== updateComponentDto.warrantyGuarantorLabor) {
-        const warrantyGuarantorLaborUrl = `${process.env.CONTACT_URL}/${updateComponentDto.warrantyGuarantorLabor}`;
-
-        const warrantyGuarantorLaborKafkaObject = {
-          exParentKey: virtualNode[0].get('children').properties.referenceKey,
-          newParentKey: updateComponentDto.warrantyGuarantorLabor,
-          referenceKey: virtualNode[0].get('parent').properties.key,
-          url: componentUrl,
-          relationName: RelationName.WARRANTY_GUARANTOR_LABOR,
-          virtualNodeLabels: [Neo4jLabelEnum.COMPONENT, Neo4jLabelEnum.VIRTUAL],
-        };
-
-        await this.kafkaService.producerSendMessage('updateContactRelation', JSON.stringify(warrantyGuarantorLaborKafkaObject));
-        await this.neo4jService.updateByIdAndFilter(virtualNode[0].get('children').identity.low, {}, [], { url: warrantyGuarantorLaborUrl, referenceKey: updateComponentDto.warrantyGuarantorLabor, updatedAt: moment().format('YYYY-MM-DD HH:mm:ss') })
-
-      }
-    }
-    if (updateComponentDto.warrantyGuarantorParts) {
-      const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName([Neo4jLabelEnum.COMPONENT], { key: node[0].get('children').properties.key }, [], { isDeleted: false }, RelationName.WARRANTY_GUARANTOR_PARTS)
-      if (virtualNode[0].get('children').properties.referenceKey !== updateComponentDto.warrantyGuarantorParts) {
-        const warrantyGuarantorPartsUrl = `${process.env.CONTACT_URL}/${updateComponentDto.warrantyGuarantorParts}`;
-
-        const warrantyGuarantorPartsKafkaObject = {
-          exParentKey: virtualNode[0].get('children').properties.referenceKey,
-          newParentKey: updateComponentDto.warrantyGuarantorParts,
-          referenceKey: virtualNode[0].get('parent').properties.key,
-          url: componentUrl,
-          relationName: RelationName.WARRANTY_GUARANTOR_PARTS,
-          virtualNodeLabels: [Neo4jLabelEnum.COMPONENT, Neo4jLabelEnum.VIRTUAL],
-        };
-
-        await this.kafkaService.producerSendMessage('updateContactRelation', JSON.stringify(warrantyGuarantorPartsKafkaObject));
-        await this.neo4jService.updateByIdAndFilter(virtualNode[0].get('children').identity.low, {}, [], { url: warrantyGuarantorPartsUrl, referenceKey: updateComponentDto.warrantyGuarantorParts, updatedAt: moment().format('YYYY-MM-DD HH:mm:ss') })
-
+        }
       }
 
+      if (updateComponentDto.warrantyGuarantorLabor) {
+        const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+          [Neo4jLabelEnum.COMPONENT],
+          { key: node[0].get('children').properties.key },
+          [],
+          { isDeleted: false },
+          RelationName.WARRANTY_GUARANTOR_LABOR,
+        );
+        if (virtualNode[0].get('children').properties.referenceKey !== updateComponentDto.warrantyGuarantorLabor) {
+          const warrantyGuarantorLaborUrl = `${process.env.CONTACT_URL}/${updateComponentDto.warrantyGuarantorLabor}`;
 
+          const warrantyGuarantorLaborKafkaObject = {
+            exParentKey: virtualNode[0].get('children').properties.referenceKey,
+            newParentKey: updateComponentDto.warrantyGuarantorLabor,
+            referenceKey: virtualNode[0].get('parent').properties.key,
+            url: componentUrl,
+            relationName: RelationName.WARRANTY_GUARANTOR_LABOR,
+            virtualNodeLabels: [Neo4jLabelEnum.COMPONENT, Neo4jLabelEnum.VIRTUAL],
+          };
+
+          await this.kafkaService.producerSendMessage(
+            'updateContactRelation',
+            JSON.stringify(warrantyGuarantorLaborKafkaObject),
+          );
+          await this.neo4jService.updateByIdAndFilter(virtualNode[0].get('children').identity.low, {}, [], {
+            url: warrantyGuarantorLaborUrl,
+            referenceKey: updateComponentDto.warrantyGuarantorLabor,
+            updatedAt: moment().format('YYYY-MM-DD HH:mm:ss'),
+          });
+        }
+      }
+      if (updateComponentDto.warrantyGuarantorParts) {
+        const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+          [Neo4jLabelEnum.COMPONENT],
+          { key: node[0].get('children').properties.key },
+          [],
+          { isDeleted: false },
+          RelationName.WARRANTY_GUARANTOR_PARTS,
+        );
+        if (virtualNode[0].get('children').properties.referenceKey !== updateComponentDto.warrantyGuarantorParts) {
+          const warrantyGuarantorPartsUrl = `${process.env.CONTACT_URL}/${updateComponentDto.warrantyGuarantorParts}`;
+
+          const warrantyGuarantorPartsKafkaObject = {
+            exParentKey: virtualNode[0].get('children').properties.referenceKey,
+            newParentKey: updateComponentDto.warrantyGuarantorParts,
+            referenceKey: virtualNode[0].get('parent').properties.key,
+            url: componentUrl,
+            relationName: RelationName.WARRANTY_GUARANTOR_PARTS,
+            virtualNodeLabels: [Neo4jLabelEnum.COMPONENT, Neo4jLabelEnum.VIRTUAL],
+          };
+
+          await this.kafkaService.producerSendMessage(
+            'updateContactRelation',
+            JSON.stringify(warrantyGuarantorPartsKafkaObject),
+          );
+          await this.neo4jService.updateByIdAndFilter(virtualNode[0].get('children').identity.low, {}, [], {
+            url: warrantyGuarantorPartsUrl,
+            referenceKey: updateComponentDto.warrantyGuarantorParts,
+            updatedAt: moment().format('YYYY-MM-DD HH:mm:ss'),
+          });
+        }
+      }
+      const updatedNode = await this.neo4jService.updateByIdAndFilter(
+        +_id,
+        { isDeleted: false, isActive: true },
+        [],
+        updateComponentDto,
+      );
+      if (!updatedNode) {
+        throw new FacilityStructureNotFountException(_id);
+      }
+      return updatedNode;
+    } catch (error) {
+      const code = error.response?.code;
+
+      if (code >= 1000 && code <= 1999) {
+      } else if (code >= 5000 && code <= 5999) {
+        if (error.response?.code == CustomNeo4jError.ADD_CHILDREN_RELATION_BY_ID_ERROR) {
+        }
+      } else if (code >= 9500 && code <= 9750) {
+        if (error.response?.code == CustomAssetError.WRONG_PARENT) {
+          throw new WrongIdProvided();
+        }
+        if (error.response?.code == CustomAssetError.OTHER_MICROSERVICE_ERROR) {
+          throw new HttpException(error.response.message, error.status);
+        }
+      } else {
+        throw new HttpException(error, 500);
+      }
     }
-    const updatedNode = await this.neo4jService.updateByIdAndFilter(
-      +_id,
-      { isDeleted: false, isActive: true },
-      [],
-      updateComponentDto,
-    );
-    if (!updatedNode) {
-      throw new FacilityStructureNotFountException(_id);
-    }
-    return updatedNode;
   }
 
   async delete(_id: string, header) {

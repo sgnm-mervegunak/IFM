@@ -222,6 +222,7 @@ export class TypesRepository implements GeciciInterface<Type> {
       return result;
     } catch (error) {
       const code = error.response?.code;
+      console.log(error.response);
 
       if (code >= 1000 && code <= 1999) {
       } else if (code >= 5000 && code <= 5999) {
@@ -232,7 +233,7 @@ export class TypesRepository implements GeciciInterface<Type> {
           throw new WrongIdProvided();
         }
         if (error.response?.code == CustomAssetError.OTHER_MICROSERVICE_ERROR) {
-          throw new HttpException(error.response.message, error.response.status);
+          throw new HttpException(error.response.message, error.status);
         }
       } else {
         throw new HttpException(error, 500);
@@ -412,7 +413,7 @@ export class TypesRepository implements GeciciInterface<Type> {
           throw new WrongIdProvided();
         }
         if (error.response?.code == CustomAssetError.OTHER_MICROSERVICE_ERROR) {
-          throw new HttpException(error.response.message, error.response.status);
+          throw new HttpException(error.response.message, error.status);
         }
       } else {
         throw new HttpException(error, 500);

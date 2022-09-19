@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Headers } from '@nestjs/common';
 import { Unprotected } from 'nest-keycloak-connect';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { NoCache } from 'ifmcommon';
@@ -33,7 +33,7 @@ export class WinformRelationController {
   @Unprotected()
   @Get('/:key')
   @NoCache()
-  findOneNode(@Param('key') key: string) {
-    return this.structureRelationService.findOneNode(key);
+  findOneNode(@Param('key') key: string, @Headers() header) {
+    return this.structureRelationService.findOneNode(key, header);
   }
 }
