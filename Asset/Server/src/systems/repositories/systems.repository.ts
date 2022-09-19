@@ -234,6 +234,44 @@ export class SystemsRepository implements SystemsInterface<System> {
     if (!updatedNode) {
       throw new FacilityStructureNotFountException(_id);
     }
+    ////////////////////////////// update classified_by  relation, if category changed //////////////////////////////////
+    const categories =  await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+      [],
+      {"isDeleted": false, "key": node[0]["_fields"][0].properties.key},
+      [],
+      {"isDeleted": false},
+      RelationName.CLASSIFIED_BY,
+      RelationDirection.RIGHT
+    )
+    const newCategories = await this.neo4jService.findChildrensByLabelsAndFilters(
+      ['Classification'],
+      {"isDeleted": false, "realm": structureRootNode[0]["_fields"][0].properties.realm},
+      [],
+      {"isDeleted": false, "code": structureData["category"] }
+    )
+   if (categories && categories.length>0)  {
+    if (categories[0]['_fields'][1]['properties'].code != structureData["category"]) {
+      for (let i=0; i<categories.length; i++) {
+         await this.neo4jService.deleteRelationByIdAndRelationNameWithoutFilters(
+              node[0]["_fields"][0].identity.low,
+              categories[i]['_fields'][1].identity.low,
+              RelationName.CLASSIFIED_BY,
+              RelationDirection.RIGHT       
+        )
+      }
+      for (let i=0; i<newCategories.length; i++) {
+        await this.neo4jService.addRelationByIdAndRelationNameWithFilters(node[0]["_fields"][0].identity.low,{"isDeleted":false},
+        newCategories[i]['_fields'][1].identity.low, {"isDeleted":false}, RelationName.CLASSIFIED_BY, RelationDirection.RIGHT);
+      }
+    }
+   }
+   else {
+      for (let i=0; i<newCategories.length; i++) {
+        await this.neo4jService.addRelationByIdAndRelationNameWithFilters(node[0]["_fields"][0].identity.low,{"isDeleted":false},
+        newCategories[i]['_fields'][1].identity.low, {"isDeleted":false}, RelationName.CLASSIFIED_BY, RelationDirection.RIGHT);
+      }
+   }
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     return updatedNode;
   }
 
