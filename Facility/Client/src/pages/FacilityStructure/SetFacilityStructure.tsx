@@ -107,18 +107,10 @@ const SetFacilityStructure = () => {
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
   const [generateNodeKey, setGenerateNodeKey] = useState("");
-  const [generateFormTypeKey, setGenerateFormTypeKey] = useState<
-    string | undefined
-  >("");
-  const [generateNodeName, setGenerateNodeName] = useState<string | undefined>(
-    ""
-  );
-  const [facilityType, setFacilityType] = useState<
-    { name: string; code: string }[]
-  >([]);
-  const [selectedFacilityType, setSelectedFacilityType] = useState<
-    string | undefined
-  >("");
+  const [generateFormTypeKey, setGenerateFormTypeKey] = useState<string | undefined>("");
+  const [generateNodeName, setGenerateNodeName] = useState<string | undefined>("");
+  const [facilityType, setFacilityType] = useState<{ name: string; code: string }[]>([]);
+  const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const [display, setDisplay] = useState(false);
@@ -183,7 +175,7 @@ const SetFacilityStructure = () => {
   };
 
   useEffect(() => {
-    getForms();
+    // getForms();
   }, []);
 
   useEffect(() => {
@@ -787,7 +779,7 @@ const SetFacilityStructure = () => {
           />
         </div>
         {selectedFacilityType === "Building" ||
-        selectedFacilityType === "Bina" ? (
+          selectedFacilityType === "Bina" ? (
           <BuildingForm
             selectedFacilityType={selectedFacilityType}
             submitted={submitted}
@@ -935,7 +927,7 @@ const SetFacilityStructure = () => {
           />
         </div>
         {selectedFacilityType === "Building" ||
-        selectedFacilityType === "Bina" ? (
+          selectedFacilityType === "Bina" ? (
           <BuildingForm
             selectedFacilityType={selectedFacilityType}
             submitted={submitted}
@@ -1240,34 +1232,34 @@ const SetFacilityStructure = () => {
                       title={t("View Data")}
                     />
                     {process.env.REACT_APP_API_PLANNER_CLIENT_URL &&
-                    data.nodeType === "Floor" &&
-                    (data.hasPlan ? (
-                      <a
-                        href={
-                          process.env.REACT_APP_API_PLANNER_CLIENT_URL +
-                          "?key=" +
-                          data.key
-                        }
-                      >
+                      data.nodeType === "Floor" &&
+                      (data.hasPlan ? (
+                        <a
+                          href={
+                            process.env.REACT_APP_API_PLANNER_CLIENT_URL +
+                            "?key=" +
+                            data.key
+                          }
+                        >
+                          <Button
+                            icon="pi pi-map"
+                            className="p-button-rounded p-button-info p-button-outlined"
+                            aria-label="Go Plan"
+                            title={"Go Plan"}
+                          />
+                        </a>
+                      ) : (
                         <Button
                           icon="pi pi-map"
-                          className="p-button-rounded p-button-info p-button-outlined"
-                          aria-label="Go Plan"
-                          title={"Go Plan"}
+                          className="p-button-rounded p-button-help p-button-outlined"
+                          aria-label="Add Plan"
+                          title={"Add Plan"}
+                          onClick={() => {
+                            setSelectedNodeKey(data.key);
+                            setPlanDia(true);
+                          }}
                         />
-                      </a>
-                    ) : (
-                      <Button
-                        icon="pi pi-map"
-                        className="p-button-rounded p-button-help p-button-outlined"
-                        aria-label="Add Plan"
-                        title={"Add Plan"}
-                        onClick={() => {
-                          setSelectedNodeKey(data.key);
-                          setPlanDia(true);
-                        }}
-                      />
-                    ))}
+                      ))}
 
                     {/* <Button
                   icon="pi pi-book" className="p-button-rounded p-button-secondary p-button-text" aria-label="Edit Form"
