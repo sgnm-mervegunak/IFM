@@ -289,7 +289,7 @@ const SetTypes = () => {
             paginator
             responsiveLayout="scroll"
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} types"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Types"
             rows={15}
             rowsPerPageOptions={[15, 25, 50]}
             showGridlines
@@ -314,7 +314,11 @@ const SetTypes = () => {
               sortable
               style={{ width: "25%" }}
             />
-            <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '8rem' }}></Column>
+            <Column
+              body={actionBodyTemplate}
+              exportable={false}
+              style={{ minWidth: '8rem' }}
+            />
           </DataTable>
         </div>
 
