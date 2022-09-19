@@ -122,7 +122,6 @@ export class ContactRepository implements GeciciInterface<Contact> {
       ['Contact'],
       {'isDeleted': false},
       +_id,
-      [],
       {'isDeleted': false},
       RelationName.PARENT_OF
     )
@@ -257,7 +256,6 @@ catch (error) {
         [],
         {"isDeleted": false},
         +_id,
-        [],
         {"isDeleted": false},
         RelationName.CREATED_BY
       )

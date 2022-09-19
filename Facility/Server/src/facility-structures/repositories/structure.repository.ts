@@ -63,9 +63,8 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
 
     return node;
   }
-
-
-  //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////  Dynamic DTO  //////////////////////////////////////////
+  //REVISED FOR NEW NEO4J
   async update(key: string, structureData: Object, realm: string, language: string) {
     //is there facility-structure node
    try { 
@@ -85,24 +84,18 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       throw new HttpException({ message: 'You dont have permission' }, 403);
     }
 
-
-
          //name property uniqueness  control
          if (node[0]["_fields"][0].labels[0] == 'Space' || node[0]["_fields"][0].labels[0] == 'Block' || node[0]["_fields"][0].labels[0] == 'Floor') {
           let building;
-          //  if (node[0]["_fields"][0].labels[0] == 'Building') {
-          //    building = node;
-          //  }
-          //  else {
+
             building = await this.neo4jService.findChildrensByChildIdAndFilters(
               ['Building'],
               {'isDeleted': false},
               node[0]["_fields"][0].identity.low,
-              [],
               {'isDeleted': false},
               RelationName.PARENT_OF
              ) 
-            // } 
+
             let sameNameNode = await this.neo4jService.findChildrensByIdAndFilters(
               building[0]["_fields"][0].identity.low,
               {'isDeleted': false},
@@ -134,9 +127,6 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
           }
         }
 
-
-
-
     const properties = await this.findChildrenByFacilityTypeNode(
       structureData['nodeType'],
       structureRootNode[0]["_fields"][0].properties.realm,
@@ -165,8 +155,6 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       }
     });
 
- 
-
     //update facility structure node
     const updatedOn = moment().format('YYYY-MM-DD HH:mm:ss');
     structureData['updatedOn'] = updatedOn;
@@ -176,7 +164,6 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       }
     }); 
     const dynamicObject = createDynamicCyperObject(structureData);
-    //const updatedNode = await this.neo4jService.updateById(node[0]["_fields"][0].identity.low, dynamicObject);
     const updatedNode = await this.neo4jService.updateByIdAndFilter(
       node[0]["_fields"][0].identity.low,
       {"isDeleted": false},
@@ -532,14 +519,14 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
       { isDeleted: false },
       ['FacilityType'],
       { isDeleted: false, name: typename },
-      'PARENT_OF',
+      RelationName.PARENT_OF,
     );
     let node = await this.neo4jService.findChildrensByIdOneLevel(
       type_node[0]['_fields'][1]['identity'].low,
       { isDeleted: false },
       ['FacilityTypeProperty'],
       { isDeleted: false, isActive: true, canDisplay: true },
-      'PARENT_OF',
+      RelationName.PARENT_OF,
     );
 
     if (!node) {
@@ -557,47 +544,8 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
     return [];
   }
 
-  //////////////////////////////////////
-  async findChildrensByLabelsOneLevel(
-    root_labels: Array<string> = [],
-    root_filters: object = {},
-    children_labels: Array<string> = [],
-    children_filters: object = {},
-    databaseOrTransaction?: string | Transaction
-  ) {
-    try {
-      const rootLabelsWithoutEmptyString =
-        filterArrayForEmptyString(root_labels);
-      const childrenLabelsWithoutEmptyString =
-        filterArrayForEmptyString(children_labels);
-
-      const cypher =
-        `MATCH p=(n` +
-        dynamicLabelAdder(rootLabelsWithoutEmptyString) +
-        dynamicFilterPropertiesAdder(root_filters) +
-        `-[:PARENT_OF]->(m` +
-        dynamicLabelAdder(childrenLabelsWithoutEmptyString) +
-        dynamicFilterPropertiesAdderAndAddParameterKey(children_filters) +
-        ` RETURN n as parent,m as children`;
-
-      children_filters = changeObjectKeyName(children_filters);
-      const parameters = { ...root_filters, ...children_filters };
-      const result = await this.neo4jService.read(cypher, parameters, databaseOrTransaction);
-      return result["records"];
-    } catch (error) {
-      if (error.response?.code) {
-        throw new HttpException(
-          { message: error.response?.message, code: error.response?.code },
-          error.status
-        );
-      } else {
-        throw new HttpException(error, 500);
-      }
-    }
-  }
-  /////////////////////////////////////
-
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
+  //REVISED FOR NEW NEO4J
   async create(key: string, structureData: Object, realm: string, language: string) {
    try {
     if (!structureData["category"] || structureData["category"] == null) {
@@ -632,7 +580,7 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
      }
     ///////////////////////////// parent - child node type relation control ////////////////////////////
    
-    const allowedStructureTypeNode = await this.findChildrensByLabelsOneLevel(
+    const allowedStructureTypeNode = await this.neo4jService.findChildrensByLabelsOneLevel(
       ['FacilityTypes_en'],
       {"isDeleted": false, "realm": structureRootNode[0]['_fields'][0].properties.realm},
       [],
@@ -667,7 +615,6 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
           ['Building'],
           {'isDeleted': false},
           node[0]["_fields"][0].identity.low,
-          [],
           {'isDeleted': false},
           RelationName.PARENT_OF
          ) 
@@ -683,9 +630,7 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
           throw new HttpException(not_unique({val: structureData['name']}), 400);
         }
        }
-
     else  {
-      
       let sameNameNode = await this.neo4jService.findChildrensByIdAndFilters(
         structureRootNode[0]["_fields"][0].identity.low,
         {'isDeleted': false},
@@ -698,9 +643,6 @@ async changeNodeBranch(_id: string, target_parent_id: string, realm: string, lan
       }
     }
     
-
-   
-
     ////////////////////////////// Control of input properties with facility type properties //////////////////////////////////////////////////
     const properties = await this.findChildrenByFacilityTypeNode(
       structureData['nodeType'],
