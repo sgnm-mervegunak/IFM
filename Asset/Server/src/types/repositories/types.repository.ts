@@ -6,11 +6,11 @@ import {
 import { Type } from '../entities/types.entity';
 import { NestKafkaService, nodeHasChildException } from 'ifmcommon';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
-import { assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError, Neo4jService } from 'sgnm-neo4j/dist';
+import { assignDtoPropToEntity, CustomNeo4jError, Neo4jService } from 'sgnm-neo4j/dist';
 import { CreateTypesDto } from '../dto/create.types.dto';
 import { UpdateTypesDto } from '../dto/update.tpes.dto';
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
-import { node_not_found, other_microservice_errors, wrong_parent_error } from 'src/common/const/custom.error.object';
+import { node_not_found, wrong_parent_error } from 'src/common/const/custom.error.object';
 import { CustomAssetError } from 'src/common/const/custom.error.enum';
 import { NodeNotFound, WrongIdProvided } from 'src/common/bad.request.exception';
 import * as moment from 'moment';
@@ -32,6 +32,43 @@ export class TypesRepository implements GeciciInterface<Type> {
       if (!nodes.length) {
         throw new AssetNotFoundException(key);
       }
+
+      const createtByNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        [Neo4jLabelEnum.TYPE],
+        { key: nodes[0].get('n').properties.key },
+        [],
+        { isDeleted: false },
+        RelationName.CREATED_BY,
+      );
+      nodes[0].get('n').properties['createdBy'] = createtByNode[0].get('children').properties.referenceUrl;
+
+      const manufacturedByNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        [Neo4jLabelEnum.TYPE],
+        { key: nodes[0].get('n').properties.key },
+        [],
+        { isDeleted: false },
+        RelationName.MANUFACTURED_BY,
+      );
+      nodes[0].get('n').properties['manufacturer'] = manufacturedByNode[0].get('children').properties.referenceUrl;
+      const warrantyGuaranorLaborNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        [Neo4jLabelEnum.TYPE],
+        { key: nodes[0].get('n').properties.key },
+        [],
+        { isDeleted: false },
+        RelationName.WARRANTY_GUARANTOR_LABOR,
+      );
+      nodes[0].get('n').properties['warrantyGuarantorLabor'] =
+        warrantyGuaranorLaborNode[0].get('children').properties.referenceUrl;
+      const warrantyGuaranorPartsNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        [Neo4jLabelEnum.TYPE],
+        { key: nodes[0].get('n').properties.key },
+        [],
+        { isDeleted: false },
+        RelationName.WARRANTY_GUARANTOR_PARTS,
+      );
+      nodes[0].get('n').properties['warrantyGuarantorParts'] =
+        warrantyGuaranorPartsNode[0].get('children').properties.referenceUrl;
+
       return nodes[0]['_fields'][0];
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -432,7 +469,7 @@ export class TypesRepository implements GeciciInterface<Type> {
       if (hasChildrenArray.length === 0) {
         deletedNode = await this.neo4jService.updateByIdAndFilter(+_id, {}, [], { isDeleted: true, isActive: false });
         await this.kafkaService.producerSendMessage(
-          'deleteContactRelation',
+          'deleteRelation',
           JSON.stringify({ referenceKey: typeNode.properties.key }),
         );
       } else {
