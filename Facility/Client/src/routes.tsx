@@ -26,7 +26,7 @@ import Zone from "./pages/Zone/Zone";
 import SetJointSpace from "./pages/JointSpace/SetJointSpace";
 import SetZone from "./pages/Zone/SetZone";
 import ClassificationFileImportWithoutCode from "./pages/Classifications/ClassificationFileImportWithoutCode";
-import Types from "./pages/Types/Types";
+import SetTypes from "./pages/Types/SetTypes";
 
 // import Main from './pages/Main';
 
@@ -49,7 +49,7 @@ export default function Router() {
         // { path: "formgenerate", element: <FormGenerate />},
         { path: "contact", element: <Contact /> },
         { path: "structure-asset", element: <StructureAsset /> },
-        { path: "asset-types", element: <Types/> },
+        { path: "assettype", element:  <SetTypes/>},
       ],
     },
     {
