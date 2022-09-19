@@ -423,29 +423,22 @@ export class TypesRepository implements GeciciInterface<Type> {
 
   async delete(_id: string, header) {
     try {
-      const node = await this.neo4jService.read(`match(n) where id(n)=$id return n`, { id: parseInt(_id) });
-      if (!node.records[0]) {
-        throw new HttpException({ code: 5005 }, 404);
-      }
-      await this.neo4jService.getParentById(_id);
+      const typeNode = await this.neo4jService.findByIdAndFilters(+_id, { isDeleted: false });
+
       let deletedNode;
 
-      const hasChildren = await this.neo4jService.findChildrenById(_id);
+      const hasChildrenArray = await this.neo4jService.findChildrensByIdAndFilters(+_id, {}, [], {}, 'PARENT_OF');
 
-      if (hasChildren['records'].length == 0) {
+      if (hasChildrenArray.length === 0) {
+        deletedNode = await this.neo4jService.updateByIdAndFilter(+_id, {}, [], { isDeleted: true, isActive: false });
         await this.kafkaService.producerSendMessage(
-          'deleteAsset',
-          JSON.stringify({ referenceKey: node.records[0]['_fields'][0].properties.key }),
+          'deleteContactRelation',
+          JSON.stringify({ referenceKey: typeNode.properties.key }),
         );
-        deletedNode = await this.neo4jService.delete(_id);
-        if (!deletedNode) {
-          throw new AssetNotFoundException(_id);
-        }
+      } else {
+        throw new HttpException('node has parent relation ', 400);
       }
-      await this.kafkaService.producerSendMessage(
-        'deleteAsset',
-        JSON.stringify({ referenceKey: deletedNode.properties.key }),
-      );
+
       return deletedNode;
     } catch (error) {
       const { code, message } = error.response;
