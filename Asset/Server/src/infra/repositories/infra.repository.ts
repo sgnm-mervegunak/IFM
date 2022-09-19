@@ -46,133 +46,138 @@ export class InfraRepository implements InfraInterface {
   }
   async create() {
     //create  node with multi or single label
-    const infraNode = await this.neo4jService.createNode(
-      { canDelete: false, isDeleted: false, name: 'Infra', realm: 'Signum' },
-      ['Infra'],
-    );
-    const classificationNode = await this.neo4jService.createNode(
-      { canDelete: false, isDeleted: false, name: 'Classification', realm: 'Signum' },
-      ['Classification'],
-    );
-    const typeNode = await this.neo4jService.createNode(
-      { canDelete: false, isDeleted: false, name: 'Types', realm: 'Signum' },
-      ['Types'],
-    );
-    const configNode = await this.neo4jService.createNode(
-      { canDelete: false, isDeleted: false, name: 'System Config', realm: 'Signum' },
-      ['System_Config'],
-    );
-    await this.neo4jService.addParentRelationByIdAndFilters(
-      classificationNode.identity.low,
-      {},
-      infraNode.identity.low,
-      {},
-    );
-    await this.neo4jService.addParentRelationByIdAndFilters(typeNode.identity.low, {}, infraNode.identity.low, {});
-    await this.neo4jService.addParentRelationByIdAndFilters(configNode.identity.low, {}, infraNode.identity.low, {});
+    try {
+      const infraNode = await this.neo4jService.createNode(
+        { canDelete: false, isDeleted: false, name: 'Infra', realm: 'Signum' },
+        ['Infra'],
+      );
+      const classificationNode = await this.neo4jService.createNode(
+        { canDelete: false, isDeleted: false, name: 'Classification', realm: 'Signum' },
+        ['Classification'],
+      );
+      const typeNode = await this.neo4jService.createNode(
+        { canDelete: false, isDeleted: false, name: 'Types', realm: 'Signum' },
+        ['Types'],
+      );
+      const configNode = await this.neo4jService.createNode(
+        { canDelete: false, isDeleted: false, name: 'System Config', realm: 'Signum' },
+        ['System_Config'],
+      );
 
-    const languageConfigNode = await this.neo4jService.createNode(
-      {
-        canDelete: false,
-        isDeleted: false,
-        nodesCanDelete: true,
-        name: 'LanguageConfig',
-        realm: 'Signum',
-        isRoot: true,
-        canCopied: true,
-        isActive: true,
-      },
-      ['Language_Config'],
-    );
+      await this.neo4jService.addParentRelationByIdAndFilters(
+        classificationNode.identity.low,
+        {},
+        infraNode.identity.low,
+        {},
+      );
+      await this.neo4jService.addParentRelationByIdAndFilters(typeNode.identity.low, {}, infraNode.identity.low, {});
+      await this.neo4jService.addParentRelationByIdAndFilters(configNode.identity.low, {}, infraNode.identity.low, {});
 
-    await this.neo4jService.addParentRelationByIdAndFilters(
-      languageConfigNode.identity.low,
-      {},
-      configNode.identity.low,
-      {},
-    );
+      const languageConfigNode = await this.neo4jService.createNode(
+        {
+          canDelete: false,
+          isDeleted: false,
+          nodesCanDelete: true,
+          name: 'LanguageConfig',
+          realm: 'Signum',
+          isRoot: true,
+          canCopied: true,
+          isActive: true,
+        },
+        ['Language_Config'],
+      );
 
-    const languageTRNode = await this.neo4jService.createNode(
-      {
-        canDelete: true,
-        isDeleted: false,
-        name: 'tr',
-        realm: 'Signum',
-        isActive: true,
-      },
-      [],
-    );
+      await this.neo4jService.addParentRelationByIdAndFilters(
+        languageConfigNode.identity.low,
+        {},
+        configNode.identity.low,
+        {},
+      );
 
-    const languageENNode = await this.neo4jService.createNode(
-      {
-        canDelete: true,
-        isDeleted: false,
-        name: 'en',
-        realm: 'Signum',
-        isActive: true,
-      },
-      [],
-    );
-    await this.neo4jService.addParentRelationByIdAndFilters(
-      languageTRNode.identity.low,
-      {},
-      languageConfigNode.identity.low,
-      {},
-    );
-    await this.neo4jService.addParentRelationByIdAndFilters(
-      languageENNode.identity.low,
-      {},
-      languageConfigNode.identity.low,
-      {},
-    );
+      const languageTRNode = await this.neo4jService.createNode(
+        {
+          canDelete: true,
+          isDeleted: false,
+          name: 'tr',
+          realm: 'Signum',
+          isActive: true,
+        },
+        [],
+      );
 
-    //-----AssetTypes------
-    const assetTypesNode = await this.neo4jService.createNode(
-      { canDelete: false, isDeleted: false, name: 'Types', realm: 'Signum' },
-      ['AssetTypes'],
-    );
+      const languageENNode = await this.neo4jService.createNode(
+        {
+          canDelete: true,
+          isDeleted: false,
+          name: 'en',
+          realm: 'Signum',
+          isActive: true,
+        },
+        [],
+      );
+      await this.neo4jService.addParentRelationByIdAndFilters(
+        languageTRNode.identity.low,
+        {},
+        languageConfigNode.identity.low,
+        {},
+      );
+      await this.neo4jService.addParentRelationByIdAndFilters(
+        languageENNode.identity.low,
+        {},
+        languageConfigNode.identity.low,
+        {},
+      );
 
-    await this.neo4jService.addParentRelationByIdAndFilters(
-      assetTypesNode.identity.low,
-      {},
-      classificationNode.identity.low,
-      {},
-    );
+      //-----AssetTypes------
+      const assetTypesNode = await this.neo4jService.createNode(
+        { canDelete: false, isDeleted: false, name: 'Types', realm: 'Signum' },
+        ['AssetTypes'],
+      );
 
-    const fixedAssetTypeNode = await this.neo4jService.createNode(
-      {
-        canDelete: true,
-        isDeleted: false,
-        name: 'fixed',
-        isActive: true,
-      },
-      ['AssetType'],
-    );
-    const moveableAssetTypeNode = await this.neo4jService.createNode(
-      {
-        canDelete: true,
-        isDeleted: false,
-        name: 'moveable',
-        isActive: true,
-      },
-      ['AssetType'],
-    );
+      await this.neo4jService.addParentRelationByIdAndFilters(
+        assetTypesNode.identity.low,
+        {},
+        classificationNode.identity.low,
+        {},
+      );
 
-    await this.neo4jService.addParentRelationByIdAndFilters(
-      fixedAssetTypeNode.identity.low,
-      {},
-      assetTypesNode.identity.low,
-      {},
-    );
+      const fixedAssetTypeNode = await this.neo4jService.createNode(
+        {
+          canDelete: true,
+          isDeleted: false,
+          name: 'fixed',
+          isActive: true,
+        },
+        ['AssetType'],
+      );
+      const moveableAssetTypeNode = await this.neo4jService.createNode(
+        {
+          canDelete: true,
+          isDeleted: false,
+          name: 'moveable',
+          isActive: true,
+        },
+        ['AssetType'],
+      );
 
-    await this.neo4jService.addParentRelationByIdAndFilters(
-      moveableAssetTypeNode.identity.low,
-      {},
-      assetTypesNode.identity.low,
-      {},
-    );
+      await this.neo4jService.addParentRelationByIdAndFilters(
+        fixedAssetTypeNode.identity.low,
+        {},
+        assetTypesNode.identity.low,
+        {},
+      );
 
-    return infraNode;
+      await this.neo4jService.addParentRelationByIdAndFilters(
+        moveableAssetTypeNode.identity.low,
+        {},
+        assetTypesNode.identity.low,
+        {},
+      );
+
+      return infraNode;
+    } catch (error) {
+      throw new HttpException(error, 500);
+    }
   }
 
   async importClassificationFromExcel(file: Express.Multer.File, language: string) {
