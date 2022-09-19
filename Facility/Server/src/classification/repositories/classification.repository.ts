@@ -99,7 +99,6 @@ export class ClassificationRepository implements classificationInterface<Classif
         [],
         { isDeleted: false, isRoot: true },
         value['identity'].low,
-        [],
         { isDeleted: false },
         RelationName.PARENT_OF,
         // databaseOrTransaction?: string | Transaction
