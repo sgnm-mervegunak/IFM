@@ -76,7 +76,11 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     function uuidReturn() {
       return uuidv4();
     }
-    const neo4Transaction = await this.neo4jService.beginTransaction();
+    const realmUniqness = await this.neo4jService.findByLabelAndFilters(['Infra'], { realm: 'Signum' });
+
+    if (realmUniqness.length > 0) {
+      throw new HttpException('realm must bu uniqe for Root node', 400);
+    }
 
     //create  node with multi or single label
     const infraNode = await this.neo4jService.createNode(

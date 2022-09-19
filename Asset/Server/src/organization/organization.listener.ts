@@ -19,6 +19,12 @@ export class OrganizationListenerController {
 
     const realm = facilityInfo.realm;
 
+    const realmUniqness = await this.neo4jService.findByLabelAndFilters(['Root'], { realm });
+
+    if (realmUniqness.length > 0) {
+      throw new HttpException('realm must bu uniqe for Root node', 400);
+    }
+
     await this.httpService
       .get(`${process.env.STRUCTURE_URL}/${facilityInfo.key}`)
       .pipe(
