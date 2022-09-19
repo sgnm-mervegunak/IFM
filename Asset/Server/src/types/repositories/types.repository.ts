@@ -40,7 +40,7 @@ export class TypesRepository implements GeciciInterface<Type> {
         { isDeleted: false },
         RelationName.CREATED_BY,
       );
-      nodes[0].get('n').properties['createdBy'] = createtByNode[0].get('children').properties.referenceUrl;
+      nodes[0].get('n').properties['createdBy'] = createtByNode[0].get('children').properties.referenceKey;
 
       const manufacturedByNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
         [Neo4jLabelEnum.TYPE],
@@ -49,7 +49,7 @@ export class TypesRepository implements GeciciInterface<Type> {
         { isDeleted: false },
         RelationName.MANUFACTURED_BY,
       );
-      nodes[0].get('n').properties['manufacturer'] = manufacturedByNode[0].get('children').properties.referenceUrl;
+      nodes[0].get('n').properties['manufacturer'] = manufacturedByNode[0].get('children').properties.referenceKey;
       const warrantyGuaranorLaborNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
         [Neo4jLabelEnum.TYPE],
         { key: nodes[0].get('n').properties.key },
@@ -58,7 +58,7 @@ export class TypesRepository implements GeciciInterface<Type> {
         RelationName.WARRANTY_GUARANTOR_LABOR,
       );
       nodes[0].get('n').properties['warrantyGuarantorLabor'] =
-        warrantyGuaranorLaborNode[0].get('children').properties.referenceUrl;
+        warrantyGuaranorLaborNode[0].get('children').properties.referenceKey;
       const warrantyGuaranorPartsNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
         [Neo4jLabelEnum.TYPE],
         { key: nodes[0].get('n').properties.key },
@@ -67,7 +67,7 @@ export class TypesRepository implements GeciciInterface<Type> {
         RelationName.WARRANTY_GUARANTOR_PARTS,
       );
       nodes[0].get('n').properties['warrantyGuarantorParts'] =
-        warrantyGuaranorPartsNode[0].get('children').properties.referenceUrl;
+        warrantyGuaranorPartsNode[0].get('children').properties.referenceKey;
 
       return nodes[0]['_fields'][0];
     } catch (error) {
