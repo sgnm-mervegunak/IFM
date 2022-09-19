@@ -48,6 +48,11 @@ export class InfraRepository implements InfraInterface {
   async create() {
     //create  node with multi or single label
     try {
+      const realmUniqness = await this.neo4jService.findByLabelAndFilters(['Infra'], { realm: 'Signum' });
+
+      if (realmUniqness.length > 0) {
+        throw new HttpException('realm must bu uniqe for Root node', 400);
+      }
       const infraNode = await this.neo4jService.createNode(
         { canDelete: false, isDeleted: false, name: 'Infra', realm: 'Signum' },
         ['Infra'],
@@ -182,12 +187,11 @@ export class InfraRepository implements InfraInterface {
   }
 
   async importClassificationFromExcel(file: Express.Multer.File, language: string) {
+    let durationUnit: any;
+    let assetType: any;
+    let categoryProduct: any;
+    let categoryElement: any;
 
-    let durationUnit: any
-    let assetType:any
-    let categoryProduct:any
-    let categoryElement:any
- 
     let buffer = new Uint8Array(file.buffer);
     const workbook = new exceljs.Workbook();
 
@@ -205,21 +209,15 @@ export class InfraRepository implements InfraInterface {
 
       // columnsLength = book.getWorksheet(20)._columns?.length; //column length of specific sheet
 
-      
       //we got what we want
-      assetType=sheet.getColumn(3).values
-      durationUnit=sheet.getColumn(13).values
-      categoryProduct=sheet.getColumn(7).values
-      categoryElement=sheet.getColumn(6).values
-
-   
+      assetType = sheet.getColumn(3).values;
+      durationUnit = sheet.getColumn(13).values;
+      categoryProduct = sheet.getColumn(7).values;
+      categoryElement = sheet.getColumn(6).values;
     });
 
-   
-
-     
-    let classificationsWithoutCode = [ assetType, durationUnit];
-    let classifications = [ categoryProduct, categoryElement];
+    let classificationsWithoutCode = [assetType, durationUnit];
+    let classifications = [categoryProduct, categoryElement];
 
     /////////// process of classifications with code ////////////////////////////////
     for (let i = 0; i < classifications.length; i++) {
@@ -424,36 +422,47 @@ export class InfraRepository implements InfraInterface {
       //   let data2 = await this.neo4jService.write(cypher2);
       // }
     }
-   
 
     /////////////////////////////////////////////////////////////// process of classfications without code ////////////////////////////////////////////////////////////////
-    let deneme4 = []
-    const realmName="Signum"
-  
+    let deneme4 = [];
+    const realmName = 'Signum';
 
-      for(let i=0;i<classificationsWithoutCode.length;i++){
-        let deneme5=[];
-         let dto ={}
-        for (let index = 1; index < classificationsWithoutCode[i].length; index++) {
-
-          dto={name:classificationsWithoutCode[i][index],isDeleted:false,isActive:true,canDelete:true,canDisplay:true,code:`${classificationsWithoutCode[i][1]}${index-1}`}
-          deneme5.push(dto);
-
-        }
-       deneme4.push(deneme5);
-        }
-
-        for(let i=0;i < deneme4.length;i++){
-          let cypher= `MATCH (n:Classification {realm:"${realmName}"}) MERGE (b:${deneme4[i][0].name}_${language} {name:"${deneme4[i][0].name}",isDeleted:${deneme4[i][0].isDeleted},key:"${generateUuid()}",realm:"${realmName}",canDelete:false,isActive:true,canCopied:true,isRoot:true,canDisplay:true,language:"${language}"})  MERGE (n)-[:PARENT_OF]->(b)`;
-          await this.neo4jService.write(cypher);
-
-          for (let index = 1; index < deneme4[i].length; index++) {
-
-        let cypher3= `MATCH (n:${deneme4[i][0].name}_${language} {isDeleted:false}) MERGE (b {code:"${deneme4[i][index].code}",name:"${deneme4[i][index].name}",isDeleted:${deneme4[i][index].isDeleted},key:"${generateUuid()}",canDelete:${deneme4[i][index].canDelete},canDisplay:${deneme4[i][index].canDisplay},language:"${language}"})  MERGE (n)-[:PARENT_OF]->(b)`;
-         let data =await this.neo4jService.write(cypher3)
-         console.log(data);
-          }
-        }
-
+    for (let i = 0; i < classificationsWithoutCode.length; i++) {
+      let deneme5 = [];
+      let dto = {};
+      for (let index = 1; index < classificationsWithoutCode[i].length; index++) {
+        dto = {
+          name: classificationsWithoutCode[i][index],
+          isDeleted: false,
+          isActive: true,
+          canDelete: true,
+          canDisplay: true,
+          code: `${classificationsWithoutCode[i][1]}${index - 1}`,
+        };
+        deneme5.push(dto);
       }
+      deneme4.push(deneme5);
+    }
+
+    for (let i = 0; i < deneme4.length; i++) {
+      let cypher = `MATCH (n:Classification {realm:"${realmName}"}) MERGE (b:${deneme4[i][0].name}_${language} {name:"${
+        deneme4[i][0].name
+      }",isDeleted:${
+        deneme4[i][0].isDeleted
+      },key:"${generateUuid()}",realm:"${realmName}",canDelete:false,isActive:true,canCopied:true,isRoot:true,canDisplay:true,language:"${language}"})  MERGE (n)-[:PARENT_OF]->(b)`;
+      await this.neo4jService.write(cypher);
+
+      for (let index = 1; index < deneme4[i].length; index++) {
+        let cypher3 = `MATCH (n:${deneme4[i][0].name}_${language} {isDeleted:false}) MERGE (b {code:"${
+          deneme4[i][index].code
+        }",name:"${deneme4[i][index].name}",isDeleted:${
+          deneme4[i][index].isDeleted
+        },key:"${generateUuid()}",canDelete:${deneme4[i][index].canDelete},canDisplay:${
+          deneme4[i][index].canDisplay
+        },language:"${language}"})  MERGE (n)-[:PARENT_OF]->(b)`;
+        let data = await this.neo4jService.write(cypher3);
+        console.log(data);
+      }
+    }
+  }
 }
