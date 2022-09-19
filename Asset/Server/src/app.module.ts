@@ -17,6 +17,7 @@ import { OrganizationModule } from './organization/organization.module';
 import { TypesModule } from './types/types.module';
 import { ComponentModule } from './component/component.module';
 import { ExcelImportModule } from './excelImport/excelImport.module';
+import { SystemsModule } from './systems/systems.module';
 
 @Module({
   imports: [
@@ -61,7 +62,7 @@ import { ExcelImportModule } from './excelImport/excelImport.module';
         port: configService.get('NEO4J_PORT'),
         scheme: configService.get('NEO4J_SCHEME'),
         username: configService.get('NEO4J_USERNAME'),
-        database: 'test',
+        database: 'atamer',
       }),
     }),
 
@@ -80,6 +81,7 @@ import { ExcelImportModule } from './excelImport/excelImport.module';
     OrganizationModule,
     TypesModule,
     ExcelImportModule,
+    SystemsModule,
   ],
   providers: [
     //to cache all get request

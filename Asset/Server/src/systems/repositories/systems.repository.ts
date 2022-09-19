@@ -191,16 +191,22 @@ export class SystemsRepository implements SystemsInterface<System> {
   async update(_id: string, systemsDto: SystemsDto, header) {
     const { realm, authorization } = header;
 
-    const node = await this.neo4jService.findChildrensByChildIdAndFilters(
-      [Neo4jLabelEnum.SYSTEMS],
-      { realm },
-      +_id,
-      { isDeleted: false, isActive: true },
-      RelationName.PARENT_OF,
-    );
+    const node = await this.neo4jService.findChildrensByChildIdAndFilters([Neo4jLabelEnum.SYSTEMS], { realm },
+         +_id, { isDeleted: false, isActive: true }, RelationName.PARENT_OF);
     if (!node.length) {
       throw new HttpException(node_not_found(), 400);
     }
+    const  systemRootNode = await this.neo4jService.findChildrensByLabelsAndFilters(
+            ['Asset'],
+            {'isDeleted': false},
+            [],
+            {'isDeleted': false, 'key': node[0]["_fields"][0].properties.key}
+    ); 
+     //check if rootNode realm equal to keyclock token realm
+     if (systemRootNode[0]["_fields"][0].properties.realm !== realm) {
+      throw new HttpException({ message: 'You dont have permission' }, 403);
+    }
+
     const systemUrl = `${process.env.SYSTEM_URL}/${node[0].get('children').properties.key}`;
     if (systemsDto.createdBy) {
       await this.httpService.get(`${process.env.CONTACT_URL}/${systemsDto.createdBy}`, {
@@ -261,20 +267,20 @@ export class SystemsRepository implements SystemsInterface<System> {
     );
     const newCategories = await this.neo4jService.findChildrensByLabelsAndFilters(
       ['Classification'],
-      { isDeleted: false, realm: structureRootNode[0]['_fields'][0].properties.realm },
+      {"isDeleted": false, "realm": systemRootNode[0]["_fields"][0].properties.realm},
       [],
-      { isDeleted: false, code: structureData['category'] },
-    );
-    if (categories && categories.length > 0) {
-      if (categories[0]['_fields'][1]['properties'].code != structureData['category']) {
-        for (let i = 0; i < categories.length; i++) {
-          await this.neo4jService.deleteRelationByIdAndRelationNameWithoutFilters(
-            node[0]['_fields'][0].identity.low,
-            categories[i]['_fields'][1].identity.low,
-            RelationName.CLASSIFIED_BY,
-            RelationDirection.RIGHT,
-          );
-        }
+      {"isDeleted": false, "code": systemsDto["category"] }
+    )
+   if (categories && categories.length>0)  {
+    if (categories[0]['_fields'][1]['properties'].code != systemsDto["category"]) {
+      for (let i=0; i<categories.length; i++) {
+         await this.neo4jService.deleteRelationByIdAndRelationNameWithoutFilters(
+              node[0]["_fields"][0].identity.low,
+              categories[i]['_fields'][1].identity.low,
+              RelationName.CLASSIFIED_BY,
+              RelationDirection.RIGHT       
+        );
+       }
         for (let i = 0; i < newCategories.length; i++) {
           await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
             node[0]['_fields'][0].identity.low,
@@ -285,48 +291,48 @@ export class SystemsRepository implements SystemsInterface<System> {
             RelationDirection.RIGHT,
           );
         }
+    } 
+   }
+   else {
+      for (let i=0; i<newCategories.length; i++) {
+        await this.neo4jService.addRelationByIdAndRelationNameWithFilters(node[0]["_fields"][0].identity.low,{"isDeleted":false},
+        newCategories[i]['_fields'][1].identity.low, {"isDeleted":false}, RelationName.CLASSIFIED_BY, RelationDirection.RIGHT);
       }
-    } else {
-      for (let i = 0; i < newCategories.length; i++) {
-        await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
-          node[0]['_fields'][0].identity.low,
-          { isDeleted: false },
-          newCategories[i]['_fields'][1].identity.low,
-          { isDeleted: false },
-          RelationName.CLASSIFIED_BY,
-          RelationDirection.RIGHT,
-        );
-      }
-    }
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+   }
+
     return updatedNode;
   }
 
   async delete(_id: string, header) {
     try {
-      const node = await this.neo4jService.read(`match(n) where id(n)=$id return n`, { id: parseInt(_id) });
-      if (!node.records[0]) {
-        throw new HttpException({ code: 5005 }, 404);
-      }
+      //const node = await this.neo4jService.read(`match(n) where id(n)=$id return n`, { id: parseInt(_id) });
+      const node = await this.neo4jService.findByIdAndFilters(
+        +_id,
+        {"isDeleted": false},
+        []
+      )
+      // if (!node.records[0]) {
+      //   throw new HttpException({ code: 5005 }, 404);
+      // }
       await this.neo4jService.getParentById(_id);
       let deletedNode;
 
-      const hasChildren = await this.neo4jService.findChildrenById(_id);
+      // const hasChildren = await this.neo4jService.findChildrenById(_id);
+      const hasChildren = await this.neo4jService.findChildrensByIdOneLevel(
+        +_id,
+        {"isDeleted": false},
+        ['Component'],
+        {"isDeleted": false},
+        RelationName.CONTAINS_COMPONENT
+      )
 
-      if (hasChildren['records'].length == 0) {
-        await this.kafkaService.producerSendMessage(
-          'deleteAsset',
-          JSON.stringify({ referenceKey: node.records[0]['_fields'][0].properties.key }),
-        );
+      if (hasChildren['length'] == 0) {
         deletedNode = await this.neo4jService.delete(_id);
         if (!deletedNode) {
           throw new AssetNotFoundException(_id);
         }
       }
-      await this.kafkaService.producerSendMessage(
-        'deleteAsset',
-        JSON.stringify({ referenceKey: deletedNode.properties.key }),
-      );
+      
       return deletedNode;
     } catch (error) {
       const { code, message } = error.response;
