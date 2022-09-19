@@ -82,25 +82,19 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
     const infraNode = await this.neo4jService.createNode(
       { canDelete: false, isDeleted: false, name: 'Infra', realm: 'Signum' },
       ['Infra'],
-      neo4Transaction,
     );
     const classificationNode = await this.neo4jService.createNode(
       { canDelete: false, isDeleted: false, name: 'Classification', realm: 'Signum' },
       ['Classification'],
-      neo4Transaction,
     );
     const typeNode = await this.neo4jService.createNode(
       { canDelete: false, isDeleted: false, name: 'Types', realm: 'Signum' },
       ['Types'],
-      neo4Transaction,
     );
     const configNode = await this.neo4jService.createNode(
       { canDelete: false, isDeleted: false, name: 'System Config', realm: 'Signum' },
       ['System_Config'],
-      neo4Transaction,
     );
-    neo4Transaction.commit();
-    neo4Transaction.close();
 
     await this.neo4jService.addRelations(classificationNode.identity.low, infraNode.identity.low);
     await this.neo4jService.addRelations(typeNode.identity.low, infraNode.identity.low);

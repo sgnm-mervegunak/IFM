@@ -27,8 +27,8 @@ export class AssetRelationRepository implements VirtualNodeInterface<FacilityStr
 
   async findOneNodeByKey(key: string, headers) {
     const { authorization } = headers;
-    const node = await this.neo4jService.findOneNodeByKey(key);
-    if (!node) {
+    const node = await this.neo4jService.findByLabelAndFilters([], { key });
+    if (!node[0].length) {
       //throw new HttpException('uygun node id si giriniz', 400);
       throw new RelationNotFountException(key);
     }
