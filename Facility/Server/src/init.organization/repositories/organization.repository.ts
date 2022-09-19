@@ -2295,6 +2295,12 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
 
   async create(createFacilityDto: CreateOrganizationDto) {
     const { structureInfo, organizationInfo, classificationInfo, realm } = createFacilityDto;
+    const realmUniqness = await this.neo4jService.findByLabelAndFilters(['Root'], { realm });
+
+    console.log(realmUniqness);
+    if (realmUniqness.length > 0) {
+      throw new HttpException('realm must bu uniqe for Root node', 400);
+    }
 
     const facility = new Facility();
     facility.realm = realm;
