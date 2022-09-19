@@ -77,11 +77,7 @@ export class OrganizationRepository implements OrganizationInterface<Facility> {
       return uuidv4();
     }
     const neo4Transaction = await this.neo4jService.beginTransaction();
-    const infraNode1 = await this.neo4jService.createNode(
-      { canDelete: false, isDeleted: false, name: 'Infra1z', realm: 'Signum' },
-      ['Infra1'],
-      neo4Transaction,
-    );
+
     //create  node with multi or single label
     const infraNode = await this.neo4jService.createNode(
       { canDelete: false, isDeleted: false, name: 'Infra', realm: 'Signum' },
