@@ -47,51 +47,31 @@ export class InfraRepository implements InfraInterface {
   async create() {
     //create  node with multi or single label
     try {
-      const neo4Transaction = await this.neo4jService.beginTransaction();
       const infraNode = await this.neo4jService.createNode(
         { canDelete: false, isDeleted: false, name: 'Infra', realm: 'Signum' },
         ['Infra'],
-        neo4Transaction,
       );
       const classificationNode = await this.neo4jService.createNode(
         { canDelete: false, isDeleted: false, name: 'Classification', realm: 'Signum' },
         ['Classification'],
-        neo4Transaction,
       );
       const typeNode = await this.neo4jService.createNode(
         { canDelete: false, isDeleted: false, name: 'Types', realm: 'Signum' },
         ['Types'],
-        neo4Transaction,
       );
       const configNode = await this.neo4jService.createNode(
         { canDelete: false, isDeleted: false, name: 'System Config', realm: 'Signum' },
         ['System_Config'],
-        neo4Transaction,
       );
-      neo4Transaction.commit();
 
       await this.neo4jService.addParentRelationByIdAndFilters(
         classificationNode.identity.low,
         {},
         infraNode.identity.low,
         {},
-        neo4Transaction,
       );
-      await this.neo4jService.addParentRelationByIdAndFilters(
-        typeNode.identity.low,
-        {},
-        infraNode.identity.low,
-        {},
-        neo4Transaction,
-      );
-      await this.neo4jService.addParentRelationByIdAndFilters(
-        configNode.identity.low,
-        {},
-        infraNode.identity.low,
-        {},
-        neo4Transaction,
-      );
-      neo4Transaction.commit();
+      await this.neo4jService.addParentRelationByIdAndFilters(typeNode.identity.low, {}, infraNode.identity.low, {});
+      await this.neo4jService.addParentRelationByIdAndFilters(configNode.identity.low, {}, infraNode.identity.low, {});
 
       const languageConfigNode = await this.neo4jService.createNode(
         {
@@ -105,9 +85,8 @@ export class InfraRepository implements InfraInterface {
           isActive: true,
         },
         ['Language_Config'],
-        neo4Transaction,
       );
-      neo4Transaction.commit();
+
       await this.neo4jService.addParentRelationByIdAndFilters(
         languageConfigNode.identity.low,
         {},
