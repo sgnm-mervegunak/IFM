@@ -59,7 +59,7 @@ interface ITypes {
 
 }
 
-const Types = () => {
+const SetTypes = () => {
   let emptyType = {
     accessibilityPerformance: "",
     assetType: "",
@@ -289,11 +289,12 @@ const Types = () => {
             paginator
             responsiveLayout="scroll"
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Types"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} types"
             rows={15}
             rowsPerPageOptions={[15, 25, 50]}
             showGridlines
             header="Types"
+            emptyMessage="Type not found"
           >
             <Column
               field="name"
@@ -389,4 +390,4 @@ const Types = () => {
   );
 };
 
-export default React.memo(Types);
+export default React.memo(SetTypes);
