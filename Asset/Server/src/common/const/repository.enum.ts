@@ -13,4 +13,5 @@ export enum RepositoryEnums {
   ORGANIZATION = 'ORGANIZATION',
   INFRA = 'INFRA',
   EXCEL_IMPORT='EXCEL_IMPORT',
+  SYSTEMS = 'SYSTEMS',
 }
