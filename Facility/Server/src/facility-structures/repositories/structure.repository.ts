@@ -537,14 +537,14 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       { isDeleted: false },
       ['FacilityType'],
       { isDeleted: false, name: typename },
-      'PARENT_OF',
+      RelationName.PARENT_OF,
     );
     let node = await this.neo4jService.findChildrensByIdOneLevel(
       type_node[0]['_fields'][1]['identity'].low,
       { isDeleted: false },
       ['FacilityTypeProperty'],
       { isDeleted: false, isActive: true, canDisplay: true },
-      'PARENT_OF',
+      RelationName.PARENT_OF,
     );
 
     if (!node) {

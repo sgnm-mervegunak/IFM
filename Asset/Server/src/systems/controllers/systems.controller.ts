@@ -6,9 +6,9 @@ import { UserRoles } from 'src/common/const/keycloak.role.enum';
 import { SystemsService } from '../services/systems.service';
 import { SystemsDto } from '../dto/systems.dto';
 
-@ApiTags('types')
+@ApiTags('systems')
 @ApiBearerAuth('JWT-auth')
-@Controller('types')
+@Controller('systems')
 export class SystemsController {
   constructor(private readonly systemsService: SystemsService) {}
 
