@@ -133,13 +133,9 @@ const SetTypes = () => {
   const getTypes = () => {
     TypesService.findAll()
       .then((res) => {
-        console.log(res.data);
         setTypes(res.data);
       })
       .catch((err) => {
-        if (types.length === 0) {
-          setTypes([])
-        }
         toast.current.show({
           severity: "error",
           summary: t("Error"),

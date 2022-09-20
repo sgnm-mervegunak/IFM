@@ -254,8 +254,6 @@ const TypeForm = ({
   };
 
   const onSubmit = (data: any) => {
-    console.log(editDia);
-
     if (editDia === false) {
       let newNode: any = {};
 
@@ -312,6 +310,7 @@ const TypeForm = ({
           // StructureWinformService.createForm(res.data.properties.key, newForm)
           //     .then((res) => {
           //     })
+
           let temp = {} as any;
           for (let item in uploadFiles) {
             temp[item] = [];
@@ -336,7 +335,7 @@ const TypeForm = ({
           for (let item in temp) {
             temp[item] = JSON.stringify(temp[item]);
           }
-          TypesService.update(res.data.properties.id, {
+          await TypesService.update(res.data.properties.id, {
             ...newNode,
             ...temp,
           });
@@ -356,8 +355,6 @@ const TypeForm = ({
       setUploadFiles({});
 
     } else {
-      console.log("test");
-
       let updateNode: any = {};
       updateNode = {
         name: data?.name,
@@ -451,9 +448,10 @@ const TypeForm = ({
             ...updateNode,
             ...temp,
           });
-          getTypes();
+
           setUploadFiles({});
           setDeleteFiles([]);
+          getTypes();
         })
         .catch((err) => {
           toast.current.show({
@@ -463,11 +461,9 @@ const TypeForm = ({
             life: 4000,
           });
         });
-      setTimeout(() => {
-        setEditDia(false);
-        setUploadFiles({});
-        setDeleteFiles([]);
-      }, 1000);
+      setUploadFiles({});
+      setDeleteFiles([]);
+      setEditDia(false);
     }
   };
 
