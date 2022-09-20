@@ -5,62 +5,98 @@ import { Unprotected } from 'nest-keycloak-connect';
 import { catchError, firstValueFrom, map } from 'rxjs';
 import { assignDtoPropToEntity, Neo4jService } from 'sgnm-neo4j/dist';
 import { VirtualNode } from 'src/common/baseobject/virtual.node';
+import { node_not_found } from 'src/common/const/custom.error.object';
 import { CreateKafkaObject, UpdateKafkaObject } from 'src/common/const/kafka.object.type';
+import { ContactService } from '../services/contact.service';
 
 @Controller('contactListener')
 @Unprotected()
 export class ContactListenerController {
-  constructor(private readonly neo4jService: Neo4jService, private readonly httpService: HttpService) { }
+  constructor(
+    private readonly neo4jService: Neo4jService,
+    private readonly httpService: HttpService,
+    private readonly contactService: ContactService,
+  ) {}
 
   @EventPattern('createContactRelation')
   async createAssetListener(@Payload() message) {
-    console.log(message);
-    if (!message.value?.referenceKey || !message.value?.parentKey) {
-      throw new HttpException('key is not available on kafka object', 400);
+    try {
+      console.log(message);
+      if (!message.value?.referenceKey || !message.value?.parentKey) {
+        throw new HttpException('key is not available on kafka object', 400);
+      }
+
+      const parentNode = await this.neo4jService.findByLabelAndFilters([], { key: message.value.parentKey });
+
+      if (parentNode.length === 0) {
+        throw new HttpException('node_not_found()', 400);
+      }
+
+      const virtualObject: CreateKafkaObject = message.value;
+
+      const { parentKey } = virtualObject;
+
+      let virtualNodeObject = new VirtualNode();
+
+      virtualNodeObject = assignDtoPropToEntity(virtualNodeObject, virtualObject);
+      delete virtualNodeObject['relationName'];
+      delete virtualNodeObject['virtualNodeLabel'];
+
+      const value = await this.neo4jService.createNode(virtualNodeObject, virtualObject.virtualNodeLabels);
+
+      await this.neo4jService.addRelationWithRelationNameByKey(
+        parentKey,
+        value.properties.key,
+        virtualObject.relationName,
+      );
+
+      await this.neo4jService.addRelationWithRelationNameByKey(parentKey, value.properties.key, 'HAS_VIRTUAL_RELATION');
+    } catch (error) {
+      throw new HttpException(error, 400);
     }
-
-    const virtualObject: CreateKafkaObject = message.value;
-
-    const { parentKey } = virtualObject;
-
-    let virtualNodeObject = new VirtualNode();
-
-    virtualNodeObject = assignDtoPropToEntity(virtualNodeObject, virtualObject);
-    delete virtualNodeObject['relationName'];
-    delete virtualNodeObject['virtualNodeLabel'];
-
-    const value = await this.neo4jService.createNode(virtualNodeObject, virtualObject.virtualNodeLabels);
-
-    await this.neo4jService.addRelationWithRelationNameByKey(
-      parentKey,
-      value.properties.key,
-      virtualObject.relationName,
-    );
-
-    await this.neo4jService.addRelationWithRelationNameByKey(parentKey, value.properties.key, 'HAS_VIRTUAL_RELATION');
   }
 
   @EventPattern('updateContactRelation')
   async updateContactListener(@Payload() message) {
-    if (!message.value?.referenceKey) {
-      throw new HttpException('key is not provided by service', 400);
-    }
-    const virtualObject: UpdateKafkaObject = message.value;
-    // const component = await this.componentService.findOneNode(message.value?.key, realm);
-    const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName([], { key: virtualObject.exParentKey }, virtualObject.virtualNodeLabels, { referenceKey: virtualObject.referenceKey, isDeleted: false }, virtualObject.relationName)
+    try {
+      if (!message.value?.referenceKey) {
+        throw new HttpException('key is not provided by service', 400);
+      }
+      const virtualObject: UpdateKafkaObject = message.value;
+      // const component = await this.componentService.findOneNode(message.value?.key, realm);
+      const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        [],
+        { key: virtualObject.exParentKey },
+        virtualObject.virtualNodeLabels,
+        { referenceKey: virtualObject.referenceKey, isDeleted: false },
+        virtualObject.relationName,
+      );
 
-    await this.neo4jService.updateByIdAndFilter(virtualNode[0].get('children').identity.low, {}, [], { isDeleted: true })
-    let newVirtualNodeObject = new VirtualNode();
-    newVirtualNodeObject['referenceKey'] = virtualObject.referenceKey
-    newVirtualNodeObject['url'] = virtualObject.url
+      await this.neo4jService.updateByIdAndFilter(virtualNode[0].get('children').identity.low, {}, [], {
+        isDeleted: true,
+      });
+      let newVirtualNodeObject = new VirtualNode();
+      newVirtualNodeObject['referenceKey'] = virtualObject.referenceKey;
+      newVirtualNodeObject['url'] = virtualObject.url;
 
-    const newVirtualNode = await this.neo4jService.createNode(newVirtualNodeObject, virtualObject.virtualNodeLabels)
-    console.log(newVirtualNode)
+      const newVirtualNode = await this.neo4jService.createNode(newVirtualNodeObject, virtualObject.virtualNodeLabels);
+      console.log(newVirtualNode);
 
-    await this.neo4jService.addRelationByLabelsAndFiltersAndRelationName([], { key: virtualObject.newParentKey }, [], { key: newVirtualNode.properties.key }, virtualObject.relationName)
-    await this.neo4jService.addRelationByLabelsAndFiltersAndRelationName([], { key: virtualObject.newParentKey }, [], { key: newVirtualNode.properties.key }, 'HAS_VIRTUAL_RELATION')
-
-
+      await this.neo4jService.addRelationByLabelsAndFiltersAndRelationName(
+        [],
+        { key: virtualObject.newParentKey },
+        [],
+        { key: newVirtualNode.properties.key },
+        virtualObject.relationName,
+      );
+      await this.neo4jService.addRelationByLabelsAndFiltersAndRelationName(
+        [],
+        { key: virtualObject.newParentKey },
+        [],
+        { key: newVirtualNode.properties.key },
+        'HAS_VIRTUAL_RELATION',
+      );
+    } catch (error) {}
   }
 
   @EventPattern('deleteStructure')

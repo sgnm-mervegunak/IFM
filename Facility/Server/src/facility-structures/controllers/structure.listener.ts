@@ -12,29 +12,38 @@ export class StructureListenerController {
   constructor(private readonly neo4jService: Neo4jService, private readonly httpService: HttpService) {}
   @EventPattern('createStructureRelation')
   async createAssetListener(@Payload() message) {
-    if (!message.value?.referenceKey || !message.value?.parentKey) {
-      throw new HttpException('key is not available on kafka object', 400);
+    try {
+      if (!message.value?.referenceKey || !message.value?.parentKey) {
+        throw new HttpException('key is not available on kafka object', 400);
+      }
+
+      const parentNode = await this.neo4jService.findByLabelAndFilters([], { key: message.value.parentKey });
+
+      if (parentNode.length === 0) {
+        throw new HttpException('node_not_found()', 400);
+      }
+      const virtualObject: CreateKafkaObject = message.value;
+
+      const { parentKey } = virtualObject;
+
+      let virtualNodeObject = new VirtualNode();
+
+      virtualNodeObject = assignDtoPropToEntity(virtualNodeObject, virtualObject);
+      delete virtualNodeObject['relationName'];
+      delete virtualNodeObject['virtualNodeLabel'];
+
+      const value = await this.neo4jService.createNode(virtualNodeObject, virtualObject.virtualNodeLabels);
+
+      await this.neo4jService.addRelationWithRelationNameByKey(
+        parentKey,
+        value.properties.key,
+        virtualObject.relationName,
+      );
+
+      await this.neo4jService.addRelationWithRelationNameByKey(parentKey, value.properties.key, 'HAS_VIRTUAL_RELATION');
+    } catch (error) {
+      throw new HttpException(error, 400);
     }
-
-    const virtualObject: CreateKafkaObject = message.value;
-
-    const { parentKey } = virtualObject;
-
-    let virtualNodeObject = new VirtualNode();
-
-    virtualNodeObject = assignDtoPropToEntity(virtualNodeObject, virtualObject);
-    delete virtualNodeObject['relationName'];
-    delete virtualNodeObject['virtualNodeLabel'];
-
-    const value = await this.neo4jService.createNode(virtualNodeObject, virtualObject.virtualNodeLabels);
-
-    await this.neo4jService.addRelationWithRelationNameByKey(
-      parentKey,
-      value.properties.key,
-      virtualObject.relationName,
-    );
-
-    await this.neo4jService.addRelationWithRelationNameByKey(parentKey, value.properties.key, 'HAS_VIRTUAL_RELATION');
   }
 
   @EventPattern('deleteAsset')
