@@ -29,22 +29,50 @@ export class ComponentRepository implements ComponentInterface<Component> {
   ) {}
   async findByKey(key: string, header) {
     try {
-      const nodes = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.COMPONENT], { key });
+      const nodes = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.TYPE], { key });
       if (!nodes.length) {
-        throw new HttpException(node_not_found(), 400);
+        throw new AssetNotFoundException(key);
       }
+
+      const createdByNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        [Neo4jLabelEnum.COMPONENT],
+        { key: nodes[0].get('n').properties.key },
+        [],
+        { isDeleted: false },
+        RelationName.CREATED_BY,
+      );
+      nodes[0].get('n').properties['createdBy'] = createdByNode[0].get('children').properties.referenceKey;
+
+      const spaceNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        [Neo4jLabelEnum.COMPONENT],
+        { key: nodes[0].get('n').properties.key },
+        [],
+        { isDeleted: false },
+        RelationName.LOCATED_IN,
+      );
+      nodes[0].get('n').properties['manufacturer'] = spaceNode[0].get('children').properties.referenceKey;
+      const warrantyGuaranorLaborNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        [Neo4jLabelEnum.COMPONENT],
+        { key: nodes[0].get('n').properties.key },
+        [],
+        { isDeleted: false },
+        RelationName.WARRANTY_GUARANTOR_LABOR,
+      );
+      nodes[0].get('n').properties['warrantyGuarantorLabor'] =
+        warrantyGuaranorLaborNode[0].get('children').properties.referenceKey;
+      const warrantyGuaranorPartsNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        [Neo4jLabelEnum.COMPONENT],
+        { key: nodes[0].get('n').properties.key },
+        [],
+        { isDeleted: false },
+        RelationName.WARRANTY_GUARANTOR_PARTS,
+      );
+      nodes[0].get('n').properties['warrantyGuarantorParts'] =
+        warrantyGuaranorPartsNode[0].get('children').properties.referenceKey;
+
       return nodes[0]['_fields'][0];
     } catch (error) {
-      const code = error.response?.code;
-
-      if (code >= 1000 && code <= 1999) {
-      } else if (code >= 9500 && code <= 9750) {
-        if (error.response?.code == CustomAssetError.NODE_NOT_FOUND) {
-          throw new AssetNotFoundException(key);
-        }
-      } else {
-        throw new HttpException(error, 500);
-      }
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
