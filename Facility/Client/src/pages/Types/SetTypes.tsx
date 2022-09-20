@@ -149,21 +149,6 @@ const SetTypes = () => {
     getTypes();
   }, []);
 
-  const header = (
-    <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-      <h5 className="m-0">Types Editing</h5>
-      {/* <span className="block mt-2 md:mt-0">
-        <InputText
-          type="search"
-          onInput={(e) => setGlobalFilter(e.target.value)}
-          placeholder="Search..."
-        />
-        <Button icon="pi pi-search" className="ml-1" />
-      </span> */}
-    </div>
-  );
-
-
   const leftToolbarTemplate = () => {
     return (
       <React.Fragment>
@@ -176,6 +161,20 @@ const SetTypes = () => {
       </React.Fragment>
     );
   };
+
+  const renderSearch = () => {
+    return (
+      <React.Fragment>
+        <div className="flex justify-content-between">
+          <h5 className="m-0">Manage Types</h5>
+          <span className="p-input-icon-left">
+            <i className="pi pi-search" />
+            <InputText value={globalFilter} onChange={(e) => { setGlobalFilter(e.target.value) }} placeholder="Search" />
+          </span>
+        </div>
+      </React.Fragment>
+    )
+  }
 
   const renderFooterAdd = () => {
     return (
@@ -279,6 +278,8 @@ const SetTypes = () => {
     );
   }
 
+  const header = renderSearch();
+
   return (
     <div className="grid crud-demo">
       <div className="col-12">
@@ -292,10 +293,11 @@ const SetTypes = () => {
             responsiveLayout="scroll"
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Types"
-            rows={15}
-            rowsPerPageOptions={[15, 25, 50]}
-            header="Types"
+            rows={10}
+            rowsPerPageOptions={[10, 25, 50]}
+            header={header}
             emptyMessage="Type not found"
+            globalFilter={globalFilter}
           >
             <Column
               field="name"
