@@ -9,11 +9,11 @@ import { Facility } from './entities/facility.entity';
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
 @Injectable()
 export class OrganizationRepository {
-  constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) {}
+  constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) { }
 
   async create(createFacilityDto: CreateOrganizationDto) {
     try {
-      const { structureInfo, organizationInfo, classificationInfo, realm } = createFacilityDto;
+      const { realm } = createFacilityDto;
       const realmUniqness = await this.neo4jService.findByLabelAndFilters(['Root'], { realm });
 
       console.log(realmUniqness);
@@ -34,15 +34,30 @@ export class OrganizationRepository {
       const config = new Facility();
       config.realm = realm;
 
+      const organizationInfo = {
+        name: realm,
+        canDelete:false
+      };
+      const classificationInfo = {
+        name: realm + 'Classification',
+        canDelete:false
+      };
+      const structureInfo = {
+        name: realm + 'Structure',
+        canDelete:false
+      };
       const typeInfo = {
-        name: 'Type',
+        name: realm+'Type',
+        canDelete:false
       };
 
       const contactInfo = {
-        name: 'Contact',
+        name: realm+'Contact',
+        canDelete:false
       };
       const configInfo = {
-        name: 'Config',
+        name: realm+'Config',
+        canDelete:false
       };
 
       const finalOrganizationObject = assignDtoPropToEntity(facility, organizationInfo);
