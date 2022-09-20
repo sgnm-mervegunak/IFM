@@ -160,6 +160,8 @@ export class TypesRepository implements GeciciInterface<Type> {
       const typeObject = assignDtoPropToEntity(type, createTypesDto);
       delete typeObject['manufacturer'];
       delete typeObject['createdBy'];
+      delete typeObject['warrantyGuarantorParts'];
+      delete typeObject['warrantyGuarantorLabor'];
       const typeNode = await this.neo4jService.createNode(typeObject, [Neo4jLabelEnum.TYPE]);
 
       typeNode['properties']['id'] = typeNode['identity'].low;
@@ -428,6 +430,11 @@ export class TypesRepository implements GeciciInterface<Type> {
           });
         }
       }
+
+      delete updateTypeDto['manufacturer'];
+      delete updateTypeDto['createdBy'];
+      delete updateTypeDto['warrantyGuarantorParts'];
+      delete updateTypeDto['warrantyGuarantorLabor'];
       const updatedNode = await this.neo4jService.updateByIdAndFilter(
         +_id,
         { isDeleted: false, isActive: true },

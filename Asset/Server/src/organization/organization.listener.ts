@@ -42,32 +42,23 @@ export class OrganizationListenerController {
     structure.realm = realm;
     const classification = new Facility();
     classification.realm = realm;
-    const assetTypes = new Facility();
-    assetTypes.realm = realm;
     const contact = new Facility();
     contact.realm = realm;
     const config = new Facility();
     config.realm = realm;
-
-    const AssetTypeInfo = {
-      name: 'AssetTypes',
-    };
 
     const organizationInfo = {
       name: facilityInfo.name,
     };
 
     const classificationInfo = {
-      name: facilityInfo.name,
+      name: facilityInfo.name + 'Classification',
     };
 
     const assetInfo = {
-      name: facilityInfo.name,
+      name: facilityInfo.name + 'Asset',
     };
 
-    const contactInfo = {
-      name: 'Contact',
-    };
     const configInfo = {
       name: 'Config',
     };
@@ -75,8 +66,6 @@ export class OrganizationListenerController {
     const finalOrganizationObject = assignDtoPropToEntity(facility, organizationInfo);
     const finalAssetObject = assignDtoPropToEntity(asset, assetInfo);
     const finalClassificationObject = assignDtoPropToEntity(classification, classificationInfo);
-    const finalAssetTypesObject = assignDtoPropToEntity(assetTypes, AssetTypeInfo);
-    const finalContactObject = assignDtoPropToEntity(contact, contactInfo);
     const finalConfigObject = assignDtoPropToEntity(config, configInfo);
 
     //create  node with multi or single label
@@ -85,8 +74,6 @@ export class OrganizationListenerController {
     const classificationNode = await this.neo4jService.createNode(finalClassificationObject, [
       Neo4jLabelEnum.CLASSIFICATION,
     ]);
-    const assetTypeNode = await this.neo4jService.createNode(finalAssetTypesObject, [Neo4jLabelEnum.ASSET_TYPES]);
-    const contactNode = await this.neo4jService.createNode(finalContactObject, [Neo4jLabelEnum.CONTACT]);
     const configNode = await this.neo4jService.createNode(finalConfigObject, [Neo4jLabelEnum.SYSTEM_CONFIG]);
     await this.neo4jService.addParentRelationByIdAndFilters(
       classificationNode.identity.low,
@@ -101,18 +88,6 @@ export class OrganizationListenerController {
       {},
     );
     await this.neo4jService.addParentRelationByIdAndFilters(
-      assetTypeNode.identity.low,
-      {},
-      organizationNode.identity.low,
-      {},
-    );
-    await this.neo4jService.addParentRelationByIdAndFilters(
-      contactNode.identity.low,
-      {},
-      organizationNode.identity.low,
-      {},
-    );
-    await this.neo4jService.addParentRelationByIdAndFilters(
       configNode.identity.low,
       {},
       organizationNode.identity.low,
@@ -122,7 +97,7 @@ export class OrganizationListenerController {
     const types = new Facility();
     types.realm = realm;
     const typesInfo = {
-      name: 'Tpes',
+      name: 'Types',
     };
     const finalTypesObject = assignDtoPropToEntity(types, typesInfo);
     const typesNode = await this.neo4jService.createNode(finalTypesObject, [Neo4jLabelEnum.TYPES]);

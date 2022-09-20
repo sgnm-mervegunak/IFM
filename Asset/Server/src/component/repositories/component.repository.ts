@@ -97,7 +97,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
       isDeleted: false,
       isActive: true,
     });
-    console.log(node);
+
     if (!node) {
       throw new FacilityStructureNotFountException(realm);
     }
@@ -177,6 +177,11 @@ export class ComponentRepository implements ComponentInterface<Component> {
 
       const component = new Component();
       const componentFinalObject = assignDtoPropToEntity(component, createComponentDto);
+      delete componentFinalObject['space'];
+      delete componentFinalObject['spaceType'];
+      delete componentFinalObject['createdBy'];
+      delete componentFinalObject['warrantyGuarantorParts'];
+      delete componentFinalObject['warrantyGuarantorLabor'];
       const componentNode = await this.neo4jService.createNode(componentFinalObject, [Neo4jLabelEnum.COMPONENT]);
       const uniqName = componentNode.properties.name + ' ' + componentNode.identity.low;
       await this.neo4jService.updateByIdAndFilter(componentNode.identity.low, {}, [], { name: uniqName });
@@ -477,6 +482,11 @@ export class ComponentRepository implements ComponentInterface<Component> {
           });
         }
       }
+      delete updateComponentDto['space'];
+      delete updateComponentDto['spaceType'];
+      delete updateComponentDto['createdBy'];
+      delete updateComponentDto['warrantyGuarantorParts'];
+      delete updateComponentDto['warrantyGuarantorLabor'];
       const updatedNode = await this.neo4jService.updateByIdAndFilter(
         +_id,
         { isDeleted: false, isActive: true },
