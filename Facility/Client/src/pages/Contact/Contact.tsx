@@ -6,11 +6,13 @@ import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { Toolbar } from "primereact/toolbar";
 
 import ContactService from "../../services/contact";
 import FormTypeService from "../../services/formType";
 import { useAppSelector } from "../../app/hook";
 import ContactForm from "./Forms/ContactForm";
+import ImportContact from "./ImportContact"
 
 interface Node {
   cantDeleted: boolean;
@@ -80,6 +82,7 @@ const Contact = () => {
   const [isUpdate, setIsUpdate] = useState(false);
   const [canDelete, setCanDelete] = useState<boolean>(false);
   const { t } = useTranslation(["common"]);
+  const [importDia, setImportDia] = useState(false);
 
   const getForms = async () => {
     await FormTypeService.findOne("111").then((res) => {
@@ -263,6 +266,33 @@ const Contact = () => {
 
   return (
     <div className="container">
+      <Toolbar
+        className="mb-4"
+        right={() => (
+          <>
+            <Button
+              label={t("Import Contacts")}
+              icon="pi pi-upload"
+              className="p-button"
+              onClick={() => setImportDia(true)}
+            />
+          </>
+        )}
+      />
+      <Dialog
+        header={t("Import Contacts")}
+        visible={importDia}
+        style={{ width: "40vw" }}
+        onHide={() => {
+          setImportDia(false);
+        }}
+      >
+        <ImportContact
+          selectedNodeKey={selectedNodeKey}
+          setImportDia={setImportDia}
+          getContact={getContact}
+        />
+      </Dialog>
 
       {(() => {
         if (canDelete === false) {
