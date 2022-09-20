@@ -9,29 +9,30 @@ import { generateUuid } from 'src/common/baseobject/base.virtual.node.object';
 export class InfraRepository implements InfraInterface {
   constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) {}
   async createConstraints() {
-    const neo4Transaction = await this.neo4jService.beginTransaction();
-    const constraintArr = [
-      'CREATE CONSTRAINT IF NOT EXISTS ON (node:Infra) ASSERT  (node.realm) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS ON (node:Types) ASSERT  (node.realm) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS ON (node:Type) ASSERT  (node.name) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS ON (node:Root) ASSERT  (node.realm) IS UNIQUE',
-      'CREATE CONSTRAINT IF NOT EXISTS ON (node:Classification) ASSERT  (node.realm) IS UNIQUE',
-    ];
+    try {
+      const neo4Transaction = await this.neo4jService.beginTransaction();
+      const constraintArr = [
+        'CREATE CONSTRAINT IF NOT EXISTS ON (node:Infra) ASSERT  (node.realm) IS UNIQUE',
+        'CREATE CONSTRAINT IF NOT EXISTS ON (node:Types) ASSERT  (node.realm) IS UNIQUE',
+        'CREATE CONSTRAINT IF NOT EXISTS ON (node:Type) ASSERT  (node.name) IS UNIQUE',
+        'CREATE CONSTRAINT IF NOT EXISTS ON (node:Root) ASSERT  (node.realm) IS UNIQUE',
+        'CREATE CONSTRAINT IF NOT EXISTS ON (node:Classification) ASSERT  (node.realm) IS UNIQUE',
+      ];
 
-    constraintArr.forEach((element) => {
-      neo4Transaction
-        .run(element)
-        .then((res) => {})
-        .catch((err) => {
-          console.log(err);
-          neo4Transaction.rollback();
-          throw new HttpException(err, 400);
-        });
-    });
-    neo4Transaction.commit();
-    neo4Transaction.close();
+      constraintArr.forEach((element) => {
+        neo4Transaction
+          .run(element)
+          .then((res) => {})
+          .catch((err) => {
+            console.log(err);
+            neo4Transaction.rollback();
+            throw new HttpException(err, 400);
+          });
+      });
+      neo4Transaction.commit();
+      neo4Transaction.close();
 
-    /* without transaction
+      /* without transaction
     arr.forEach(async (element) => {
       await this.neo4jService
         .write(element)
@@ -43,7 +44,10 @@ export class InfraRepository implements InfraInterface {
         });
     });
     */
-    return 'constraints succesfully created';
+      return 'constraints succesfully created';
+    } catch (error) {
+      throw new HttpException(error, 500);
+    }
   }
   async create() {
     //create  node with multi or single label
