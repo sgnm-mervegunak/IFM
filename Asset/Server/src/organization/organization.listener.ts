@@ -15,181 +15,160 @@ export class OrganizationListenerController {
 
   @EventPattern('createFacility')
   async createFacilityListener(@Payload() message) {
-    const facilityInfo = message.value;
+    try {
+      const facilityInfo = message.value;
 
-    const realm = facilityInfo.realm;
+      const realm = facilityInfo.realm;
 
-    const realmUniqness = await this.neo4jService.findByLabelAndFilters(['Root'], { realm });
+      const realmUniqness = await this.neo4jService.findByLabelAndFilters(['Root'], { realm });
 
-    if (realmUniqness.length > 0) {
-      throw new HttpException('realm must bu uniqe for Root node', 400);
-    }
+      if (realmUniqness.length > 0) {
+        throw new HttpException('realm must bu uniqe for Root node', 400);
+      }
 
-    await this.httpService
-      .get(`${process.env.STRUCTURE_URL}/${facilityInfo.key}`)
-      .pipe(
-        catchError(() => {
-          throw new HttpException('connection refused due to connection lost or wrong data provided', 502);
-        }),
-      )
-      .pipe(map((response) => response.data));
+      await this.httpService
+        .get(`${process.env.STRUCTURE_URL}/${facilityInfo.key}`)
+        .pipe(
+          catchError(() => {
+            throw new HttpException('connection refused due to connection lost or wrong data provided', 502);
+          }),
+        )
+        .pipe(map((response) => response.data));
 
-    const facility = new Facility();
-    facility.realm = realm;
-    const asset = new Facility();
-    asset.realm = realm;
-    const structure = new Facility();
-    structure.realm = realm;
-    const classification = new Facility();
-    classification.realm = realm;
-    const assetTypes = new Facility();
-    assetTypes.realm = realm;
-    const contact = new Facility();
-    contact.realm = realm;
-    const config = new Facility();
-    config.realm = realm;
+      const facility = new Facility();
+      facility.realm = realm;
+      const asset = new Facility();
+      asset.realm = realm;
+      const structure = new Facility();
+      structure.realm = realm;
+      const classification = new Facility();
+      classification.realm = realm;
+      const contact = new Facility();
+      contact.realm = realm;
+      const config = new Facility();
+      config.realm = realm;
 
-    const AssetTypeInfo = {
-      name: 'AssetTypes',
-    };
+      const organizationInfo = {
+        name: facilityInfo.name,
+      };
 
-    const organizationInfo = {
-      name: facilityInfo.name,
-    };
+      const classificationInfo = {
+        name: facilityInfo.name + 'Classification',
+      };
 
-    const classificationInfo = {
-      name: facilityInfo.name,
-    };
+      const assetInfo = {
+        name: facilityInfo.name + 'Asset',
+      };
 
-    const assetInfo = {
-      name: facilityInfo.name,
-    };
+      const configInfo = {
+        name: 'Config',
+      };
 
-    const contactInfo = {
-      name: 'Contact',
-    };
-    const configInfo = {
-      name: 'Config',
-    };
+      const finalOrganizationObject = assignDtoPropToEntity(facility, organizationInfo);
+      const finalAssetObject = assignDtoPropToEntity(asset, assetInfo);
+      const finalClassificationObject = assignDtoPropToEntity(classification, classificationInfo);
+      const finalConfigObject = assignDtoPropToEntity(config, configInfo);
 
-    const finalOrganizationObject = assignDtoPropToEntity(facility, organizationInfo);
-    const finalAssetObject = assignDtoPropToEntity(asset, assetInfo);
-    const finalClassificationObject = assignDtoPropToEntity(classification, classificationInfo);
-    const finalAssetTypesObject = assignDtoPropToEntity(assetTypes, AssetTypeInfo);
-    const finalContactObject = assignDtoPropToEntity(contact, contactInfo);
-    const finalConfigObject = assignDtoPropToEntity(config, configInfo);
-
-    //create  node with multi or single label
-    const organizationNode = await this.neo4jService.createNode(finalOrganizationObject, [Neo4jLabelEnum.ROOT]);
-    const assetNode = await this.neo4jService.createNode(finalAssetObject, [Neo4jLabelEnum.ASSET]);
-    const classificationNode = await this.neo4jService.createNode(finalClassificationObject, [
-      Neo4jLabelEnum.CLASSIFICATION,
-    ]);
-    const assetTypeNode = await this.neo4jService.createNode(finalAssetTypesObject, [Neo4jLabelEnum.ASSET_TYPES]);
-    const contactNode = await this.neo4jService.createNode(finalContactObject, [Neo4jLabelEnum.CONTACT]);
-    const configNode = await this.neo4jService.createNode(finalConfigObject, [Neo4jLabelEnum.SYSTEM_CONFIG]);
-    await this.neo4jService.addParentRelationByIdAndFilters(
-      classificationNode.identity.low,
-      {},
-      organizationNode.identity.low,
-      {},
-    );
-    await this.neo4jService.addParentRelationByIdAndFilters(
-      assetNode.identity.low,
-      {},
-      organizationNode.identity.low,
-      {},
-    );
-    await this.neo4jService.addParentRelationByIdAndFilters(
-      assetTypeNode.identity.low,
-      {},
-      organizationNode.identity.low,
-      {},
-    );
-    await this.neo4jService.addParentRelationByIdAndFilters(
-      contactNode.identity.low,
-      {},
-      organizationNode.identity.low,
-      {},
-    );
-    await this.neo4jService.addParentRelationByIdAndFilters(
-      configNode.identity.low,
-      {},
-      organizationNode.identity.low,
-      {},
-    );
-
-    const types = new Facility();
-    types.realm = realm;
-    const typesInfo = {
-      name: 'Tpes',
-    };
-    const finalTypesObject = assignDtoPropToEntity(types, typesInfo);
-    const typesNode = await this.neo4jService.createNode(finalTypesObject, [Neo4jLabelEnum.TYPES]);
-
-    await this.neo4jService.addParentRelationByIdAndFilters(typesNode.identity.low, {}, assetNode.identity.low, {});
-
-    const infraFirstLevelChildren = await this.neo4jService.findChildrensByLabelsOneLevel(
-      ['Infra'],
-      { realm: 'Signum' },
-      [],
-      {},
-    );
-
-    infraFirstLevelChildren.map(async (node) => {
-      //from lvl 1 to lvl 2 which nodes are replicable
-      const replicableNodes = await this.neo4jService.findChildrensByIdOneLevel(
-        node.get('children').identity.low,
+      //create  node with multi or single label
+      const organizationNode = await this.neo4jService.createNode(finalOrganizationObject, [Neo4jLabelEnum.ROOT]);
+      const assetNode = await this.neo4jService.createNode(finalAssetObject, [Neo4jLabelEnum.ASSET]);
+      const classificationNode = await this.neo4jService.createNode(finalClassificationObject, [
+        Neo4jLabelEnum.CLASSIFICATION,
+      ]);
+      const configNode = await this.neo4jService.createNode(finalConfigObject, [Neo4jLabelEnum.SYSTEM_CONFIG]);
+      await this.neo4jService.addParentRelationByIdAndFilters(
+        classificationNode.identity.low,
         {},
-        [],
-        { canCopied: true, isRoot: true },
-        'PARENT_OF',
+        organizationNode.identity.low,
+        {},
+      );
+      await this.neo4jService.addParentRelationByIdAndFilters(
+        assetNode.identity.low,
+        {},
+        organizationNode.identity.low,
+        {},
+      );
+      await this.neo4jService.addParentRelationByIdAndFilters(
+        configNode.identity.low,
+        {},
+        organizationNode.identity.low,
+        {},
       );
 
-      //target realm node(Classification,Types)
-      const targetRealmNode = await this.neo4jService.findByLabelAndFilters(node.get('children').labels, { realm });
+      const types = new Facility();
+      types.realm = realm;
+      const typesInfo = {
+        name: 'Types',
+      };
+      const finalTypesObject = assignDtoPropToEntity(types, typesInfo);
+      const typesNode = await this.neo4jService.createNode(finalTypesObject, [Neo4jLabelEnum.TYPES]);
 
-      replicableNodes.map(async (replicableNode) => {
-        replicableNode.get('children').properties.realm = realm;
-        const key = generateUuid();
-        replicableNode.get('children').properties.key = key;
-        const createdNodes = await this.neo4jService.createNode(
-          replicableNode.get('children').properties,
-          replicableNode.get('children').labels,
-        );
-        await this.neo4jService.addParentRelationByIdAndFilters(
-          createdNodes.identity.low,
+      await this.neo4jService.addParentRelationByIdAndFilters(typesNode.identity.low, {}, assetNode.identity.low, {});
+
+      const infraFirstLevelChildren = await this.neo4jService.findChildrensByLabelsOneLevel(
+        ['Infra'],
+        { realm: 'Signum' },
+        [],
+        {},
+      );
+
+      infraFirstLevelChildren.map(async (node) => {
+        //from lvl 1 to lvl 2 which nodes are replicable
+        const replicableNodes = await this.neo4jService.findChildrensByIdOneLevel(
+          node.get('children').identity.low,
           {},
-          targetRealmNode[0].get('n').identity.low,
-          {},
-        );
-        const root = await this.neo4jService.findByLabelAndFilters(replicableNode.get('children').labels, {
-          realm: 'Signum',
-        });
-        const targetRoot = await this.neo4jService.findByLabelAndFilters(replicableNode.get('children').labels, {
-          realm,
-        });
-
-        await this.neo4jService.copySubGrapFromOneNodeToAnotherById(
-          root[0].get('n').identity.low,
-          targetRoot[0].get('n').identity.low,
-          'PARENT_OF',
-        );
-
-        const replicableNodesChilds = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
-          createdNodes.labels,
-          { realm },
           [],
-          {},
+          { canCopied: true, isRoot: true },
           'PARENT_OF',
         );
-        if (replicableNodesChilds.length) {
-          replicableNodesChilds.map(async (node) => {
-            const key = generateUuid();
-            await this.neo4jService.updateByIdAndFilter(node.get('children').identity.low, {}, [], { key });
+
+        //target realm node(Classification,Types)
+        const targetRealmNode = await this.neo4jService.findByLabelAndFilters(node.get('children').labels, { realm });
+
+        replicableNodes.map(async (replicableNode) => {
+          replicableNode.get('children').properties.realm = realm;
+          const key = generateUuid();
+          replicableNode.get('children').properties.key = key;
+          const createdNodes = await this.neo4jService.createNode(
+            replicableNode.get('children').properties,
+            replicableNode.get('children').labels,
+          );
+          await this.neo4jService.addParentRelationByIdAndFilters(
+            createdNodes.identity.low,
+            {},
+            targetRealmNode[0].get('n').identity.low,
+            {},
+          );
+          const root = await this.neo4jService.findByLabelAndFilters(replicableNode.get('children').labels, {
+            realm: 'Signum',
           });
-        }
+          const targetRoot = await this.neo4jService.findByLabelAndFilters(replicableNode.get('children').labels, {
+            realm,
+          });
+
+          await this.neo4jService.copySubGrapFromOneNodeToAnotherById(
+            root[0].get('n').identity.low,
+            targetRoot[0].get('n').identity.low,
+            'PARENT_OF',
+          );
+
+          const replicableNodesChilds = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+            createdNodes.labels,
+            { realm },
+            [],
+            {},
+            'PARENT_OF',
+          );
+          if (replicableNodesChilds.length) {
+            replicableNodesChilds.map(async (node) => {
+              const key = generateUuid();
+              await this.neo4jService.updateByIdAndFilter(node.get('children').identity.low, {}, [], { key });
+            });
+          }
+        });
       });
-    });
+    } catch (error) {
+      throw new HttpException(error, 500);
+    }
   }
 }

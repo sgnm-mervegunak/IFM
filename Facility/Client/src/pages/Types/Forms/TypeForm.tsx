@@ -1,7 +1,5 @@
 import React, { useState, useEffect, InputHTMLAttributes } from "react";
 import { InputText } from "primereact/inputtext";
-import { InputNumber } from 'primereact/inputnumber';
-import { Calendar } from "primereact/calendar";
 import { Chips } from "primereact/chips";
 import { TreeSelect } from "primereact/treeselect";
 import { TabView, TabPanel } from 'primereact/tabview';
@@ -79,8 +77,8 @@ const TypeForm = ({
   const { toast } = useAppSelector((state) => state.toast);
   const { t } = useTranslation(["common"]);
   const [codeCategory, setCodeCategory] = useState("");
-  const [codeStatus, setCodeStatus] = useState("");
-
+  const [codeAssetType, setCodeAssetType] = useState("");
+  const [codeDurationUnit, setCodeDurationUnit] = useState("");
 
   const [data, setData] = useState<any>();
   const language = useAppSelector((state) => state.language.language);
@@ -91,7 +89,7 @@ const TypeForm = ({
     category: yup.string().required(t("This area is required.")),
     assetType: yup.string().required(t("This area is required.")),
     manufacturer: yup.string().required(t("This area is required.")),
-    modelNumber: yup.string().required(t("This area is required.")).max(50, t("This area accepts max 50 characters.")),
+    modelNo: yup.string().required(t("This area is required.")).max(50, t("This area accepts max 50 characters.")),
     warrantyGuarantorParts: yup.string().required(t("This area is required.")),
     warrantyDurationParts: yup.number()
       .required(t("This area is required."))
@@ -130,7 +128,6 @@ const TypeForm = ({
 
   const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
     defaultValues: {
-      siteName: realm,
       ...data
     },
     resolver: yupResolver(schema)
@@ -185,7 +182,6 @@ const TypeForm = ({
   useEffect(() => {
     if (submitted) {
       handleSubmit(onSubmit)();
-
     }
     setSubmitted(false);
   }, [submitted]);
@@ -201,13 +197,29 @@ const TypeForm = ({
     TypesService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
         console.log(res.data);
-        
+
         let temp = {};
         await ClassificationsService.findClassificationByCodeAndLanguage("OmniClass11", res.data.properties.category).then(clsf1 => {
           setCodeCategory(res.data.properties.category);
           res.data.properties.category = clsf1.data.key
           temp = res.data.properties;
-          // setData(res.data.properties);
+        })
+          .catch((err) => {
+            setData(res.data.properties);
+          })
+        await ClassificationsService.findClassificationByCodeAndLanguage("OmniClass11", res.data.properties.assetType).then(clsf2 => {
+          setCodeAssetType(res.data.properties.assetType);
+          res.data.properties.assetType = clsf2.data.key
+          temp = res.data.properties;
+        })
+          .catch((err) => {
+            setData(res.data.properties);
+          })
+
+        await ClassificationsService.findClassificationByCodeAndLanguage("OmniClass11", res.data.properties.durationUnit).then(clsf3 => {
+          setCodeDurationUnit(res.data.properties.durationUnit);
+          res.data.properties.durationUnit = clsf3.data.key
+          temp = res.data.properties;
         })
           .catch((err) => {
             setData(res.data.properties);
@@ -242,6 +254,8 @@ const TypeForm = ({
   };
 
   const onSubmit = (data: any) => {
+    console.log(editDia);
+
     if (editDia === false) {
       let newNode: any = {};
 
@@ -250,9 +264,9 @@ const TypeForm = ({
         tag: data?.tag,
         description: data?.description,
         category: codeCategory, //Düzeltilecek
-        assetType: codeCategory, //Düzeltilecek
+        assetType: codeAssetType, //Düzeltilecek
         manufacturer: data?.manufacturer,
-        modelNo: data?.modelNumber,
+        modelNo: data?.modelNo,
         warrantyGuarantorParts: data?.warrantyGuarantorParts,
         warrantyDurationParts: Number(data?.warrantyDurationParts),
         warrantyGuarantorLabor: data?.warrantyGuarantorLabor,
@@ -260,7 +274,7 @@ const TypeForm = ({
         warrantyDurationUnit: data?.warrantyDurationUnit,
         replacementCost: Number(data?.replacementCost),
         expectedLife: Number(data?.expectedLife),
-        durationUnit: codeCategory, //Düzeltilecek
+        durationUnit: codeDurationUnit, //Düzeltilecek
         warranty: data?.warranty,
         nominalLength: Number(data?.nominalLength),
         nominalWidth: Number(data?.nominalWidth),
@@ -322,7 +336,7 @@ const TypeForm = ({
           for (let item in temp) {
             temp[item] = JSON.stringify(temp[item]);
           }
-          FacilityStructureService.update(res.data.properties.key, {
+          TypesService.update(res.data.properties.id, {
             ...newNode,
             ...temp,
           });
@@ -342,15 +356,17 @@ const TypeForm = ({
       setUploadFiles({});
 
     } else {
+      console.log("test");
+
       let updateNode: any = {};
       updateNode = {
         name: data?.name,
         tag: data?.tag,
         description: data?.description,
         category: codeCategory, //Düzeltilecek
-        assetType: codeCategory, //Düzeltilecek
+        assetType: codeAssetType, //Düzeltilecek
         manufacturer: data?.manufacturer,
-        modelNo: data?.modelNumber,
+        modelNo: data?.modelNo,
         warrantyGuarantorParts: data?.warrantyGuarantorParts,
         warrantyDurationParts: Number(data?.warrantyDurationParts),
         warrantyGuarantorLabor: data?.warrantyGuarantorLabor,
@@ -358,7 +374,7 @@ const TypeForm = ({
         warrantyDurationUnit: data?.warrantyDurationUnit,
         replacementCost: Number(data?.replacementCost),
         expectedLife: Number(data?.expectedLife),
-        durationUnit: codeCategory, //Düzeltilecek
+        durationUnit: codeDurationUnit, //Düzeltilecek
         warranty: data?.warranty,
         nominalLength: Number(data?.nominalLength),
         nominalWidth: Number(data?.nominalWidth),
@@ -431,7 +447,7 @@ const TypeForm = ({
           }
 
           // update node
-          FacilityStructureService.update(res.data.properties.key, {
+          TypesService.update(selectedNodeId, {
             ...updateNode,
             ...temp,
           });
@@ -548,7 +564,7 @@ const TypeForm = ({
                       ClassificationsService.nodeInfo(e.value as string)
                         .then((res) => {
                           field.onChange(e.value)
-                          setCodeCategory(res.data.properties.code || "");
+                          setCodeAssetType(res.data.properties.code || "");
                         })
                     }}
                     filter
@@ -608,11 +624,11 @@ const TypeForm = ({
               <h5 style={{ marginBottom: "0.5em" }}>{t("Model Number")}</h5>
               <InputText
                 autoComplete="off"
-                {...register("modelNumber")}
+                {...register("modelNo")}
                 style={{ width: "100%" }}
-                defaultValue={data?.modelNumber || ""}
+                defaultValue={data?.modelNo || ""}
               />
-              <p style={{ color: "red" }}>{errors.modelNumber?.message}</p>
+              <p style={{ color: "red" }}>{errors.modelNo?.message}</p>
             </div>
 
             <div className="field col-12 md:col-3">
@@ -747,7 +763,7 @@ const TypeForm = ({
                       ClassificationsService.nodeInfo(e.value as string)
                         .then((res) => {
                           field.onChange(e.value)
-                          setCodeCategory(res.data.properties.code || "");
+                          setCodeDurationUnit(res.data.properties.code || "");
                         })
                     }}
                     filter

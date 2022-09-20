@@ -90,13 +90,14 @@ export class TypesRepository implements GeciciInterface<Type> {
         'PARENT_OF',
       );
       if (!node.length) {
-        throw new HttpException(node_not_found(), 400);
+        return node;
+      } else {
+        const typeArray = node.map((element) => {
+          element.get('children').properties['id'] = element.get('children').identity.low;
+          return element.get('children').properties;
+        });
+        return typeArray;
       }
-      const typeArray = node.map((element) => {
-        element.get('children').properties['id'] = element.get('children').identity.low;
-        return element.get('children').properties;
-      });
-      return typeArray;
     } catch (error) {
       const code = error.response?.code;
 
@@ -160,6 +161,8 @@ export class TypesRepository implements GeciciInterface<Type> {
       const typeObject = assignDtoPropToEntity(type, createTypesDto);
       delete typeObject['manufacturer'];
       delete typeObject['createdBy'];
+      delete typeObject['warrantyGuarantorParts'];
+      delete typeObject['warrantyGuarantorLabor'];
       const typeNode = await this.neo4jService.createNode(typeObject, [Neo4jLabelEnum.TYPE]);
 
       typeNode['properties']['id'] = typeNode['identity'].low;
@@ -428,6 +431,11 @@ export class TypesRepository implements GeciciInterface<Type> {
           });
         }
       }
+
+      delete updateTypeDto['manufacturer'];
+      delete updateTypeDto['createdBy'];
+      delete updateTypeDto['warrantyGuarantorParts'];
+      delete updateTypeDto['warrantyGuarantorLabor'];
       const updatedNode = await this.neo4jService.updateByIdAndFilter(
         +_id,
         { isDeleted: false, isActive: true },
