@@ -92,18 +92,26 @@ export class ComponentRepository implements ComponentInterface<Component> {
       throw new HttpException(wrong_parent_error(), 400);
     }
 
-    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure([Neo4jLabelEnum.TYPE], {
-      key,
-      isDeleted: false,
-      isActive: true,
-    });
+    const node = await this.neo4jService.findChildrensByLabelsAndFilters(
+      [Neo4jLabelEnum.TYPE],
+      {
+        key,
+        isDeleted: false,
+        isActive: true,
+      },
+      [Neo4jLabelEnum.COMPONENT],
+      { isDeleted: false, isActive: true },
+    );
 
-    if (!node) {
-      throw new FacilityStructureNotFountException(realm);
+    if (!node.length) {
+      return node;
+    } else {
+      const componentArray = node.map((element) => {
+        element.get('children').properties['id'] = element.get('children').identity.low;
+        return element.get('children').properties;
+      });
+      return componentArray;
     }
-    node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
-
-    return node;
   }
   async create(createComponentDto: CreateComponentDto, header) {
     try {
