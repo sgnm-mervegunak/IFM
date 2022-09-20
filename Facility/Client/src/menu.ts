@@ -31,7 +31,7 @@ export default [
           {
             label: "Types",
             icon: "pi pi-fw pi-angle-right",
-            to: "/assettype",
+            to: "/asset-types",
           },
           {
             label: "Components",
