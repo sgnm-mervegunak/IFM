@@ -146,7 +146,8 @@
 	"Net Area must be a number":"Net Area must be a number",
 	"Net Area can not be negative":"Net Area can not be negative",
 	"Usable Height must be a number":"Usable Height must be a number",
-	"Usable Height can not be negative":"Usable Height can not be negative"
+	"Usable Height can not be negative":"Usable Height can not be negative",
+	"Import Contacts": "Import Contacts"
 
 
 

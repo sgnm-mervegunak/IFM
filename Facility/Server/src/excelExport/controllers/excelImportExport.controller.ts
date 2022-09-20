@@ -141,7 +141,7 @@ export class ExcelImportExportController {
     return this.excelImportExport.addZonesToBuilding(file,header,buildingKey);
   }
 
-  @Unprotected()
+  //@Unprotected()
   //@Roles({ roles: [UserRoles.ADMIN] })
   @Post('addContacts')
   @ApiBody({
@@ -161,10 +161,11 @@ export class ExcelImportExportController {
   })
   @ApiConsumes('multipart/form-data')
   async addContacts(@UploadedFile() file: Express.Multer.File, @Headers() header){
+    console.log(header);
     return this.excelImportExport.addContacts(file,header);
   }
 
-  @Unprotected()
+  //@Unprotected()
   //@Roles({ roles: [UserRoles.ADMIN] })
   @Post('addTypesWithCobie')
   @ApiBody({
@@ -187,7 +188,7 @@ export class ExcelImportExportController {
     return this.excelImportExport.addTypesWithCobie(file,header);
   }
 
-  @Unprotected()
+  //@Unprotected()
   //@Roles({ roles: [UserRoles.ADMIN] })
   @Post('addComponentsWithCobie')
   @ApiBody({
@@ -211,7 +212,7 @@ export class ExcelImportExportController {
   }
 
 
-  @Unprotected()
+  //@Unprotected()
   //@Roles({ roles: [UserRoles.ADMIN] })
   @Post('addSystemWithCobie')
   @ApiBody({
