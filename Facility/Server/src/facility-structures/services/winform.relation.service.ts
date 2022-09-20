@@ -16,8 +16,8 @@ export class WinformRelationService {
     return this.WinformRelationsRepository.delete(key, referenceKey);
   }
 
-  async findOneNode(key: string) {
+  async findOneNode(key: string, header) {
     //checkObjectIddİsValid(id);
-    return await this.WinformRelationsRepository.findOneNodeByKey(key);
+    return await this.WinformRelationsRepository.findOneNodeByKey(key, header);
   }
 }

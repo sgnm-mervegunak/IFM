@@ -16,8 +16,8 @@ export class AssetRelationService {
     return this.AssetRelationsRepository.delete(key, referenceKey);
   }
 
-  async findOneNode(key: string) {
+  async findOneNode(key: string, header) {
     //checkObjectIddİsValid(id);
-    return await this.AssetRelationsRepository.findOneNodeByKey(key);
+    return await this.AssetRelationsRepository.findOneNodeByKey(key, header);
   }
 }
