@@ -19,11 +19,12 @@ import { KeycloakModule } from './common/keycloak/keycloak.module';
 import { ClassificationModule } from './classification/classification.module';
 import { HttpCacheInterceptor, KafkaModule } from 'ifmcommon';
 import { Neo4jModule } from 'sgnm-neo4j/dist';
-import { OrganizationModule } from './init.organization/organization.module';
 import { JointSpaceModule } from './jointspace/jointspace.module';
 import { ZoneModule } from './zone/zone.module';
 import { ExcelImportExportModule } from './excelExport/excelImportExport.module';
 import { ContactModule } from './contact/contact.module';
+import { OrganizationModule } from './organization/organization.module';
+import { InfraModule } from './infra/infra.module';
 
 @Module({
   imports: [
@@ -113,6 +114,7 @@ import { ContactModule } from './contact/contact.module';
     ContactModule,
 
     OrganizationModule,
+    InfraModule,
 
     JointSpaceModule,
 
