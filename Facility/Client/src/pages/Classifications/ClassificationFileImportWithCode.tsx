@@ -52,6 +52,7 @@ const ClassificationFileImportWithCode: React.FC = () => {
                     detail: err.response ? err.response.data.message : err.message,
                     life: 4000
                 });
+                setSpinner(false);
             })
 
         refUpload.current.clear();
