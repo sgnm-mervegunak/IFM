@@ -82,7 +82,8 @@ import { InfraModule } from './infra/infra.module';
         port: configService.get('NEO4J_PORT'),
         scheme: configService.get('NEO4J_SCHEME'),
         username: configService.get('NEO4J_USERNAME'),
-        database: configService.get('NEO4J_DATABASE'),
+        // database: configService.get('NEO4J_DATABASE'),
+        database:"beyza"
       }),
     }),
 
