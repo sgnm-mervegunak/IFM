@@ -134,9 +134,14 @@ export class TypesRepository implements GeciciInterface<Type> {
         createTypesDto['name'] = manufacturer.properties.company + ' ' + createTypesDto.modelNo;
       }
 
-      const uniqnessCheck = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.TYPE], {
-        name: createTypesDto.name,
-      });
+      const uniqnessCheck = await this.neo4jService.findChildrensByLabelsAndFilters(
+        [Neo4jLabelEnum.TYPES],
+        { realm },
+        [Neo4jLabelEnum.TYPE],
+        {
+          name: createTypesDto.name,
+        },
+      );
 
       if (uniqnessCheck.length) {
         throw new HttpException('name musb be uniq', 400);
