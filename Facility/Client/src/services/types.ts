@@ -80,8 +80,8 @@ const create = async (type: TypeInterface) => {
   return axios.post(url, type);
 };
 
-const update = async (id: string, classification: TypeInterface) => {
-  return axios.patch(url + "/" + id, classification);
+const update = async (id: string, type: TypeInterface) => {
+  return axios.patch(url + "/" + id, type);
 };
 
 const remove = async (id: string) => {
