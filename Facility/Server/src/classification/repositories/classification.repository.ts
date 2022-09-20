@@ -515,16 +515,20 @@ export class ClassificationRepository implements classificationInterface<Classif
 
   //REVISED FOR NEW NEO4J
   async addAClassificationWithCodeFromExcel(file: Express.Multer.File, realm: string, language: string) {
-    let data = [];
+    try {
+      let data = [];
 
-    let buffer = new Uint8Array(file.buffer);
-    const workbook = new exceljs.Workbook();
-
-    await workbook.xlsx.load(buffer).then(function async(book) {
-      const firstSheet = book.getWorksheet(1);
-
-      data = firstSheet.getColumn(1).values.filter((e) => e != null);
-    });
+      let buffer = new Uint8Array(file.buffer);
+      const workbook = new exceljs.Workbook();
+  
+      await workbook.xlsx.load(buffer).then(function async(book) {
+        const firstSheet = book.getWorksheet(1);
+  
+        data = firstSheet.getColumn(1).values.filter((e) => e != null);
+      });
+      let label = await data[0].replaceAll(' ', '_');
+      let checkClassification = await this.neo4jService.findByLabelAndFilters([`${label}_${language}`],{realm})
+  if(checkClassification.length==0){
     let deneme = [];
     for (let index = 1; index < data.length; index++) {
       const element = data[index].split(new RegExp(/\s{3,}|:\s{1,}|:/g));
@@ -542,7 +546,6 @@ export class ClassificationRepository implements classificationInterface<Classif
     function uuidReturn() {
       return uuidv4();
     }
-    let label = await data[0].replaceAll(' ', '_');
     for (let q = 0; q < deneme.length; q++) {
       let parentcode = '';
       var z = 0;
@@ -692,6 +695,14 @@ export class ClassificationRepository implements classificationInterface<Classif
         RelationDirection.RIGHT,
       );
     }
+  }else {
+    throw new HttpException("Bu classification bulunuyor",400)
+  }
+     
+    } catch (error) {
+      throw new HttpException({message:error.message,code:error.status},error.status)
+    }
+   
   }
 
   async getNodeByClassificationLanguageRealmAndCode(
