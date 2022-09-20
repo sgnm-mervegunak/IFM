@@ -29,7 +29,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
   ) {}
   async findByKey(key: string, header) {
     try {
-      const nodes = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.TYPE], { key });
+      const nodes = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.COMPONENT], { key });
       if (!nodes.length) {
         throw new AssetNotFoundException(key);
       }
