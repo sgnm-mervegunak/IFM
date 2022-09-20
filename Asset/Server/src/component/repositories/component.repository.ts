@@ -528,7 +528,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
       if (hasChildrenArray.length === 0) {
         deletedNode = await this.neo4jService.updateByIdAndFilter(+_id, {}, [], { isDeleted: true, isActive: false });
         await this.kafkaService.producerSendMessage(
-          'deleteContactRelation',
+          'deleteTypeRelation',
           JSON.stringify({ referenceKey: typeNode.properties.key }),
         );
       } else {
