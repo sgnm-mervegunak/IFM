@@ -10,15 +10,45 @@ const url = process.env.REACT_APP_API_URL3 + "types";
 //   class_name?: string;
 // }
 
-interface ClassificationInterface {
+interface TypeInterface {
+  accessibilityPerformance: string;
+  assetType: string;
+  canDelete: boolean;
+  category: string;
+  codePerformance: string;
+  color: string;
+  constituents: string;
+  createdAt: string;
+  description: string;
+  documents: string;
+  durationUnit: string;
+  expectedLife: string;
+  features: string;
+  finish: string;
+  id: string;
+  images: string;
+  isActive: boolean;
+  isDeleted: boolean;
   key: string;
-  parentId?: string;
+  material: string;
+  modelNo: string;
+  modelReference: string;
   name: string;
-  code: string;
-  tag: string[];
-  description?: string;
-  labels?: string[];
-  formTypeId?: string;
+  nominalHeight: string;
+  nominalLength: string;
+  nominalWidth: string;
+  replacementCost: number;
+  shape: string;
+  size: string;
+  sustainabilityPerformance: string;
+  tags: [],
+  updatedAt: string;
+  warranty: string;
+  warrantyDurationLabor: number;
+  warrantyDurationParts: number;
+  warrantyDurationUnit: string;
+  warrantyGuarantorLabor: string;
+  warrantyGuarantorParts: string;
 }
 
 interface ActiveInterface {
@@ -46,11 +76,11 @@ const findAllActive = async () => {
   );
 };
 
-const create = async (classification: ClassificationInterface) => {
-  return axios.post(url, classification);
+const create = async (type: TypeInterface) => {
+  return axios.post(url, type);
 };
 
-const update = async (id: string, classification: ClassificationInterface) => {
+const update = async (id: string, classification: TypeInterface) => {
   return axios.patch(url + "/" + id, classification);
 };
 
@@ -59,7 +89,6 @@ const remove = async (id: string) => {
 
   return axios.delete(url + '/' + id);
 };
-
 
 const nodeInfo = async (key: string) => {
   return axios.get(url + "/" + key);

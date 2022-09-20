@@ -15,5 +15,6 @@ export enum RepositoryEnums {
   CONTACT = 'contact',
   WINFORM_STRUCTURE_DATA_OPERATION = 'WINFORM_STRUCTURE_DATA_OPERATION',
   LAZY_LOADING = 'lazyLoading',
-  EXCEL_IMPORT_EXPORT= 'excel_import_export'
+  EXCEL_IMPORT_EXPORT = 'excel_import_export',
+  INFRA = 'infra',
 }

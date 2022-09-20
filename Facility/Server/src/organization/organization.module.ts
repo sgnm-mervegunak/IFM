@@ -1,13 +1,12 @@
+import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { RepositoryEnums } from 'src/common/const/repository.enum';
-import { StructureModule } from 'src/facility-structures/structure.module';
 import { OrganizationController } from './organization.controller';
+import { OrganizationRepository } from './organization.repository';
 import { OrganizationService } from './organization.service';
-import { OrganizationRepository } from './repositories/organization.repository';
 
 @Module({
-  imports: [StructureModule],
-  controllers: [OrganizationController],
+  imports: [HttpModule],
   providers: [
     OrganizationService,
     {
@@ -15,5 +14,6 @@ import { OrganizationRepository } from './repositories/organization.repository';
       useClass: OrganizationRepository,
     },
   ],
+  controllers: [OrganizationController],
 })
 export class OrganizationModule {}

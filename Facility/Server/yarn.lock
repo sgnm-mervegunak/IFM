@@ -8391,17 +8391,10 @@
   "resolved" "https://registry.npmjs.org/setprototypeof/-/setprototypeof-1.2.0.tgz"
   "version" "1.2.0"
 
-<<<<<<< HEAD
-"sgnm-neo4j@^0.0.203":
-  "integrity" "sha512-aI2nyweTqsIfGZuXtQHbgWD9Pkler6S7CrvDahnEVmvY/jUr2gVyKCXZxnYbAY+lEb5wryVhXUuITZpRUJfiJg=="
-  "resolved" "https://registry.npmjs.org/sgnm-neo4j/-/sgnm-neo4j-0.0.203.tgz"
-  "version" "0.0.203"
-=======
-"sgnm-neo4j@^0.0.201":
-  "integrity" "sha512-9dk7C5aZUXva6CQZD6p3DzHoE2dtChVCuBgWo85vHk5kAtxqBwibqQ5U7PK+lcDA61RPHVoPrKr2HFm9RluADw=="
-  "resolved" "https://registry.npmjs.org/sgnm-neo4j/-/sgnm-neo4j-0.0.201.tgz"
-  "version" "0.0.201"
->>>>>>> 1b4edd0a394feb8b3e33e26b1df06908996e8282
+"sgnm-neo4j@^0.0.206":
+  "integrity" "sha512-Aza6gHCqztwYsKv1ZhmUFpchpnKnScZeVy89qo0wbGZWNRYZhXgRA8lMM3l6IIOPZSfmOvAcROLsmWCwIn07sw=="
+  "resolved" "https://registry.npmjs.org/sgnm-neo4j/-/sgnm-neo4j-0.0.206.tgz"
+  "version" "0.0.206"
   dependencies:
     "@nestjs/common" "^8.4.5"
     "@nestjs/config" "^2.0.0"
@@ -9390,7 +9383,7 @@
   "resolved" "https://registry.npmjs.org/webpack-sources/-/webpack-sources-3.2.3.tgz"
   "version" "3.2.3"
 
-"webpack@^5.0.0", "webpack@^5.1.0", "webpack@^5.11.0":
+"webpack@^5.0.0", "webpack@^5.1.0", "webpack@^5.11.0", "webpack@5.74.0":
   "integrity" "sha512-A2InDwnhhGN4LYctJj6M1JEaGL7Luj6LOmyBHjcI8529cm5p6VXiTIW2sn6ffvEAKmveLzvu4jrihwXtPojlAA=="
   "resolved" "https://registry.npmjs.org/webpack/-/webpack-5.74.0.tgz"
   "version" "5.74.0"
