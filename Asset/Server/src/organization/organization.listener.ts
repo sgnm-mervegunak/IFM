@@ -11,7 +11,7 @@ import { Facility } from './entities/facility.entity';
 @Controller('organizationListener')
 @Unprotected()
 export class OrganizationListenerController {
-  constructor(private readonly neo4jService: Neo4jService, private readonly httpService: HttpService) {}
+  constructor(private readonly neo4jService: Neo4jService, private readonly httpService: HttpService) { }
 
   @EventPattern('createFacility')
   async createFacilityListener(@Payload() message) {
@@ -49,19 +49,19 @@ export class OrganizationListenerController {
       config.realm = realm;
 
       const organizationInfo = {
-        name: facilityInfo.name,
+        name: realm,
       };
 
       const classificationInfo = {
-        name: facilityInfo.name + 'Classification',
+        name: realm + 'Classification',
       };
 
       const assetInfo = {
-        name: facilityInfo.name + 'Asset',
+        name: realm + 'Asset',
       };
 
       const configInfo = {
-        name: 'Config',
+        name: realm + 'Config',
       };
 
       const finalOrganizationObject = assignDtoPropToEntity(facility, organizationInfo);
