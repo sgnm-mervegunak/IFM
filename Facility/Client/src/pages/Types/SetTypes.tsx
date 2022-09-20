@@ -137,6 +137,9 @@ const SetTypes = () => {
         setTypes(res.data);
       })
       .catch((err) => {
+        if (types.length === 0) {
+          setTypes([])
+        }
         toast.current.show({
           severity: "error",
           summary: t("Error"),
@@ -226,11 +229,11 @@ const SetTypes = () => {
         toast.current.show({
           severity: "success",
           summary: "Successful",
-          detail: "Facility Deleted",
+          detail: "Type Deleted",
           life: 3000,
         });
-        setDeleteTypeDialog(false);
-        // setFacility(emptyFacility);
+        setDelDia(false);
+        setType(emptyType);
         getTypes(); //loadLazyData();
       })
       .catch((err) => {
@@ -240,8 +243,8 @@ const SetTypes = () => {
           detail: err.response ? err.response.data.message : err.message,
           life: 2000,
         });
-        setDeleteTypeDialog(false);
-        // setFacility(emptyFacility);
+        setDelDia(false);
+        setType(emptyType);
         getTypes(); //loadLazyData();
       });
   };
@@ -252,7 +255,7 @@ const SetTypes = () => {
         label="No"
         icon="pi pi-times"
         className="p-button-text"
-        onClick={() => setDeleteTypeDialog(false)}
+        onClick={() => setDelDia(false)}
       />
       <Button
         label="Yes"
@@ -272,7 +275,10 @@ const SetTypes = () => {
           setSelectedNodeKey(rowData.key);
           setSelectedNodeId(rowData.id);
         }} />
-        <Button icon="pi pi-trash" className="p-button-rounded p-button-warning" onClick={() => setDelDia(true)} />
+        <Button icon="pi pi-trash" className="p-button-rounded p-button-warning" onClick={() => {
+          setType(rowData);
+          setDelDia(true)
+        }} />
       </React.Fragment>
     );
   }
@@ -292,7 +298,6 @@ const SetTypes = () => {
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Types"
             rows={15}
             rowsPerPageOptions={[15, 25, 50]}
-            showGridlines
             header="Types"
             emptyMessage="Type not found"
           >
@@ -300,19 +305,25 @@ const SetTypes = () => {
               field="name"
               header="Name"
               sortable
-              style={{ width: "25%" }}
+              style={{ width: "20%" }}
+            />
+            <Column
+              field="assetType"
+              header="Asset Type"
+              sortable
+              style={{ width: "20%" }}
             />
             <Column
               field="category"
               header="Category"
               sortable
-              style={{ width: "25%" }}
+              style={{ width: "20%" }}
             />
             <Column
-              field="material"
+              field="modelNo"
               header="Model No"
               sortable
-              style={{ width: "25%" }}
+              style={{ width: "20%" }}
             />
             <Column
               body={actionBodyTemplate}
@@ -375,14 +386,14 @@ const SetTypes = () => {
           header="Confirm"
           modal
           footer={deleteTypeDialogFooter}
-          onHide={() => setDeleteTypeDialog(false)}
+          onHide={() => setDelDia(false)}
         >
           <div className="confirmation-content">
             <i
               className="pi pi-exclamation-triangle mr-3"
               style={{ fontSize: "2rem" }}
             />
-            {type && (
+            {types && (
               <span>
                 Are you sure you want to delete <b>{type.name}</b>?
               </span>
