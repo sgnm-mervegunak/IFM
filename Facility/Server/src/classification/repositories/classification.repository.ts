@@ -444,7 +444,8 @@ export class ClassificationRepository implements classificationInterface<Classif
 
   //REVISED FOR NEW NEO4J
   async addAClassificationFromExcel(file: Express.Multer.File, realm: string, language: string) {
-    let data;
+      try {
+        let data;
 
     let buffer = new Uint8Array(file.buffer);
     const workbook = new exceljs.Workbook();
@@ -453,14 +454,17 @@ export class ClassificationRepository implements classificationInterface<Classif
       const firstSheet = book.getWorksheet(1);
       data = firstSheet.getColumn(1).values.filter((e) => e != null);
     });
-    await data[0].replaceAll(' ', '_');
+   let label= await data[0].replaceAll(' ', '_');
+
+    let checkClassification = await this.neo4jService.findByLabelAndFilters([`${label}_${language}`],{realm})
+  if(checkClassification.length==0){
     function key() {
       return uuidv4();
     }
     let params = {
       isRoot: true,
       isActive: true,
-      name: data[0],
+      name: label,
       isDeleted: false,
       key: key(),
       canDelete: true,
@@ -468,7 +472,7 @@ export class ClassificationRepository implements classificationInterface<Classif
       canDisplay: true,
       language: language,
     };
-    let labels = [data[0] + '_' + language];
+    let labels = [label + '_' + language];
     let node = await this.neo4jService.createNode(params, labels);
 
     let parent = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
@@ -511,6 +515,15 @@ export class ClassificationRepository implements classificationInterface<Classif
         RelationDirection.RIGHT,
       );
     }
+  }else{
+    throw new HttpException("Bu classification bulunuyor",400)
+  }
+   
+      } catch (error) {
+        throw new HttpException({message:error.message,code:error.status},error.status)
+      }
+    
+    
   }
 
   //REVISED FOR NEW NEO4J
