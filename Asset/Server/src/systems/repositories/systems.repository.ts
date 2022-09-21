@@ -88,9 +88,14 @@ export class SystemsRepository implements SystemsInterface<System> {
         throw new HttpException(wrong_parent_error(), 400);
       }
 
-      const uniqnessCheck = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.TYPE], {
-        name: systemsDto.name,
-      });
+      const uniqnessCheck = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+        [Neo4jLabelEnum.SYSTEMS],
+        {isDeleted: false, realm},
+        [Neo4jLabelEnum.SYSTEM],
+        {isDeleted: false, name: systemsDto.name},
+        RelationName.PARENT_OF,
+        RelationDirection.RIGHT
+      ) 
 
       if (uniqnessCheck.length) {
         throw new HttpException('name must be uniq', 400);
@@ -132,7 +137,7 @@ export class SystemsRepository implements SystemsInterface<System> {
         parentKey: systemsDto.createdBy,
         referenceKey: systemNode.properties.key,
         url: systemUrl,
-        relationName: RelationName.CREATED_OF,
+        relationName: RelationName.CREATOR_OF,
         virtualNodeLabels: [Neo4jLabelEnum.SYSTEM, Neo4jLabelEnum.VIRTUAL],
       };
       await this.kafkaService.producerSendMessage('createContactRelation', JSON.stringify(createdByKafkaObject));
@@ -145,7 +150,7 @@ export class SystemsRepository implements SystemsInterface<System> {
         { isDeleted: false },
         'PARENT_OF',
       );
-      let classificationRootNone = 'OmniClass21';
+      let classificationRootNone = 'OmniClass11';
 
       languages.map(async (record) => {
         let lang = record['_fields'][1].properties.name;
@@ -196,16 +201,10 @@ export class SystemsRepository implements SystemsInterface<System> {
     if (!node.length) {
       throw new HttpException(node_not_found(), 400);
     }
-    const  systemRootNode = await this.neo4jService.findChildrensByLabelsAndFilters(
-            ['Asset'],
-            {'isDeleted': false},
-            [],
-            {'isDeleted': false, 'key': node[0]["_fields"][0].properties.key}
-    ); 
-     //check if rootNode realm equal to keyclock token realm
-     if (systemRootNode[0]["_fields"][0].properties.realm !== realm) {
-      throw new HttpException({ message: 'You dont have permission' }, 403);
-    }
+     
+    if (node[0]["_fields"][0].properties.realm !== realm) {
+         throw new HttpException({ message: 'You dont have permission' }, 403);
+       }
 
     const systemUrl = `${process.env.SYSTEM_URL}/${node[0].get('children').properties.key}`;
     if (systemsDto.createdBy) {
@@ -232,8 +231,8 @@ export class SystemsRepository implements SystemsInterface<System> {
           newParentKey: systemsDto.createdBy,
           referenceKey: virtualNode[0].get('parent').properties.key,
           url: systemUrl,
-          relationName: RelationName.CREATED_OF,
-          virtualNodeLabels: [Neo4jLabelEnum.TYPE, Neo4jLabelEnum.VIRTUAL],
+          relationName: RelationName.CREATOR_OF,
+          virtualNodeLabels: [Neo4jLabelEnum.SYSTEM, Neo4jLabelEnum.VIRTUAL],
         };
 
         await this.kafkaService.producerSendMessage('updateContactRelation', JSON.stringify(createdByKafkaObject));
@@ -251,15 +250,14 @@ export class SystemsRepository implements SystemsInterface<System> {
       [],
       systemsDto,
     );
-    let structureRootNode;
-    let structureData;
+
     if (!updatedNode) {
       throw new FacilityStructureNotFountException(_id);
     }
     ////////////////////////////// update classified_by  relation, if category changed //////////////////////////////////
     const categories = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
       [],
-      { isDeleted: false, key: node[0]['_fields'][0].properties.key },
+      { isDeleted: false, key: node[0]['_fields'][1].properties.key },
       [],
       { isDeleted: false },
       RelationName.CLASSIFIED_BY,
@@ -267,7 +265,7 @@ export class SystemsRepository implements SystemsInterface<System> {
     );
     const newCategories = await this.neo4jService.findChildrensByLabelsAndFilters(
       ['Classification'],
-      {"isDeleted": false, "realm": systemRootNode[0]["_fields"][0].properties.realm},
+      {"isDeleted": false, "realm": node[0]["_fields"][0].properties.realm },
       [],
       {"isDeleted": false, "code": systemsDto["category"] }
     )
@@ -275,7 +273,7 @@ export class SystemsRepository implements SystemsInterface<System> {
     if (categories[0]['_fields'][1]['properties'].code != systemsDto["category"]) {
       for (let i=0; i<categories.length; i++) {
          await this.neo4jService.deleteRelationByIdAndRelationNameWithoutFilters(
-              node[0]["_fields"][0].identity.low,
+              node[0]["_fields"][1].identity.low,
               categories[i]['_fields'][1].identity.low,
               RelationName.CLASSIFIED_BY,
               RelationDirection.RIGHT       
@@ -283,7 +281,7 @@ export class SystemsRepository implements SystemsInterface<System> {
        }
         for (let i = 0; i < newCategories.length; i++) {
           await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
-            node[0]['_fields'][0].identity.low,
+            node[0]['_fields'][1].identity.low,
             { isDeleted: false },
             newCategories[i]['_fields'][1].identity.low,
             { isDeleted: false },
@@ -295,7 +293,7 @@ export class SystemsRepository implements SystemsInterface<System> {
    }
    else {
       for (let i=0; i<newCategories.length; i++) {
-        await this.neo4jService.addRelationByIdAndRelationNameWithFilters(node[0]["_fields"][0].identity.low,{"isDeleted":false},
+        await this.neo4jService.addRelationByIdAndRelationNameWithFilters(node[0]["_fields"][1].identity.low,{"isDeleted":false},
         newCategories[i]['_fields'][1].identity.low, {"isDeleted":false}, RelationName.CLASSIFIED_BY, RelationDirection.RIGHT);
       }
    }
