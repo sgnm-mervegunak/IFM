@@ -15,7 +15,6 @@ import ClassificationsService from "../../../services/classifications";
 import ContactService from "../../../services/contact";
 import FacilityStructureService from "../../../services/facilitystructure";
 import { useAppSelector } from "../../../app/hook";
-import FileUploadComponent from "./FileUpload/FileUpload";
 import ImageUploadComponent from "./FileUpload/ImageUpload/ImageUpload";
 import DocumentUploadComponent from "./FileUpload/DocumentUpload/DocumentUpload";
 
@@ -76,24 +75,17 @@ const TypeForm = ({
   const [spaces, setSpaces] = useState<Node[]>([]);
   const [spaceType, setSpaceType] = useState("");
   const [contact, setContact] = useState<any>([]);
-  const [classificationStatus, setclassificationStatus] = useState<Node[]>([]);
-  const auth = useAppSelector((state) => state.auth);
-  const [realm, setRealm] = useState(auth.auth.realm);
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
   const [uploadFiles, setUploadFiles] = useState<any>({});
   const { toast } = useAppSelector((state) => state.toast);
   const { t } = useTranslation(["common"]);
-  const [codeCategory, setCodeCategory] = useState("");
-  const [codeAssetType, setCodeAssetType] = useState("");
   const [codeDurationUnit, setCodeDurationUnit] = useState("");
 
   const [data, setData] = useState<any>();
-  const language = useAppSelector((state) => state.language.language);
 
   const schema = yup.object({
     name: yup.string().max(50, t("This area accepts max 50 characters.")),
     description: yup.string().required(t("This area is required.")).max(256, t("This area accepts max 256 characters.")),
-    spaceType: yup.string().required(t("This area is required.")),
     space: yup.string().required(t("This area is required.")),
     serialNo: yup.string().max(256, t("This area accepts max 256 characters.")),
     tagNumber: yup.string().max(256, t("This area accepts max 256 characters.")),
@@ -209,6 +201,9 @@ const TypeForm = ({
     ComponentService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
         console.log(res.data);
+        if (spaceType === "") {
+          setSpaceType(res.data.nodeType);
+        }
         setData(res.data.properties);
 
       })
@@ -541,7 +536,7 @@ const TypeForm = ({
             <div className="field col-12 md:col-4">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Installation Date")}</h5>
               <Controller
-                defaultValue={new Date(data?.handoverDate)}
+                defaultValue={new Date(data?.installationDate)}
                 name="installationDate"
                 control={control}
                 render={({ field }) => (
@@ -562,7 +557,7 @@ const TypeForm = ({
             <div className="field col-12 md:col-4">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Start Date")}</h5>
               <Controller
-                defaultValue={new Date(data?.handoverDate)}
+                defaultValue={new Date(data?.warrantyStartDate)}
                 name="warrantyStartDate"
                 control={control}
                 render={({ field }) => (
@@ -695,7 +690,7 @@ const TypeForm = ({
                       ClassificationsService.nodeInfo(e.value as string)
                         .then((res) => {
                           field.onChange(e.value)
-                          setCodeCategory(res.data.properties.code || "");
+                          setCodeDurationUnit(res.data.properties.code || "");
                         })
                     }}
                     filter
