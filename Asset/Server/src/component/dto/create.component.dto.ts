@@ -43,29 +43,29 @@ export class CreateComponentDto {
   description: string;
 
   @ApiProperty()
-  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
+  @IsOptional()
   @LengthWithI18nMessage(i18nValidationMessageEnum.LENGTH, 0, 256)
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
   serialNo: string;
 
   @ApiProperty()
-  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
+  @IsOptional()
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
   installationDate: string = moment().format('YYYY-MM-DD HH:mm:ss');
 
   @ApiProperty()
-  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
+  @IsOptional()
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
   warrantyStartDate: string = moment().format('YYYY-MM-DD HH:mm:ss');
 
   @ApiProperty()
-  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
+  @IsOptional()
   @LengthWithI18nMessage(i18nValidationMessageEnum.LENGTH, 0, 256)
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
   tagNumber: string;
 
   @ApiProperty()
-  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
+  @IsOptional()
   @LengthWithI18nMessage(i18nValidationMessageEnum.LENGTH, 0, 13)
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
   barCode: string;
@@ -77,7 +77,7 @@ export class CreateComponentDto {
   assetIdentifier: string;
 
   @ApiProperty()
-  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
+  @IsOptional()
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
   warrantyGuarantorParts: string;
 
