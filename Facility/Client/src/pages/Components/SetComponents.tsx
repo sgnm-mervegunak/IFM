@@ -210,6 +210,24 @@ const SetComponents = () => {
               sortable
               style={{ width: "20%" }}
             />
+            <Column
+              field="assetType"
+              header="Asset Type"
+              sortable
+              style={{ width: "20%" }}
+            />
+            <Column
+              field="category"
+              header="Category"
+              sortable
+              style={{ width: "20%" }}
+            />
+            <Column
+              field="modelNo"
+              header="Model No"
+              sortable
+              style={{ width: "20%" }}
+            />
           </DataTable>
         </div>
 
