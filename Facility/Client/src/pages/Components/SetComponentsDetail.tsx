@@ -318,7 +318,7 @@ const SetTypes = () => {
             setEditDia={setEditDia}
             isUpdate={isUpdate}
             setIsUpdate={setIsUpdate}
-            parentKey={nodeKey}
+            // parentKey={nodeKey}
           />
         </Dialog>
 
@@ -342,7 +342,7 @@ const SetTypes = () => {
             setEditDia={setEditDia}
             isUpdate={isUpdate}
             setIsUpdate={setIsUpdate}
-            parentKey={nodeKey}
+            // parentKey={nodeKey}
           />
         </Dialog>
 

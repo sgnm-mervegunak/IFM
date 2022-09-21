@@ -77,6 +77,12 @@ const TypeForm = ({
 
   const [data, setData] = useState<any>();
 
+  console.log(submitted,
+    selectedNodeKey,
+    selectedNodeId,
+    editDia);
+  
+
   const schema = yup.object({
     name: yup.string().max(50, t("This area accepts max 50 characters.")),
     description: yup.string().max(256, t("This area accepts max 256 characters.")),
