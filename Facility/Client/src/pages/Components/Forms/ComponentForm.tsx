@@ -29,7 +29,6 @@ interface Params {
   setEditDia: React.Dispatch<React.SetStateAction<boolean>>;
   isUpdate: boolean;
   setIsUpdate: React.Dispatch<React.SetStateAction<boolean>>;
-  parentKey: string;
 }
 
 interface Node {
@@ -68,7 +67,6 @@ const TypeForm = ({
   setEditDia,
   isUpdate,
   setIsUpdate,
-  parentKey,
 }: Params) => {
 
   const [classificationCategory, setClassificationCategory] = useState<Node[]>([]);
@@ -257,7 +255,7 @@ const TypeForm = ({
         warrantyDurationUnit: data?.warrantyDurationUnit,
         images: data?.images || "",
         documents: data?.documents || "",
-        parentKey: parentKey,
+        parentKey: selectedNodeKey,
       };
       console.log(newNode);
 
@@ -343,7 +341,7 @@ const TypeForm = ({
         warrantyDurationUnit: data?.warrantyDurationUnit,
         images: data?.images || "",
         documents: data?.documents || "",
-        parentKey: parentKey,
+        parentKey: selectedNodeKey,
       };
 
       console.log(updateNode);

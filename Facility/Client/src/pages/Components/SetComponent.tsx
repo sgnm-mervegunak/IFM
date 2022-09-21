@@ -10,7 +10,7 @@ import { Toolbar } from "primereact/toolbar";
 
 import TypesService from "../../services/types";
 import { useAppSelector } from "../../app/hook";
-import TypeForm from "./Forms/TypeForm";
+import ComponentForm from "./Forms/ComponentForm";
 
 interface Node {
   cantDeleted: boolean;
@@ -35,10 +35,9 @@ interface Node {
   canDelete?: boolean;
 }
 
-const SetType = () => {
+const SetComponent = () => {
   const [selectedNodeKey, setSelectedNodeKey] = useState<any>("");
   const [selectedNodeId, setSelectedNodeId] = useState<any>("");
-  const [expandedKeys, setExpandedKeys] = useState<any>("");
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
   const [addDia, setAddDia] = useState(false);
@@ -82,7 +81,7 @@ const SetType = () => {
     },
   ];
 
-  const getTypes = () => {
+  const getComponents = () => {
     TypesService.findAll()
       .then((res) => {
         if (!res.data.root.children) {
@@ -109,7 +108,7 @@ const SetType = () => {
   };
 
   useEffect(() => {
-    getTypes();
+    getComponents();
   }, []);
 
   const fixNodes = (nodes: Node[]) => {
@@ -134,7 +133,7 @@ const SetType = () => {
               detail: t("Type Deleted"),
               life: 2000,
             });
-            getTypes();
+            getComponents();
           })
           .catch((err) => {
             toast.current.show({
@@ -152,7 +151,7 @@ const SetType = () => {
           detail: err.response ? err.response.data.message : err.message,
           life: 2000,
         });
-        getTypes();
+        getComponents();
       });
   };
 
@@ -241,13 +240,13 @@ const SetType = () => {
           setAddDia(false);
         }}
       >
-        <TypeForm
+        <ComponentForm
           submitted={submitted}
           setSubmitted={setSubmitted}
           selectedNodeKey={selectedNodeKey}
           selectedNodeId={selectedNodeId}
           editDia={editDia}
-          getTypes={getTypes}
+          getComponents={getComponents}
           setAddDia={setAddDia}
           setEditDia={setEditDia}
           isUpdate={isUpdate}
@@ -263,13 +262,13 @@ const SetType = () => {
           setEditDia(false);
         }}
       >
-        <TypeForm
+        <ComponentForm
           submitted={submitted}
           setSubmitted={setSubmitted}
           selectedNodeKey={selectedNodeKey}
           selectedNodeId={selectedNodeId}
           editDia={editDia}
-          getTypes={getTypes}
+          getComponents={getComponents}
           setAddDia={setAddDia}
           setEditDia={setEditDia}
           isUpdate={isUpdate}
@@ -359,4 +358,4 @@ const SetType = () => {
   );
 };
 
-export default SetType;
+export default SetComponent;
