@@ -4,4 +4,5 @@ export interface ComponentInterface<T> {
   findRootByRealm(key: string, header): any;
   delete(id: string, header): any;
   findByKey(key: string, header): any;
+  findChildrenOfRootByRealm(header): any;
 }

@@ -48,4 +48,11 @@ export class ComponentController {
   findOneNode(@Param('key') key: string, @Headers() header) {
     return this.componentService.findOneNode(key, header);
   }
+  
+  @Get('')
+  @Roles({ roles: [UserRoles.ADMIN] })
+  @NoCache()
+  findChildrenOfRootByRealm(@Headers() header) {
+    return this.componentService.findChildrenOfRootByRealm(header);
+  }
 }
