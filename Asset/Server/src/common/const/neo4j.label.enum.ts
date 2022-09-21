@@ -16,6 +16,6 @@ export enum Neo4jLabelEnum {
   SYSTEM_CONFIG = 'System_Config',
   VIRTUAL = 'Virtual',
   STRUCTURE = 'Structure',
-  SYSTEMS = 'SYSTEMS',
-  SYSTEM = 'SYSTEM'
+  SYSTEMS = 'Systems',
+  SYSTEM = 'System'
 }
