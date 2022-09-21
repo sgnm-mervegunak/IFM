@@ -29,4 +29,7 @@ export class ComponentService {
   async findOneNode(key: string, header) {
     return await this.componentRepository.findByKey(key, header);
   }
+  async findChildrenOfRootByRealm(header) {
+    return await this.componentRepository.findChildrenOfRootByRealm(header);
+  }
 }

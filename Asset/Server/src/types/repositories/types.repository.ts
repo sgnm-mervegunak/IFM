@@ -78,7 +78,6 @@ export class TypesRepository implements GeciciInterface<Type> {
   async findRootByRealm(header) {
     try {
       let { realm } = header;
-      realm = 'IFM'
       let node = await this.neo4jService.findChildrensByLabelsAsTree(
         [Neo4jLabelEnum.TYPES],
         {
