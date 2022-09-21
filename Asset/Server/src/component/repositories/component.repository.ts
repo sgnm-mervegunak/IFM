@@ -50,7 +50,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
         { isDeleted: false },
         RelationName.LOCATED_IN,
       );
-      nodes[0].get('n').properties['manufacturer'] = spaceNode[0].get('children').properties.referenceKey;
+      nodes[0].get('n').properties['space'] = spaceNode[0].get('children').properties.referenceKey;
       const warrantyGuaranorLaborNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
         [Neo4jLabelEnum.COMPONENT],
         { key: nodes[0].get('n').properties.key },
