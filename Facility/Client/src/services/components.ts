@@ -64,10 +64,8 @@ interface ActiveInterface {
 //   );
 // };
 
-const findAll = async () => {
-  return axios.get(
-    url
-  );
+const findAll = async (key: string) => {
+  return axios.get(url + "/type/" + key);
 };
 
 const findAllActive = async () => {
