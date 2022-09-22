@@ -282,14 +282,14 @@ export class TypesRepository implements GeciciInterface<Type> {
         +_id,
         {},
         [],
-        { isDeleted: false, isActive: false },
+        { isDeleted: false, isActive: true },
         'PARENT_OF',
       );
 
       if (hasChildrenArray.length === 0) {
         deletedNode = await this.neo4jService.updateByIdAndFilter(+_id, {}, [], { isDeleted: true, isActive: false });
         await this.kafkaService.producerSendMessage(
-          'deleteRelation',
+          'deleteVirtualNodeRelations',
           JSON.stringify({ referenceKey: typeNode.properties.key }),
         );
       } else {
