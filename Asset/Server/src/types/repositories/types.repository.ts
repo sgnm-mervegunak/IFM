@@ -10,7 +10,7 @@ import { assignDtoPropToEntity, CustomNeo4jError, Neo4jService } from 'sgnm-neo4
 import { CreateTypesDto } from '../dto/create.types.dto';
 import { UpdateTypesDto } from '../dto/update.tpes.dto';
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
-import { node_not_found, wrong_parent_error } from 'src/common/const/custom.error.object';
+import { invalid_classification, node_not_found, wrong_parent_error } from 'src/common/const/custom.error.object';
 import { CustomAssetError } from 'src/common/const/custom.error.enum';
 import { NodeNotFound, WrongIdProvided } from 'src/common/bad.request.exception';
 import { RelationName } from 'src/common/const/relation.name.enum';
@@ -132,13 +132,21 @@ export class TypesRepository implements GeciciInterface<Type> {
   }
   async create(createTypesDto: CreateTypesDto, header) {
     try {
-      const { realm, authorization } = header;
+      const { realm, authorization, language } = header;
       const rootNode = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.TYPES], {
         isDeleted: false,
         realm,
       });
       if (!rootNode.length) {
         throw new HttpException(wrong_parent_error(), 400);
+      }
+
+      const assetTypesLabel = 'AssetTypes' + '_' + language;
+      const assetTypes = await this.neo4jService.findChildrensByLabelsAndFilters([assetTypesLabel], { realm }, [], {
+        name: createTypesDto.assetType,
+      });
+      if (assetTypes.length === 0) {
+        throw new HttpException(invalid_classification(), 400);
       }
 
       //check if manufacturer exist
@@ -171,13 +179,12 @@ export class TypesRepository implements GeciciInterface<Type> {
       delete typeObject['warrantyGuarantorLabor'];
 
       const finalObjectArray = avaiableCreateVirtualPropsGetter(createTypesDto);
-      console.log(finalObjectArray);
 
       for (let index = 0; index < finalObjectArray.length; index++) {
         const url =
           (await this.configService.get(finalObjectArray[index].url)) + '/' + finalObjectArray[index].referenceKey;
 
-        await this.httpService.get(url, { authorization });
+        const contact = await this.httpService.get(url, { authorization });
       }
 
       const typeNode = await this.neo4jService.createNode(typeObject, [Neo4jLabelEnum.TYPE]);
@@ -188,7 +195,7 @@ export class TypesRepository implements GeciciInterface<Type> {
 
       const typeUrl = `${process.env.TYPE_URL}/${typeNode.properties.key}`;
 
-      this.virtualNodeHandler.createVirtualNode(typeNode.identity.low, typeUrl, finalObjectArray);
+      await this.virtualNodeHandler.createVirtualNode(typeNode.identity.low, typeUrl, finalObjectArray);
 
       return result;
     } catch (error) {
@@ -204,7 +211,10 @@ export class TypesRepository implements GeciciInterface<Type> {
           throw new WrongIdProvided();
         }
         if (error.response?.code == CustomAssetError.OTHER_MICROSERVICE_ERROR) {
-          throw new HttpException(error.response.message, error.status);
+          throw new HttpException({ message: error.response.message }, error.status);
+        }
+        if (error.response?.code == CustomAssetError.INVALID_CLASSIFICATION) {
+          throw new HttpException({ message: error.response.message }, error.status);
         }
       } else {
         throw new HttpException(error, 500);
