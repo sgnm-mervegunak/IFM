@@ -22,3 +22,12 @@ export type UpdateKafka = {
   url: string;
   newParentKey: string;
 };
+
+export type CreateKafka = {
+  kafkaTopic: string;
+  referenceKey: string;
+  url: string;
+  relationNameForThisDatabase: string;
+  relationNameForTargetDatabase: string;
+  labels: string[];
+};

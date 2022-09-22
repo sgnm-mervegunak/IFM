@@ -1,17 +1,22 @@
 import { RelationName } from 'src/common/const/relation.name.enum';
+import { Neo4jLabelEnum } from './neo4j.label.enum';
 
 export const createKafkaTopicArray = [
   {
     createdBy: 'createContactRelation',
     kafkaTopic: 'createContactRelation',
-    relationName: RelationName.CREATED_OF,
+    relationNameForThisDatabase: RelationName.CREATED_BY,
+    relationNameForTargetDatabase: RelationName.CREATED_BY,
     url: 'CONTACT_URL',
+    labels: [Neo4jLabelEnum.CONTACT, Neo4jLabelEnum.VIRTUAL],
   },
   {
     manufacturer: 'createContactRelation',
     kafkaTopic: 'createContactRelation',
-    relationName: RelationName.MANUFACTURED_BY,
+    relationNameForThisDatabase: RelationName.MANUFACTURED_BY,
+    relationNameForTargetDatabase: RelationName.MANUFACTURED_BY,
     url: 'CONTACT_URL',
+    labels: [Neo4jLabelEnum.CONTACT, Neo4jLabelEnum.VIRTUAL],
   },
   {
     warrantyGuarantorLabor: 'createContactRelation',
@@ -19,18 +24,23 @@ export const createKafkaTopicArray = [
     relationNameForThisDatabase: RelationName.WARRANTY_GUARANTOR_LABOR,
     relationNameForTargetDatabase: RelationName.WARRANTY_GUARANTOR_LABOR,
     url: 'CONTACT_URL',
+    labels: [Neo4jLabelEnum.CONTACT, Neo4jLabelEnum.VIRTUAL],
   },
   {
     warrantyGuarantorParts: 'createContactRelation',
     kafkaTopic: 'createContactRelation',
     relationNameForThisDatabase: RelationName.WARRANTY_GUARANTOR_PARTS,
+    relationNameForTargetDatabase: RelationName.WARRANTY_GUARANTOR_PARTS,
     url: 'CONTACT_URL',
+    labels: [Neo4jLabelEnum.CONTACT, Neo4jLabelEnum.VIRTUAL],
   },
   {
     space: 'createStructureRelation',
     kafkaTopic: 'createStructureRelation',
-    relationName: RelationName.HAS,
+    relationNameForThisDatabase: RelationName.LOCATED_IN,
+    relationNameForTargetDatabase: RelationName.HAS,
     url: 'STRUCTURE_URL',
+    labels: [Neo4jLabelEnum.STRUCTURE, Neo4jLabelEnum.VIRTUAL],
   },
 ];
 
