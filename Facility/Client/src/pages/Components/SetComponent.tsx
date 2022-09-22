@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Toolbar } from "primereact/toolbar";
 
-import TypesService from "../../services/types";
+import ComponentService from "../../services/components";
 import { useAppSelector } from "../../app/hook";
 import ComponentForm from "./Forms/ComponentForm";
 
@@ -33,11 +33,13 @@ interface Node {
   parentId?: string;
   email?: string;
   canDelete?: boolean;
+  _type?: string;
 }
 
 const SetComponent = () => {
   const [selectedNodeKey, setSelectedNodeKey] = useState<any>("");
   const [selectedNodeId, setSelectedNodeId] = useState<any>("");
+  const [nodeType, setNodeType] = useState<any>("")
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
   const [addDia, setAddDia] = useState(false);
@@ -82,7 +84,7 @@ const SetComponent = () => {
   ];
 
   const getComponents = () => {
-    TypesService.findAll()
+    ComponentService.findAll()
       .then((res) => {
         if (!res.data.root.children) {
           let temp = JSON.parse(
@@ -123,14 +125,14 @@ const SetComponent = () => {
 
 
   const deleteItem = (key: string) => {
-    TypesService.nodeInfo(key)
+    ComponentService.nodeInfo(key)
       .then((res) => {
-        TypesService.remove(res.data.identity.low)
+        ComponentService.remove(res.data.identity.low)
           .then(() => {
             toast.current.show({
               severity: "success",
               summary: t("Successful"),
-              detail: t("Type Deleted"),
+              detail: t("Component Deleted"),
               life: 2000,
             });
             getComponents();
@@ -215,10 +217,10 @@ const SetComponent = () => {
       />
 
       {(() => {
-        if (canDelete === false) {
-          return <ContextMenu model={menu1} ref={cm} />;
-        } else {
+        if (nodeType === "Component") {
           return <ContextMenu model={menu2} ref={cm} />;
+        } else {
+          return <ContextMenu model={menu1} ref={cm} />;
         }
       })()}
 
@@ -276,7 +278,7 @@ const SetComponent = () => {
         />
       </Dialog>
 
-      <h1>{t("Manage Types")}</h1>
+      <h1>{t("Manage Components")}</h1>
       <div className="field">
         <Tree
           loading={loading}
@@ -289,7 +291,11 @@ const SetComponent = () => {
           onContextMenu={(event: any) => {
             setCanDelete(event.node.canDelete); // for use import building control on context menu
             setSelectedNodeId(event.node._id.low);
+            setNodeType(event.node.className);
             cm.current.show(event.originalEvent);
+            if (event.node.canDelete === false) {
+              cm.current.hide(event.originalEvent);
+            }
           }}
           filter
           filterBy="name,code"
@@ -302,7 +308,7 @@ const SetComponent = () => {
                   <span className="ml-4 ">
 
                     {
-                      data.canDelete === false && (
+                      data._type === "Type" && (
                         <Button
                           icon="pi pi-plus"
                           className="p-button-rounded p-button-secondary p-button-text"
@@ -318,7 +324,7 @@ const SetComponent = () => {
                     }
 
                     {
-                      data.canDelete === true && (
+                      data._type === "Component" && (
                         <>
                           <Button
                             icon="pi pi-pencil"
