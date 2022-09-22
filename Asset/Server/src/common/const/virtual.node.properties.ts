@@ -4,7 +4,7 @@ export const createKafkaTopicArray = [
   {
     createdBy: 'createContactRelation',
     kafkaTopic: 'createContactRelation',
-    relationName: RelationName.CREATED_OF,
+    relationName: RelationName.CREATOR_OF,
     url: 'CONTACT_URL',
   },
   {
