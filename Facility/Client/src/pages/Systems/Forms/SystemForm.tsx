@@ -77,15 +77,10 @@ const SystemForm = ({
   const [uploadFiles, setUploadFiles] = useState<any>({});
   const { toast } = useAppSelector((state) => state.toast);
   const { t } = useTranslation(["common"]);
+  const [codeCategory, setCodeCategory] = useState("");
   const [codeDurationUnit, setCodeDurationUnit] = useState("");
 
   const [data, setData] = useState<any>();
-
-  console.log(submitted,
-    selectedNodeKey,
-    selectedNodeId,
-    editDia,);
-
 
   const schema = yup.object({
     name: yup.string().max(50, t("This area accepts max 50 characters.")),
@@ -271,7 +266,7 @@ const SystemForm = ({
           toast.current.show({
             severity: "success",
             summary: t("Successful"),
-            detail: t("Component Created"),
+            detail: t("System Created"),
             life: 4000,
           });
           console.log(res.data);
@@ -361,7 +356,7 @@ const SystemForm = ({
           toast.current.show({
             severity: "success",
             summary: t("Successful"),
-            detail: t("Component Updated"),
+            detail: t("System Updated"),
             life: 4000,
           });
           // upload files
@@ -439,7 +434,7 @@ const SystemForm = ({
         <TabPanel header={t("Form")}>
           <div className="formgrid grid">
 
-            <div className="field col-12 md:col-4">
+            <div className="field col-12 md:col-12">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
               <InputText
                 autoComplete="off"
@@ -450,33 +445,33 @@ const SystemForm = ({
               <p style={{ color: "red" }}>{errors.name?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Space")}</h5>
+            <div className="field col-12 md:col-12">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
               <Controller
-                defaultValue={data?.space || ""}
-                name="space"
+                defaultValue={data?.category || ""}
+                name="category"
                 control={control}
                 render={({ field }) => (
                   <TreeSelect
                     value={field.value}
-                    options={spaces}
+                    options={classificationCategory}
                     onChange={(e) => {
-                      FacilityStructureService.nodeInfo(e.value as string)
+                      ClassificationsService.nodeInfo(e.value as string)
                         .then((res) => {
                           field.onChange(e.value)
-                          setSpaceType(res.data.properties.nodeType);
+                          setCodeCategory(res.data.properties.code || "");
                         })
                     }}
                     filter
-                    placeholder="Select Space"
+                    placeholder="Select Type"
                     style={{ width: "100%" }}
                   />
                 )}
               />
-              <p style={{ color: "red" }}>{errors.space?.message}</p>
+              <p style={{ color: "red" }}>{errors.category?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-4 structureChips">
+            <div className="field col-12 md:col-12 structureChips">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
               <Controller
 
@@ -496,7 +491,7 @@ const SystemForm = ({
               <p style={{ color: "red" }}>{errors.tag?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-4">
+            <div className="field col-12 md:col-12">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Description")}</h5>
               <InputText
                 autoComplete="off"
@@ -507,7 +502,7 @@ const SystemForm = ({
               <p style={{ color: "red" }}>{errors.description?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-4">
+            <div className="field col-12 md:col-12">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Created By")}</h5>
               <Controller
                 defaultValue={data?.createdBy || ""}
@@ -529,186 +524,6 @@ const SystemForm = ({
               <p style={{ color: "red" }}>{errors.createdBy?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Serial No")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("serialNo")}
-                style={{ width: '100%' }}
-                defaultValue={data?.serialNo || ""}
-              />
-              <p style={{ color: "red" }}>{errors.serialNo?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Installation Date")}</h5>
-              <Controller
-                defaultValue={new Date(data?.installationDate)}
-                name="installationDate"
-                control={control}
-                render={({ field }) => (
-                  <Calendar
-                    dateFormat="dd/mm/yy"
-                    value={field.value}
-                    showIcon
-                    style={{ width: "100%" }}
-                    onChange={(e) => {
-                      field.onChange(e.value)
-                    }}
-                  />
-                )}
-              />
-              <p style={{ color: "red" }}>{errors.installationDate?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Start Date")}</h5>
-              <Controller
-                defaultValue={new Date(data?.warrantyStartDate)}
-                name="warrantyStartDate"
-                control={control}
-                render={({ field }) => (
-                  <Calendar
-                    dateFormat="dd/mm/yy"
-                    value={field.value}
-                    showIcon
-                    style={{ width: "100%" }}
-                    onChange={(e) => {
-                      field.onChange(e.value)
-                    }}
-                  />
-                )}
-              />
-              <p style={{ color: "red" }}>{errors.warrantyStartDate?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Tag Number")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("tagNumber")}
-                style={{ width: '100%' }}
-                defaultValue={data?.tagNumber || ""}
-              />
-              <p style={{ color: "red" }}>{errors.tagNumber?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Barcode")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("barCode")}
-                style={{ width: '100%' }}
-                defaultValue={data?.barCode || ""}
-              />
-              <p style={{ color: "red" }}>{errors.barCode?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Asset Identifier")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("assetIdentifier")}
-                style={{ width: '100%' }}
-                defaultValue={data?.assetIdentifier || ""}
-              />
-              <p style={{ color: "red" }}>{errors.assetIdentifier?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Guarantor Parts")}</h5>
-              <Controller
-                defaultValue={data?.warrantyGuarantorParts || ""}
-                name="warrantyGuarantorParts"
-                control={control}
-                render={({ field }) => (
-                  <TreeSelect
-                    value={field.value}
-                    options={contact}
-                    onChange={(e) => {
-                      field.onChange(e.value)
-                    }}
-                    filter
-                    placeholder="Select Type"
-                    style={{ width: "100%" }}
-                  />
-                )}
-              />
-              <p style={{ color: "red" }}>{errors.warrantyGuarantorParts?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Duration Parts")}</h5>
-              <InputText
-                type="number"
-                autoComplete="off"
-                {...register("warrantyDurationParts")}
-                style={{ width: "100%" }}
-                defaultValue={data?.warrantyDurationParts || 0}
-              />
-              <p style={{ color: "red" }}>{errors.warrantyDurationParts?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Guarantor Labor")}</h5>
-              <Controller
-                defaultValue={data?.warrantyGuarantorLabor || ""}
-                name="warrantyGuarantorLabor"
-                control={control}
-                render={({ field }) => (
-                  <TreeSelect
-                    value={field.value}
-                    options={contact}
-                    onChange={(e) => {
-                      field.onChange(e.value)
-                    }}
-                    filter
-                    placeholder="Select Type"
-                    style={{ width: "100%" }}
-                  />
-                )}
-              />
-              <p style={{ color: "red" }}>{errors.warrantyGuarantorLabor?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Duration Labor")}</h5>
-              <InputText
-                type="number"
-                autoComplete="off"
-                {...register("warrantyDurationLabor")}
-                style={{ width: "100%" }}
-                defaultValue={data?.warrantyDurationLabor || 0}
-              />
-              <p style={{ color: "red" }}>{errors.warrantyDurationLabor?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Duration Unit")}</h5>
-              <Controller
-                defaultValue={data?.warrantyDurationUnit || ""}
-                name="warrantyDurationUnit"
-                control={control}
-                render={({ field }) => (
-                  <TreeSelect
-                    value={field.value}
-                    options={classificationCategory}
-                    onChange={(e) => {
-                      ClassificationsService.nodeInfo(e.value as string)
-                        .then((res) => {
-                          field.onChange(e.value)
-                          setCodeDurationUnit(res.data.properties.code || "");
-                        })
-                    }}
-                    filter
-                    placeholder="Select Type"
-                    style={{ width: "100%" }}
-                  />
-                )}
-              />
-              <p style={{ color: "red" }}>{errors.warrantyDurationUnit?.message}</p>
-            </div>
-
           </div>
 
         </TabPanel>
@@ -725,8 +540,6 @@ const SystemForm = ({
                     label={"images"}
                     value={field.value}
                     onChange={(e: any) => {
-                      console.log(e);
-
                       field.onChange(e)
                     }}
                     deleteFiles={deleteFiles}

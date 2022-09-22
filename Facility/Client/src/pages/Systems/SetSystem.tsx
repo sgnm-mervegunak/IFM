@@ -234,7 +234,7 @@ const SetSystem = () => {
       <Dialog
         header={t("Add New Item")}
         visible={addDia}
-        style={{ width: "80vw" }}
+        style={{ width: "40vw" }}
         footer={renderFooterAdd}
         className="dial"
         onHide={() => {
@@ -257,7 +257,7 @@ const SetSystem = () => {
       <Dialog
         header={t("Edit Item")}
         visible={editDia}
-        style={{ width: "80vw" }}
+        style={{ width: "40vw" }}
         footer={renderFooterEdit}
         onHide={() => {
           setEditDia(false);
