@@ -270,6 +270,9 @@ export class TypesRepository implements GeciciInterface<Type> {
         if (error.response?.code == CustomAssetError.OTHER_MICROSERVICE_ERROR) {
           throw new HttpException({ message: error.response.message, status: error.status }, 400);
         }
+        if (error.response?.code == CustomAssetError.INVALID_CLASSIFICATION) {
+          throw new HttpException({ message: error.response.message }, error.status);
+        }
       } else {
         throw new HttpException(error, 500);
       }
