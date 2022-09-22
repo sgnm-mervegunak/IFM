@@ -8,9 +8,9 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Toolbar } from "primereact/toolbar";
 
-import ComponentService from "../../services/components";
+import SystemService from "../../services/systems";
 import { useAppSelector } from "../../app/hook";
-import ComponentForm from "./Forms/ComponentForm";
+import SystemForm from "./Forms/SystemForm";
 
 interface Node {
   cantDeleted: boolean;
@@ -36,7 +36,7 @@ interface Node {
   _type?: string;
 }
 
-const SetComponent = () => {
+const SetSystem = () => {
   const [selectedNodeKey, setSelectedNodeKey] = useState<any>("");
   const [selectedNodeId, setSelectedNodeId] = useState<any>("");
   const [nodeType, setNodeType] = useState<any>("")
@@ -53,7 +53,6 @@ const SetComponent = () => {
   const [canDelete, setCanDelete] = useState<boolean>(false);
   const { t } = useTranslation(["common"]);
   const [importDia, setImportDia] = useState(false);
-
 
   const menu1 = [
     {
@@ -83,11 +82,9 @@ const SetComponent = () => {
     },
   ];
 
-  const getComponents = () => {
-    ComponentService.findAll()
+  const getSystems= () => {
+    SystemService.findAll()
       .then((res) => {
-        console.log(res.data);
-        
         if (!res.data.root.children) {
           let temp = JSON.parse(
             JSON.stringify([res.data.root.properties] || [])
@@ -112,7 +109,7 @@ const SetComponent = () => {
   };
 
   useEffect(() => {
-    getComponents();
+    getSystems();
   }, []);
 
   const fixNodes = (nodes: Node[]) => {
@@ -127,9 +124,9 @@ const SetComponent = () => {
 
 
   const deleteItem = (key: string) => {
-    ComponentService.nodeInfo(key)
+    SystemService.nodeInfo(key)
       .then((res) => {
-        ComponentService.remove(res.data.identity.low)
+        SystemService.remove(res.data.identity.low)
           .then(() => {
             toast.current.show({
               severity: "success",
@@ -137,7 +134,7 @@ const SetComponent = () => {
               detail: t("Component Deleted"),
               life: 2000,
             });
-            getComponents();
+            getSystems();
           })
           .catch((err) => {
             toast.current.show({
@@ -155,7 +152,7 @@ const SetComponent = () => {
           detail: err.response ? err.response.data.message : err.message,
           life: 2000,
         });
-        getComponents();
+        getSystems();
       });
   };
 
@@ -244,13 +241,13 @@ const SetComponent = () => {
           setAddDia(false);
         }}
       >
-        <ComponentForm
+        <SystemForm
           submitted={submitted}
           setSubmitted={setSubmitted}
           selectedNodeKey={selectedNodeKey}
           selectedNodeId={selectedNodeId}
           editDia={editDia}
-          getComponents={getComponents}
+          getSystems={getSystems}
           setAddDia={setAddDia}
           setEditDia={setEditDia}
           isUpdate={isUpdate}
@@ -266,13 +263,13 @@ const SetComponent = () => {
           setEditDia(false);
         }}
       >
-        <ComponentForm
+        <SystemForm
           submitted={submitted}
           setSubmitted={setSubmitted}
           selectedNodeKey={selectedNodeKey}
           selectedNodeId={selectedNodeId}
           editDia={editDia}
-          getComponents={getComponents}
+          getSystems={getSystems}
           setAddDia={setAddDia}
           setEditDia={setEditDia}
           isUpdate={isUpdate}
@@ -280,7 +277,7 @@ const SetComponent = () => {
         />
       </Dialog>
 
-      <h1>{t("Manage Components")}</h1>
+      <h1>{t("Manage Systems")}</h1>
       <div className="field">
         <Tree
           loading={loading}
@@ -292,14 +289,14 @@ const SetComponent = () => {
           }
           onContextMenu={(event: any) => {
             setCanDelete(event.node.canDelete); // for use import building control on context menu
-            setSelectedNodeId(event.node._id.low);
+            // setSelectedNodeId(event.node._id.low);
             setNodeType(event.node.className);
             console.log(event.node);
             
             cm.current.show(event.originalEvent);
-            if (event.node.canDelete === false) {
-              cm.current.hide(event.originalEvent);
-            }
+            // if (event.node.canDelete === false) {
+            //   cm.current.hide(event.originalEvent);
+            // }
           }}
           filter
           filterBy="name,code"
@@ -312,17 +309,16 @@ const SetComponent = () => {
                   <span className="ml-4 ">
 
                     {
-                      data._type === "Type" && (
+                      data.canDelete === false && (
                         <Button
                           icon="pi pi-plus"
                           className="p-button-rounded p-button-secondary p-button-text"
                           aria-label={t("Add Item")}
                           onClick={() => {
                             setSelectedNodeKey(data.key);
-                            setSelectedNodeId(data._id.low);
                             setAddDia(true);
                           }}
-                          title={t("Add Item")}
+                          title={t("Add System")}
                         />
                       )
                     }
@@ -368,4 +364,4 @@ const SetComponent = () => {
   );
 };
 
-export default SetComponent;
+export default SetSystem;
