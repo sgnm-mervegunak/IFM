@@ -1,9 +1,10 @@
-import { node_not_found } from "sgnm-neo4j/dist";
+import { node_not_found } from 'sgnm-neo4j/dist';
 
 export enum CustomTreeError {
   HAS_CHILDREN = 9000,
   WRONG_PARENT = 9001,
   NODE_NOT_FOUND = 9002,
   NULL_VALUE = 9003,
-  NOT_UNIQUE = 9004
+  NOT_UNIQUE = 9004,
+  HAS_NOT_REFERENCE_KEY = '9005',
 }

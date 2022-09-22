@@ -25,6 +25,7 @@ import { ExcelImportExportModule } from './excelExport/excelImportExport.module'
 import { ContactModule } from './contact/contact.module';
 import { OrganizationModule } from './organization/organization.module';
 import { InfraModule } from './infra/infra.module';
+import { AppListenerController } from './app.listener';
 
 @Module({
   imports: [
@@ -122,6 +123,7 @@ import { InfraModule } from './infra/infra.module';
     ZoneModule,
 
     ExcelImportExportModule,
+    AppListenerController,
   ],
   providers: [
     //to cache all get request

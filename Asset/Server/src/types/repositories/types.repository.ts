@@ -21,7 +21,7 @@ import {
   avaiableCreateVirtualPropsGetter,
   avaiableUpdateVirtualPropsGetter,
 } from 'src/common/func/virtual.node.props.functions';
-
+import * as moment from 'moment';
 @Injectable()
 export class TypesRepository implements GeciciInterface<Type> {
   constructor(
@@ -87,7 +87,7 @@ export class TypesRepository implements GeciciInterface<Type> {
         [Neo4jLabelEnum.TYPES],
         {
           realm,
-          isDeleted: false
+          isDeleted: false,
         },
         [Neo4jLabelEnum.TYPE],
         { isDeleted: false },
@@ -286,7 +286,11 @@ export class TypesRepository implements GeciciInterface<Type> {
       );
 
       if (hasChildrenArray.length === 0) {
-        deletedNode = await this.neo4jService.updateByIdAndFilter(+_id, {}, [], { isDeleted: true, isActive: false });
+        deletedNode = await this.neo4jService.updateByIdAndFilter(+_id, {}, [], {
+          isDeleted: true,
+          isActive: false,
+          updatedAt: moment().format('YYYY-MM-DD HH:mm:ss'),
+        });
         await this.kafkaService.producerSendMessage(
           'deleteVirtualNodeRelations',
           JSON.stringify({ referenceKey: typeNode.properties.key }),
@@ -297,13 +301,15 @@ export class TypesRepository implements GeciciInterface<Type> {
 
       return deletedNode;
     } catch (error) {
-      const { code, message } = error.response;
+      const code = error.response?.code;
       if (code === CustomNeo4jError.HAS_CHILDREN) {
         nodeHasChildException(_id);
       } else if (code === 5005) {
         AssetNotFoundException(_id);
+      } else if (code === 5001) {
+        AssetNotFoundException(_id);
       } else {
-        throw new HttpException(message, code);
+        throw new HttpException(error, code);
       }
     }
   }
