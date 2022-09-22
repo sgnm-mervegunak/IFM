@@ -249,10 +249,12 @@ export class InfraRepository implements InfraInterface {
 
   async importClassificationFromExcel(file: Express.Multer.File, language: string) {
     try {
+      const realmName = 'Signum';
+
       let checkClassification1 = await this.neo4jService.findByLabelAndFilters([`DurationUnits_${language}`], {
         realm: 'Signum',
       });
-      let checkClassification2 = await this.neo4jService.findByLabelAndFilters([`AssetType_${language}`], {
+      let checkClassification2 = await this.neo4jService.findByLabelAndFilters([`AssetTypes_${language}`], {
         realm: 'Signum',
       });
       let checkClassification3 = await this.neo4jService.findByLabelAndFilters([`OmniClass23_${language}`], {
@@ -489,8 +491,8 @@ export class InfraRepository implements InfraInterface {
             newClassification.push(dto);
           }
 
-          const realmName = 'Signum';
-          ///////// the process start here
+          
+          ///////// the process start here //////////////////////////////////
 
           // let cypher = `MATCH (a:Infra {realm:"${realmName}"})-[:PARENT_OF]->(n:Classification {realm:"${realmName}"}) MERGE (b:${classificationName}_${language} {code:"${newClassification[0].parentCode}",isActive: true,name:"${classificationName}",isDeleted:${newClassification[i].isDeleted},canCopied:true,canDelete:false,realm:"${realmName}",isRoot:true,canDisplay:true,language:"${language}"}) MERGE (n)-[:PARENT_OF]->(b)`;
           // let data = await this.neo4jService.write(cypher);
@@ -501,9 +503,9 @@ export class InfraRepository implements InfraInterface {
           // }
         }
 
-        /////////////////////////////////////////////////////////////// process of classfications without code ////////////////////////////////////////////////////////////////
+        /////////////// process of classfications without code ////////////////////////////////////////////////////////////////
         let deneme4 = [];
-        const realmName = 'Signum';
+       
 
         for (let i = 0; i < classificationsWithoutCode.length; i++) {
           let deneme5 = [];
