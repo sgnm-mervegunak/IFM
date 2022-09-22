@@ -6,11 +6,11 @@ import {
 import { Component } from '../entities/component.entity';
 import { NestKafkaService, nodeHasChildException } from 'ifmcommon';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
-import { assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError, Neo4jService } from 'sgnm-neo4j/dist';
+import { assignDtoPropToEntity, changeObjectKeyName, createDynamicCyperObject, CustomNeo4jError, dynamicFilterPropertiesAdder, dynamicFilterPropertiesAdderAndAddParameterKey, dynamicLabelAdder, dynamicNotLabelAdder, filterArrayForEmptyString, Neo4jService, tree_structure_not_found_by_realm_name_error } from 'sgnm-neo4j/dist';
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
 import { CreateComponentDto } from '../dto/create.component.dto';
 import { UpdateComponentDto } from '../dto/update.component.dto';
-import { WrongIdProvided } from 'src/common/bad.request.exception';
+import { NodeNotFound, WrongIdProvided } from 'src/common/bad.request.exception';
 import { CustomAssetError } from 'src/common/const/custom.error.enum';
 import { wrong_parent_error, other_microservice_errors, node_not_found } from 'src/common/const/custom.error.object';
 import { RelationName } from 'src/common/const/relation.name.enum';
@@ -552,6 +552,45 @@ export class ComponentRepository implements ComponentInterface<Component> {
         AssetNotFoundException(_id);
       } else {
         throw new HttpException(message, code);
+      }
+    }
+  }
+
+  async findChildrenOfRootByRealm(header) {
+
+    try {
+      let { realm } = header;
+      realm = 'IFM'  // test için kaldırılacaaaakkkk
+   
+      let node =  await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructure(
+        [Neo4jLabelEnum.TYPES],
+        [],
+        {"isDeleted": false, realm},
+        [],
+        ['Virtual'],
+        {"isDeleted": false},
+      ) 
+     
+      if (!node) {
+        throw new HttpException(node_not_found(), 400);
+      }
+      
+
+      node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
+      return node;
+    } catch (error) {
+      const code = error.response?.code;
+
+      if (code >= 1000 && code <= 1999) {
+      } else if (code >= 5000 && code <= 5999) {
+        if (error.response?.code == CustomNeo4jError.ADD_CHILDREN_RELATION_BY_ID_ERROR) {
+        }
+      } else if (code >= 9500 && code <= 9750) {
+        if (error.response?.code == CustomAssetError.NODE_NOT_FOUND) {
+          NodeNotFound();
+        }
+      } else {
+        throw new HttpException(error, 500);
       }
     }
   }

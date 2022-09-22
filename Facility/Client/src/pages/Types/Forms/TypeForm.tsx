@@ -12,9 +12,7 @@ import { useTranslation } from "react-i18next";
 import TypesService from "../../../services/types";
 import ClassificationsService from "../../../services/classifications";
 import ContactService from "../../../services/contact";
-import FacilityStructureService from "../../../services/facilitystructure";
 import { useAppSelector } from "../../../app/hook";
-import FileUploadComponent from "./FileUpload/FileUpload";
 import ImageUploadComponent from "./FileUpload/ImageUpload/ImageUpload";
 import DocumentUploadComponent from "./FileUpload/DocumentUpload/DocumentUpload";
 
@@ -69,9 +67,6 @@ const TypeForm = ({
 
   const [classificationCategory, setClassificationCategory] = useState<Node[]>([]);
   const [contact, setContact] = useState<any>([]);
-  const [classificationStatus, setclassificationStatus] = useState<Node[]>([]);
-  const auth = useAppSelector((state) => state.auth);
-  const [realm, setRealm] = useState(auth.auth.realm);
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
   const [uploadFiles, setUploadFiles] = useState<any>({});
   const { toast } = useAppSelector((state) => state.toast);
@@ -81,7 +76,12 @@ const TypeForm = ({
   const [codeDurationUnit, setCodeDurationUnit] = useState("");
 
   const [data, setData] = useState<any>();
-  const language = useAppSelector((state) => state.language.language);
+
+  console.log(submitted,
+    selectedNodeKey,
+    selectedNodeId,
+    editDia);
+  
 
   const schema = yup.object({
     name: yup.string().max(50, t("This area accepts max 50 characters.")),
@@ -162,20 +162,8 @@ const TypeForm = ({
       });
   };
 
-  const getClassificationStatus = async () => {
-    await ClassificationsService.findAllActiveByLabel({
-      label: "FacilityStatus"
-    }).then((res) => {
-      let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
-      fixNodes(temp);
-      temp[0].selectable = false
-      setclassificationStatus(temp);
-    });
-  };
-
   useEffect(() => {
     getClassificationCategory();
-    getClassificationStatus();
     getContact();
   }, []);
 
@@ -196,8 +184,6 @@ const TypeForm = ({
   const getNodeInfoForUpdate = (selectedNodeKey: string) => {
     TypesService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
-        console.log(res.data);
-
         let temp = {};
         await ClassificationsService.findClassificationByCodeAndLanguage("OmniClass11", res.data.properties.category).then(clsf1 => {
           setCodeCategory(res.data.properties.category);
@@ -292,9 +278,7 @@ const TypeForm = ({
         documents: data?.documents || "",
         images: data?.images || "",
       };
-      console.log(newNode);
-
-
+  
       TypesService.create(newNode)
         .then(async (res) => {
           toast.current.show({
@@ -391,9 +375,6 @@ const TypeForm = ({
         documents: data?.documents || "",
         images: data?.images || "",
       };
-
-      console.log(updateNode);
-
 
       TypesService.update(selectedNodeId, updateNode)
         .then(async (res) => {
@@ -955,8 +936,6 @@ const TypeForm = ({
                     label={"images"}
                     value={field.value}
                     onChange={(e: any) => {
-                      console.log(e);
-
                       field.onChange(e)
                     }}
                     deleteFiles={deleteFiles}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, InputHTMLAttributes } from "react";
 import { InputText } from "primereact/inputtext";
 import { Chips } from "primereact/chips";
 import { TreeSelect } from "primereact/treeselect";
+import { Calendar } from "primereact/calendar";
 import { TabView, TabPanel } from 'primereact/tabview';
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -9,12 +10,11 @@ import * as yup from "yup";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 
-import TypesService from "../../../services/types";
+import ComponentService from "../../../services/components";
 import ClassificationsService from "../../../services/classifications";
 import ContactService from "../../../services/contact";
 import FacilityStructureService from "../../../services/facilitystructure";
 import { useAppSelector } from "../../../app/hook";
-import FileUploadComponent from "./FileUpload/FileUpload";
 import ImageUploadComponent from "./FileUpload/ImageUpload/ImageUpload";
 import DocumentUploadComponent from "./FileUpload/DocumentUpload/DocumentUpload";
 
@@ -24,7 +24,7 @@ interface Params {
   selectedNodeKey: string;
   selectedNodeId: string;
   editDia: boolean;
-  getTypes: () => void;
+  getComponents: () => void;
   setAddDia: React.Dispatch<React.SetStateAction<boolean>>;
   setEditDia: React.Dispatch<React.SetStateAction<boolean>>;
   isUpdate: boolean;
@@ -52,6 +52,8 @@ interface Node {
   parentId?: string;
   className?: string;
   email?: string;
+  selectable?: boolean;
+  nodeType?: string;
 }
 
 const TypeForm = ({
@@ -60,7 +62,7 @@ const TypeForm = ({
   selectedNodeKey,
   selectedNodeId,
   editDia,
-  getTypes,
+  getComponents,
   setAddDia,
   setEditDia,
   isUpdate,
@@ -68,28 +70,25 @@ const TypeForm = ({
 }: Params) => {
 
   const [classificationCategory, setClassificationCategory] = useState<Node[]>([]);
+  const [spaces, setSpaces] = useState<Node[]>([]);
+  const [spaceType, setSpaceType] = useState("");
   const [contact, setContact] = useState<any>([]);
-  const [classificationStatus, setclassificationStatus] = useState<Node[]>([]);
-  const auth = useAppSelector((state) => state.auth);
-  const [realm, setRealm] = useState(auth.auth.realm);
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
   const [uploadFiles, setUploadFiles] = useState<any>({});
   const { toast } = useAppSelector((state) => state.toast);
   const { t } = useTranslation(["common"]);
-  const [codeCategory, setCodeCategory] = useState("");
-  const [codeAssetType, setCodeAssetType] = useState("");
   const [codeDurationUnit, setCodeDurationUnit] = useState("");
 
   const [data, setData] = useState<any>();
-  const language = useAppSelector((state) => state.language.language);
 
   const schema = yup.object({
     name: yup.string().max(50, t("This area accepts max 50 characters.")),
-    description: yup.string().max(256, t("This area accepts max 256 characters.")),
-    category: yup.string().required(t("This area is required.")),
-    assetType: yup.string().required(t("This area is required.")),
-    manufacturer: yup.string().required(t("This area is required.")),
-    modelNo: yup.string().required(t("This area is required.")).max(50, t("This area accepts max 50 characters.")),
+    description: yup.string().required(t("This area is required.")).max(256, t("This area accepts max 256 characters.")),
+    space: yup.string().required(t("This area is required.")),
+    serialNo: yup.string().max(256, t("This area accepts max 256 characters.")),
+    tagNumber: yup.string().max(256, t("This area accepts max 256 characters.")),
+    barCode: yup.string().max(13, t("This area accepts max 13 characters.")),
+    assetIdentifier: yup.string().max(50, t("This area accepts max 50 characters.")),
     warrantyGuarantorParts: yup.string().required(t("This area is required.")),
     warrantyDurationParts: yup.number()
       .required(t("This area is required."))
@@ -105,24 +104,6 @@ const TypeForm = ({
       .nullable()
       .transform((_, val) => (val !== "" ? Number(val) : null)),
     warrantyDurationUnit: yup.string().required(t("This area is required.")),
-    replacementCost: yup.number(),
-    expectedLife: yup.number(),
-    durationUnit: yup.string().required(t("This area is required.")),
-    warranty: yup.string().max(256, t("This area accepts max 256 characters.")),
-    nominalLength: yup.number().required(t("This area is required.")),
-    nominalWidth: yup.number().required(t("This area is required.")),
-    nominalHeight: yup.number().required(t("This area is required.")),
-    modelReference: yup.string().required(t("This area is required")).max(250, t("This area accepts max 250 characters.")),
-    shape: yup.string().max(256, t("This area accepts max 256 characters.")),
-    size: yup.string().max(256, t("This area accepts max 256 characters.")),
-    color: yup.string().max(256, t("This area accepts max 256 characters.")),
-    finish: yup.string().max(256, t("This area accepts max 256 characters.")),
-    material: yup.string().max(256, t("This area accepts max 256 characters.")),
-    constituents: yup.string().max(256, t("This area accepts max 256 characters.")),
-    features: yup.string().max(256, t("This area accepts max 256 characters.")),
-    accessibilityPerformance: yup.string().max(256, t("This area accepts max 256 characters.")),
-    codePerformance: yup.string().max(256, t("This area accepts max 256 characters.")),
-    sustainabilityPerformance: yup.string().max(256, t("This area accepts max 256 characters.")),
     createdBy: yup.string().required(t("This area is required.")),
   });
 
@@ -143,6 +124,21 @@ const TypeForm = ({
     }
   };
 
+  const fixNodesSpaces = (nodes: Node[]) => {
+    if (!nodes || nodes.length === 0) {
+      return;
+    }
+    for (let i of nodes) {
+      fixNodesSpaces(i.children);
+      i.label = i.name;
+      if (i.nodeType === "Space") {
+        i.selectable = true;
+      } else {
+        i.selectable = false;
+      }
+    }
+  };
+
   const getClassificationCategory = async () => {
     await ClassificationsService.findAllActiveByLabel({
       label: "OmniClass11"
@@ -151,6 +147,23 @@ const TypeForm = ({
       fixNodes(temp);
       setClassificationCategory(temp);
     });
+  };
+
+  const getSpaces = () => {
+    FacilityStructureService.findAll()
+      .then((res) => {
+        if (!res.data.root.children) {
+          let temp = JSON.parse(
+            JSON.stringify([res.data.root.properties] || [])
+          );
+          fixNodesSpaces(temp);
+          setSpaces(temp);
+        } else if (res.data.root.children) {
+          let temp = JSON.parse(JSON.stringify([res.data.root] || []));
+          fixNodesSpaces(temp);
+          setSpaces(temp);
+        }
+      })
   };
 
   const getContact = async () => {
@@ -162,21 +175,10 @@ const TypeForm = ({
       });
   };
 
-  const getClassificationStatus = async () => {
-    await ClassificationsService.findAllActiveByLabel({
-      label: "FacilityStatus"
-    }).then((res) => {
-      let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
-      fixNodes(temp);
-      temp[0].selectable = false
-      setclassificationStatus(temp);
-    });
-  };
-
   useEffect(() => {
     getClassificationCategory();
-    getClassificationStatus();
     getContact();
+    getSpaces();
   }, []);
 
   useEffect(() => {
@@ -194,38 +196,14 @@ const TypeForm = ({
   }, [isUpdate]);
 
   const getNodeInfoForUpdate = (selectedNodeKey: string) => {
-    TypesService.nodeInfo(selectedNodeKey)
+    ComponentService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
         console.log(res.data);
+        if (spaceType === "") {
+          setSpaceType(res.data.nodeType);
+        }
+        setData(res.data.properties);
 
-        let temp = {};
-        await ClassificationsService.findClassificationByCodeAndLanguage("OmniClass11", res.data.properties.category).then(clsf1 => {
-          setCodeCategory(res.data.properties.category);
-          res.data.properties.category = clsf1.data.key
-          temp = res.data.properties;
-        })
-          .catch((err) => {
-            setData(res.data.properties);
-          })
-        await ClassificationsService.findClassificationByCodeAndLanguage("OmniClass11", res.data.properties.assetType).then(clsf2 => {
-          setCodeAssetType(res.data.properties.assetType);
-          res.data.properties.assetType = clsf2.data.key
-          temp = res.data.properties;
-        })
-          .catch((err) => {
-            setData(res.data.properties);
-          })
-
-        await ClassificationsService.findClassificationByCodeAndLanguage("OmniClass11", res.data.properties.durationUnit).then(clsf3 => {
-          setCodeDurationUnit(res.data.properties.durationUnit);
-          res.data.properties.durationUnit = clsf3.data.key
-          temp = res.data.properties;
-        })
-          .catch((err) => {
-            setData(res.data.properties);
-          })
-
-        setData(temp);
       })
       .catch((err) => {
         toast.current.show({
@@ -259,48 +237,35 @@ const TypeForm = ({
 
       newNode = {
         name: data?.name,
+        spaceType: spaceType,
+        space: data?.space,
         tag: data?.tag,
         description: data?.description,
-        category: codeCategory, //Düzeltilecek
-        assetType: codeAssetType, //Düzeltilecek
-        manufacturer: data?.manufacturer,
-        modelNo: data?.modelNo,
-        warrantyGuarantorParts: data?.warrantyGuarantorParts,
-        warrantyDurationParts: Number(data?.warrantyDurationParts),
-        warrantyGuarantorLabor: data?.warrantyGuarantorLabor,
-        warrantyDurationLabor: Number(data?.warrantyDurationLabor),
-        warrantyDurationUnit: data?.warrantyDurationUnit,
-        replacementCost: Number(data?.replacementCost),
-        expectedLife: Number(data?.expectedLife),
-        durationUnit: codeDurationUnit, //Düzeltilecek
-        warranty: data?.warranty,
-        nominalLength: Number(data?.nominalLength),
-        nominalWidth: Number(data?.nominalWidth),
-        nominalHeight: Number(data?.nominalHeight),
-        modelReference: data?.modelReference,
-        shape: data?.shape,
-        size: data?.size,
-        color: data?.color,
-        finish: data?.finish,
-        material: data?.material,
-        constituents: data?.constituents,
-        features: data?.features,
-        accessibilityPerformance: data?.accessibilityPerformance,
-        codePerformance: data?.codePerformance,
-        sustainabilityPerformance: data?.sustainabilityPerformance,
         createdBy: data?.createdBy,
-        documents: data?.documents || "",
+        serialNo: data?.serialNo,
+        installationDate: data?.installationDate,
+        warrantyStartDate: data?.warrantyStartDate,
+        tagNumber: data?.tagNumber,
+        barCode: data?.barCode,
+        assetIdentifier: data?.assetIdentifier,
+        warrantyGuarantorParts: data?.warrantyGuarantorParts,
+        warrantyDurationParts: data?.warrantyDurationParts,
+        warrantyGuarantorLabor: data?.warrantyGuarantorLabor,
+        warrantyDurationLabor: data?.warrantyDurationLabor,
+        warrantyDurationUnit: data?.warrantyDurationUnit,
         images: data?.images || "",
+        documents: data?.documents || "",
+        parentKey: selectedNodeKey,
       };
       console.log(newNode);
 
 
-      TypesService.create(newNode)
+      ComponentService.create(newNode)
         .then(async (res) => {
           toast.current.show({
             severity: "success",
             summary: t("Successful"),
-            detail: t("Type Created"),
+            detail: t("Component Created"),
             life: 4000,
           });
           // let newForm: any = {};
@@ -335,12 +300,12 @@ const TypeForm = ({
           for (let item in temp) {
             temp[item] = JSON.stringify(temp[item]);
           }
-          await TypesService.update(res.data.properties.id, {
+          await ComponentService.update(res.data.properties.id, {
             ...newNode,
             ...temp,
           });
           setUploadFiles({});
-          getTypes();
+          getComponents();
         })
         .catch((err) => {
           toast.current.show({
@@ -351,56 +316,43 @@ const TypeForm = ({
           });
         });
 
-      setAddDia(false);
       setUploadFiles({});
+      setAddDia(false);
 
     } else {
       let updateNode: any = {};
       updateNode = {
         name: data?.name,
+        spaceType: spaceType,
+        space: data?.space,
         tag: data?.tag,
         description: data?.description,
-        category: codeCategory, //Düzeltilecek
-        assetType: codeAssetType, //Düzeltilecek
-        manufacturer: data?.manufacturer,
-        modelNo: data?.modelNo,
-        warrantyGuarantorParts: data?.warrantyGuarantorParts,
-        warrantyDurationParts: Number(data?.warrantyDurationParts),
-        warrantyGuarantorLabor: data?.warrantyGuarantorLabor,
-        warrantyDurationLabor: Number(data?.warrantyDurationLabor),
-        warrantyDurationUnit: data?.warrantyDurationUnit,
-        replacementCost: Number(data?.replacementCost),
-        expectedLife: Number(data?.expectedLife),
-        durationUnit: codeDurationUnit, //Düzeltilecek
-        warranty: data?.warranty,
-        nominalLength: Number(data?.nominalLength),
-        nominalWidth: Number(data?.nominalWidth),
-        nominalHeight: Number(data?.nominalHeight),
-        modelReference: data?.modelReference,
-        shape: data?.shape,
-        size: data?.size,
-        color: data?.color,
-        finish: data?.finish,
-        material: data?.material,
-        constituents: data?.constituents,
-        features: data?.features,
-        accessibilityPerformance: data?.accessibilityPerformance,
-        codePerformance: data?.codePerformance,
-        sustainabilityPerformance: data?.sustainabilityPerformance,
         createdBy: data?.createdBy,
-        documents: data?.documents || "",
+        serialNo: data?.serialNo,
+        installationDate: data?.installationDate,
+        warrantyStartDate: data?.warrantyStartDate,
+        tagNumber: data?.tagNumber,
+        barCode: data?.barCode,
+        assetIdentifier: data?.assetIdentifier,
+        warrantyGuarantorParts: data?.warrantyGuarantorParts,
+        warrantyDurationParts: data?.warrantyDurationParts,
+        warrantyGuarantorLabor: data?.warrantyGuarantorLabor,
+        warrantyDurationLabor: data?.warrantyDurationLabor,
+        warrantyDurationUnit: data?.warrantyDurationUnit,
         images: data?.images || "",
+        documents: data?.documents || "",
+        parentKey: selectedNodeKey,
       };
 
       console.log(updateNode);
 
 
-      TypesService.update(selectedNodeId, updateNode)
+      ComponentService.update(selectedNodeId, updateNode)
         .then(async (res) => {
           toast.current.show({
             severity: "success",
             summary: t("Successful"),
-            detail: t("Type Updated"),
+            detail: t("Component Updated"),
             life: 4000,
           });
           // upload files
@@ -444,14 +396,14 @@ const TypeForm = ({
           }
 
           // update node
-          TypesService.update(selectedNodeId, {
+          ComponentService.update(selectedNodeId, {
             ...updateNode,
             ...temp,
           });
 
           setUploadFiles({});
           setDeleteFiles([]);
-          getTypes();
+          getComponents();
         })
         .catch((err) => {
           toast.current.show({
@@ -478,7 +430,7 @@ const TypeForm = ({
         <TabPanel header={t("Form")}>
           <div className="formgrid grid">
 
-            <div className="field col-12 md:col-3">
+            <div className="field col-12 md:col-4">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
               <InputText
                 autoComplete="off"
@@ -489,7 +441,33 @@ const TypeForm = ({
               <p style={{ color: "red" }}>{errors.name?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-3 structureChips">
+            <div className="field col-12 md:col-4">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Space")}</h5>
+              <Controller
+                defaultValue={data?.space || ""}
+                name="space"
+                control={control}
+                render={({ field }) => (
+                  <TreeSelect
+                    value={field.value}
+                    options={spaces}
+                    onChange={(e) => {
+                      FacilityStructureService.nodeInfo(e.value as string)
+                        .then((res) => {
+                          field.onChange(e.value)
+                          setSpaceType(res.data.properties.nodeType);
+                        })
+                    }}
+                    filter
+                    placeholder="Select Space"
+                    style={{ width: "100%" }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.space?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-4 structureChips">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
               <Controller
 
@@ -509,33 +487,7 @@ const TypeForm = ({
               <p style={{ color: "red" }}>{errors.tag?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
-              <Controller
-                defaultValue={data?.category || ""}
-                name="category"
-                control={control}
-                render={({ field }) => (
-                  <TreeSelect
-                    value={field.value}
-                    options={classificationCategory}
-                    onChange={(e) => {
-                      ClassificationsService.nodeInfo(e.value as string)
-                        .then((res) => {
-                          field.onChange(e.value)
-                          setCodeCategory(res.data.properties.code || "");
-                        })
-                    }}
-                    filter
-                    placeholder="Select Type"
-                    style={{ width: "100%" }}
-                  />
-                )}
-              />
-              <p style={{ color: "red" }}>{errors.category?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-3">
+            <div className="field col-12 md:col-4">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Description")}</h5>
               <InputText
                 autoComplete="off"
@@ -546,33 +498,7 @@ const TypeForm = ({
               <p style={{ color: "red" }}>{errors.description?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Asset Type")}</h5>
-              <Controller
-                defaultValue={data?.assetType || ""}
-                name="assetType"
-                control={control}
-                render={({ field }) => (
-                  <TreeSelect
-                    value={field.value}
-                    options={classificationCategory}
-                    onChange={(e) => {
-                      ClassificationsService.nodeInfo(e.value as string)
-                        .then((res) => {
-                          field.onChange(e.value)
-                          setCodeAssetType(res.data.properties.code || "");
-                        })
-                    }}
-                    filter
-                    placeholder="Select Type"
-                    style={{ width: "100%" }}
-                  />
-                )}
-              />
-              <p style={{ color: "red" }}>{errors.assetType?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-3">
+            <div className="field col-12 md:col-4">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Created By")}</h5>
               <Controller
                 defaultValue={data?.createdBy || ""}
@@ -594,40 +520,93 @@ const TypeForm = ({
               <p style={{ color: "red" }}>{errors.createdBy?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Manufacturer")}</h5>
+            <div className="field col-12 md:col-4">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Serial No")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("serialNo")}
+                style={{ width: '100%' }}
+                defaultValue={data?.serialNo || ""}
+              />
+              <p style={{ color: "red" }}>{errors.serialNo?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-4">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Installation Date")}</h5>
               <Controller
-                defaultValue={data?.manufacturer || ""}
-                name="manufacturer"
+                defaultValue={new Date(data?.installationDate)}
+                name="installationDate"
                 control={control}
                 render={({ field }) => (
-                  <TreeSelect
+                  <Calendar
+                    dateFormat="dd/mm/yy"
                     value={field.value}
-                    options={contact}
+                    showIcon
+                    style={{ width: "100%" }}
                     onChange={(e) => {
                       field.onChange(e.value)
                     }}
-                    filter
-                    placeholder="Select Type"
-                    style={{ width: "100%" }}
                   />
                 )}
               />
-              <p style={{ color: "red" }}>{errors.manufacturer?.message}</p>
+              <p style={{ color: "red" }}>{errors.installationDate?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Model Number")}</h5>
+            <div className="field col-12 md:col-4">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Start Date")}</h5>
+              <Controller
+                defaultValue={new Date(data?.warrantyStartDate)}
+                name="warrantyStartDate"
+                control={control}
+                render={({ field }) => (
+                  <Calendar
+                    dateFormat="dd/mm/yy"
+                    value={field.value}
+                    showIcon
+                    style={{ width: "100%" }}
+                    onChange={(e) => {
+                      field.onChange(e.value)
+                    }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.warrantyStartDate?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-4">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Tag Number")}</h5>
               <InputText
                 autoComplete="off"
-                {...register("modelNo")}
-                style={{ width: "100%" }}
-                defaultValue={data?.modelNo || ""}
+                {...register("tagNumber")}
+                style={{ width: '100%' }}
+                defaultValue={data?.tagNumber || ""}
               />
-              <p style={{ color: "red" }}>{errors.modelNo?.message}</p>
+              <p style={{ color: "red" }}>{errors.tagNumber?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-3">
+            <div className="field col-12 md:col-4">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Barcode")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("barCode")}
+                style={{ width: '100%' }}
+                defaultValue={data?.barCode || ""}
+              />
+              <p style={{ color: "red" }}>{errors.barCode?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-4">
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Asset Identifier")}</h5>
+              <InputText
+                autoComplete="off"
+                {...register("assetIdentifier")}
+                style={{ width: '100%' }}
+                defaultValue={data?.assetIdentifier || ""}
+              />
+              <p style={{ color: "red" }}>{errors.assetIdentifier?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-4">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Guarantor Parts")}</h5>
               <Controller
                 defaultValue={data?.warrantyGuarantorParts || ""}
@@ -649,7 +628,7 @@ const TypeForm = ({
               <p style={{ color: "red" }}>{errors.warrantyGuarantorParts?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-3">
+            <div className="field col-12 md:col-4">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Duration Parts")}</h5>
               <InputText
                 type="number"
@@ -661,7 +640,7 @@ const TypeForm = ({
               <p style={{ color: "red" }}>{errors.warrantyDurationParts?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-3">
+            <div className="field col-12 md:col-4">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Guarantor Labor")}</h5>
               <Controller
                 defaultValue={data?.warrantyGuarantorLabor || ""}
@@ -683,7 +662,7 @@ const TypeForm = ({
               <p style={{ color: "red" }}>{errors.warrantyGuarantorLabor?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-3">
+            <div className="field col-12 md:col-4">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Duration Labor")}</h5>
               <InputText
                 type="number"
@@ -695,61 +674,11 @@ const TypeForm = ({
               <p style={{ color: "red" }}>{errors.warrantyDurationLabor?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-3">
+            <div className="field col-12 md:col-4">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Duration Unit")}</h5>
               <Controller
                 defaultValue={data?.warrantyDurationUnit || ""}
                 name="warrantyDurationUnit"
-                control={control}
-                render={({ field }) => (
-                  <TreeSelect
-                    value={field.value}
-                    options={classificationCategory}
-                    onChange={(e) => {
-                      ClassificationsService.nodeInfo(e.value as string)
-                        .then((res) => {
-                          field.onChange(e.value)
-                          setCodeCategory(res.data.properties.code || "");
-                        })
-                    }}
-                    filter
-                    placeholder="Select Type"
-                    style={{ width: "100%" }}
-                  />
-                )}
-              />
-              <p style={{ color: "red" }}>{errors.warrantyDurationUnit?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Replacement Cost")}</h5>
-              <InputText
-                type="number"
-                autoComplete="off"
-                {...register("replacementCost")}
-                style={{ width: "100%" }}
-                defaultValue={data?.replacementCost || 0}
-              />
-              <p style={{ color: "red" }}>{errors.replacementCost?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Expected Life")}</h5>
-              <InputText
-                type="number"
-                autoComplete="off"
-                {...register("expectedLife")}
-                style={{ width: "100%" }}
-                defaultValue={data?.expectedLife || 0}
-              />
-              <p style={{ color: "red" }}>{errors.expectedLife?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Duration Unit")}</h5>
-              <Controller
-                defaultValue={data?.durationUnit || ""}
-                name="durationUnit"
                 control={control}
                 render={({ field }) => (
                   <TreeSelect
@@ -768,175 +697,7 @@ const TypeForm = ({
                   />
                 )}
               />
-              <p style={{ color: "red" }}>{errors.durationUnit?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("warranty")}
-                style={{ width: '100%' }}
-                defaultValue={data?.warranty || ""}
-              />
-              <p style={{ color: "red" }}>{errors.projectDescription?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Nominal Length")}</h5>
-              <InputText
-                type="number"
-                autoComplete="off"
-                {...register("nominalLength")}
-                style={{ width: '100%' }}
-                defaultValue={data?.nominalLength || 0}
-              />
-              <p style={{ color: "red" }}>{errors.nominalLength?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Nominal Width")}</h5>
-              <InputText
-                type="number"
-                autoComplete="off"
-                {...register("nominalWidth")}
-                style={{ width: '100%' }}
-                defaultValue={data?.nominalWidth || 0}
-              />
-              <p style={{ color: "red" }}>{errors.nominalWidth?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Nominal Height")}</h5>
-              <InputText
-                type="number"
-                autoComplete="off"
-                {...register("nominalHeight")}
-                style={{ width: '100%' }}
-                defaultValue={data?.nominalHeight || 0}
-              />
-              <p style={{ color: "red" }}>{errors.nominalHeight?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Model Reference")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("modelReference")}
-                style={{ width: "100%" }}
-                defaultValue={data?.modelReference || ""}
-              />
-              <p style={{ color: "red" }}>{errors.modelReference?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Shape")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("shape")}
-                style={{ width: "100%" }}
-                defaultValue={data?.shape || ""}
-              />
-              <p style={{ color: "red" }}>{errors.shape?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Size")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("size")}
-                style={{ width: "100%" }}
-                defaultValue={data?.size || ""}
-              />
-              <p style={{ color: "red" }}>{errors.size?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Color")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("color")}
-                style={{ width: "100%" }}
-                defaultValue={data?.color || ""}
-              />
-              <p style={{ color: "red" }}>{errors.color?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Finish")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("finish")}
-                style={{ width: "100%" }}
-                defaultValue={data?.finish || ""}
-              />
-              <p style={{ color: "red" }}>{errors.finish?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Material")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("material")}
-                style={{ width: "100%" }}
-                defaultValue={data?.material || ""}
-              />
-              <p style={{ color: "red" }}>{errors.material?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Constituents")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("constituents")}
-                style={{ width: "100%" }}
-                defaultValue={data?.constituents || ""}
-              />
-              <p style={{ color: "red" }}>{errors.constituents?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Features")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("features")}
-                style={{ width: "100%" }}
-                defaultValue={data?.features || ""}
-              />
-              <p style={{ color: "red" }}>{errors.features?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Accessibility Performance")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("accessibilityPerformance")}
-                style={{ width: "100%" }}
-                defaultValue={data?.accessibilityPerformance || ""}
-              />
-              <p style={{ color: "red" }}>{errors.accessibilityPerformance?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Code Performance")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("codePerformance")}
-                style={{ width: "100%" }}
-                defaultValue={data?.codePerformance || ""}
-              />
-              <p style={{ color: "red" }}>{errors.codePerformance?.message}</p>
-            </div>
-
-            <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Sustainability Performance")}</h5>
-              <InputText
-                autoComplete="off"
-                {...register("sustainabilityPerformance")}
-                style={{ width: "100%" }}
-                defaultValue={data?.sustainabilityPerformance || ""}
-              />
-              <p style={{ color: "red" }}>{errors.sustainabilityPerformance?.message}</p>
+              <p style={{ color: "red" }}>{errors.warrantyDurationUnit?.message}</p>
             </div>
 
           </div>

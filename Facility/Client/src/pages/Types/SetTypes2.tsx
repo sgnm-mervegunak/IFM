@@ -12,8 +12,6 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import TypesService from "../../services/types";
-import FacilityService from "../../services/facility";
-import DefineFacility from "../../components/Facility/DefineFacility";
 import { useAppSelector } from "../../app/hook";
 import TypeForm from "./Forms/TypeForm";
 

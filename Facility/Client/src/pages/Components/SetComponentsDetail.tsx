@@ -8,7 +8,7 @@ import { Toolbar } from "primereact/toolbar";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Menu } from "primereact/menu";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams} from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import ComponentService from "../../services/components";
@@ -62,7 +62,7 @@ const SetTypes = () => {
     id: "",
   };
 
-  const [types, setTypes] = useState<IComponents[]>([]);
+  const [components, setComponents] = useState<IComponents[]>([]);
   const [selectedNodeKey, setSelectedNodeKey] = useState<any>("");
   const [selectedNodeId, setSelectedNodeId] = useState<any>("");
   const [loading, setLoading] = useState(false);
@@ -79,7 +79,7 @@ const SetTypes = () => {
   const [addDia, setAddDia] = useState(false);
   const [editDia, setEditDia] = useState(false);
   const [delDia, setDelDia] = useState<boolean>(false);
-  const [type, setType] = useState(emptyComponent);
+  const [component, setComponent] = useState(emptyComponent);
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -91,12 +91,15 @@ const SetTypes = () => {
   const navigate = useNavigate();
   const menu = useRef(null);
 
-  const getTypes = () => {
-    ComponentService.findAll()
+  const params = useParams();
+  const nodeKey: any = params.id;
+
+  const getComponents = () => {
+    ComponentService.findAll(nodeKey)
       .then((res) => {
         console.log(res.data);
         
-        setTypes(res.data);
+        setComponents(res.data);
       })
       .catch((err) => {
         toast.current.show({
@@ -109,14 +112,14 @@ const SetTypes = () => {
   };
 
   useEffect(() => {
-    getTypes();
+    getComponents();
   }, []);
 
   const leftToolbarTemplate = () => {
     return (
       <React.Fragment>
         <Button
-          label="Add Type"
+          label="Add Component"
           icon="pi pi-plus"
           className="p-button-success mr-2"
           onClick={() => setAddDia(true)}
@@ -182,17 +185,17 @@ const SetTypes = () => {
   };
 
   const deleteType = () => {
-    ComponentService.remove(type.id)
+    ComponentService.remove(component.id)
       .then((response) => {
         toast.current.show({
           severity: "success",
           summary: "Successful",
-          detail: "Type Deleted",
+          detail: "Component Deleted",
           life: 3000,
         });
         setDelDia(false);
-        setType(emptyComponent);
-        getTypes(); //loadLazyData();
+        setComponent(emptyComponent);
+        getComponents(); //loadLazyData();
       })
       .catch((err) => {
         toast.current.show({
@@ -202,8 +205,8 @@ const SetTypes = () => {
           life: 2000,
         });
         setDelDia(false);
-        setType(emptyComponent);
-        getTypes(); //loadLazyData();
+        setComponent(emptyComponent);
+        getComponents(); //loadLazyData();
       });
   };
 
@@ -234,7 +237,7 @@ const SetTypes = () => {
           setSelectedNodeId(rowData.id);
         }} />
         <Button icon="pi pi-trash" className="p-button-rounded p-button-warning" onClick={() => {
-          setType(rowData);
+          setComponent(rowData);
           setDelDia(true)
         }} />
       </React.Fragment>
@@ -250,16 +253,16 @@ const SetTypes = () => {
           <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>
 
           <DataTable
-            value={types}
+            value={components}
             dataKey="id"
             paginator
             responsiveLayout="scroll"
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Types"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Components"
             rows={10}
             rowsPerPageOptions={[10, 25, 50]}
             header={header}
-            emptyMessage="Type not found"
+            emptyMessage="Component not found"
             globalFilter={globalFilter}
           >
             <Column
@@ -269,20 +272,20 @@ const SetTypes = () => {
               style={{ width: "20%" }}
             />
             <Column
-              field="assetType"
-              header="Asset Type"
+              field="assetIdentifier"
+              header="Asset Identifier"
               sortable
               style={{ width: "20%" }}
             />
             <Column
-              field="category"
-              header="Category"
+              field="serialNo"
+              header="Serial No"
               sortable
               style={{ width: "20%" }}
             />
             <Column
-              field="modelNo"
-              header="Model No"
+              field="barCode"
+              header="Barcode"
               sortable
               style={{ width: "20%" }}
             />
@@ -297,7 +300,7 @@ const SetTypes = () => {
         <Dialog
           header={t("Add New Item")}
           visible={addDia}
-          style={{ width: "80vw" }}
+          style={{ width: "60vw" }}
           footer={renderFooterAdd}
           className="dial"
           onHide={() => {
@@ -310,18 +313,19 @@ const SetTypes = () => {
             selectedNodeKey={selectedNodeKey}
             selectedNodeId={selectedNodeId}
             editDia={editDia}
-            getTypes={getTypes}
+            getComponents={getComponents}
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
             setIsUpdate={setIsUpdate}
+            // parentKey={nodeKey}
           />
         </Dialog>
 
         <Dialog
           header={t("Edit Item")}
           visible={editDia}
-          style={{ width: "80vw" }}
+          style={{ width: "60vw" }}
           footer={renderFooterEdit}
           onHide={() => {
             setEditDia(false);
@@ -333,11 +337,12 @@ const SetTypes = () => {
             selectedNodeKey={selectedNodeKey}
             selectedNodeId={selectedNodeId}
             editDia={editDia}
-            getTypes={getTypes}
+            getComponents={getComponents}
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
             setIsUpdate={setIsUpdate}
+            // parentKey={nodeKey}
           />
         </Dialog>
 
@@ -354,9 +359,9 @@ const SetTypes = () => {
               className="pi pi-exclamation-triangle mr-3"
               style={{ fontSize: "2rem" }}
             />
-            {types && (
+            {components && (
               <span>
-                Are you sure you want to delete <b>{type.name}</b>?
+                Are you sure you want to delete <b>{component.name}</b>?
               </span>
             )}
           </div>

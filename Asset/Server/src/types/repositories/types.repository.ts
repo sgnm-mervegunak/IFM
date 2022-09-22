@@ -82,8 +82,8 @@ export class TypesRepository implements GeciciInterface<Type> {
 
   async findRootByRealm(header) {
     try {
-      const { realm } = header;
-      const node = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+      let { realm } = header;
+      let node = await this.neo4jService.findChildrensByLabelsAsTree(
         [Neo4jLabelEnum.TYPES],
         {
           realm,
@@ -91,18 +91,30 @@ export class TypesRepository implements GeciciInterface<Type> {
           isActive: true,
         },
         [Neo4jLabelEnum.TYPE],
-        { isDeleted: false },
-        'PARENT_OF',
-      );
-      if (!node.length) {
-        return node;
-      } else {
-        const typeArray = node.map((element) => {
-          element.get('children').properties['id'] = element.get('children').identity.low;
-          return element.get('children').properties;
-        });
-        return typeArray;
+        { isDeleted: false }
+      )
+      // const node = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+      //   [Neo4jLabelEnum.TYPES],
+      //   {
+      //     realm,
+      //     isDeleted: false,
+      //     isActive: true,
+      //   },
+      //   [Neo4jLabelEnum.TYPE],
+      //   { isDeleted: false },
+      //   'PARENT_OF',
+      // );
+      if (!node) {
+        throw new HttpException(node_not_found(), 400);
       }
+      // const typeArray = node.map((element) => {
+      //   element.get('children').properties['id'] = element.get('children').identity.low;
+      //   return element.get('children').properties;
+      // });
+      // return typeArray;
+      node = {"root":node};
+      node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
+      return node;
     } catch (error) {
       const code = error.response?.code;
 
