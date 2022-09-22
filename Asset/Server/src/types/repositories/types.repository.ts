@@ -6,7 +6,7 @@ import {
 import { Type } from '../entities/types.entity';
 import { NestKafkaService, nodeHasChildException } from 'ifmcommon';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
-import { assignDtoPropToEntity, CustomNeo4jError, Neo4jService } from 'sgnm-neo4j/dist';
+import { assignDtoPropToEntity, changeObjectKeyName, CustomNeo4jError, dynamicFilterPropertiesAdder, dynamicFilterPropertiesAdderAndAddParameterKey, dynamicLabelAdder, dynamicNotLabelAdder, filterArrayForEmptyString, library_server_error, Neo4jService, tree_structure_not_found_by_realm_name_error } from 'sgnm-neo4j/dist';
 import { CreateTypesDto } from '../dto/create.types.dto';
 import { UpdateTypesDto } from '../dto/update.tpes.dto';
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
@@ -80,19 +80,10 @@ export class TypesRepository implements GeciciInterface<Type> {
     }
   }
 
+
   async findRootByRealm(header) {
     try {
       const { realm } = header;
-      // let node = await this.neo4jService.findChildrensByLabelsAsTree(
-      //   [Neo4jLabelEnum.TYPES],
-      //   {
-      //     realm,
-      //     isDeleted: false
-      //   },
-      //   [Neo4jLabelEnum.TYPE],
-      //   { isDeleted: false },
-      // );
-
       let node = await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructure(
         [Neo4jLabelEnum.TYPES],
         [],
@@ -102,28 +93,10 @@ export class TypesRepository implements GeciciInterface<Type> {
         {"isDeleted": false},
       )  
 
-
-
-      // const node = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-      //   [Neo4jLabelEnum.TYPES],
-      //   {
-      //     realm,
-      //     isDeleted: false,
-      //     isActive: true,
-      //   },
-      //   [Neo4jLabelEnum.TYPE],
-      //   { isDeleted: false },
-      //   'PARENT_OF',
-      // );
       if (!node) {
         throw new HttpException(node_not_found(), 400);
       }
-      // const typeArray = node.map((element) => {
-      //   element.get('children').properties['id'] = element.get('children').identity.low;
-      //   return element.get('children').properties;
-      // });
-      // return typeArray;
-      node = { root: node };
+
       node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
       return node;
     } catch (error) {
