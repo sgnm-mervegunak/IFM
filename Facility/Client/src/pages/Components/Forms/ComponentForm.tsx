@@ -81,6 +81,12 @@ const TypeForm = ({
 
   const [data, setData] = useState<any>();
 
+  console.log(submitted,
+    selectedNodeKey,
+    selectedNodeId,
+    editDia,);
+
+
   const schema = yup.object({
     name: yup.string().max(50, t("This area accepts max 50 characters.")),
     description: yup.string().required(t("This area is required.")).max(256, t("This area accepts max 256 characters.")),
@@ -268,6 +274,7 @@ const TypeForm = ({
             detail: t("Component Created"),
             life: 4000,
           });
+          console.log(res.data);
           // let newForm: any = {};
           // newForm = {
           //     referenceKey: formTypeId,
@@ -300,6 +307,8 @@ const TypeForm = ({
           for (let item in temp) {
             temp[item] = JSON.stringify(temp[item]);
           }
+
+
           await ComponentService.update(res.data.properties.id, {
             ...newNode,
             ...temp,

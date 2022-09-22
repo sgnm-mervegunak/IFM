@@ -560,7 +560,6 @@ export class ComponentRepository implements ComponentInterface<Component> {
 
     try {
       let { realm } = header;
-      realm = 'IFM'  // test için kaldırılacaaaakkkk
    
       let node =  await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructure(
         [Neo4jLabelEnum.TYPES],
