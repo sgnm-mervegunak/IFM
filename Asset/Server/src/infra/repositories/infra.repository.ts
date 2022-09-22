@@ -524,7 +524,7 @@ export class InfraRepository implements InfraInterface {
           await this.neo4jService.write(cypher);
 
           for (let index = 1; index < deneme4[i].length; index++) {
-            let cypher3 = `MATCH (n:${deneme4[i][0].name}s_${language} {isDeleted:false}) MERGE (b {code:"${
+            let cypher3 = `MATCH (n:${deneme4[i][0].name}s_${language} {isDeleted:false}) MERGE (b:${deneme4[i][0].name}s {code:"${
               deneme4[i][index].code
             }",name:"${deneme4[i][index].name}",isDeleted:${
               deneme4[i][index].isDeleted
