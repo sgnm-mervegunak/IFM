@@ -360,6 +360,7 @@ export class SystemsRepository implements SystemsInterface<System> {
       }
 
       let deletedNode;
+      let deletedVirtualNode;
 
       // const hasChildren = await this.neo4jService.findChildrenById(_id);
       const hasChildren = await this.neo4jService.findChildrensByIdOneLevel(
@@ -371,29 +372,38 @@ export class SystemsRepository implements SystemsInterface<System> {
       )
 
       if (hasChildren['length'] == 0) {
-        // deletedNode = await this.neo4jService.delete(_id);
         deletedNode = await this.neo4jService.updateByIdAndFilter(
           +_id,
-          {"isDeleted": false},
+          {},
+          [],
+          {"isDeleted": true, "isActive": false}
+        )
+        
+        const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+          [Neo4jLabelEnum.SYSTEM],
+          {key: node[0].get('n').properties.key },
+          ['Virtual'],
+          { isDeleted: false },
+          RelationName.CREATED_BY,
+        ); 
+        deletedVirtualNode = await this.neo4jService.updateByIdAndFilter(
+          +virtualNode[0].get('children').identity.low,
+          {},
           [],
           {"isDeleted": true}
-        )
-
-        if (!deletedNode) {
-          throw new AssetNotFoundException(_id);
-        }
+        );
+       
+        await this.kafkaService.producerSendMessage(
+          'deleteVirtualNodeRelations',
+          JSON.stringify({ referenceKey: node.properties.key }),
+        );
+        
       }
       else {
-          // hata fırlatılacak (??) (Component(ler) içeriyor 400)
+        throw new HttpException('node has parent relation ', 400);
       }
       
-      const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
-        [Neo4jLabelEnum.SYSTEM],
-        {key: node[0].get('n').properties.key },
-        ['Virtual'],
-        { isDeleted: false },
-        RelationName.CREATED_BY,
-      );
+      
 
 
       return deletedNode;

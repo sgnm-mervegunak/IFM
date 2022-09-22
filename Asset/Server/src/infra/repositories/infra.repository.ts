@@ -84,11 +84,11 @@ export class InfraRepository implements InfraInterface {
 
       const assetTypesNodeEN = await this.neo4jService.createNode(
         { canDelete: false, isDeleted: false, canCopied: true, isRoot: true, name: 'Asset Types', realm: 'Signum' },
-        ['Asset_Types_en'],
+        ['AssetTypes_en'],
       );
       const assetTypesNodeTR = await this.neo4jService.createNode(
         { canDelete: false, isDeleted: false, canCopied: true, isRoot: true, name: 'Asset Types', realm: 'Signum' },
-        ['Asset_Types_tr'],
+        ['AssetTypes_tr'],
       );
 
       await this.neo4jService.addParentRelationByIdAndFilters(
@@ -108,7 +108,7 @@ export class InfraRepository implements InfraInterface {
         {
           canDelete: true,
           isDeleted: false,
-          name: 'fixed',
+          name: 'Fixed',
           isActive: true,
           language: 'en',
         },
@@ -118,7 +118,7 @@ export class InfraRepository implements InfraInterface {
         {
           canDelete: true,
           isDeleted: false,
-          name: 'moveable',
+          name: 'Moveable',
           isActive: true,
           language: 'en',
         },
@@ -141,7 +141,7 @@ export class InfraRepository implements InfraInterface {
         {
           canDelete: true,
           isDeleted: false,
-          name: 'sabit',
+          name: 'Sabit',
           isActive: true,
           language: 'tr',
         },
@@ -151,7 +151,7 @@ export class InfraRepository implements InfraInterface {
         {
           canDelete: true,
           isDeleted: false,
-          name: 'hareketli',
+          name: 'Hareketli',
           isActive: true,
           language: 'tr',
         },
