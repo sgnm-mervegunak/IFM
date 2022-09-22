@@ -261,6 +261,7 @@ export class TypesRepository implements GeciciInterface<Type> {
       const typeNode = await this.neo4jService.findByIdAndFilters(+_id, { isDeleted: false });
 
       let deletedNode;
+      let deletedVirtualNode;
 
       const hasChildrenArray = await this.neo4jService.findChildrensByIdAndFilters(
         +_id,
@@ -272,6 +273,22 @@ export class TypesRepository implements GeciciInterface<Type> {
 
       if (hasChildrenArray.length === 0) {
         deletedNode = await this.neo4jService.updateByIdAndFilter(+_id, {}, [], { isDeleted: true, isActive: false });
+         
+        const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+          [Neo4jLabelEnum.TYPE],
+          {key: typeNode[0].get('n').properties.key },
+          ['Virtual'],
+          { isDeleted: false },
+          RelationName.CREATED_BY,
+        ); 
+        deletedVirtualNode = await this.neo4jService.updateByIdAndFilter(
+          +virtualNode[0].get('children').identity.low,
+          {},
+          [],
+          {"isDeleted": true}
+        ); 
+
+        
         await this.kafkaService.producerSendMessage(
           'deleteVirtualNodeRelations',
           JSON.stringify({ referenceKey: typeNode.properties.key }),
