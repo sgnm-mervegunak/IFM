@@ -85,6 +85,8 @@ const SetType = () => {
   const getTypes = () => {
     TypesService.findAll()
       .then((res) => {
+        console.log(res.data);
+        
         if (!res.data.root.children) {
           let temp = JSON.parse(
             JSON.stringify([res.data.root.properties] || [])

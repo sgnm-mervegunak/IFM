@@ -29,12 +29,13 @@ import ClassificationFileImportWithoutCode from "./pages/Classifications/Classif
 import SetType from "./pages/Types/SetType";
 import SetComponent from "./pages/Components/SetComponent";
 import SetComponentsDetail from "./pages/Components/SetComponentsDetail";
+import SetSystem from "./pages/Systems/SetSystem";
 
 // import Main from './pages/Main';
 
 export default function Router() {
   const auth = useAppSelector((state) => state.auth);
-  
+
   return useRoutes([
     {
       path: "/",
@@ -51,8 +52,9 @@ export default function Router() {
         // { path: "formgenerate", element: <FormGenerate />},
         { path: "contact", element: <Contact /> },
         { path: "structure-asset", element: <StructureAsset /> },
-        { path: "asset-types", element:  <SetType/>},
-        { path: "asset-components", element:  <SetComponent/>},
+        { path: "asset-types", element: <SetType /> },
+        { path: "asset-components", element: <SetComponent /> },
+        { path: "asset-systems", element: <SetSystem /> },
       ],
     },
     {
@@ -103,7 +105,7 @@ export default function Router() {
     {
       path: "/asset-components",
       element: <AppLayout />,
-      children: [{ path: ":id", element: <SetComponentsDetail/> }],
+      children: [{ path: ":id", element: <SetComponentsDetail /> }],
     },
     {
       path: "/404",
