@@ -5,18 +5,14 @@ import { Unprotected } from 'nest-keycloak-connect';
 import { catchError, firstValueFrom, map } from 'rxjs';
 import { assignDtoPropToEntity, Neo4jService } from 'sgnm-neo4j/dist';
 import { VirtualNode } from 'src/common/baseobject/virtual.node';
-import { node_not_found } from 'src/common/const/custom.error.object';
 import { CreateKafkaObject, UpdateKafkaObject } from 'src/common/const/kafka.object.type';
-import { ContactService } from '../services/contact.service';
-
+import * as moment from 'moment';
+import { has_not_reference_key } from 'src/common/const/custom.error.object';
+import { CustomTreeError } from 'src/common/const/custom.error.enum';
 @Controller('contactListener')
 @Unprotected()
 export class ContactListenerController {
-  constructor(
-    private readonly neo4jService: Neo4jService,
-    private readonly httpService: HttpService,
-    private readonly contactService: ContactService,
-  ) {}
+  constructor(private readonly neo4jService: Neo4jService, private readonly httpService: HttpService) {}
 
   @EventPattern('createContactRelation')
   async createAssetListener(@Payload() message) {
@@ -74,6 +70,7 @@ export class ContactListenerController {
 
       await this.neo4jService.updateByIdAndFilter(virtualNode[0].get('children').identity.low, {}, [], {
         isDeleted: true,
+        updatedAt: moment().format('YYYY-MM-DD HH:mm:ss'),
       });
       let newVirtualNodeObject = new VirtualNode();
       newVirtualNodeObject['referenceKey'] = virtualObject.referenceKey;
@@ -126,32 +123,34 @@ export class ContactListenerController {
     });
   }
 
-  @EventPattern('deleteAssetFromStructure')
-  async deleteAssetFromStructureListener(@Payload() message, @Headers('realm') realm) {
-    if (!message.value?.referenceKey || !message.value?.key) {
-      throw new HttpException('key is not available on kafka object', 400);
+  @EventPattern('deleteVirtualNodeRelations')
+  async deleteRelationListener(@Payload() message) {
+    try {
+      if (!message.value?.referenceKey) {
+        throw new HttpException(has_not_reference_key(), 400);
+      }
+      console.log(message.value.referenceKey);
+      const willDeleteVirtualNodes = await this.neo4jService.findByLabelAndFilters([], {
+        referenceKey: message.value?.referenceKey,
+        isDeleted: false,
+      });
+
+      willDeleteVirtualNodes.forEach(async (node) => {
+        const updatedNode = await this.neo4jService.updateByIdAndFilter(node.get('n').identity.low, {}, [], {
+          isDeleted: true,
+          updatedAt: moment().format('YYYY-MM-DD HH:mm:ss'),
+        });
+        console.log(updatedNode);
+      });
+    } catch (error) {
+      const code = error.response?.code;
+
+      if (code) {
+        if (code === CustomTreeError.HAS_NOT_REFERENCE_KEY) {
+          throw new HttpException({ message: error.response.message }, error.status);
+        }
+      }
+      throw new HttpException(error, 500);
     }
-
-    //const component = await this.componentService.findOneNode(message.value?.key, realm);
-
-    //check if asset exist
-    const structurePromise = await this.httpService
-      .get(`${process.env.STRUCTURE_URL}/${message.value?.referenceKey}`)
-      .pipe(
-        catchError(() => {
-          throw new HttpException('connection refused due to connection lost or wrong data provided', 502);
-        }),
-      )
-      .pipe(map((response) => response.data));
-
-    const relationExistanceBetweenVirtualNodeAndNodeByKey = await this.neo4jService.findNodeByKeysAndRelationName(
-      message.value.key,
-      message.value.referenceKey,
-      'INSIDE_IN',
-    );
-    const virtualNodeId = relationExistanceBetweenVirtualNodeAndNodeByKey[0]['_fields'][1].identity.low;
-    console.log(relationExistanceBetweenVirtualNodeAndNodeByKey[0]['_fields'][1].identity.low);
-
-    await this.neo4jService.deleteVirtualNode(virtualNodeId);
   }
 }

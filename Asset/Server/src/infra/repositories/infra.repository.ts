@@ -229,11 +229,14 @@ export class InfraRepository implements InfraInterface {
         { canDelete: false, isDeleted: false, name: 'Types', realm: 'Signum' },
         ['Types'],
       );
+     
+      await this.neo4jService.updateByIdAndFilter(typesNode.identity.low, {}, [], {id:typesNode.identity.low});
 
       const systemsNode = await this.neo4jService.createNode(
         { canDelete: false, isDeleted: false, canCopied: true, isRoot: true, name: 'Systems', realm: 'Signum' },
         ['Systems'],
       );
+      await this.neo4jService.updateByIdAndFilter(systemsNode.identity.low, {}, [], {id:systemsNode.identity.low});
 
       await this.neo4jService.addParentRelationByIdAndFilters(typesNode.identity.low, {}, assetNode.identity.low, {});
       await this.neo4jService.addParentRelationByIdAndFilters(systemsNode.identity.low, {}, assetNode.identity.low, {});

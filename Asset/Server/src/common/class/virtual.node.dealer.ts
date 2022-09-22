@@ -2,12 +2,10 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestKafkaService } from 'ifmcommon/dist';
 import { Neo4jService } from 'sgnm-neo4j/dist';
-import { HttpRequestHandler } from './http.request.helper.class';
 import * as moment from 'moment';
 import { CreateKafka, CreateKafkaObject, UpdateKafka } from '../const/kafka.object.type';
 import { RelationName } from '../const/relation.name.enum';
 import { VirtualNode } from '../baseobject/virtual.node';
-import { isNotEmpty } from 'class-validator';
 import { Neo4jLabelEnum } from '../const/neo4j.label.enum';
 
 @Injectable()
@@ -84,16 +82,11 @@ export class VirtualNodeHandler {
             virtualNodeLabels,
           };
           await this.kafkaService.producerSendMessage('updateContactRelation', JSON.stringify(updatedByKafkaObject));
-          const updatedVirtualNode = await this.neo4jService.updateByIdAndFilter(
-            virtualNode[0].get('children').identity.low,
-            {},
-            [],
-            {
-              url,
-              referenceKey: item.newParentKey,
-              updatedAt: moment().format('YYYY-MM-DD HH:mm:ss'),
-            },
-          );
+          await this.neo4jService.updateByIdAndFilter(virtualNode[0].get('children').identity.low, {}, [], {
+            url,
+            referenceKey: item.newParentKey,
+            updatedAt: moment().format('YYYY-MM-DD HH:mm:ss'),
+          });
         }
       });
     } catch (error) {

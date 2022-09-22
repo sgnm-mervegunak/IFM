@@ -40,6 +40,7 @@ interface Node {
 
 const SetClassificationAdmin = () => {
   const [selectedNodeKey, setSelectedNodeKey] = useState("");
+  const [expandedKeys, setExpandedKeys] = useState({});
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
   const [code, setCode] = useState("");
@@ -114,6 +115,11 @@ const SetClassificationAdmin = () => {
         setData(temp)
       }
       else if (res.data.root.children) {
+        let _expandedKey: { [key: string]: boolean } = {};
+        let rootKey:string=res.data.root.key;
+        _expandedKey[rootKey]=true;
+        setExpandedKeys(_expandedKey);
+        
         setData([res.data.root] || []);
         let temp = JSON.parse(JSON.stringify([res.data.root] || []));
         fixNodes(temp)
@@ -515,6 +521,8 @@ const SetClassificationAdmin = () => {
 
           loading={loading}
           value={data}
+          expandedKeys={expandedKeys}
+          onToggle={e => setExpandedKeys(e.value)}
           dragdropScope="-"
           contextMenuSelectionKey={selectedNodeKey ? selectedNodeKey : ""}
           onContextMenuSelectionChange={(event: any) =>

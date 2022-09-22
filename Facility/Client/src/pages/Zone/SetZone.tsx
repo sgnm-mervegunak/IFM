@@ -1,32 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { Tree } from "primereact/tree";
-import { ContextMenu } from "primereact/contextmenu";
 import { Dialog } from "primereact/dialog";
-import { Chips } from "primereact/chips";
 import { ConfirmDialog } from "primereact/confirmdialog";
 import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
-import { TreeSelect } from "primereact/treeselect";
-import { TabPanel, TabView } from "primereact/tabview";
 import { useNavigate, useParams } from "react-router-dom";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { useForm, Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import axios from "axios";
 
 import FacilityStructureService from "../../services/facilitystructure";
-import ClassificationsService from "../../services/classifications";
 import ZoneService from "../../services/zone";
 import { useAppSelector } from "../../app/hook";
-import FormGenerate from "../FormGenerate/FormGenerate";
-import Export, { ExportType } from "../FacilityStructure/Export/Export";
-import ExportService from "../../services/export";
-import DownloadExcel from "../../utils/download-excel";
 import DisplayNode from "../FacilityStructure/Display/DisplayNode";
 import DocumentUploadComponent from "../FacilityStructure/Forms/FileUpload/DocumentUpload/DocumentUpload";
 import ImageUploadComponent from "../FacilityStructure/Forms/FileUpload/ImageUpload/ImageUpload";
-
+import ZoneForm from "./Forms/ZoneForm";
 
 interface Node {
   cantDeleted: boolean;
@@ -52,22 +38,6 @@ interface Node {
   selectable?: boolean;
   nodeType?: string;
   isBlocked?: boolean;
-}
-
-interface ZoneInterface {
-  name: string;
-  category: string;
-  spaceNames: string;
-  code: string;
-  description: string;
-  credatedBy: string;
-  createdOn: string;
-  externalSystem: string;
-  externalObject: string;
-  documents: any;
-  images: any;
-  tag: string[];
-  nodeKeys: string[];
 }
 
 interface FormNode {
@@ -96,157 +66,42 @@ interface FormNode {
   icon?: string;
 }
 
+
 const SetZone = () => {
+  const [selectedNodeKey, setSelectedNodeKey] = useState<any>("");
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+  const [spaceNames, setSpaceNames] = useState<string>("");
   const [selectedKeysName, setSelectedKeysName] = useState<string[]>([]);
-  const [selectedNodeKey, setSelectedNodeKey] = useState<any>([]);
-  const [deleteNodeKey, setDeleteNodeKey] = useState<any>("");
+  const [display, setDisplay] = useState(false);
+  const [displayKey, setDisplayKey] = useState("");
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
-  const [createZone, setCreateZone] = useState<ZoneInterface>(
-    {} as ZoneInterface
-  );
-  const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
-  const [uploadFiles, setUploadFiles] = useState<any>({});
-  const [ArchitecturalName, setArchitecturalName] = useState<string>("");
-  const [ArchitecturalCode, setArchitecturalCode] = useState<string>("");
-  const [name, setName] = useState<string>("");
-  const [code, setCode] = useState<string>("");
-  // const [tag, setTag] = useState<string[]>([]);
-  const [m2, setM2] = useState<string>("");
-  const [spaceType, setSpaceType] = useState<any>(undefined);
-  const [status, setStatus] = useState<any>(undefined);
-  const [jointStartDate, setJointStartDate] = useState<any>(undefined);
-  const [jointEndDate, setJointEndDate] = useState<any>(undefined);
-  const [nodeKeys, setNodeKeys] = useState<string[]>([]);
-  const [classificationSpace, setClassificationSpace] = useState<Node[]>([]);
-  const [classificationStatus, setclassificationStatus] = useState<Node[]>([]);
-  const [codeCategory, setCodeCategory] = useState("");
-  const [codeStatus, setCodeStatus] = useState("");
   const [formTypeId, setFormTypeId] = useState<any>(undefined);
-  const [labels, setLabels] = useState<string[]>([]);
-  const [isActive, setIsActive] = useState<boolean>(true);
+  const [formDia, setFormDia] = useState<boolean>(false);
   const [addDia, setAddDia] = useState(false);
   const [editDia, setEditDia] = useState(false);
   const [delDia, setDelDia] = useState<boolean>(false);
-  const [formDia, setFormDia] = useState<boolean>(false);
-  const [display, setDisplay] = useState(false);
-  const [displayKey, setDisplayKey] = useState("");
-  const [exportDia, setExportDia] = useState(false);
-  const { toast } = useAppSelector((state) => state.toast);
-  const { t } = useTranslation(["common"]);
-  const language = useAppSelector((state) => state.language.language);
   const cm: any = React.useRef(null);
   const navigate = useNavigate();
-  // const [formData, setFormData] = useState<FormNode[]>([]);
+  const [formData, setFormData] = useState<FormNode[]>([]);
+  const [classification, setClassification] = useState<Node[]>([]);
   const auth = useAppSelector((state) => state.auth);
+  const { toast } = useAppSelector((state) => state.toast);
   const [realm, setRealm] = useState(auth.auth.realm);
+  const [submitted, setSubmitted] = useState(false);
+  const [isUpdate, setIsUpdate] = useState(false);
+  const [canDelete, setCanDelete] = useState<boolean>(false);
   const [generateNodeKey, setGenerateNodeKey] = useState("");
   const [generateFormTypeKey, setGenerateFormTypeKey] = useState<string | undefined>("");
   const [generateNodeName, setGenerateNodeName] = useState<string | undefined>("");
-  const [facilityType, setFacilityType] = useState<string[]>([]);
   const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
-  const [submitted, setSubmitted] = useState(false);
-  const [isUpdate, setIsUpdate] = useState(false);
+  const [deleteNodeKey, setDeleteNodeKey] = useState<any>("");
+  const { t } = useTranslation(["common"]);
 
   const params = useParams();
 
-  const schema = yup.object({
-    name: yup.string().required(t("This area is required.")).max(50, t("This area accepts max 50 characters.")),
-    category: yup.string().required(t("This area is required.")),
-  });
 
-  const fixNodesClassification = (nodes: Node[]) => {
-    if (!nodes || nodes.length === 0) {
-      return;
-    }
-    for (let i of nodes) {
-      fixNodesClassification(i.children);
-      i.label = i.name;
-      i.selectable = true;
-    }
-  };
 
-  const getClassificationSpace = async () => {
-    await ClassificationsService.findAllActiveByLabel({
-      label: "FacilityZoneTypes",
-    }).then((res) => {
-      let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
-      fixNodesClassification(temp);
-      setClassificationSpace(temp);
-    });
-  };
-
-  const getClassificationStatus = async () => {
-    await ClassificationsService.findAllActiveByLabel({
-      label: "FacilityZoneTypes",
-    }).then((res) => {
-      let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
-      fixNodesClassification(temp);
-      temp[0].selectable = false;
-      setclassificationStatus(temp);
-    });
-  };
-
-  useEffect(() => {
-    getClassificationSpace();
-    getClassificationStatus();
-  }, []);
-
-  const getNodeInfoAndEdit = (selectedNodeKey: string) => {
-    FacilityStructureService.nodeInfo(selectedNodeKey)
-      .then((res) => {
-        console.log(res.data);
-        setSelectedFacilityType(res.data.properties.nodeType);
-
-        // setName(res.data.properties.name || "");
-        // setTag(res.data.properties.tag || []);
-        // setIsActive(res.data.properties.isActive);
-        // setFormTypeId(res.data.properties.formTypeId);
-      })
-      .catch((err) => {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
-        });
-      });
-  };
-
-  // const menuBuilding = [
-  //   {
-  //     label: t("Export Zones"),
-  //     icon: "pi pi-download",
-  //     command: () => {
-  //       console.log("in here, export zones");
-
-  //       let key = selectedNodeKey;
-  //       console.log("node key", key);
-  //       ExportService.exportZones({
-  //         buildingKeys: key.map((item: any) => {
-  //           if (item.key) {
-  //             return item.key;
-  //           }
-  //         }),
-  //         realm: auth.auth.realm,
-  //       })
-  //         .then(async (res) => {
-  //           await DownloadExcel(res.data, "test", "zones-deneme");
-  //           setExportDia(false);
-  //         })
-  //         .catch((err) => {
-  //           toast.current.show({
-  //             severity: "error",
-  //             summary: "Error",
-  //             detail: err.response ? err.response.data.message : err.message,
-  //             life: 2000,
-  //           });
-  //         });
-
-  //     },
-  //   },
-  // ];
 
   const getZone = () => {
     const key = params.id || "";
@@ -285,34 +140,18 @@ const SetZone = () => {
 
   useEffect(() => {
     getZone();
-  }, []);
+  }, [])
 
-  const [formData, setFormData] = useState<any>();
-
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-    control,
-    reset,
-    formState,
-    formState: { isSubmitSuccessful },
-  } = useForm<ZoneInterface>({
-    resolver: yupResolver(schema),
-  });
-
-  useEffect(() => {
-    watch((value, { name, type }) => console.log(value, name, type));
-  }, [watch]);
-
-  // useEffect(() => {
-  //   if (formState.isSubmitSuccessful) {
-  //     reset({ ...createZone });
-
-  //   } else {
-  //   }
-  // }, [formState, createZone, reset]);
+  const fixNodesClassification = (nodes: Node[]) => {
+    if (!nodes || nodes.length === 0) {
+      return;
+    }
+    for (let i of nodes) {
+      fixNodesClassification(i.children);
+      i.label = i.name;
+      i.selectable = true;
+    }
+  };
 
   const fixNodes = (nodes: Node[]) => {
     if (!nodes || nodes.length === 0) {
@@ -334,150 +173,14 @@ const SetZone = () => {
     }
   };
 
-  const UploadAnyFile = (folderName: string, file: any) => {
-    const url = process.env.REACT_APP_API_MINIO_URL+"/file-upload/single";
-    const formData = new FormData();
-
-    formData.append("file", file);
-    formData.append("realmName", "ifm");
-    formData.append("folderName", folderName);
-    return axios.post(url, formData);
-  };
-
-  const addItem = handleSubmit((createZone) => {
-    let newNode: any = {};
-    newNode = {
-      ...createZone,
-      category: codeCategory,
-      spaceNames: `${selectedKeysName.toString().replaceAll(",", ", ")}` || "",
-      nodeKeys: selectedKeys || [],
-      credatedBy: "",
-      createdOn: "",
-      externalSystem: "",
-      externalObject: "",
-      images: "",
-      documents: "",
-    };
-
-    ZoneService.createZone(newNode)
-      .then(async (res) => {
-        toast.current.show({
-          severity: "success",
-          summary: "Successful",
-          detail: "Zone Created",
-          life: 3000,
-        });
-        // upload files
-        let temp = {} as any;
-        for (let item in uploadFiles) {
-          temp[item] = [];
-          for (let file of uploadFiles[item]) {
-            if (file.isImage) {
-              let resFile = await UploadAnyFile(
-                res.data.key + "/" + item,
-                file.file
-              );
-              delete resFile.data.message;
-              temp[item].push({ ...resFile.data, main: file.main });
-            } else {
-              let resFile = await UploadAnyFile(
-                res.data.key + "/" + item,
-                file.file
-              );
-              delete resFile.data.message;
-              temp[item].push({ ...resFile.data, type: file.type });
-            }
-          }
-        }
-        for (let item in temp) {
-          temp[item] = JSON.stringify(temp[item]);
-        }
-        console.log({ ...newNode, ...temp });
-        await ZoneService.update(res.data.id, { ...newNode, ...temp })
-
-        reset({ name:"", code:"", description:"", tag: [], category: "" });
-
-        setSelectedNodeKey([]);
-        setCreateZone({} as ZoneInterface);
-        setSelectedKeys([]);
-        setAddDia(false);
-        getZone();
-        setSelectedKeysName([]);
-      })
-      .catch((err) => {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
+  const findKeyName = (data: any) => {
+    setSelectedKeysName([]);
+    if (data.length > 0) {
+      data.map((key: any) => {
+        FacilityStructureService.nodeInfo(key).then((res) => {
+          setSelectedKeysName((prev) => [...prev, res.data.properties.name]);
         });
       });
-  }
-  );
-
-  const editItem = (key: string) => {
-    let updateNode: any = {};
-    FacilityStructureService.nodeInfo(key)
-      .then((responseStructure) => {
-        if (labels.length > 0) {
-          updateNode = {
-            ...createZone,
-            isActive: isActive,
-            description: "",
-            labels: [labels[0]],
-            formTypeId: formTypeId,
-          };
-        } else {
-          updateNode = {
-            ...createZone,
-            isActive: isActive,
-            description: "",
-            formTypeId: formTypeId,
-          };
-        }
-
-        FacilityStructureService.update(responseStructure.data.id, updateNode)
-          .then((res) => {
-            toast.current.show({
-              severity: "success",
-              summary: t("Successful"),
-              detail: t("Zone Updated"),
-              life: 3000,
-            });
-            getZone();
-          })
-          .catch((err) => {
-            toast.current.show({
-              severity: "error",
-              summary: t("Error"),
-              detail: err.response ? err.response.data.message : err.message,
-              life: 2000,
-            });
-          });
-      })
-      .catch((err) => {
-        toast.current.show({
-          severity: "error",
-          summary: t("Error"),
-          detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
-        });
-      });
-    setName("");
-    // setTag([]);
-    setFormTypeId(undefined);
-    setLabels([]);
-    setEditDia(false);
-  };
-
-  const onChange = (e: any) => {
-    try {
-      setCreateZone((prev) => ({
-        ...prev,
-        [e.target?.name]: e.target.value,
-      }));
-    } catch (e) {
-      alert(e);
     }
   };
 
@@ -493,7 +196,7 @@ const SetZone = () => {
         getZone();
         setSelectedNodeKey([]);
         setSelectedKeys([]);
-        setDisplay(false);
+        setDisplay(false); 
       })
       .catch((err) => {
         toast.current.show({
@@ -505,26 +208,6 @@ const SetZone = () => {
       });
   };
 
-  const findKeyName = (data: any) => {
-    setSelectedKeysName([]);
-
-    if (data.length > 0) {
-      data.map((key: any) => {
-        FacilityStructureService.nodeInfo(key).then((res) => {
-          setSelectedKeysName((prev) => [...prev, res.data.properties.name]);
-        });
-      });
-    }
-  };
-
-  const showSuccess = (detail: string) => {
-    toast.current.show({
-      severity: "success",
-      summary: "Success Message",
-      detail: detail,
-      life: 3000,
-    });
-  };
 
   const renderFooterAdd = () => {
     return (
@@ -534,7 +217,7 @@ const SetZone = () => {
           icon="pi pi-times"
           onClick={() => {
             setAddDia(false);
-            reset({ ...createZone, tag: [], category: "" }); // reset form values after canceling the create zone operation
+            // reset({ ...createZone, tag: [], category: "" }); // reset form values after canceling the create zone operation
           }}
           className="p-button-text"
         />
@@ -542,7 +225,7 @@ const SetZone = () => {
           label={t("Add")}
           icon="pi pi-check"
           onClick={() => {
-            addItem();
+            setSubmitted(true);
           }
           }
           autoFocus
@@ -559,15 +242,13 @@ const SetZone = () => {
           icon="pi pi-times"
           onClick={() => {
             setEditDia(false);
-            // setName("");
-            // setTag([]);
-            setLabels([]);
-            setFormTypeId(undefined);
+            // setLabels([]);
+            // setFormTypeId(undefined);
 
-            setSelectedFacilityType(undefined);
-            reset({
-              ...createZone,
-            });
+            // setSelectedFacilityType(undefined);
+            // reset({
+            //   ...createZone,
+            // });
           }}
           className="p-button-text"
         />
@@ -581,38 +262,19 @@ const SetZone = () => {
     );
   };
 
-  // const renderFooterForm = () => {
-  //   return (
-  //     <div>
-  //       <Button
-  //         label="Cancel"
-  //         icon="pi pi-times"
-  //         onClick={() => {
-  //           setFormDia(false);
-  //         }}
-  //         className="p-button-text"
-  //       />
-  //     </div>
-  //   );
-  // };
-
   return (
+
     <div className="container">
-      {/* {
-        (() => {
-          if(selectedFacilityType==="Building")
-          return(
-            <ContextMenu id={"001" } model={menuBuilding} ref={cm} />
-          )
-        })()
-     } */}
       <ConfirmDialog
         visible={delDia}
         onHide={() => setDelDia(false)}
         message="Do you want to delete?"
         header="Delete Confirmation"
         icon="pi pi-exclamation-triangle"
-        accept={() => deleteItem(deleteNodeKey)}
+        accept={() => {
+          deleteItem(deleteNodeKey)
+        }
+        }
       />
       <Dialog
         header={t("Zone Detail")}
@@ -628,193 +290,39 @@ const SetZone = () => {
       >
         <DisplayNode displayKey={displayKey} />
       </Dialog>
+
       <Dialog
         header={t("Add New Item")}
         visible={addDia}
         style={{ width: "40vw" }}
         footer={renderFooterAdd}
         onHide={() => {
-          // setName("");
-          // setTag([]);
-          setFormTypeId(undefined);
-          setLabels([]);
-          // setCreateZone({} as ZoneInterface)
+          // setFormTypeId(undefined); 
+          // setLabels([]); 
           setAddDia(false);
-          setCreateZone({} as ZoneInterface);
-
-          setSelectedFacilityType(undefined);
-          reset({ ...createZone });
+          // setSelectedFacilityType(undefined);
+          // reset({ ...createZone });
         }}
       >
-        <form>
-          <TabView>
-            <TabPanel header={t("Form")}>
-              <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
-                <InputText
-                  autoComplete="off"
-                  {...register("name")}
-                  style={{ width: "100%" }}
-                />
-              </div>
-              <p style={{ color: "red" }}>{errors.name?.message}</p>
 
-              <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
-                <InputText
-                  autoComplete="off"
-                  {...register("code")}
-                  style={{ width: "100%" }}
-                  defaultValue={createZone?.code || ""}
-                />
-                <p style={{ color: "red" }}>{errors.code?.message}</p>
-              </div>
-
-              <div className="field structureChips">
-                <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
-                <Controller
-                  defaultValue={formData?.tag || []}
-                  name="tag"
-                  control={control}
-                  render={({ field }) => (
-                    <Chips
-                      value={field.value}
-                      onChange={(e) => {
-                        field.onChange({
-                          target: { name: "tag", value: e.value },
-                        });
-                      }}
-                      style={{ width: "100%" }}
-                    />
-                  )}
-                />
-              </div>
-              <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>{t("Description")}</h5>
-                <InputText
-                  autoComplete="off"
-                  {...register("description")}
-                  style={{ width: "100%" }}
-                  defaultValue={createZone?.description || ""}
-                />
-              </div>
-
-              <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
-                <Controller
-                  defaultValue={createZone?.category}
-                  name="category"
-                  control={control}
-                  render={({ field }) => (
-                    <TreeSelect
-                      value={field.value}
-                      options={classificationSpace}
-                      onChange={(e) => {
-                        ClassificationsService.nodeInfo(e.value as string).then(
-                          (res) => {
-                            field.onChange(e.value);
-                            setCodeCategory(res.data.properties.code || "");
-                          }
-                        );
-                      }}
-                      filter
-                      placeholder="Select Type"
-                      style={{ width: "100%" }}
-                    />
-                  )}
-                />
-              </div>
-            </TabPanel>
-            <TabPanel header={t("Images")}>
-              <div className="formgrid grid">
-                <div className="field col-12">
-                  <h5 style={{ marginBottom: "0.5em" }}>{t("Images")}</h5>
-                  <Controller
-                    name="images"
-                    defaultValue={createZone?.images || []}
-                    control={control}
-                    render={({ field }) => (
-                      <ImageUploadComponent
-                        label={"images"}
-                        value={field.value}
-                        onChange={(e: any) => {
-                          console.log(e);
-
-                          field.onChange(e);
-                        }}
-                        deleteFiles={deleteFiles}
-                        setDeleteFiles={setDeleteFiles}
-                        uploadFiles={uploadFiles}
-                        setUploadFiles={setUploadFiles}
-                      />
-                    )}
-                  />
-                  <p style={{ color: "red" }}>{errors.images?.message}</p>
-                </div>
-              </div>
-            </TabPanel>
-            <TabPanel header={t("Documents")}>
-              <div className="formgrid grid">
-                <div className="field col-12">
-                  <h5 style={{ marginBottom: "0.5em" }}>{t("Documents")}</h5>
-                  <Controller
-                    name="documents"
-                    defaultValue={createZone?.documents || []}
-                    control={control}
-                    render={({ field }) => (
-                      <DocumentUploadComponent
-                        label={"documents"}
-                        value={field.value}
-                        onChange={(e: any) => {
-                          field.onChange(e);
-                        }}
-                        deleteFiles={deleteFiles}
-                        setDeleteFiles={setDeleteFiles}
-                        uploadFiles={uploadFiles}
-                        setUploadFiles={setUploadFiles}
-                      />
-                    )}
-                  />
-                  <p style={{ color: "red" }}>{errors.documents?.message}</p>
-                </div>
-              </div>
-            </TabPanel>
-          </TabView>
-        </form>
-      </Dialog>
-
-      <Dialog
-        header="Edit Item"
-        visible={editDia}
-        style={{ width: "40vw" }}
-        footer={renderFooterEdit}
-        onHide={() => {
-          // setName("");
-          // setTag([]);
-          setFormTypeId(undefined);
-          setLabels([]);
-          setEditDia(false);
-
-          setSelectedFacilityType(undefined);
-        }}
-      ></Dialog>
-
-      <Dialog
-        // header="Form"
-        visible={formDia}
-        style={{ width: "40vw" }}
-        // footer={renderFooterForm}
-        onHide={() => {
-          setFormDia(false);
-        }}
-      >
-        <FormGenerate
-          nodeKey={generateNodeKey}
-          formKey={generateFormTypeKey}
-          nodeName={generateNodeName}
-          setFormDia={setFormDia}
+        <ZoneForm
+          submitted={submitted}
+          setSubmitted={setSubmitted}
+          selectedNodeKey={selectedNodeKey}
+          editDia={editDia}
+          getZone={getZone}
+          setAddDia={setAddDia}
+          setEditDia={setEditDia}
+          isUpdate={isUpdate}
+          setIsUpdate={setIsUpdate}
+          zoneData={data}
+          selectedSpaceKeys={selectedKeys}
+          setSelectedSpaceKeys={setSelectedKeys}
+          selectedSpaceNames={selectedKeysName}
+          setSelectedSpaceNames={setSelectedKeysName}
         />
       </Dialog>
+
       <h3>Zone</h3>
       <div>
         <span style={{ fontWeight: "bold", fontSize: "16px" }}>
@@ -832,16 +340,16 @@ const SetZone = () => {
               className="ml-2"
               onClick={() => {
                 setAddDia(true);
-                // setCreateZone({} as ZoneInterface)
               }}
             />
           </div>
         )}
       </div>
+
       <div className="field mt-4">
         <Tree
           onContextMenu={(event: any) => {
-            setSelectedFacilityType(event.node.nodeType);
+            // setSelectedFacilityType(event.node.nodeType);
             cm.current.show(event.originalEvent);
           }}
           loading={loading}
@@ -864,8 +372,9 @@ const SetZone = () => {
 
             setSelectedNodeKey(event.value);
             setSelectedKeys(Object.keys(event.value));
-            // findKeyName(Object.keys(event.value));
-            // selectedKeys?.map((key) =>{findKeyName(key)});
+            findKeyName(Object.keys(event.value));
+            selectedKeys?.map((key) => { findKeyName(key) });
+
           }}
           selectionKeys={selectedNodeKey}
           propagateSelectionUp={false}
@@ -909,8 +418,9 @@ const SetZone = () => {
           )}
         />
       </div>
+
     </div>
-  );
-};
+  )
+}
 
 export default SetZone;
