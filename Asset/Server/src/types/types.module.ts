@@ -1,6 +1,7 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { HttpRequestHandler } from 'src/common/class/http.request.helper.class';
+import { VirtualNodeHandler } from 'src/common/class/virtual.node.dealer';
 import { RepositoryEnums } from 'src/common/const/repository.enum';
 import { TypesController } from './controllers/types.controller';
 import { TypesRepository } from './repositories/types.repository';
@@ -18,6 +19,10 @@ import { TypesService } from './services/types.service';
     {
       provide: HttpRequestHandler,
       useClass: HttpRequestHandler,
+    },
+    {
+      provide: VirtualNodeHandler,
+      useClass: VirtualNodeHandler,
     },
   ],
   exports: [TypesService],
