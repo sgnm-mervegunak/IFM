@@ -529,8 +529,6 @@ export class ClassificationRepository implements classificationInterface<Classif
   //REVISED FOR NEW NEO4J
   async addAClassificationWithCodeFromExcel(file: Express.Multer.File, realm: string, language: string) {
     try {
-      realm="IFM";
-      language= "en";
       let data = [];
 
       let buffer = new Uint8Array(file.buffer);

@@ -255,9 +255,13 @@ export class InfraRepository implements InfraInterface {
       let checkClassification3 = await this.neo4jService.findByLabelAndFilters([`OmniClass23_${language}`], {
         realm: 'Signum',
       });
+
+      let checkClassification4 = await this.neo4jService.findByLabelAndFilters([`OmniClass21_${language}`], {
+        realm: 'Signum',
+      });
       //console.log(checkClassification1.length==0 && checkClassification2.length==0 && checkClassification3.length==0);
 
-      if (checkClassification1.length == 0 && checkClassification2.length == 0) {
+      if (checkClassification1.length == 0 && checkClassification2.length == 0 && checkClassification3.length == 0 && checkClassification4.length == 0) {
         let durationUnit: any;
         let assetType: any;
         let categoryProduct: any;
@@ -524,13 +528,10 @@ export class InfraRepository implements InfraInterface {
           await this.neo4jService.write(cypher);
 
           for (let index = 1; index < deneme4[i].length; index++) {
-            let cypher3 = `MATCH (n:${deneme4[i][0].name}s_${language} {isDeleted:false}) MERGE (b:${deneme4[i][0].name}s {code:"${
-              deneme4[i][index].code
-            }",name:"${deneme4[i][index].name}",isDeleted:${
-              deneme4[i][index].isDeleted
-            },key:"${generateUuid()}",canDelete:${deneme4[i][index].canDelete},canDisplay:${
-              deneme4[i][index].canDisplay
-            },language:"${language}"})  MERGE (n)-[:PARENT_OF]->(b)`;
+            let {name,code,isDeleted,canDelete,canDisplay,isActive}=deneme4[i][index];
+
+            let cypher3 = `MATCH (n:${deneme4[i][0].name}s_${language} {isDeleted:false}) MERGE (b:${deneme4[i][0].name} {code:"${code}",name:"${name}",isDeleted:${isDeleted},key:"${generateUuid()}",canDelete:${canDelete}, \
+            canDisplay:${canDisplay},language:"${language}",isActive:${isActive}})  MERGE (n)-[:PARENT_OF]->(b)`;
             let data = await this.neo4jService.write(cypher3);
             console.log(data);
           }
