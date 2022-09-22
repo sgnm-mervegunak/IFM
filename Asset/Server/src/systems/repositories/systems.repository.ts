@@ -188,7 +188,7 @@ export class SystemsRepository implements SystemsInterface<System> {
         { isDeleted: false },
         'PARENT_OF',
       );
-      let classificationRootNone = 'OmniClass11';
+      let classificationRootNone = 'OmniClass21';
 
       languages.map(async (record) => {
         let lang = record['_fields'][1].properties.name;
