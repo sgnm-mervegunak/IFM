@@ -236,7 +236,7 @@ const Facility2 = () => {
             // currentPageReportTemplate="Showing {first} to {last} of {totalRecords} facilities"
             // totalRecords={countFacilities}
             // globalFilter={globalFilter}
-            emptyMessage="No facilities found."
+            emptyMessage="Organization not found"
             // header={header}
             responsiveLayout="scroll"
             // onSort={onSort}

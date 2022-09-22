@@ -208,7 +208,7 @@ export class TypesRepository implements GeciciInterface<Type> {
 
   async update(_id: string, updateTypeDto: UpdateTypesDto, header) {
     try {
-      const { realm, authorization } = header;
+      const { realm, authorization, language } = header;
       const node = await this.neo4jService.findChildrensByChildIdAndFilters(
         [Neo4jLabelEnum.TYPES],
         { realm },
@@ -219,6 +219,17 @@ export class TypesRepository implements GeciciInterface<Type> {
       if (!node.length) {
         throw new HttpException(node_not_found(), 400);
       }
+
+      if (updateTypeDto.assetType) {
+        const assetTypesLabel = 'AssetTypes' + '_' + language;
+        const assetTypes = await this.neo4jService.findChildrensByLabelsAndFilters([assetTypesLabel], { realm }, [], {
+          name: updateTypeDto.assetType,
+        });
+        if (assetTypes.length === 0) {
+          throw new HttpException(invalid_classification(), 400);
+        }
+      }
+
       const typeUrl = `${process.env.TYPE_URL}/${node[0].get('children').properties.key}`;
 
       const finalObjectArray = avaiableUpdateVirtualPropsGetter(updateTypeDto);
@@ -259,6 +270,9 @@ export class TypesRepository implements GeciciInterface<Type> {
         if (error.response?.code == CustomAssetError.OTHER_MICROSERVICE_ERROR) {
           throw new HttpException({ message: error.response.message, status: error.status }, 400);
         }
+        if (error.response?.code == CustomAssetError.INVALID_CLASSIFICATION) {
+          throw new HttpException({ message: error.response.message }, error.status);
+        }
       } else {
         throw new HttpException(error, 500);
       }
@@ -270,6 +284,7 @@ export class TypesRepository implements GeciciInterface<Type> {
       const typeNode = await this.neo4jService.findByIdAndFilters(+_id, { isDeleted: false });
 
       let deletedNode;
+      let deletedVirtualNode;
 
       const hasChildrenArray = await this.neo4jService.findChildrensByIdAndFilters(
         +_id,
@@ -280,11 +295,23 @@ export class TypesRepository implements GeciciInterface<Type> {
       );
 
       if (hasChildrenArray.length === 0) {
-        deletedNode = await this.neo4jService.updateByIdAndFilter(+_id, {}, [], {
-          isDeleted: true,
-          isActive: false,
-          updatedAt: moment().format('YYYY-MM-DD HH:mm:ss'),
-        });
+        deletedNode = await this.neo4jService.updateByIdAndFilter(+_id, {}, [], { isDeleted: true, isActive: false });
+         
+        const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+          [Neo4jLabelEnum.TYPE],
+          {key: typeNode[0].get('n').properties.key },
+          ['Virtual'],
+          { isDeleted: false },
+          RelationName.CREATED_BY,
+        ); 
+        deletedVirtualNode = await this.neo4jService.updateByIdAndFilter(
+          +virtualNode[0].get('children').identity.low,
+          {},
+          [],
+          {"isDeleted": true}
+        ); 
+
+        
         await this.kafkaService.producerSendMessage(
           'deleteVirtualNodeRelations',
           JSON.stringify({ referenceKey: typeNode.properties.key }),
