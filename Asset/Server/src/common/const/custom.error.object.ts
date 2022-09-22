@@ -22,6 +22,13 @@ export function node_not_found() {
   };
 }
 
+export function invalid_classification() {
+  return {
+    message: 'some of classification ur entered is wrong',
+    code: CustomAssetError.INVALID_CLASSIFICATION,
+  };
+}
+
 export function other_microservice_errors(message) {
   return {
     message,

@@ -55,7 +55,7 @@ export const updateKafkaTopicArray = [
     manufacturer: 'updateContactRelation',
     kafkaTopic: 'updateContactRelation',
     relationNameForThisDatabase: RelationName.MANUFACTURED_BY,
-    relationNameForTargetDatabase: RelationName.WARRANTY_GUARANTOR_LABOR,
+    relationNameForTargetDatabase: RelationName.MANUFACTURED_BY,
     url: 'CONTACT_URL',
   },
   {
@@ -69,14 +69,14 @@ export const updateKafkaTopicArray = [
     warrantyGuarantorParts: 'updateContactRelation',
     kafkaTopic: 'updateContactRelation',
     relationNameForThisDatabase: RelationName.WARRANTY_GUARANTOR_PARTS,
-    relationNameForTargetDatabase: RelationName.WARRANTY_GUARANTOR_LABOR,
+    relationNameForTargetDatabase: RelationName.WARRANTY_GUARANTOR_PARTS,
     url: 'CONTACT_URL',
   },
   {
     space: 'updateStructureRelation',
     kafkaTopic: 'updateStructureRelation',
-    relationNameForThisDatabase: RelationName.HAS,
-    relationNameForTargetDatabase: RelationName.LOCATED_IN,
+    relationNameForThisDatabase: RelationName.LOCATED_IN,
+    relationNameForTargetDatabase: RelationName.HAS,
     url: 'STRUCTURE_URL',
   },
 ];

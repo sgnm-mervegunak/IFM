@@ -71,7 +71,7 @@ export class CreateComponentDto {
   barCode: string;
 
   @ApiProperty()
-  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
+  @IsOptional()
   @LengthWithI18nMessage(i18nValidationMessageEnum.LENGTH, 0, 13)
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
   assetIdentifier: string;
