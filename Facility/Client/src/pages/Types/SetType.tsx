@@ -86,7 +86,7 @@ const SetType = () => {
     TypesService.findAll()
       .then((res) => {
         console.log(res.data);
-        
+
         if (!res.data.root.children) {
           let temp = JSON.parse(
             JSON.stringify([res.data.root.properties] || [])
@@ -312,7 +312,9 @@ const SetType = () => {
                           aria-label={t("Add Item")}
                           onClick={() => {
                             setSelectedNodeKey(data.key);
-                            setSelectedNodeId(data._id.low);
+                            if (data.canDelete !== false) {
+                              setSelectedNodeId(data._id.low);
+                            }
                             setAddDia(true);
                           }}
                           title={t("Add Item")}
