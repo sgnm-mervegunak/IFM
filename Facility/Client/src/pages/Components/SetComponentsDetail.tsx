@@ -95,7 +95,7 @@ const SetTypes = () => {
   const nodeKey: any = params.id;
 
   const getComponents = () => {
-    ComponentService.findAll(nodeKey)
+    ComponentService.findAll()
       .then((res) => {
         console.log(res.data);
         
