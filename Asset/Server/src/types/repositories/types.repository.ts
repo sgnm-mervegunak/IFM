@@ -208,7 +208,7 @@ export class TypesRepository implements GeciciInterface<Type> {
 
   async update(_id: string, updateTypeDto: UpdateTypesDto, header) {
     try {
-      const { realm, authorization } = header;
+      const { realm, authorization, language } = header;
       const node = await this.neo4jService.findChildrensByChildIdAndFilters(
         [Neo4jLabelEnum.TYPES],
         { realm },
@@ -219,6 +219,17 @@ export class TypesRepository implements GeciciInterface<Type> {
       if (!node.length) {
         throw new HttpException(node_not_found(), 400);
       }
+
+      if (updateTypeDto.assetType) {
+        const assetTypesLabel = 'AssetTypes' + '_' + language;
+        const assetTypes = await this.neo4jService.findChildrensByLabelsAndFilters([assetTypesLabel], { realm }, [], {
+          name: updateTypeDto.assetType,
+        });
+        if (assetTypes.length === 0) {
+          throw new HttpException(invalid_classification(), 400);
+        }
+      }
+
       const typeUrl = `${process.env.TYPE_URL}/${node[0].get('children').properties.key}`;
 
       const finalObjectArray = avaiableUpdateVirtualPropsGetter(updateTypeDto);
