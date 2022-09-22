@@ -536,8 +536,7 @@ export class ClassificationRepository implements classificationInterface<Classif
   
       await workbook.xlsx.load(buffer).then(function async(book) {
         const firstSheet = book.getWorksheet(1);
-  
-        data = firstSheet.getColumn(1).values.filter((e) => e != null);
+        data = firstSheet?.getColumn(1).values.filter((e) => e != null);
       });
       let label = await data[0].replaceAll(' ', '_');
       let checkClassification = await this.neo4jService.findByLabelAndFilters([`${label}_${language}`],{realm})
@@ -623,6 +622,34 @@ export class ClassificationRepository implements classificationInterface<Classif
             parentcode = '00-00-00-00-00';
           } else {
             parentcode = parentcode + '-' + '00-00-00-00-00';
+          }
+        }
+        else if (z == 5) {
+          for (let i = 0; i < codearray.length - 6; i++) {
+            if (parentcode == '') {
+              parentcode = codearray[i];
+            } else {
+              parentcode = parentcode + '-' + codearray[i];
+            }
+          }
+          if (parentcode == '') {
+            parentcode = '00-00-00-00-00-00';
+          } else {
+            parentcode = parentcode + '-' + '00-00-00-00-00-00';
+          }
+        }
+        else if (z == 6) {
+          for (let i = 0; i < codearray.length - 7; i++) {
+            if (parentcode == '') {
+              parentcode = codearray[i];
+            } else {
+              parentcode = parentcode + '-' + codearray[i];
+            }
+          }
+          if (parentcode == '') {
+            parentcode = '00-00-00-00-00-00-00';
+          } else {
+            parentcode = parentcode + '-' + '00-00-00-00-00-00-00';
           }
         }
       }

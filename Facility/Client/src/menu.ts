@@ -41,7 +41,7 @@ export default [
           {
             label: "System",
             icon: "pi pi-fw pi-angle-right",
-            to: "/asset-system",
+            to: "/asset-systems",
           },
         ],
       },
