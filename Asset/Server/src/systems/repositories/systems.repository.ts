@@ -39,28 +39,66 @@ export class SystemsRepository implements SystemsInterface<System> {
     }
   }
 
+  // async findRootByRealm(header) {
+  //   try {
+  //     const { realm } = header;
+  //     const node = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+  //       [Neo4jLabelEnum.SYSTEMS],
+  //       {
+  //         realm,
+  //         isDeleted: false,
+  //         isActive: true,
+  //       },
+  //       [Neo4jLabelEnum.SYSTEM],
+  //       { isDeleted: false },
+  //       'PARENT_OF',
+  //     );
+  //     if (!node.length) {
+  //       throw new HttpException(node_not_found(), 400);
+  //     }
+  //     const systemArray = node.map((element) => {
+  //       element.get('children').properties['id'] = element.get('children').identity.low;
+  //       return element.get('children').properties;
+  //     });
+  //     return systemArray;
+  //   } catch (error) {
+  //     const code = error.response?.code;
+
+  //     if (code >= 1000 && code <= 1999) {
+  //     } else if (code >= 5000 && code <= 5999) {
+  //       if (error.response?.code == CustomNeo4jError.ADD_CHILDREN_RELATION_BY_ID_ERROR) {
+  //       }
+  //     } else if (code >= 9500 && code <= 9750) {
+  //       if (error.response?.code == CustomAssetError.NODE_NOT_FOUND) {
+  //         NodeNotFound();
+  //       }
+  //     } else {
+  //       throw new HttpException(error, 500);
+  //     }
+  //   }
+  // }
   async findRootByRealm(header) {
+
     try {
-      const { realm } = header;
-      const node = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+      let { realm } = header;
+      realm = 'IFM'  // test için kaldırılacaaaakkkk
+   
+      let node =  await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructure(
         [Neo4jLabelEnum.SYSTEMS],
-        {
-          realm,
-          isDeleted: false,
-          isActive: true,
-        },
-        [Neo4jLabelEnum.SYSTEM],
-        { isDeleted: false },
-        'PARENT_OF',
-      );
-      if (!node.length) {
+        [],
+        {"isDeleted": false, realm},
+        [],
+        ['Virtual'],
+        {"isDeleted": false},
+      ) 
+     
+      if (!node) {
         throw new HttpException(node_not_found(), 400);
       }
-      const systemArray = node.map((element) => {
-        element.get('children').properties['id'] = element.get('children').identity.low;
-        return element.get('children').properties;
-      });
-      return systemArray;
+      
+
+      node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
+      return node;
     } catch (error) {
       const code = error.response?.code;
 
@@ -303,6 +341,7 @@ export class SystemsRepository implements SystemsInterface<System> {
 
   async delete(_id: string, header) {
     try {
+      const {realm} = header;
       //const node = await this.neo4jService.read(`match(n) where id(n)=$id return n`, { id: parseInt(_id) });
       const node = await this.neo4jService.findByIdAndFilters(
         +_id,
@@ -312,7 +351,14 @@ export class SystemsRepository implements SystemsInterface<System> {
       // if (!node.records[0]) {
       //   throw new HttpException({ code: 5005 }, 404);
       // }
-      await this.neo4jService.getParentById(_id);
+     
+      //await this.neo4jService.getParentById(_id);
+      const parentNode = await this.neo4jService.findChildrensByChildIdAndFilters([Neo4jLabelEnum.SYSTEMS], { realm },
+        +_id, { isDeleted: false, isActive: true }, RelationName.PARENT_OF);
+      if (!parentNode || parentNode.length == 0) {
+         // hata fırlatılacak (??)
+      }
+
       let deletedNode;
 
       // const hasChildren = await this.neo4jService.findChildrenById(_id);
@@ -325,12 +371,31 @@ export class SystemsRepository implements SystemsInterface<System> {
       )
 
       if (hasChildren['length'] == 0) {
-        deletedNode = await this.neo4jService.delete(_id);
+        // deletedNode = await this.neo4jService.delete(_id);
+        deletedNode = await this.neo4jService.updateByIdAndFilter(
+          +_id,
+          {"isDeleted": false},
+          [],
+          {"isDeleted": true}
+        )
+
         if (!deletedNode) {
           throw new AssetNotFoundException(_id);
         }
       }
+      else {
+          // hata fırlatılacak (??) (Component(ler) içeriyor 400)
+      }
       
+      const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        [Neo4jLabelEnum.SYSTEM],
+        {key: node[0].get('n').properties.key },
+        ['Virtual'],
+        { isDeleted: false },
+        RelationName.CREATED_BY,
+      );
+
+
       return deletedNode;
     } catch (error) {
       const { code, message } = error.response;
