@@ -83,15 +83,27 @@ export class TypesRepository implements GeciciInterface<Type> {
   async findRootByRealm(header) {
     try {
       const { realm } = header;
-      let node = await this.neo4jService.findChildrensByLabelsAsTree(
+      // let node = await this.neo4jService.findChildrensByLabelsAsTree(
+      //   [Neo4jLabelEnum.TYPES],
+      //   {
+      //     realm,
+      //     isDeleted: false
+      //   },
+      //   [Neo4jLabelEnum.TYPE],
+      //   { isDeleted: false },
+      // );
+
+      let node = await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructure(
         [Neo4jLabelEnum.TYPES],
-        {
-          realm,
-          isDeleted: false
-        },
-        [Neo4jLabelEnum.TYPE],
-        { isDeleted: false },
-      );
+        [],
+        {"isDeleted": false, realm},
+        [],
+        ['Virtual'],
+        {"isDeleted": false},
+      )  
+
+
+
       // const node = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
       //   [Neo4jLabelEnum.TYPES],
       //   {
