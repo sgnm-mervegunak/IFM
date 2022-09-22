@@ -87,8 +87,7 @@ export class TypesRepository implements GeciciInterface<Type> {
         [Neo4jLabelEnum.TYPES],
         {
           realm,
-          isDeleted: false,
-          isActive: true,
+          isDeleted: false
         },
         [Neo4jLabelEnum.TYPE],
         { isDeleted: false },
