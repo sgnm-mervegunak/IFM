@@ -246,6 +246,12 @@ export class ClassificationRepository implements classificationInterface<Classif
     try {
       const new_parent = await this.neo4jService.findByIdAndFilters(+target_parent_id, { isDeleted: false }, []);
       const node = await this.neo4jService.findByIdAndFilters(+_id, { isDeleted: false }, []);
+      if (new_parent['labels'] && new_parent['labels'].includes('Classification')) {
+        throw new HttpException(
+          wrong_parent_error({ node1: node['properties'].name, node2: new_parent['properties'].name }),
+          400,
+        );
+    }
       const nodeChilds = await this.neo4jService.findChildrensByIdAndFilters(
         +_id,
         { isDeleted: false },
