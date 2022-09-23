@@ -33,14 +33,20 @@ const AppTopbar = (props) => {
     //   localStorage.setItem("i18nextLng", "EN");
     // }
     if (localStorage.getItem("i18nextLng")?.length > 2) {
-      i18next.changeLanguage("EN");
+      i18next.changeLanguage("en");
     } else {
       // localStorage.setItem("i18nextLng","EN");
       onLanguageChange({ value: localStorage.getItem("i18nextLng") });
     }
   }, []);
 
-  const languages = ["EN", "TR", "AR"];
+  // const languages = ["EN", "TR", "AR"];
+
+  const languages = [
+    { name: "EN", code: "en" },
+    { name: "TR", code: "tr" },
+    { name: "AR", code: "ar" },
+  ];
 
   const onLanguageChange = (e) => {
     i18n.changeLanguage(e.value);
@@ -125,6 +131,8 @@ const AppTopbar = (props) => {
                 <Dropdown
                   value={localStorage.getItem("i18nextLng")}
                   options={languages}
+                  optionValue="code"
+                  optionLabel="name"
                   onChange={onLanguageChange}
                   dropdownIcon="pi pi-globe"
                 >
@@ -269,7 +277,6 @@ const AppTopbar = (props) => {
                   <i className="pi pi-align-right"></i>
                 </button>
               </li> */}
-
             </>
           ) : (
             <li className="right-sidebar-item">

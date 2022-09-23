@@ -292,7 +292,9 @@ const SetComponent = () => {
           }
           onContextMenu={(event: any) => {
             setCanDelete(event.node.canDelete); // for use import building control on context menu
-            setSelectedNodeId(event.node._id.low);
+            if (canDelete !== false) {
+              setSelectedNodeId(event.node._id.low);
+            }
             setNodeType(event.node.className);
             console.log(event.node);
             
