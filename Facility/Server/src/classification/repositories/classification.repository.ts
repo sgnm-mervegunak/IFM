@@ -539,6 +539,14 @@ export class ClassificationRepository implements classificationInterface<Classif
         const firstSheet = book.getWorksheet(1);
         data = firstSheet?.getColumn(1).values.filter((e) => e != null);
       });
+
+      for (let i = 1; i < data.length; i++) {
+        if(!data[i].match(/[0-9a-zA-Z#]{1,}(: )[a-zA-Z\s]{1,}\w+/)){
+          throw new classification_import_error();
+        }
+        
+      }
+     
       let label = await data[0].replaceAll(' ', '_');
       let checkClassification = await this.neo4jService.findByLabelAndFilters([`${label}_${language}`],{realm})
   if(checkClassification.length==0){
