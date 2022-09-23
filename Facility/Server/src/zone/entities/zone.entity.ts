@@ -4,35 +4,35 @@ import { BaseGraphObject } from 'src/common/baseobject/base.graph.object';
 export class Zone extends BaseGraphObject {
   className: string = Zone.name;
 
-  name: string;
+  // name: string;
 
-  category: string;
+  // category: string;
 
-  spaceNames: string[];
+  // spaceNames: string[];
 
-  code: string;
+  // code: string;
 
-  description: string;
+  // description: string;
 
-  tag: string[];
+  // tag: string[];
 
   createdOn: string = moment().format('YYYY-MM-DD HH:mm:ss');
 
-  createdBy: string;
+  // createdBy: string;
 
-  externalSystem: string;
+  // externalSystem: string;
 
-  externalObject: string;
+  // externalObject: string;
 
-  externalIdentifier: string;
+  // externalIdentifier: string;
 
-  nodeKeys: [];
+  // nodeKeys: [];
 
   nodeType: string = Zone.name;
 
-  canDisplay = false;
+  // canDisplay = false;
 
-  images: string;
+  // images: string;
 
-  documents: string;
+  // documents: string;
 }

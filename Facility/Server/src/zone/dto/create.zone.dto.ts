@@ -21,12 +21,12 @@ export class CreateZoneDto {
   spaceNames: string;
 
   @ApiProperty()
-  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
+  @IsOptional()
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
   code: string;
 
   @ApiProperty()
-  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
+  @IsOptional()
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
   description: string;
 
@@ -52,7 +52,7 @@ export class CreateZoneDto {
 
   @ApiProperty()
   @IsOptional()
-  tag?: string[];
+  tag: string[];
 
   @ApiProperty()
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
