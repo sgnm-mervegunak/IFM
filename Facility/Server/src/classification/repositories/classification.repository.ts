@@ -539,7 +539,6 @@ export class ClassificationRepository implements classificationInterface<Classif
         const firstSheet = book.getWorksheet(1);
         data = firstSheet?.getColumn(1).values.filter((e) => e != null);
       });
-      console.log(data)
       for (let i = 1; i < data.length; i++) {
         if(!data[i].match(/[0-9a-zA-Z#-]{1,}(: )[a-zA-Z\s\(\)İĞÜŞÖÇığüşöç]{1,}(: [a-zA-Z\s\(\)İĞÜŞÖÇığüşöç]{1,})?/)){
           throw new classification_import_error();
