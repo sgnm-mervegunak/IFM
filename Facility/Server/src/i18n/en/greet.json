@@ -33,7 +33,9 @@
   "FIND_WITH_CHILDREN_BY_REALM_AS_TREE_ERROR": "In {realm}, tree of {label} not found.",
   "NULL_VALUE": "{val} can not be null..",
   "NOT_UNIQUE":"{val} already exist.",
-  "CONTACT_HAS_CHILDREN_ERROR": "{email} can not be deleted, because it is creator of else users."
+  "CONTACT_HAS_CHILDREN_ERROR": "{email} can not be deleted, because it is creator of else users.",
+  "CLASSIFICATION_ALREADY_EXIST":"This Classification already exists.",
+  "CLASSIFICATION_IMPORT_ERROR":"This file has not the correct import format."
 
 }
 

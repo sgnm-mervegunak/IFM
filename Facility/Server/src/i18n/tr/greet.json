@@ -32,6 +32,8 @@
   "FIND_WITH_CHILDREN_BY_REALM_AS_TREE_ERROR": "{realm} de {label} ağacı bulunamadı",
   "NULL_VALUE": "{val} boş geçilemez..",
   "NOT_UNIQUE":"{val} zaten mevcut.",
-  "CONTACT_HAS_CHILDREN_ERROR": "{email} başka kullanıcıların yaratıcısı olduğundan silinemez"
+  "CONTACT_HAS_CHILDREN_ERROR": "{email} başka kullanıcıların yaratıcısı olduğundan silinemez",
+  "CLASSIFICATION_ALREADY_EXIST":"Bu Classification zaten mevcut.",
+  "CLASSIFICATION_IMPORT_ERROR": "Bu dosya doğru import formatına sahip değil."
 
 }

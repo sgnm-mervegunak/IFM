@@ -252,17 +252,17 @@ export class InfraRepository implements InfraInterface {
       const realmName = 'Signum';
 
       let checkClassification1 = await this.neo4jService.findByLabelAndFilters([`DurationUnits_${language}`], {
-        realm: 'Signum',
+        realm: realmName,
       });
       let checkClassification2 = await this.neo4jService.findByLabelAndFilters([`AssetTypes_${language}`], {
-        realm: 'Signum',
+        realm: realmName,
       });
       let checkClassification3 = await this.neo4jService.findByLabelAndFilters([`OmniClass23_${language}`], {
-        realm: 'Signum',
+        realm: realmName,
       });
 
       let checkClassification4 = await this.neo4jService.findByLabelAndFilters([`OmniClass21_${language}`], {
-        realm: 'Signum',
+        realm: realmName,
       });
       //console.log(checkClassification1.length==0 && checkClassification2.length==0 && checkClassification3.length==0);
 
