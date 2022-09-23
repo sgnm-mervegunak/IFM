@@ -630,16 +630,19 @@ export class ClassificationRepository implements classificationInterface<Classif
       }
      
       let label = await columnName.replaceAll(' ', '_');
-      let checkClassification = await this.neo4jService.findByLabelAndFilters([`${label}_${language}`],{realm})
-  if(checkClassification.length==0){
-    let deneme = [];
 
-      data.map((value)=>{
-        const [first,...rest] = value.split(new RegExp(/:\s{1}/g));
-        let arr= [first,rest.join(": ")]
+      let checkClassification = await this.neo4jService.findByLabelAndFilters([`${label}_${language}`],{realm});
+
+    if(checkClassification.length==0){
+        let deneme = [];
+    
+      for (let i = 0; i < data.length; i++) {
+
+        const [first,...rest] = data[i].split(new RegExp(/:\s{1}/g));
+        let arr= [first,rest.join(": ")];
 
         deneme.push(arr);
-      })
+      }
    
     for (let i = 0; i < deneme.length; i++) {
       deneme[i][0] = deneme[i][0].replace(/ /g, '-');
