@@ -38,6 +38,7 @@ import { WrongClassificationParentExceptions } from 'src/common/badRequestExcept
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
 import { has_children_error, wrong_parent_error } from 'src/common/const/custom.error.object';
 import { RelationName } from 'src/common/const/relation.name.enum';
+import { classification_already_exist, classification_import_error } from 'src/common/const/custom.classification.error';
 
 const exceljs = require('exceljs');
 const { v4: uuidv4 } = require('uuid');
@@ -735,12 +736,18 @@ export class ClassificationRepository implements classificationInterface<Classif
         RelationDirection.RIGHT,
       );
     }
-  }else {
-    throw new HttpException("Bu classification bulunuyor",400)
+  }else  {
+    throw new classification_already_exist()
   }
      
     } catch (error) {
-      throw new HttpException({message:error.message,code:error.status},error.status)
+      if(error?.response?.code ===10001){
+        throw new classification_already_exist()
+        
+      }
+      else {
+        throw new classification_import_error();
+      }
     }
    
   }
