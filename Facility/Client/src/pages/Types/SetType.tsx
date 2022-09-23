@@ -290,8 +290,12 @@ const SetType = () => {
             setSelectedNodeKey(event.value)
           }
           onContextMenu={(event: any) => {
+            console.log(event.node);
             setCanDelete(event.node.canDelete); // for use import building control on context menu
-            setSelectedNodeId(event.node._id.low);
+            if (canDelete !== false) {
+              setSelectedNodeId(event.node._id.low);
+            }
+
             cm.current.show(event.originalEvent);
           }}
           filter
