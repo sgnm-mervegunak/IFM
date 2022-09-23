@@ -242,7 +242,7 @@ const TypeForm = ({
         tag: data?.tag,
         description: data?.description,
         category: codeCategory, //Düzeltilecek
-        assetType: codeAssetType, //Düzeltilecek
+        assetType:"Fixed",   //codeAssetType, //Düzeltilecek
         manufacturer: data?.manufacturer,
         modelNo: data?.modelNo,
         warrantyGuarantorParts: data?.warrantyGuarantorParts,
@@ -339,7 +339,7 @@ const TypeForm = ({
         tag: data?.tag,
         description: data?.description,
         category: codeCategory, //Düzeltilecek
-        assetType: codeAssetType, //Düzeltilecek
+        assetType: "Fixed",  //codeAssetType, //Düzeltilecek
         manufacturer: data?.manufacturer,
         modelNo: data?.modelNo,
         warrantyGuarantorParts: data?.warrantyGuarantorParts,
