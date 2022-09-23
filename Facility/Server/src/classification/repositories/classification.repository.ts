@@ -113,7 +113,71 @@ export class ClassificationRepository implements classificationInterface<Classif
 
     return result;
   }
+  /////////////////////////////////////////////
+  async updateByIdAndFilter(
+    id: number,
+    filter_properties: object = {},
+    update_labels: Array<string> = [],
+    update_properties: object = {}
+    // ,
+    // databaseOrTransaction?: string | Transaction
+  ) {
+    try {
+      const updateLabelsWithoutEmptyString =
+        filterArrayForEmptyString(update_labels);
+      const isNodeExist = await this.neo4jService.findByIdAndFilters(id, filter_properties);
 
+      if (!isNodeExist) {
+        throw new HttpException(node_not_found, 404);
+      }
+      let query =
+        "match (n) " +
+        ` where id(n)=${id} set ` +
+        dynamicUpdatePropertyAdder("n", update_properties);
+
+      if (
+        updateLabelsWithoutEmptyString &&
+        updateLabelsWithoutEmptyString.length > 0
+      ) {
+        if (!update_properties || Object.keys(update_properties).length === 0) {
+          query =
+            query +
+            "  n" +
+            dynamicLabelAdder(updateLabelsWithoutEmptyString) +
+            " return n";
+        } else {
+          query =
+            query +
+            ", n" +
+            dynamicLabelAdder(updateLabelsWithoutEmptyString) +
+            " return n";
+        }
+      } else {
+        query = query + " return n";
+      }
+      update_properties["id"] = id;
+      const parameters = update_properties;
+      const node = await this.neo4jService.write(query, parameters); //, databaseOrTransaction);
+      if (node.records.length === 0) {
+        return null;
+      } else {
+        return node.records[0]["_fields"][0];
+      }
+    } catch (error) {
+      if (error.response?.code) {
+        throw new HttpException(
+          { message: error.response?.message, code: error.response?.code },
+          error.status
+        );
+      } else {
+        throw new HttpException(
+          library_server_error,
+          HttpStatus.INTERNAL_SERVER_ERROR
+        );
+      }
+    }
+  }
+  /////////////////////////////////////////////
   //REVISED FOR NEW NEO4J
   async update(_id: string, updateClassificationto: UpdateClassificationDto, realm: string, language: string) {
     const updateClassificationDtoWithoutLabelsAndParentId = {};
@@ -123,11 +187,23 @@ export class ClassificationRepository implements classificationInterface<Classif
         updateClassificationDtoWithoutLabelsAndParentId[element] = updateClassificationto[element];
       }
     });
-
-    const updatedNode = await this.neo4jService.updateByIdAndFilter(
+      // eğer label lar güncellenecekse
+      
+    // let labelsWithoutSpace = [];
+    // updateClassificationto.labels.forEach((label)=> {
+    //    let lbs = label.split(' ');
+    //    let finalLabel = "";
+    //    lbs.forEach((lb)=> {
+    //       finalLabel = finalLabel + lb; 
+    //    });
+    //    labelsWithoutSpace.push(finalLabel);
+    // });
+    // updateClassificationto.labels = labelsWithoutSpace;
+    const updatedNode = await this.updateByIdAndFilter(
       Number(_id),
       { isDeleted: false },
-      updateClassificationto.labels,
+      //updateClassificationto.labels,
+      [],
       updateClassificationDtoWithoutLabelsAndParentId,
     );
     const result = {
@@ -170,6 +246,12 @@ export class ClassificationRepository implements classificationInterface<Classif
     try {
       const new_parent = await this.neo4jService.findByIdAndFilters(+target_parent_id, { isDeleted: false }, []);
       const node = await this.neo4jService.findByIdAndFilters(+_id, { isDeleted: false }, []);
+      if (new_parent['labels'] && new_parent['labels'].includes('Classification')) {
+        throw new HttpException(
+          wrong_parent_error({ node1: node['properties'].name, node2: new_parent['properties'].name }),
+          400,
+        );
+    }
       const nodeChilds = await this.neo4jService.findChildrensByIdAndFilters(
         +_id,
         { isDeleted: false },
