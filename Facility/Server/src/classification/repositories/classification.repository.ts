@@ -559,194 +559,194 @@ export class ClassificationRepository implements classificationInterface<Classif
         deneme.push(arr);
       })
    
-    // for (let i = 0; i < deneme.length; i++) {
-    //   deneme[i][0] = deneme[i][0].replace(/ /g, '-');
-    // }
-    // let collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+    for (let i = 0; i < deneme.length; i++) {
+      deneme[i][0] = deneme[i][0].replace(/ /g, '-');
+    }
+    let collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
 
-    // deneme.sort(collator.compare[0]);
-    // let newClassification = [];
-    // let codearray = [];
-    // function uuidReturn() {
-    //   return uuidv4();
-    // }
-    // for (let q = 0; q < deneme.length; q++) {
-    //   let parentcode = '';
-    //   var z = 0;
-    //   codearray = await deneme[q][0].split('-');
-    //   for (let j = 0; j < codearray.length; j++) {
-    //     if (codearray[j] == '00') {
-    //       z = z + 1;
-    //     }
-    //   }
-    //   if (z == 0) {
-    //     for (let i = 0; i < codearray.length - 1; i++) {
-    //       if (parentcode == '') {
-    //         parentcode = codearray[i];
-    //       } else {
-    //         parentcode = parentcode + '-' + codearray[i];
-    //       }
-    //     }
-    //     if (codearray.length == 4) {
-    //       parentcode = parentcode + '-' + '00';
-    //     }
-    //   } else {
-    //     if (z == 1) {
-    //       for (let i = 0; i < codearray.length - 2; i++) {
-    //         if (parentcode == '') {
-    //           parentcode = codearray[i];
-    //         } else {
-    //           parentcode = parentcode + '-' + codearray[i];
-    //         }
-    //       }
-    //       parentcode = parentcode + '-' + '00-00';
-    //     } else if (z == 2) {
-    //       for (let i = 0; i < codearray.length - 3; i++) {
-    //         if (parentcode == '') {
-    //           parentcode = codearray[i];
-    //         } else {
-    //           parentcode = parentcode + '-' + codearray[i];
-    //         }
-    //       }
-    //       parentcode = parentcode + '-' + '00-00-00';
-    //     } else if (z == 3) {
-    //       for (let i = 0; i < codearray.length - 4; i++) {
-    //         if (parentcode == '') {
-    //           parentcode = codearray[i];
-    //         } else {
-    //           parentcode = parentcode + '-' + codearray[i];
-    //         }
-    //       }
-    //       if (parentcode == '') {
-    //         parentcode = '00-00-00-00';
-    //       } else {
-    //         parentcode = parentcode + '-' + '00-00-00-00';
-    //       }
-    //     } else if (z == 4) {
-    //       for (let i = 0; i < codearray.length - 5; i++) {
-    //         if (parentcode == '') {
-    //           parentcode = codearray[i];
-    //         } else {
-    //           parentcode = parentcode + '-' + codearray[i];
-    //         }
-    //       }
-    //       if (parentcode == '') {
-    //         parentcode = '00-00-00-00-00';
-    //       } else {
-    //         parentcode = parentcode + '-' + '00-00-00-00-00';
-    //       }
-    //     }
-    //     else if (z == 5) {
-    //       for (let i = 0; i < codearray.length - 6; i++) {
-    //         if (parentcode == '') {
-    //           parentcode = codearray[i];
-    //         } else {
-    //           parentcode = parentcode + '-' + codearray[i];
-    //         }
-    //       }
-    //       if (parentcode == '') {
-    //         parentcode = '00-00-00-00-00-00';
-    //       } else {
-    //         parentcode = parentcode + '-' + '00-00-00-00-00-00';
-    //       }
-    //     }
-    //     else if (z == 6) {
-    //       for (let i = 0; i < codearray.length - 7; i++) {
-    //         if (parentcode == '') {
-    //           parentcode = codearray[i];
-    //         } else {
-    //           parentcode = parentcode + '-' + codearray[i];
-    //         }
-    //       }
-    //       if (parentcode == '') {
-    //         parentcode = '00-00-00-00-00-00-00';
-    //       } else {
-    //         parentcode = parentcode + '-' + '00-00-00-00-00-00-00';
-    //       }
-    //     }
-    //   }
-    //   var codestr = '';
-    //   for (let t = 0; t < codearray.length; t++) {
-    //     if (codestr == '') {
-    //       codestr = codearray[t];
-    //     } else {
-    //       codestr = codestr + '-' + codearray[t];
-    //     }
-    //   }
-    //   let dto = {
-    //     code: codestr,
-    //     parentCode: parentcode.length < codestr.length ? parentcode + '-00' : parentcode,
-    //     name: deneme[q][1],
-    //     key: uuidReturn(),
-    //     isDeleted: false,
-    //     isActive: true,
-    //     canDelete: true,
-    //     canDisplay: true,
-    //   };
-    //   newClassification.push(dto);
-    // }
-    /////// the process start here
+    deneme.sort(collator.compare[0]);
+    let newClassification = [];
+    let codearray = [];
+    function uuidReturn() {
+      return uuidv4();
+    }
+    for (let q = 0; q < deneme.length; q++) {
+      let parentcode = '';
+      var z = 0;
+      codearray = await deneme[q][0].split('-');
+      for (let j = 0; j < codearray.length; j++) {
+        if (codearray[j] == '00') {
+          z = z + 1;
+        }
+      }
+      if (z == 0) {
+        for (let i = 0; i < codearray.length - 1; i++) {
+          if (parentcode == '') {
+            parentcode = codearray[i];
+          } else {
+            parentcode = parentcode + '-' + codearray[i];
+          }
+        }
+        if (codearray.length == 4) {
+          parentcode = parentcode + '-' + '00';
+        }
+      } else {
+        if (z == 1) {
+          for (let i = 0; i < codearray.length - 2; i++) {
+            if (parentcode == '') {
+              parentcode = codearray[i];
+            } else {
+              parentcode = parentcode + '-' + codearray[i];
+            }
+          }
+          parentcode = parentcode + '-' + '00-00';
+        } else if (z == 2) {
+          for (let i = 0; i < codearray.length - 3; i++) {
+            if (parentcode == '') {
+              parentcode = codearray[i];
+            } else {
+              parentcode = parentcode + '-' + codearray[i];
+            }
+          }
+          parentcode = parentcode + '-' + '00-00-00';
+        } else if (z == 3) {
+          for (let i = 0; i < codearray.length - 4; i++) {
+            if (parentcode == '') {
+              parentcode = codearray[i];
+            } else {
+              parentcode = parentcode + '-' + codearray[i];
+            }
+          }
+          if (parentcode == '') {
+            parentcode = '00-00-00-00';
+          } else {
+            parentcode = parentcode + '-' + '00-00-00-00';
+          }
+        } else if (z == 4) {
+          for (let i = 0; i < codearray.length - 5; i++) {
+            if (parentcode == '') {
+              parentcode = codearray[i];
+            } else {
+              parentcode = parentcode + '-' + codearray[i];
+            }
+          }
+          if (parentcode == '') {
+            parentcode = '00-00-00-00-00';
+          } else {
+            parentcode = parentcode + '-' + '00-00-00-00-00';
+          }
+        }
+        else if (z == 5) {
+          for (let i = 0; i < codearray.length - 6; i++) {
+            if (parentcode == '') {
+              parentcode = codearray[i];
+            } else {
+              parentcode = parentcode + '-' + codearray[i];
+            }
+          }
+          if (parentcode == '') {
+            parentcode = '00-00-00-00-00-00';
+          } else {
+            parentcode = parentcode + '-' + '00-00-00-00-00-00';
+          }
+        }
+        else if (z == 6) {
+          for (let i = 0; i < codearray.length - 7; i++) {
+            if (parentcode == '') {
+              parentcode = codearray[i];
+            } else {
+              parentcode = parentcode + '-' + codearray[i];
+            }
+          }
+          if (parentcode == '') {
+            parentcode = '00-00-00-00-00-00-00';
+          } else {
+            parentcode = parentcode + '-' + '00-00-00-00-00-00-00';
+          }
+        }
+      }
+      var codestr = '';
+      for (let t = 0; t < codearray.length; t++) {
+        if (codestr == '') {
+          codestr = codearray[t];
+        } else {
+          codestr = codestr + '-' + codearray[t];
+        }
+      }
+      let dto = {
+        code: codestr,
+        parentCode: parentcode.length < codestr.length ? parentcode + '-00' : parentcode,
+        name: deneme[q][1],
+        key: uuidReturn(),
+        isDeleted: false,
+        isActive: true,
+        canDelete: true,
+        canDisplay: true,
+      };
+      newClassification.push(dto);
+    }
+    ///// the process start here
     function uuidReturn3() {
       return uuidv4();
     }
 
-    // let params = {
-    //   code: newClassification[0].parentCode,
-    //   name: columnName,
-    //   isDeleted: false,
-    //   canCopied: true,
-    //   canDelete: false,
-    //   realm: realm,
-    //   isRoot: true,
-    //   canDisplay: true,
-    //   key: uuidReturn3(),
-    //   isActive: true,
-    //   language: language,
-    // };
-    // let lbls = [label + '_' + language];
-    // let node = await this.neo4jService.createNode(params, lbls);
-    // let parent = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-    //   ['Root'],
-    //   { isDeleted: false, realm: realm },
-    //   ['Classification'],
-    //   { isDeleted: false, realm: realm },
-    //   'PARENT_OF',
-    //   RelationDirection.RIGHT,
-    // );
-    // await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
-    //   parent[0]['_fields'][1]['identity'].low,
-    //   node['identity'].low,
-    //   'PARENT_OF',
-    //   RelationDirection.RIGHT,
-    // );
-    // for (let i = 0; i < newClassification.length; i++) {
-    //   let params = {
-    //     code: newClassification[i].code,
-    //     parentCode: newClassification[i].parentCode,
-    //     name: newClassification[i].name,
-    //     isDeleted: newClassification[i].isDeleted,
-    //     isActive: newClassification[i].isActive,
-    //     canDelete: newClassification[i].canDelete,
-    //     key: uuidReturn3(),
-    //     canDisplay: newClassification[i].canDisplay,
-    //     language: language,
-    //   };
+    let params = {
+      code: newClassification[0].parentCode,
+      name: columnName,
+      isDeleted: false,
+      canCopied: true,
+      canDelete: false,
+      realm: realm,
+      isRoot: true,
+      canDisplay: true,
+      key: uuidReturn3(),
+      isActive: true,
+      language: language,
+    };
+    let lbls = [label + '_' + language];
+    let node = await this.neo4jService.createNode(params, lbls);
+    let parent = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+      ['Root'],
+      { isDeleted: false, realm: realm },
+      ['Classification'],
+      { isDeleted: false, realm: realm },
+      'PARENT_OF',
+      RelationDirection.RIGHT,
+    );
+    await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
+      parent[0]['_fields'][1]['identity'].low,
+      node['identity'].low,
+      'PARENT_OF',
+      RelationDirection.RIGHT,
+    );
+    for (let i = 0; i < newClassification.length; i++) {
+      let params = {
+        code: newClassification[i].code,
+        parentCode: newClassification[i].parentCode,
+        name: newClassification[i].name,
+        isDeleted: newClassification[i].isDeleted,
+        isActive: newClassification[i].isActive,
+        canDelete: newClassification[i].canDelete,
+        key: uuidReturn3(),
+        canDisplay: newClassification[i].canDisplay,
+        language: language,
+      };
 
-    //   let labels = [label];
-    //   let node = await this.neo4jService.createNode(params, labels);
-    //   let parent = await this.neo4jService.findByLabelAndFilters(
-    //     [],
-    //     { isDeleted: false, code: newClassification[i].parentCode, language: language },
-    //     [],
-    //   );
+      let labels = [label];
+      let node = await this.neo4jService.createNode(params, labels);
+      let parent = await this.neo4jService.findByLabelAndFilters(
+        [],
+        { isDeleted: false, code: newClassification[i].parentCode, language: language },
+        [],
+      );
 
-    //   await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
-    //     parent[0]['_fields'][0]['identity'].low,
-    //     node['identity'].low,
-    //     'PARENT_OF',
-    //     RelationDirection.RIGHT,
-    //   );
-    // }
+      await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
+        parent[0]['_fields'][0]['identity'].low,
+        node['identity'].low,
+        'PARENT_OF',
+        RelationDirection.RIGHT,
+      );
+    }
   }else  {
     throw new classification_already_exist()
   }
