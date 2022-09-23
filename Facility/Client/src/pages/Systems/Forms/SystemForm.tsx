@@ -84,27 +84,6 @@ const SystemForm = ({
 
   const schema = yup.object({
     name: yup.string().max(50, t("This area accepts max 50 characters.")),
-    description: yup.string().required(t("This area is required.")).max(256, t("This area accepts max 256 characters.")),
-    space: yup.string().required(t("This area is required.")),
-    serialNo: yup.string().max(256, t("This area accepts max 256 characters.")),
-    tagNumber: yup.string().max(256, t("This area accepts max 256 characters.")),
-    barCode: yup.string().max(13, t("This area accepts max 13 characters.")),
-    assetIdentifier: yup.string().max(50, t("This area accepts max 50 characters.")),
-    warrantyGuarantorParts: yup.string().required(t("This area is required.")),
-    warrantyDurationParts: yup.number()
-      .required(t("This area is required."))
-      .min(0, t("This area accepts min 0"))
-      .max(20, t("This area accepts max 20"))
-      .nullable()
-      .transform((_, val) => (val !== "" ? Number(val) : null)),
-    warrantyGuarantorLabor: yup.string().required(t("This area is required.")),
-    warrantyDurationLabor: yup.number()
-      .required(t("This area is required."))
-      .min(0, t("This area accepts min 0"))
-      .max(20, t("This area accepts max 20"))
-      .nullable()
-      .transform((_, val) => (val !== "" ? Number(val) : null)),
-    warrantyDurationUnit: yup.string().required(t("This area is required.")),
     createdBy: yup.string().required(t("This area is required.")),
   });
 
@@ -238,25 +217,12 @@ const SystemForm = ({
 
       newNode = {
         name: data?.name,
-        spaceType: spaceType,
-        space: data?.space,
+        category: codeCategory,
         tag: data?.tag,
         description: data?.description,
         createdBy: data?.createdBy,
-        serialNo: data?.serialNo,
-        installationDate: data?.installationDate,
-        warrantyStartDate: data?.warrantyStartDate,
-        tagNumber: data?.tagNumber,
-        barCode: data?.barCode,
-        assetIdentifier: data?.assetIdentifier,
-        warrantyGuarantorParts: data?.warrantyGuarantorParts,
-        warrantyDurationParts: data?.warrantyDurationParts,
-        warrantyGuarantorLabor: data?.warrantyGuarantorLabor,
-        warrantyDurationLabor: data?.warrantyDurationLabor,
-        warrantyDurationUnit: data?.warrantyDurationUnit,
         images: data?.images || "",
         documents: data?.documents || "",
-        parentKey: selectedNodeKey,
       };
       console.log(newNode);
 
@@ -327,25 +293,12 @@ const SystemForm = ({
       let updateNode: any = {};
       updateNode = {
         name: data?.name,
-        spaceType: spaceType,
-        space: data?.space,
+        category: codeCategory,
         tag: data?.tag,
         description: data?.description,
         createdBy: data?.createdBy,
-        serialNo: data?.serialNo,
-        installationDate: data?.installationDate,
-        warrantyStartDate: data?.warrantyStartDate,
-        tagNumber: data?.tagNumber,
-        barCode: data?.barCode,
-        assetIdentifier: data?.assetIdentifier,
-        warrantyGuarantorParts: data?.warrantyGuarantorParts,
-        warrantyDurationParts: data?.warrantyDurationParts,
-        warrantyGuarantorLabor: data?.warrantyGuarantorLabor,
-        warrantyDurationLabor: data?.warrantyDurationLabor,
-        warrantyDurationUnit: data?.warrantyDurationUnit,
         images: data?.images || "",
         documents: data?.documents || "",
-        parentKey: selectedNodeKey,
       };
 
       console.log(updateNode);
