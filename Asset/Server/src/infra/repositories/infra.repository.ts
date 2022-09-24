@@ -7,7 +7,7 @@ const exceljs = require('exceljs');
 import { generateUuid } from 'src/common/baseobject/base.virtual.node.object';
 @Injectable()
 export class InfraRepository implements InfraInterface {
-  constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) {}
+  constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) { }
   async createConstraints() {
     try {
       const neo4Transaction = await this.neo4jService.beginTransaction();
@@ -22,7 +22,7 @@ export class InfraRepository implements InfraInterface {
       constraintArr.forEach((element) => {
         neo4Transaction
           .run(element)
-          .then((res) => {})
+          .then((res) => { })
           .catch((err) => {
             console.log(err);
             neo4Transaction.rollback();
@@ -83,11 +83,11 @@ export class InfraRepository implements InfraInterface {
       await this.neo4jService.addParentRelationByIdAndFilters(configNode.identity.low, {}, infraNode.identity.low, {});
 
       const assetTypesNodeEN = await this.neo4jService.createNode(
-        { canDelete: false, isDeleted: false, canCopied: true, isRoot: true, name: 'Asset Types', realm: 'Signum' },
+        { canDelete: false, isDeleted: false, canCopied: true, isActive: true, isRoot: true, name: 'Asset Types', realm: 'Signum' },
         ['AssetTypes_en'],
       );
       const assetTypesNodeTR = await this.neo4jService.createNode(
-        { canDelete: false, isDeleted: false, canCopied: true, isRoot: true, name: 'Asset Types', realm: 'Signum' },
+        { canDelete: false, isDeleted: false, canCopied: true, isActive: true, isRoot: true, name: 'Asset Types', realm: 'Signum' },
         ['AssetTypes_tr'],
       );
 
@@ -229,14 +229,14 @@ export class InfraRepository implements InfraInterface {
         { canDelete: false, isDeleted: false, name: 'Types', realm: 'Signum' },
         ['Types'],
       );
-     
-      await this.neo4jService.updateByIdAndFilter(typesNode.identity.low, {}, [], {id:typesNode.identity.low});
+
+      await this.neo4jService.updateByIdAndFilter(typesNode.identity.low, {}, [], { id: typesNode.identity.low });
 
       const systemsNode = await this.neo4jService.createNode(
         { canDelete: false, isDeleted: false, canCopied: true, isRoot: true, name: 'Systems', realm: 'Signum' },
         ['Systems'],
       );
-      await this.neo4jService.updateByIdAndFilter(systemsNode.identity.low, {}, [], {id:systemsNode.identity.low});
+      await this.neo4jService.updateByIdAndFilter(systemsNode.identity.low, {}, [], { id: systemsNode.identity.low });
 
       await this.neo4jService.addParentRelationByIdAndFilters(typesNode.identity.low, {}, assetNode.identity.low, {});
       await this.neo4jService.addParentRelationByIdAndFilters(systemsNode.identity.low, {}, assetNode.identity.low, {});
@@ -491,7 +491,7 @@ export class InfraRepository implements InfraInterface {
             newClassification.push(dto);
           }
 
-          
+
           ///////// the process start here //////////////////////////////////
 
           // let cypher = `MATCH (a:Infra {realm:"${realmName}"})-[:PARENT_OF]->(n:Classification {realm:"${realmName}"}) MERGE (b:${classificationName}_${language} {code:"${newClassification[0].parentCode}",isActive: true,name:"${classificationName}",isDeleted:${newClassification[i].isDeleted},canCopied:true,canDelete:false,realm:"${realmName}",isRoot:true,canDisplay:true,language:"${language}"}) MERGE (n)-[:PARENT_OF]->(b)`;
@@ -505,7 +505,7 @@ export class InfraRepository implements InfraInterface {
 
         /////////////// process of classfications without code ////////////////////////////////////////////////////////////////
         let deneme4 = [];
-       
+
 
         for (let i = 0; i < classificationsWithoutCode.length; i++) {
           let deneme5 = [];
@@ -525,15 +525,13 @@ export class InfraRepository implements InfraInterface {
         }
 
         for (let i = 0; i < deneme4.length; i++) {
-          let cypher = `MATCH (n:Classification {realm:"${realmName}"}) MERGE (b:${
-            deneme4[i][0].name
-          }s_${language} {name:"${deneme4[i][0].name}",isDeleted:${
-            deneme4[i][0].isDeleted
-          },key:"${generateUuid()}",realm:"${realmName}",canDelete:false,isActive:true,canCopied:true,isRoot:true,canDisplay:true,language:"${language}"})  MERGE (n)-[:PARENT_OF]->(b)`;
+          let cypher = `MATCH (n:Classification {realm:"${realmName}"}) MERGE (b:${deneme4[i][0].name
+            }s_${language} {name:"${deneme4[i][0].name}",isDeleted:${deneme4[i][0].isDeleted
+            },key:"${generateUuid()}",realm:"${realmName}",canDelete:false,isActive:true,canCopied:true,isRoot:true,canDisplay:true,language:"${language}"})  MERGE (n)-[:PARENT_OF]->(b)`;
           await this.neo4jService.write(cypher);
 
           for (let index = 1; index < deneme4[i].length; index++) {
-            let {name,code,isDeleted,canDelete,canDisplay,isActive}=deneme4[i][index];
+            let { name, code, isDeleted, canDelete, canDisplay, isActive } = deneme4[i][index];
 
             let cypher3 = `MATCH (n:${deneme4[i][0].name}s_${language} {isDeleted:false}) MERGE (b:${deneme4[i][0].name} {code:"${code}",name:"${name}",isDeleted:${isDeleted},key:"${generateUuid()}",canDelete:${canDelete}, \
             canDisplay:${canDisplay},language:"${language}",isActive:${isActive}})  MERGE (n)-[:PARENT_OF]->(b)`;

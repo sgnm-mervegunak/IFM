@@ -489,23 +489,21 @@ export class ClassificationRepository implements classificationInterface<Classif
 
   //REVISED FOR NEW NEO4J
   async getAClassificationByRealmAndLabelNameAndLanguage(labelName: string, header) {
+    try {
+      const { language, realm } = header
 
-    const { language, realm } = header
-    const root_node = await this.neo4jService.findByLabelAndFilters(
-      ['Classification'],
-      { isDeleted: false, realm: realm },
-      [],
-    );
-    let root = { root: { parent_of: [], ...root_node[0]['_fields'][0].properties } };
-    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
-      [labelName + '_' + language],
-      { realm: realm, isDeleted: false, isActive: true },
-      [],
-      { isDeleted: false, isActive: true },
-    );
-    root.root.parent_of.push(node['root']);
-    root = await this.neo4jService.changeObjectChildOfPropToChildren(root);
-    return root;
+      let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
+        [labelName + '_' + language],
+        { realm: realm, isDeleted: false, isActive: true },
+        [],
+        { isDeleted: false },
+      );
+
+      node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
+      return node;
+    } catch (error) {
+
+    }
   }
 
   //REVISED FOR NEW NEO4J
