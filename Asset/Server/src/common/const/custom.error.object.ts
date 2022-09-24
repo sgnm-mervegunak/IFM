@@ -15,6 +15,14 @@ export function wrong_parent_error() {
   };
 }
 
+export function wrong_parent_error_with_params(params) {
+  return {
+    message: 'This node cannot be added below the specified node',
+    code: CustomAssetError.WRONG_PARENT,
+    params: params,
+  };
+}
+
 export function node_not_found() {
   return {
     message: 'Node not found',
