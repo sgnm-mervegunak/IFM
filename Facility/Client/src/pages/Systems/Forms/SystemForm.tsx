@@ -10,7 +10,7 @@ import * as yup from "yup";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 
-import ComponentService from "../../../services/components";
+import SystemService from "../../../services/systems";
 import ClassificationsService from "../../../services/classifications";
 import ContactService from "../../../services/contact";
 import FacilityStructureService from "../../../services/facilitystructure";
@@ -83,7 +83,7 @@ const SystemForm = ({
   const [data, setData] = useState<any>();
 
   const schema = yup.object({
-    name: yup.string().max(50, t("This area accepts max 50 characters.")),
+    name: yup.string().required(t("This area is required.")).max(50, t("This area accepts max 50 characters.")),
     createdBy: yup.string().required(t("This area is required.")),
   });
 
@@ -176,7 +176,7 @@ const SystemForm = ({
   }, [isUpdate]);
 
   const getNodeInfoForUpdate = (selectedNodeKey: string) => {
-    ComponentService.nodeInfo(selectedNodeKey)
+    SystemService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
         console.log(res.data);
         if (spaceType === "") {
@@ -227,7 +227,7 @@ const SystemForm = ({
       console.log(newNode);
 
 
-      ComponentService.create(newNode)
+      SystemService.create(newNode)
         .then(async (res) => {
           toast.current.show({
             severity: "success",
@@ -270,7 +270,7 @@ const SystemForm = ({
           }
 
 
-          await ComponentService.update(res.data.properties.id, {
+          await SystemService.update(res.data.properties.id, {
             ...newNode,
             ...temp,
           });
@@ -304,7 +304,7 @@ const SystemForm = ({
       console.log(updateNode);
 
 
-      ComponentService.update(selectedNodeId, updateNode)
+      SystemService.update(selectedNodeId, updateNode)
         .then(async (res) => {
           toast.current.show({
             severity: "success",
@@ -353,7 +353,7 @@ const SystemForm = ({
           }
 
           // update node
-          ComponentService.update(selectedNodeId, {
+          SystemService.update(selectedNodeId, {
             ...updateNode,
             ...temp,
           });
