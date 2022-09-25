@@ -21,15 +21,15 @@ export class ClassificationController {
   create(@Body() createClassificationDto: CreateClassificationDto, @Headers() header) {
     return this.classificationService.create(createClassificationDto, header);
   }
-  
-  // @Unprotected()
-  // @Get(':label/')
-  // @NoCache()
-  // findOne(@Param('label') label: string, @Headers() header) {
-  //   const {language, realm} = header;
-  //   return this.classificationService.findOne(label, realm, language);
-  // }
-  //@Unprotected()
+
+  @Roles({ roles: [UserRoles.ADMIN] })
+  @Get(':key')
+  @NoCache()
+  findOneNode(@Param('key') key: string, @Headers() header) {
+    const {language, realm} = header;
+    return this.classificationService.findOneNode(key, header);
+  }
+
   @Roles({ roles: [UserRoles.ADMIN] })
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateClassificationDto: UpdateClassificationDto, @Headers() header) {

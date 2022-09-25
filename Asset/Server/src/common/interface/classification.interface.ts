@@ -4,6 +4,7 @@ export interface classificationInterface<T>  {
   update(id: string, data: T | any, header): any;
   create(data: T | any, header): any;
   delete(id: string, header): any;
+  findOneNodeByKey(key: string,header): any;
   changeNodeBranch(id: string, target_parent_id: string, header): any;
   setIsActiveTrueOfClassificationAndItsChild(id:string, header):any;
   setIsActiveFalseOfClassificationAndItsChild(id:string, header):any;

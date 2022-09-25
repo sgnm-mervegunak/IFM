@@ -20,6 +20,13 @@ export class ClassificationService {
     return await this.classificationRepository.create(createClassificationDto, header);
   }
 
+  
+  @Span('find a classification node by key')
+  @OtelMethodCounter()
+  async findOneNode(key: string, header) {
+    //checkObjectIddİsValid(id);
+    return await this.classificationRepository.findOneNodeByKey(key, header);
+  }
 
   @Span('update a classification')
   @OtelMethodCounter()
