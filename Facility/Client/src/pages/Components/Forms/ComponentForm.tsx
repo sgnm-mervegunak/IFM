@@ -543,7 +543,7 @@ const TypeForm = ({
             <div className="field col-12 md:col-4">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Installation Date")}</h5>
               <Controller
-                defaultValue={new Date(data?.installationDate)}
+                defaultValue={data ? new Date(data?.installationDate) : ""}
                 name="installationDate"
                 control={control}
                 render={({ field }) => (
@@ -564,7 +564,7 @@ const TypeForm = ({
             <div className="field col-12 md:col-4">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Start Date")}</h5>
               <Controller
-                defaultValue={new Date(data?.warrantyStartDate)}
+                defaultValue={data ? new Date(data?.warrantyStartDate) : ""}
                 name="warrantyStartDate"
                 control={control}
                 render={({ field }) => (

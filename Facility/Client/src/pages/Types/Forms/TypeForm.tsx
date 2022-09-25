@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 
 import TypesService from "../../../services/types";
 import ClassificationsService from "../../../services/classifications";
+import AssetClassificationsService from "../../../services/assetclassifications";
 import ContactService from "../../../services/contact";
 import { useAppSelector } from "../../../app/hook";
 import ImageUploadComponent from "./FileUpload/ImageUpload/ImageUpload";
@@ -66,6 +67,7 @@ const TypeForm = ({
 }: Params) => {
 
   const [classificationCategory, setClassificationCategory] = useState<Node[]>([]);
+  const [assetType, setAssetType] = useState<Node[]>([]);
   const [contact, setContact] = useState<any>([]);
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
   const [uploadFiles, setUploadFiles] = useState<any>({});
@@ -140,10 +142,20 @@ const TypeForm = ({
   const getClassificationCategory = async () => {
     await ClassificationsService.findAllActiveByLabel({
       label: "OmniClass11"
-    }).then((res) => {
+    }).then((res) => { 
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodes(temp);
       setClassificationCategory(temp);
+    });
+  };
+
+  const getAssetType = async () => {
+    await AssetClassificationsService.findAllActiveByLabel({
+      label: "AssetTypes"
+    }).then((res) => {
+      let temp = JSON.parse(JSON.stringify([res.data.root] || []));
+      fixNodes(temp);
+      setAssetType(temp);
     });
   };
 
@@ -158,6 +170,7 @@ const TypeForm = ({
 
   useEffect(() => {
     getClassificationCategory();
+    getAssetType();
     getContact();
   }, []);
 
@@ -242,7 +255,7 @@ const TypeForm = ({
         tag: data?.tag,
         description: data?.description,
         category: codeCategory, //Düzeltilecek
-        assetType:"Fixed",   //codeAssetType, //Düzeltilecek
+        assetType: codeAssetType,   //codeAssetType, //Düzeltilecek
         manufacturer: data?.manufacturer,
         modelNo: data?.modelNo,
         warrantyGuarantorParts: data?.warrantyGuarantorParts,
@@ -272,7 +285,7 @@ const TypeForm = ({
         documents: data?.documents || "",
         images: data?.images || "",
       };
-  
+
       TypesService.create(newNode)
         .then(async (res) => {
           toast.current.show({
@@ -339,7 +352,7 @@ const TypeForm = ({
         tag: data?.tag,
         description: data?.description,
         category: codeCategory, //Düzeltilecek
-        assetType: "Fixed",  //codeAssetType, //Düzeltilecek
+        assetType: codeAssetType,  //codeAssetType, //Düzeltilecek
         manufacturer: data?.manufacturer,
         modelNo: data?.modelNo,
         warrantyGuarantorParts: data?.warrantyGuarantorParts,
@@ -530,9 +543,9 @@ const TypeForm = ({
                 render={({ field }) => (
                   <TreeSelect
                     value={field.value}
-                    options={classificationCategory}
+                    options={assetType}
                     onChange={(e) => {
-                      ClassificationsService.nodeInfo(e.value as string)
+                      AssetClassificationsService.nodeInfo(e.value as string)
                         .then((res) => {
                           field.onChange(e.value)
                           setCodeAssetType(res.data.properties.code || "");
