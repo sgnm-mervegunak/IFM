@@ -129,7 +129,7 @@ const SetJointSpace = () => {
     operatorCode: yup.string().max(50, t("This area accepts max 50 characters.")),
     operatorName: yup.string().max(50, t("This area accepts max 50 characters.")),
     description: yup.string().max(255, t("This area accepts max 255 characters.")),
-    roomTag: yup.array().max(50, t("This area accepts max 50 characters.")),
+    roomTag: yup.array().nullable().max(50, t("This area accepts max 50 characters.")),
     category: yup.string().required(t("This area is required.")),
     usage: yup.string().required(t("This area is required.")),
     status: yup.string().required(t("This area is required.")),
@@ -137,25 +137,26 @@ const SetJointSpace = () => {
       .number()
       .typeError(t('Usable Height must be a number'))
       .nullable().moreThan(-1, t("Usable Height can not be negative"))
-      .transform((_, val) => (val !== "" ? Number(val) : null)),
+      .transform((_, val) => (val !== "" ? Number(val) : 0)),
     grossArea: yup
       .number()
       .typeError(t('Gross Area must be a number'))
       .nullable().moreThan(-1, t("Gross Area can not be negative"))
-      .transform((_, val) => (val !== "" ? Number(val) : null)),
+      .transform((_, val) => (val !== "" ? Number(val) : 0)),
     netArea: yup
       .number()
       .typeError(t('Net Area must be a number'))
       .nullable()
       .moreThan(-1, t("Net Area can not be negative"))
-      .transform((_, val) => (val !== "" ? Number(val) : null)),
+      .transform((_, val) => (val !== "" ? Number(val) : 0)),
 
   });
 
   const { register, handleSubmit, watch, reset, formState: { errors }, control } = useForm({
     defaultValues: {
       ...data,
-      jointStartDate: new Date()
+      jointStartDate: new Date(),
+      jointEndDate: Date.parse('YYYY-MM-DD HH:mm:ss') || 0
     },
     resolver: yupResolver(schema)
   });
@@ -292,7 +293,6 @@ const SetJointSpace = () => {
       } else {
         i.selectable = false;
       }
-
       if (i.name === "Joint Space") {
         i.icon = "pi pi-fw pi-star-fill";
       }
@@ -332,7 +332,7 @@ const SetJointSpace = () => {
       usage: codeUsage,
       status: codeStatus,
       description: data?.description,
-      roomTag: data?.roomTag,
+      roomTag: data?.roomTag || [],
       usableHeight: data?.usableHeight,
       grossArea: data?.grossArea,
       netArea: data?.netArea,
@@ -889,7 +889,7 @@ const SetJointSpace = () => {
                 <div className="field col-12 md:col-6">
                   <h5 style={{ marginBottom: "0.5em" }}>{t("Joint Start Date")}</h5>
                   <Controller
-                    defaultValue={new Date(data?.jointStartDate)}
+                    defaultValue={new Date(data?.jointStartDate) || ""}
                     name="jointStartDate"
                     control={control}
                     render={({ field }) => (
@@ -910,7 +910,7 @@ const SetJointSpace = () => {
                 <div className="field col-12 md:col-6">
                   <h5 style={{ marginBottom: "0.5em" }}>{t("Joint End Date")}</h5>
                   <Controller
-                    defaultValue={new Date(data?.jointEndDate)}
+                    defaultValue={new Date(data?.jointEndDate) || ""}
                     name="jointEndDate"
                     control={control}
                     render={({ field }) => (

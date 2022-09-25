@@ -8,12 +8,12 @@ export class CreateJointSpaceDto {
   @ApiProperty()
   @IsOptional()
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
-  architecturalName: string;
+  architecturalName?: string;
 
   @ApiProperty()
   @IsOptional()
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
-  architecturalCode: string;
+  architecturalCode?: string;
 
   @ApiProperty()
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
@@ -28,7 +28,7 @@ export class CreateJointSpaceDto {
   @ApiProperty()
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
   @IsOptional()
-  description: string;
+  description?: string;
 
   @ApiProperty()
   @IsOptional()
@@ -77,7 +77,7 @@ export class CreateJointSpaceDto {
   @ApiProperty()
   @IsOptional()
   @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
-  jointEndDate: string;
+  jointEndDate?: string = moment().format('YYYY-MM-DD HH:mm:ss');
 
   @ApiProperty()
   @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)

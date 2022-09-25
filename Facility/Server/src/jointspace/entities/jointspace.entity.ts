@@ -4,39 +4,39 @@ import { BaseGraphObject } from 'src/common/baseobject/base.graph.object';
 export class JointSpace extends BaseGraphObject {
   className: string = JointSpace.name;
 
-  architecturalName: string;
+  // architecturalName: string;
 
-  architecturalCode: string;
+  // architecturalCode: string;
 
-  name: string;
+  // name: string;
 
-  code: string;
+  // code: string;
 
-  operatorName: string;
+  // operatorName: string;
 
-  operatorCode: string;
+  // operatorCode: string;
 
-  category: string;
+  // category: string;
 
-  usage: string;
+  // usage: string;
 
-  status: string;
+  // status: string;
 
-  roomTag: string[];
+  // roomTag: string[];
 
-  images: string;
+  // images: string;
 
-  usableHeight: number;
+  // usableHeight: number;
 
-  grossArea: number;
+  // grossArea: number;
 
-  netArea: number;
+  // netArea: number;
 
   jointStartDate: string = moment().format('YYYY-MM-DD HH:mm:ss');
 
-  jointEndDate: string;
+  jointEndDate?: string = moment().format('YYYY-MM-DD HH:mm:ss');
 
-  nodeKeys: [];
+  // nodeKeys: [];
 
   nodeType: string = JointSpace.name;
 
