@@ -156,7 +156,7 @@ const SetJointSpace = () => {
     defaultValues: {
       ...data,
       jointStartDate: new Date(),
-      jointEndDate: Date.parse('YYYY-MM-DD HH:mm:ss') || 0
+      jointEndDate: Date.parse('YYYY-MM-DD HH:mm:ss') || ""
     },
     resolver: yupResolver(schema)
   });
@@ -327,7 +327,7 @@ const SetJointSpace = () => {
       operatorName: data?.operatorName,
       operatorCode: data?.operatorCode,
       tag: data?.tag,
-      m2: data?.m2,
+      // m2: data?.m2,
       category: codeCategory,
       usage: codeUsage,
       status: codeStatus,
