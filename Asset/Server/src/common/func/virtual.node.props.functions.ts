@@ -7,13 +7,15 @@ export function avaiableUpdateVirtualPropsGetter(dto) {
       return key;
     }
   });
+  console.log(existVİrtualNodePropsInDtoArray);
 
   const finalObject = [];
   for (let i = 0; i < updateKafkaTopicArray.length; i++) {
     const arr = Object.keys(updateKafkaTopicArray[i])
       .map((prop) => {
         if (existVİrtualNodePropsInDtoArray.includes(prop)) {
-          if (prop === 'space') {
+          console.log(prop);
+          if (prop === 'Space') {
             switch (dto.spaceType) {
               case SpaceType.SPACE:
                 updateKafkaTopicArray[i]['url'] = 'STRUCTURE_URL';
@@ -34,6 +36,7 @@ export function avaiableUpdateVirtualPropsGetter(dto) {
         }
       })
       .filter((valid) => {
+        console.log(valid);
         if (valid !== undefined) {
           return valid;
         }
