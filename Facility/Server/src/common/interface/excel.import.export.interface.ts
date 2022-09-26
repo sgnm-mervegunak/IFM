@@ -34,5 +34,6 @@ export interface ExcelImportExportInterface<T> {
 
     createCypherForClassification(realm:string,classificationLabel:string,categoryCode:string,nodeName:string)
     keyGenerate();
+    getZoneFromDb(buildingKey:string,zoneName: string,data:string[]);
   }
   

@@ -32,11 +32,16 @@ const remove = async (key: string) => {
     return axios.delete(url + key);
 };
 
+const nodeInfo = async (key: string) => {
+    return axios.get(`${url}${key}`);
+};
+
 const service = {
     findBuildingWithKey,
     createZone,
     update,
-    remove
+    remove,
+    nodeInfo
 };
 
 export default service;

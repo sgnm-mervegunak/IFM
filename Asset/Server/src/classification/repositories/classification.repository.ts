@@ -563,10 +563,14 @@ export class ClassificationRepository implements classificationInterface<Classif
           );
         }
       } else {
-        throw new HttpException('Bu classification bulunuyor', 400);
+        throw new classification_already_exist();
       }
     } catch (error) {
-      throw new HttpException({ message: error.message, code: error.status }, error.status);
+      if (error?.response?.code === 10001) {
+        throw new classification_already_exist();
+      } else {
+        throw new classification_import_error();
+      }
     }
   }
 
