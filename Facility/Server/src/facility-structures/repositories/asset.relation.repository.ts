@@ -34,19 +34,24 @@ export class AssetRelationRepository implements VirtualNodeInterface<FacilityStr
     }
 
     //find by key with specific relation name which node has that specific relations
-    const relations = await this.neo4jService.findChildrenNodesByLabelsAndRelationName([],{key},[],{isDeleted:false},RelationName.HAS);
- 
+    const relations = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+      [],
+      { key },
+      [],
+      { isDeleted: false },
+      RelationName.HAS,
+    );
 
     if (!relations || relations.length === 0) {
       //throw new HttpException('hiç ilişkisi yok', 400);
-      throw new RelationNotFountException(key);
+      return [];
     }
 
     const assetArray = await Promise.all(
       relations.map(async (virtualAsset) => {
         console.log(virtualAsset);
         const asset = await this.httpService
-          .get(virtualAsset.get('children').properties.url,  {headers:{authorization}} )
+          .get(virtualAsset.get('children').properties.url, { headers: { authorization } })
           .pipe(
             catchError(() => {
               throw new HttpException('connection refused due to connection lost or wrong data provided', 502);
@@ -56,9 +61,9 @@ export class AssetRelationRepository implements VirtualNodeInterface<FacilityStr
         return await firstValueFrom(asset);
       }),
     );
-    const finalArray=assetArray.map(item=>{
-      return item.properties
-    })
+    const finalArray = assetArray.map((item) => {
+      return item.properties;
+    });
 
     return finalArray;
   }
