@@ -1,13 +1,12 @@
 import { SpaceType } from '../const/space.type.enum';
 import { virtualProps, updateKafkaTopicArray, createKafkaTopicArray } from '../const/virtual.node.properties';
 
-export function avaiableUpdateVirtualPropsGetter(dto) {
+export async function avaiableUpdateVirtualPropsGetter(dto) {
   const existVİrtualNodePropsInDtoArray = Object.keys(dto).filter((key) => {
     if (virtualProps.includes(key)) {
       return key;
     }
   });
-  console.log(existVİrtualNodePropsInDtoArray);
 
   const finalObject = [];
   for (let i = 0; i < updateKafkaTopicArray.length; i++) {
@@ -23,20 +22,16 @@ export function avaiableUpdateVirtualPropsGetter(dto) {
                 break;
               case SpaceType.JOINTSPACE:
                 updateKafkaTopicArray[i]['url'] = 'JOINTSPACE_URL';
-
                 break;
-
               default:
                 break;
             }
           }
           updateKafkaTopicArray[i]['newParentKey'] = dto[prop];
-          delete updateKafkaTopicArray[i][prop];
           return updateKafkaTopicArray[i];
         }
       })
       .filter((valid) => {
-        console.log(valid);
         if (valid !== undefined) {
           return valid;
         }

@@ -243,7 +243,7 @@ export class TypesRepository implements GeciciInterface<Type> {
 
       const typeUrl = `${process.env.TYPE_URL}/${node[0].get('children').properties.key}`;
 
-      const finalObjectArray = avaiableUpdateVirtualPropsGetter(updateTypeDto);
+      const finalObjectArray = await avaiableUpdateVirtualPropsGetter(updateTypeDto);
       console.log(finalObjectArray)
 
       for (let index = 0; index < finalObjectArray.length; index++) {

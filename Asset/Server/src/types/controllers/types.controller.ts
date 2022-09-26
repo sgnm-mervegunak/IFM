@@ -31,6 +31,7 @@ export class TypesController {
   }
 
   @Patch(':id')
+  @NoCache()
   @Roles({ roles: [UserRoles.ADMIN] })
   update(@Param('id') id: string, @Body() updateAssetDto: UpdateTypesDto, @Headers() header) {
     return this.typesService.update(id, updateAssetDto, header);
