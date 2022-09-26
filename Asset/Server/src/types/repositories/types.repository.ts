@@ -138,7 +138,7 @@ export class TypesRepository implements GeciciInterface<Type> {
 
       const assetTypesLabel = 'AssetTypes' + '_' + language;
       const assetTypes = await this.neo4jService.findChildrensByLabelsAndFilters([assetTypesLabel], { realm }, [], {
-        name: createTypesDto.assetType,
+        code: createTypesDto.assetType,
       });
       if (assetTypes.length === 0) {
         throw new HttpException(invalid_classification(), 400);
@@ -234,7 +234,7 @@ export class TypesRepository implements GeciciInterface<Type> {
       if (updateTypeDto.assetType) {
         const assetTypesLabel = 'AssetTypes' + '_' + language;
         const assetTypes = await this.neo4jService.findChildrensByLabelsAndFilters([assetTypesLabel], { realm }, [], {
-          name: updateTypeDto.assetType,
+          code: updateTypeDto.assetType,
         });
         if (assetTypes.length === 0) {
           throw new HttpException(invalid_classification(), 400);
