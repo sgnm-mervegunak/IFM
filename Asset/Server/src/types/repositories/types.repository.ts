@@ -33,58 +33,24 @@ export class TypesRepository implements GeciciInterface<Type> {
   ) {}
   async findByKey(key: string, header) {
     try {
-      const nodes = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.TYPE], { key });
+      const nodes = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        [Neo4jLabelEnum.TYPE],
+        { key, isDeleted: false },
+        [],
+        { isDeleted: false },
+        RelationName.HAS_VIRTUAL_RELATION,
+      );
       if (!nodes.length) {
         throw new AssetNotFoundException(key);
       }
 
-      const createtByNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
-        [Neo4jLabelEnum.TYPE],
-        { key: nodes[0].get('n').properties.key },
-        [],
-        { isDeleted: false },
-        RelationName.CREATED_BY,
-      );
-      if (createtByNode.length > 0) {
-        nodes[0].get('n').properties['createdBy'] = createtByNode[0].get('children').properties.referenceKey;
-      }
+      nodes.map((record) => {
+        record.get('children').properties.type;
+        nodes[0].get('parent').properties[record.get('children').properties.type] =
+          record.get('children').properties.referenceKey;
+      });
 
-      const manufacturedByNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
-        [Neo4jLabelEnum.TYPE],
-        { key: nodes[0].get('n').properties.key },
-        [],
-        { isDeleted: false },
-        RelationName.MANUFACTURED_BY,
-      );
-      if (manufacturedByNode.length > 0) {
-        nodes[0].get('n').properties['manufacturer'] = manufacturedByNode[0].get('children').properties.referenceKey;
-      }
-
-      const warrantyGuaranorLaborNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
-        [Neo4jLabelEnum.TYPE],
-        { key: nodes[0].get('n').properties.key },
-        [],
-        { isDeleted: false },
-        RelationName.WARRANTY_GUARANTOR_LABOR,
-      );
-      if (warrantyGuaranorLaborNode.length > 0) {
-        nodes[0].get('n').properties['warrantyGuarantorLabor'] =
-          warrantyGuaranorLaborNode[0].get('children').properties.referenceKey;
-      }
-
-      const warrantyGuaranorPartsNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
-        [Neo4jLabelEnum.TYPE],
-        { key: nodes[0].get('n').properties.key },
-        [],
-        { isDeleted: false },
-        RelationName.WARRANTY_GUARANTOR_PARTS,
-      );
-      if (warrantyGuaranorPartsNode.length > 0) {
-        nodes[0].get('n').properties['warrantyGuarantorParts'] =
-          warrantyGuaranorPartsNode[0].get('children').properties.referenceKey;
-      }
-
-      return nodes[0]['_fields'][0];
+      return nodes[0].get('parent').properties;
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -245,7 +211,7 @@ export class TypesRepository implements GeciciInterface<Type> {
       const finalObjectArray = await avaiableUpdateVirtualPropsGetter(updateTypeDto);
 
       for (let index = 0; index < finalObjectArray.length; index++) {
-        console.log(finalObjectArray[index].newParentKey)
+        console.log(finalObjectArray[index].newParentKey);
         const url =
           (await this.configService.get(finalObjectArray[index].url)) + '/' + finalObjectArray[index].newParentKey;
 

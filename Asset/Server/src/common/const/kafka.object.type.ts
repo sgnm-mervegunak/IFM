@@ -24,6 +24,7 @@ export type UpdateKafka = {
 };
 
 export type CreateKafka = {
+  type: string;
   kafkaTopic: string;
   referenceKey: string;
   url: string;

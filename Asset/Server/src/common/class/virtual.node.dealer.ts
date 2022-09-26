@@ -24,6 +24,7 @@ export class VirtualNodeHandler {
         const url = (await this.configService.get(item.url)) + '/' + item.referenceKey;
         virtualNode['url'] = url;
         virtualNode['referenceKey'] = item.referenceKey;
+        virtualNode['type'] = item.type;
 
         const createdVirtualNode = await this.neo4jService.createNode(virtualNode, item.labels);
 
