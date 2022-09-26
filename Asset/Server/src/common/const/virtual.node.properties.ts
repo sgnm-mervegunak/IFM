@@ -3,7 +3,7 @@ import { Neo4jLabelEnum } from './neo4j.label.enum';
 
 export const createKafkaTopicArray = [
   {
-    createdBy: 'createContactRelation',
+    type: 'createdBy',
     kafkaTopic: 'createContactRelation',
     relationNameForThisDatabase: RelationName.CREATED_BY,
     relationNameForTargetDatabase: RelationName.CREATED_BY,
@@ -11,7 +11,7 @@ export const createKafkaTopicArray = [
     labels: [Neo4jLabelEnum.CONTACT, Neo4jLabelEnum.VIRTUAL],
   },
   {
-    manufacturer: 'createContactRelation',
+    type: 'manufacturer',
     kafkaTopic: 'createContactRelation',
     relationNameForThisDatabase: RelationName.MANUFACTURED_BY,
     relationNameForTargetDatabase: RelationName.MANUFACTURED_BY,
@@ -19,7 +19,7 @@ export const createKafkaTopicArray = [
     labels: [Neo4jLabelEnum.CONTACT, Neo4jLabelEnum.VIRTUAL],
   },
   {
-    warrantyGuarantorLabor: 'createContactRelation',
+    type: 'warrantyGuarantorLabor',
     kafkaTopic: 'createContactRelation',
     relationNameForThisDatabase: RelationName.WARRANTY_GUARANTOR_LABOR,
     relationNameForTargetDatabase: RelationName.WARRANTY_GUARANTOR_LABOR,
@@ -27,7 +27,7 @@ export const createKafkaTopicArray = [
     labels: [Neo4jLabelEnum.CONTACT, Neo4jLabelEnum.VIRTUAL],
   },
   {
-    warrantyGuarantorParts: 'createContactRelation',
+    type: 'warrantyGuarantorParts',
     kafkaTopic: 'createContactRelation',
     relationNameForThisDatabase: RelationName.WARRANTY_GUARANTOR_PARTS,
     relationNameForTargetDatabase: RelationName.WARRANTY_GUARANTOR_PARTS,
@@ -35,7 +35,7 @@ export const createKafkaTopicArray = [
     labels: [Neo4jLabelEnum.CONTACT, Neo4jLabelEnum.VIRTUAL],
   },
   {
-    space: 'createStructureRelation',
+    type: 'space',
     kafkaTopic: 'createStructureRelation',
     relationNameForThisDatabase: RelationName.LOCATED_IN,
     relationNameForTargetDatabase: RelationName.HAS,
@@ -46,35 +46,35 @@ export const createKafkaTopicArray = [
 
 export const updateKafkaTopicArray = [
   {
-    createdBy: 'updateContactRelation',
+    type: 'createdBy',
     kafkaTopic: 'updateContactRelation',
     relationNameForThisDatabase: RelationName.CREATED_BY,
     relationNameForTargetDatabase: RelationName.CREATED_BY,
     url: 'CONTACT_URL',
   },
   {
-    manufacturer: 'updateContactRelation',
+    type: 'manufacturer',
     kafkaTopic: 'updateContactRelation',
     relationNameForThisDatabase: RelationName.MANUFACTURED_BY,
     relationNameForTargetDatabase: RelationName.MANUFACTURED_BY,
     url: 'CONTACT_URL',
   },
   {
-    warrantyGuarantorLabor: 'updateContactRelation',
+    type: 'warrantyGuarantorLabor',
     kafkaTopic: 'updateContactRelation',
     relationNameForThisDatabase: RelationName.WARRANTY_GUARANTOR_LABOR,
     relationNameForTargetDatabase: RelationName.WARRANTY_GUARANTOR_LABOR,
     url: 'CONTACT_URL',
   },
   {
-    warrantyGuarantorParts: 'updateContactRelation',
+    type: 'warrantyGuarantorParts',
     kafkaTopic: 'updateContactRelation',
     relationNameForThisDatabase: RelationName.WARRANTY_GUARANTOR_PARTS,
     relationNameForTargetDatabase: RelationName.WARRANTY_GUARANTOR_PARTS,
     url: 'CONTACT_URL',
   },
   {
-    space: 'updateStructureRelation',
+    type: 'space',
     kafkaTopic: 'updateStructureRelation',
     relationNameForThisDatabase: RelationName.LOCATED_IN,
     relationNameForTargetDatabase: RelationName.HAS,

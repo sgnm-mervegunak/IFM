@@ -245,6 +245,7 @@ export class TypesRepository implements GeciciInterface<Type> {
       const finalObjectArray = await avaiableUpdateVirtualPropsGetter(updateTypeDto);
 
       for (let index = 0; index < finalObjectArray.length; index++) {
+        console.log(finalObjectArray[index].newParentKey)
         const url =
           (await this.configService.get(finalObjectArray[index].url)) + '/' + finalObjectArray[index].newParentKey;
 

@@ -2,6 +2,7 @@ import { SpaceType } from '../const/space.type.enum';
 import { virtualProps, updateKafkaTopicArray, createKafkaTopicArray } from '../const/virtual.node.properties';
 
 export async function avaiableUpdateVirtualPropsGetter(dto) {
+  console.log(dto);
   const existVİrtualNodePropsInDtoArray = Object.keys(dto).filter((key) => {
     if (virtualProps.includes(key)) {
       return key;
@@ -10,11 +11,11 @@ export async function avaiableUpdateVirtualPropsGetter(dto) {
 
   const finalObject = [];
   for (let i = 0; i < updateKafkaTopicArray.length; i++) {
-    const arr = Object.keys(updateKafkaTopicArray[i])
+    const arr = Object.entries(updateKafkaTopicArray[i])
       .map((prop) => {
-        if (existVİrtualNodePropsInDtoArray.includes(prop)) {
+        if (!Array.isArray(prop[1]) && existVİrtualNodePropsInDtoArray.includes(prop[1])) {
           console.log(prop);
-          if (prop === 'Space') {
+          if (prop[1] === 'space') {
             switch (dto.spaceType) {
               case SpaceType.SPACE:
                 updateKafkaTopicArray[i]['url'] = 'STRUCTURE_URL';
@@ -22,12 +23,15 @@ export async function avaiableUpdateVirtualPropsGetter(dto) {
                 break;
               case SpaceType.JOINTSPACE:
                 updateKafkaTopicArray[i]['url'] = 'JOINTSPACE_URL';
+
                 break;
+
               default:
                 break;
             }
           }
-          updateKafkaTopicArray[i]['newParentKey'] = dto[prop];
+          updateKafkaTopicArray[i]['newParentKey'] = dto[prop[1]];
+
           return updateKafkaTopicArray[i];
         }
       })
@@ -53,10 +57,10 @@ export function avaiableCreateVirtualPropsGetter(dto) {
 
   const finalObject = [];
   for (let i = 0; i < createKafkaTopicArray.length; i++) {
-    const arr = Object.keys(createKafkaTopicArray[i])
+    const arr = Object.entries(createKafkaTopicArray[i])
       .map((prop) => {
-        if (existVİrtualNodePropsInDtoArray.includes(prop)) {
-          if (prop === 'Space') {
+        if (!Array.isArray(prop[1]) && existVİrtualNodePropsInDtoArray.includes(prop[1])) {
+          if (prop[1] === 'space') {
             switch (dto.spaceType) {
               case SpaceType.SPACE:
                 createKafkaTopicArray[i]['url'] = 'STRUCTURE_URL';
@@ -71,8 +75,7 @@ export function avaiableCreateVirtualPropsGetter(dto) {
                 break;
             }
           }
-          createKafkaTopicArray[i]['referenceKey'] = dto[prop];
-          delete createKafkaTopicArray[i][prop];
+          createKafkaTopicArray[i]['referenceKey'] = dto[prop[1]];
           return createKafkaTopicArray[i];
         }
       })
