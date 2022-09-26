@@ -55,12 +55,21 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
 
   //REVISED FOR NEW NEO4J
   async findOneByRealm(realm: string, language: string) {
-    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
+    let node = await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructure(
       ['FacilityStructure'],
-      { realm: realm, isDeleted: false },
       [],
-      { isDeleted: false, canDisplay: true },
-    );
+      {realm: realm, isDeleted: false},
+      [],
+      ['Zone','JointSpace'],
+      {isDeleted: false, canDisplay: true }
+    ) 
+
+    // let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
+    //   ['FacilityStructure'],
+    //   { realm: realm, isDeleted: false },
+    //   [],
+    //   { isDeleted: false, canDisplay: true },
+    // );
     if (!node) {
       throw new FacilityStructureNotFountException(realm);
     }
