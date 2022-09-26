@@ -51,7 +51,7 @@ export class VirtualNodeHandler {
           virtualNodeLabels: parentLabels,
         };
 
-        await this.kafkaService.producerSendMessage('createContactRelation', JSON.stringify(itemKafkaObject));
+        await this.kafkaService.producerSendMessage(item.kafkaTopic, JSON.stringify(itemKafkaObject));
       });
     } catch (error) {
       throw new HttpException(error, 500);
@@ -81,7 +81,7 @@ export class VirtualNodeHandler {
             relationName: item.relationNameForTargetDatabase,
             virtualNodeLabels,
           };
-          await this.kafkaService.producerSendMessage('updateContactRelation', JSON.stringify(updatedByKafkaObject));
+          await this.kafkaService.producerSendMessage(item.kafkaTopic, JSON.stringify(updatedByKafkaObject));
           await this.neo4jService.updateByIdAndFilter(virtualNode[0].get('children').identity.low, {}, [], {
             url,
             referenceKey: item.newParentKey,

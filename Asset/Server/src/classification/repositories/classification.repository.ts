@@ -15,7 +15,11 @@ import {
 import { classificationInterface } from 'src/common/interface/classification.interface';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 import { I18NEnums } from 'src/common/const/i18n.enum';
-import { has_children_error, wrong_parent_error_with_params } from 'src/common/const/custom.error.object';
+import {
+  has_children_error,
+  invalid_classification,
+  wrong_parent_error_with_params,
+} from 'src/common/const/custom.error.object';
 import { RelationName } from 'src/common/const/relation.name.enum';
 import {
   classification_already_exist,
@@ -813,8 +817,19 @@ export class ClassificationRepository implements classificationInterface<Classif
         { code },
       );
 
+      if (classification.length === 0) {
+        throw new HttpException(invalid_classification(), 400);
+      }
+
       return classification[0].get('children').properties;
-    } catch (error) {}
+    } catch (error) {
+      const code = error.response?.code;
+      if (code === CustomAssetError.INVALID_CLASSIFICATION) {
+        throw new HttpException(invalid_classification(), 400);
+      } else {
+        throw new HttpException(error, 500);
+      }
+    }
   }
 
   async getNodeByLanguageRealmAndCode(code: string, header) {

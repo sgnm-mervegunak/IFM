@@ -47,6 +47,7 @@ export const createKafkaTopicArray = [
 export const updateKafkaTopicArray = [
   {
     createdBy: 'updateContactRelation',
+    kafkaTopic: 'updateContactRelation',
     relationNameForThisDatabase: RelationName.CREATED_BY,
     relationNameForTargetDatabase: RelationName.CREATED_BY,
     url: 'CONTACT_URL',

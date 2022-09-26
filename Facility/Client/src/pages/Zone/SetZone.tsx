@@ -13,6 +13,8 @@ import DisplayNode from "../FacilityStructure/Display/DisplayNode";
 import DocumentUploadComponent from "../FacilityStructure/Forms/FileUpload/DocumentUpload/DocumentUpload";
 import ImageUploadComponent from "../FacilityStructure/Forms/FileUpload/ImageUpload/ImageUpload";
 import ZoneForm from "./Forms/ZoneForm";
+import ClassificationsService from "../../services/classifications"
+
 
 interface Node {
   cantDeleted: boolean;
@@ -96,6 +98,8 @@ const SetZone = () => {
   const [generateNodeName, setGenerateNodeName] = useState<string | undefined>("");
   const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
   const [deleteNodeKey, setDeleteNodeKey] = useState<any>("");
+  const [codeCategory, setCodeCategory] = useState("");
+
   const { t } = useTranslation(["common"]);
 
   const params = useParams();
@@ -196,7 +200,7 @@ const SetZone = () => {
         getZone();
         setSelectedNodeKey([]);
         setSelectedKeys([]);
-        setDisplay(false); 
+        setDisplay(false);
       })
       .catch((err) => {
         toast.current.show({
@@ -309,6 +313,42 @@ const SetZone = () => {
           submitted={submitted}
           setSubmitted={setSubmitted}
           selectedNodeKey={selectedNodeKey}
+          setSelectedNodeKey={setSelectedNodeKey}
+          editDia={editDia}
+          getZone={getZone}
+          setAddDia={setAddDia}
+          setEditDia={setEditDia}
+          isUpdate={isUpdate}
+          setIsUpdate={setIsUpdate}
+          zoneData={data}
+          selectedSpaceKeys={selectedKeys}
+          setSelectedSpaceKeys={setSelectedKeys}
+          selectedSpaceNames={selectedKeysName}
+          setSelectedSpaceNames={setSelectedKeysName}
+        />
+      </Dialog>
+
+      <Dialog
+        header={t("Edit Item")}
+        visible={editDia}
+        style={{ width: "40vw" }}
+        footer={renderFooterEdit}
+        onHide={() => {
+          // setFormTypeId(undefined); 
+          // setLabels([]);
+          // setAddDia(false);
+          // setSelectedFacilityType(undefined);
+          // reset({ ...createZone });
+
+          setEditDia(false);
+        }}
+      >
+
+        <ZoneForm
+          submitted={submitted}
+          setSubmitted={setSubmitted}
+          selectedNodeKey={selectedNodeKey}
+          setSelectedNodeKey={setSelectedNodeKey}
           editDia={editDia}
           getZone={getZone}
           setAddDia={setAddDia}
@@ -409,6 +449,22 @@ const SetZone = () => {
                           setDisplayKey(data.key);
                         }}
                         title={t("Display")}
+                      />
+                    ) : null}
+                  </span>
+                  <span>
+                    {data.nodeType === "Zone" ? (
+                      <Button
+                        icon="pi pi-pencil"
+                        className="p-button-rounded p-button-secondary p-button-text"
+                        aria-label="Edit Item"
+                        onClick={() => {
+                          setSelectedNodeKey(data.key);
+                          // let dataKey: any = data.key;
+                          setIsUpdate(true);
+                          setEditDia(true);
+                        }}
+                        title={t("Edit Item")}
                       />
                     ) : null}
                   </span>
