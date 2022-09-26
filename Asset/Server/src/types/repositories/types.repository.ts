@@ -45,9 +45,9 @@ export class TypesRepository implements GeciciInterface<Type> {
         { isDeleted: false },
         RelationName.CREATED_BY,
       );
-      if (createtByNode.length > 0 ) {
-        nodes[0].get('n').properties['createdBy'] = createtByNode[0].get('children').properties.referenceKey
-      };
+      if (createtByNode.length > 0) {
+        nodes[0].get('n').properties['createdBy'] = createtByNode[0].get('children').properties.referenceKey;
+      }
 
       const manufacturedByNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
         [Neo4jLabelEnum.TYPE],
@@ -56,10 +56,10 @@ export class TypesRepository implements GeciciInterface<Type> {
         { isDeleted: false },
         RelationName.MANUFACTURED_BY,
       );
-      if (manufacturedByNode.length > 0 ) {
+      if (manufacturedByNode.length > 0) {
         nodes[0].get('n').properties['manufacturer'] = manufacturedByNode[0].get('children').properties.referenceKey;
       }
-      
+
       const warrantyGuaranorLaborNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
         [Neo4jLabelEnum.TYPE],
         { key: nodes[0].get('n').properties.key },
@@ -67,11 +67,11 @@ export class TypesRepository implements GeciciInterface<Type> {
         { isDeleted: false },
         RelationName.WARRANTY_GUARANTOR_LABOR,
       );
-      if (warrantyGuaranorLaborNode.length > 0 ) {
+      if (warrantyGuaranorLaborNode.length > 0) {
         nodes[0].get('n').properties['warrantyGuarantorLabor'] =
-        warrantyGuaranorLaborNode[0].get('children').properties.referenceKey;
+          warrantyGuaranorLaborNode[0].get('children').properties.referenceKey;
       }
-      
+
       const warrantyGuaranorPartsNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
         [Neo4jLabelEnum.TYPE],
         { key: nodes[0].get('n').properties.key },
@@ -79,11 +79,10 @@ export class TypesRepository implements GeciciInterface<Type> {
         { isDeleted: false },
         RelationName.WARRANTY_GUARANTOR_PARTS,
       );
-      if (warrantyGuaranorPartsNode.length > 0 ) {
+      if (warrantyGuaranorPartsNode.length > 0) {
         nodes[0].get('n').properties['warrantyGuarantorParts'] =
-        warrantyGuaranorPartsNode[0].get('children').properties.referenceKey;
+          warrantyGuaranorPartsNode[0].get('children').properties.referenceKey;
       }
-      
 
       return nodes[0]['_fields'][0];
     } catch (error) {
@@ -244,7 +243,6 @@ export class TypesRepository implements GeciciInterface<Type> {
       const typeUrl = `${process.env.TYPE_URL}/${node[0].get('children').properties.key}`;
 
       const finalObjectArray = await avaiableUpdateVirtualPropsGetter(updateTypeDto);
-      console.log(finalObjectArray)
 
       for (let index = 0; index < finalObjectArray.length; index++) {
         const url =
@@ -309,23 +307,22 @@ export class TypesRepository implements GeciciInterface<Type> {
       if (hasChildrenArray.length === 0) {
         deletedNode = await this.neo4jService.updateByIdAndFilter(+_id, {}, [], { isDeleted: true, isActive: false });
 
-
         const virtualNodes = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
           [Neo4jLabelEnum.TYPE],
-          {key: typeNode.properties.key },
+          { key: typeNode.properties.key },
           ['Virtual'],
           { isDeleted: false },
           RelationName.HAS_VIRTUAL_RELATION,
-        ); 
+        );
         Object.keys(virtualNodes).forEach(async (element) => {
           deletedVirtualNode = await this.neo4jService.updateByIdAndFilter(
             +virtualNodes[element]['_fields'][1].identity.low,
             {},
             [],
-            {"isDeleted": true}
-          ); 
+            { isDeleted: true },
+          );
         });
-       
+
         await this.kafkaService.producerSendMessage(
           'deleteVirtualNodeRelations',
           JSON.stringify({ referenceKey: typeNode.properties.key }),

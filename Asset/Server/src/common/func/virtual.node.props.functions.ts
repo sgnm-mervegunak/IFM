@@ -56,7 +56,7 @@ export function avaiableCreateVirtualPropsGetter(dto) {
     const arr = Object.keys(createKafkaTopicArray[i])
       .map((prop) => {
         if (existVİrtualNodePropsInDtoArray.includes(prop)) {
-          if (prop === 'space') {
+          if (prop === 'Space') {
             switch (dto.spaceType) {
               case SpaceType.SPACE:
                 createKafkaTopicArray[i]['url'] = 'STRUCTURE_URL';
