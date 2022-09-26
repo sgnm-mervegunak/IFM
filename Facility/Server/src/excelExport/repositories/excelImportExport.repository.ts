@@ -220,7 +220,7 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
                 ZoneName:data.value.parent_of[index].parent_of[i].name,
                 Category:data.value.parent_of[index].parent_of[i].classified_by[0].name,
                 CreatedBy:data.value.parent_of[index].parent_of[i].created_by[0].email,
-                SpaceNames:data.value.parent_of[index].parent_of[i].spaceNames,
+                SpaceNames:data.value.parent_of[index].parent_of[i].spaceNames.toString(),
                 Description:data.value.parent_of[index].parent_of[i].description,
                 Tags:data.value.parent_of[index].parent_of[i].tag.toString()
               
@@ -493,7 +493,7 @@ await workbook.xlsx.load(buffer).then(function async(book) {
  })
 
 
- for (let i = 1; i < data.length; i++) {
+ for (let i = 1; i <10; i++) {
   
     let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"FacilityZoneTypes",data[i][4],"zz");
 
@@ -507,15 +507,15 @@ await workbook.xlsx.load(buffer).then(function async(book) {
   MATCH (c:Space {name:"${data[i][5]}"})\
   MATCH (p {email:"${email}"})\
   ${createdCypher} \
-  MERGE (zz:Zone {name:"${data[i][1]}",createdOn:"${data[i][3]}",externalSystem:"${data[i][6]}", externalObject:"${data[i][7]}", externalIdentifier:"${data[i][8]}", description:"${data[i][9]}", tag:[],\
-  nodeKeys:[], nodeType:"Zone",images:[],documents:[],spaceNames:"${data[i][5]}", key:"${this.keyGenerate()}", canDisplay:true, isActive:true, isDeleted:false, canDelete:true})\
+  ${await this.getZoneFromDb(buildingKey,data[i])} \
   MERGE (z)-[:PARENT_OF]->(zz)  \
   MERGE (c)-[:MERGEDZN]->(zz)  \
   ${createdRelationCypher} \
   MERGE (zz)-[:CREATED_BY]->(p);`
 
-  await this.neo4jService.write(cypher)
 
+   let data2 =await this.neo4jService.write(cypher)
+console.log(data2)
   
 }
 
@@ -628,7 +628,6 @@ await workbook.xlsx.load(buffer).then(function async(book) {
 
   let cypher2 = `MATCH (p {email:"${email}"}) MATCH (p2 {email:"${createdByEmail}"}) MERGE (p)-[:CREATED_BY]->(p2)`
   let data3 =await this.neo4jService.write(cypher2);
-  console.log(data3)
   };
 
 
@@ -658,4 +657,22 @@ await workbook.xlsx.load(buffer).then(function async(book) {
   keyGenerate(){
       return uuidv4()
   }
+
+
+  async getZoneFromDb(buildingKey,data){
+
+
+    let cypher =`MATCH (b:Building {key:"${buildingKey}"})-[:PARENT_OF]->(zz:Zones {name:"Zones"})-[:PARENT_OF]->(z:Zone {name:"${data[1]}"}) return z`;
+    let returnData = await this.neo4jService.read(cypher);
+    
+    
+    if(returnData.records?.length==1){
+      return `Match (zz:Zone {key:"${returnData.records[0]["_fields"][0].properties.key}"}) SET zz.spaceNames = zz.spaceNames + "${data[5]}"`;
+    }else{
+      return `MERGE (zz:Zone {name:"${data[1]}",createdOn:"${data[3]}",externalSystem:"${data[6]}", externalObject:"${data[7]}", externalIdentifier:"${data[8]}", description:"${data[9]}", tag:[],\
+      nodeKeys:[], nodeType:"Zone",images:[],documents:[],spaceNames:["${data[5]}"], key:"${this.keyGenerate()}", canDisplay:true, isActive:true, isDeleted:false, canDelete:true})\
+      MERGE (z)-[:PARENT_OF]->(zz)`; 
+    }
+  }
 }
+
