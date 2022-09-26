@@ -20,6 +20,7 @@ interface Params {
     submitted: boolean;
     setSubmitted: any;
     selectedNodeKey: string;
+    setSelectedNodeKey: React.Dispatch<React.SetStateAction<string[]>>;
     editDia: boolean;
     getZone: () => void;
     setAddDia: React.Dispatch<React.SetStateAction<boolean>>;
@@ -64,6 +65,7 @@ const ZoneForm = ({
     submitted,
     setSubmitted,
     selectedNodeKey,
+    setSelectedNodeKey,
     editDia,
     getZone,
     setAddDia,
@@ -199,11 +201,20 @@ const ZoneForm = ({
 
     const getNodeInfoForUpdate = (selectedNodeKey: string) => {
         FacilityStructureService.nodeInfo(selectedNodeKey)
-            .then((res) => {
-                // console.log(res.data);
+            .then(async(res) => {
                 // setSelectedFacilityType(res.data.properties.nodeType);
-                res.data.properties.category = res.data.properties.classificationKey;
-                res.data.properties.createdBy = res.data.properties.createdByKey;
+                // res.data.properties.category = res.data.properties.classificationKey;
+                // res.data.properties.createdBy = res.data.properties.createdByKey;
+                await ClassificationsService.findClassificationByCode(res.data.properties?.category)
+                    .then(
+                        (clsf) => {
+                            res.data.properties.category = clsf.data[1]?._fields[0]?.properties?.key;
+                        }
+                    )
+                    .catch((err) => {
+                        console.log("err", err);
+                    })
+
                 setData(res.data.properties);
             })
             .catch((err) => {
@@ -229,6 +240,7 @@ const ZoneForm = ({
 
     const onSubmit = (data: any) => {
         if (editDia === false) {
+
             let newNode: any = {};
             newNode = {
                 name: data?.name,
@@ -291,12 +303,14 @@ const ZoneForm = ({
 
                     // reset({ name: "", code: "", description: "", tag: [], category: "" });
 
-                    // setSelectedNodeKey([]);
+                    setSelectedNodeKey([]);
                     // setCreateZone({} as Node);
-                    setSelectedKeys([]);
+                    // setSelectedKeys([]);
+                    setSelectedSpaceKeys([]);
                     setAddDia(false);
                     getZone();
-                    // setSelectedKeysName([]);//----------------------
+                    // setSelectedKeysName([]);
+                    setSelectedSpaceNames([]);
                 })
                 .catch((err) => {
                     toast.current.show({
@@ -316,17 +330,20 @@ const ZoneForm = ({
                         code: data?.code,
                         tag: data?.tag,
                         description: data?.description,
+                        // category: codeCategory,
                         category: codeCategory,
-                        spaceNames: `${selectedSpaceNames.toString().replaceAll(",", ", ")}` || "",
-                        nodeKeys: selectedKeys || [],
-                        credatedBy: data?.credatedBy,
-                        createdOn: data?.createdOn,
-                        externalSystem: data?.externalSystem,
-                        externalObject: data?.externalObject,
-                        images: data?.images,
-                        documents: data?.documents,
+                        // spaceNames: `${selectedSpaceNames.toString().replaceAll(",", ", ")}` || "",
+                        spaceNames: res.data?.properties?.spaceNames || "",
+                        nodeKeys: res.data?.properties?.nodeKeys || [],
+                        createdBy: res.data?.properties?.createdBy || "",
+                        createdOn: res.data?.properties?.createdOn || "",
+                        externalSystem: res.data?.properties?.externalSystem || "",
+                        externalObject: res.data?.properties?.externalObject || "",
+                        images: data?.images || "",
+                        documents: data?.documents || "",
                     };
 
+                    console.log("update zone node: ", updateNode)
                     FacilityStructureService.update(res.data.id, updateNode)
                         .then((res) => {
                             toast.current.show({
@@ -358,6 +375,7 @@ const ZoneForm = ({
         }
     };
 
+
     if (editDia && !data) {
         return null;
     }
@@ -372,6 +390,7 @@ const ZoneForm = ({
                             autoComplete="off"
                             {...register("name")}
                             style={{ width: "100%" }}
+                            defaultValue={data?.name || ""}
                         />
                     </div>
                     <p style={{ color: "red" }}>{errors.name?.message}</p>
