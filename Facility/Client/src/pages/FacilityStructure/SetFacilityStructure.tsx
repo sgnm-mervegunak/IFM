@@ -1113,7 +1113,7 @@ const SetFacilityStructure = () => {
       >
         <DisplayNode displayKey={displayKey} docTypes={docTypes} />
       </Dialog>
-      <h1>{t("Facility Structure Editing")}</h1>
+      <h1>{t("Facility Structure Management")}</h1>
       <div className="field">
         <Tree
           loading={loading}

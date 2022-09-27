@@ -42,7 +42,7 @@ const ShowAsset = () => {
 
   const getAssets = () => {
 
-    StructureAssetService.findAsset(nodeKey).then((res) => {
+    StructureAssetService.findAll(nodeKey).then((res) => {
       console.log(res.data);
       setData(res.data);
       setLoading(false);
@@ -78,31 +78,31 @@ const ShowAsset = () => {
     getAssets();
   }, []);
 
-  const deleteFacility = () => {
-    StructureAssetService.removeAsset(nodeKey, asset.properties.key)
-      .then((response) => {
-        toast.current.show({
-          severity: "success",
-          summary: "Successful",
-          detail: "Asset Deleted",
-          life: 3000,
-        });
-        setDeleteAssetDialog(false);
-        setAsset(emptyAsset);
-        getAssets();
-      })
-      .catch((err) => {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
-        });
-        setDeleteAssetDialog(false);
-        setAsset(emptyAsset);
-        getAssets();
-      });
-  };
+  // const deleteFacility = () => {
+  //   StructureAssetService.removeAsset(nodeKey, asset.properties.key)
+  //     .then((response) => {
+  //       toast.current.show({
+  //         severity: "success",
+  //         summary: "Successful",
+  //         detail: "Asset Deleted",
+  //         life: 3000,
+  //       });
+  //       setDeleteAssetDialog(false);
+  //       setAsset(emptyAsset);
+  //       getAssets();
+  //     })
+  //     .catch((err) => {
+  //       toast.current.show({
+  //         severity: "error",
+  //         summary: "Error",
+  //         detail: err.response ? err.response.data.message : err.message,
+  //         life: 2000,
+  //       });
+  //       setDeleteAssetDialog(false);
+  //       setAsset(emptyAsset);
+  //       getAssets();
+  //     });
+  // };
 
   const hideDeleteFacilityDialog = () => {
     setDeleteAssetDialog(false);
@@ -137,7 +137,7 @@ const ShowAsset = () => {
         label="Yes"
         icon="pi pi-check"
         className="p-button-text"
-        onClick={deleteFacility}
+        // onClick={deleteFacility}
       />
     </>
   );

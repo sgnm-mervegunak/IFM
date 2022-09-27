@@ -16,8 +16,6 @@ import SetFacilityStructure from "./pages/FacilityStructure/SetFacilityStructure
 import FormGenerate from "./pages/FormGenerate/FormGenerate";
 import Facility2 from "./pages/Facility2";
 import Contact from "./pages/Contact/Contact";
-import StructureAsset from "./pages/StructureAsset/StructureAsset";
-import ShowAsset from "./pages/StructureAsset/ShowAsset";
 import { useAppSelector } from "./app/hook";
 import SetClassificationUser from "./pages/Classifications/SetClassificationUser";
 import SetFacilityStructure2 from "./pages/FacilityStructure/SetFacilityStructure2";
@@ -30,6 +28,8 @@ import SetType from "./pages/Types/SetType";
 import SetComponent from "./pages/Components/SetComponent";
 import SetComponentsDetail from "./pages/Components/SetComponentsDetail";
 import SetSystem from "./pages/Systems/SetSystem";
+import StructureAsset from "./pages/StructureAsset/StructureAsset";
+import EditAsset from "./pages/StructureAsset/EditAsset";
 
 // import Main from './pages/Main';
 
@@ -90,7 +90,7 @@ export default function Router() {
     {
       path: "/structure-asset",
       element: <AppLayout />,
-      children: [{ path: "showasset", element: <ShowAsset /> }],
+      children: [{ path: ":id", element: <EditAsset/> }],
     },
     {
       path: "/jointspace",

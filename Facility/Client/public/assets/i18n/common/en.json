@@ -1,11 +1,16 @@
 {
 	"Dashboard": "Dashboard",
+	"Organization/Realm": "Organization/Realm",
 	"Facility": "Facility",
     "Classifications": "Classifications",
 	"Facility Structure": "Facility Structure",
     "Joint Space": "Joint Space",
 	"Zone": "Zone",
     "Contact": "Contact",
+	"Asset":"Asset",
+	"Types":"Types",
+	"Components":"Components",
+	"Systems":"Systems",
 	"Structure-Asset": "Structure-Asset",
     "Buildings": "Buildings",
 	"Blocks": "Blocks",
@@ -15,7 +20,7 @@
 	"Block": "Block",
     "Floor": "Floor",
 	"Space": "Space",
-	"Classification Editing": "Classification Editing",
+	"Classification Management": "Classification Management",
 	"Add New Item": "Add New Item",
 	"Edit Item": "Edit Item",
 	"Code": "Code",
@@ -68,7 +73,7 @@
 	"Structure Updated":"Structure Updated",
 	"Facility Type":"Facility Type",
 	"Structure Detail":"Structure Detail",
-	"Facility Structure Editing": "Facility Structure Editing",
+	"Facility Structure Management": "Facility Structure Management",
 	"Edit Form":"Edit Form",
 	"Building Created":"Building Created",
 	"Block Created":"Block Created",
@@ -113,7 +118,7 @@
 	"Join":"Join",
 	"Joint Start Date": "Joint Start Date",
 	"Joint End Date": "Joint End Date",
-	"Contact Editing": "Contact Editing",
+	"Contact Management": "Contact Management",
 	"Contact Updated": "Contact Updated",
 	"Contact Created": "Contact Created",
 	"Contact not found": "Contact not found",
@@ -147,13 +152,12 @@
 	"Net Area can not be negative":"Net Area can not be negative",
 	"Usable Height must be a number":"Usable Height must be a number",
 	"Usable Height can not be negative":"Usable Height can not be negative",
-	"Import Contacts": "Import Contacts"
-
-
-
-
-
-
+	"Import Contacts": "Import Contacts",
+	"Manage Types": "Manage Types",
+	"Manage Components":"Manage Components",
+	"Manage Systems": "Manage Systems",
+	"Asset Type": "Asset Type",
+	"Structure Asset Management": "Structure Asset Management"
 }
 
 
