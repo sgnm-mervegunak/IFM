@@ -11,7 +11,7 @@ import axios from "axios";
 import { useTranslation } from "react-i18next";
 
 import SystemService from "../../../services/systems";
-import ClassificationsService from "../../../services/classifications";
+import AssetClassificationsService from "../../../services/assetclassifications";
 import ContactService from "../../../services/contact";
 import FacilityStructureService from "../../../services/facilitystructure";
 import { useAppSelector } from "../../../app/hook";
@@ -120,8 +120,8 @@ const SystemForm = ({
   };
 
   const getClassificationCategory = async () => {
-    await ClassificationsService.findAllActiveByLabel({
-      label: "OmniClass11"
+    await AssetClassificationsService.findAllActiveByLabel({
+      label: "OmniClass21"
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodes(temp);
@@ -409,7 +409,7 @@ const SystemForm = ({
                     value={field.value}
                     options={classificationCategory}
                     onChange={(e) => {
-                      ClassificationsService.nodeInfo(e.value as string)
+                      AssetClassificationsService.nodeInfo(e.value as string)
                         .then((res) => {
                           field.onChange(e.value)
                           setCodeCategory(res.data.properties.code || "");
