@@ -11,7 +11,7 @@ import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.e
 
 @Injectable()
 export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
-  constructor(private readonly neo4jService: Neo4jService) {}
+  constructor(private readonly neo4jService: Neo4jService) { }
 
   async findOneByRealm(key: string, realm: string, language: string) {
     let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
@@ -153,9 +153,9 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
   }
   ///////////////////////// Static DTO ////////////////////////////////////////////////////////////////////
   async update(_id: string, updateFacilityStructureDto, realm: string, language: string) {
-    debugger;
+    ;
     try {
-      debugger
+
 
       const updateFacilityStructureDtoWithoutLabelsAndParentId = {};
       Object.keys(updateFacilityStructureDto).forEach((element) => {
@@ -176,18 +176,19 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
       if (updateFacilityStructureDto['labels'] && updateFacilityStructureDto['labels'].length > 0) {
         await this.neo4jService.removeLabel(_id, result['labels']);
         await this.neo4jService.updateLabel(_id, updateFacilityStructureDto['labels']);
+      } else {
       }
-      debugger
+
       return updatedNode;
 
     } catch (error) {
-      console.log(error, "ERRORRRRRRRRRRRRRRRRRRRRRR")
-      debugger
+      console.log(error, "ERROR--------------------")
+
 
     }
-    debugger
 
-  
+
+
   }
 
   async delete(key: string, realm: string, language: string) {
@@ -334,9 +335,8 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
     MATCH (c:Space {name:"${data[i][5]}"})\
     MATCH (p {email:"${data[i][2]}"})\
     MATCH (zt {key:"${key}"})\
-    MERGE (zz:Zone {name:"${data[i][1]}",createdOn:"${data[i][3]}",externalSystem:"${data[i][6]}", externalObject:"${
-        data[i][7]
-      }", externalIdentifier:"${data[i][8]}", description:"${data[i][9]}", tag:[],\
+    MERGE (zz:Zone {name:"${data[i][1]}",createdOn:"${data[i][3]}",externalSystem:"${data[i][6]}", externalObject:"${data[i][7]
+        }", externalIdentifier:"${data[i][8]}", description:"${data[i][9]}", tag:[],\
     nodeKeys:[], nodeType:"Zone", key:"${generateUuid()}", canDisplay:true, isActive:true, isDeleted:false, canDelete:true})\
     MERGE (z)-[:PARENT_OF]->(zz)  \
     MERGE (c)-[:MERGEDZN]->(zz)  \
