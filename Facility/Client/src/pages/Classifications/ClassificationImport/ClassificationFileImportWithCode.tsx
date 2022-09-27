@@ -6,9 +6,9 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from "react-i18next";
 
-import { useAppSelector } from "../../app/hook";
+import { useAppSelector } from "../../../app/hook";
 
-const ClassificationFileImportWithoutCode: React.FC = () => {
+const ClassificationFileImportWithCode: React.FC = () => {
     const { toast } = useAppSelector((state) => state.toast);
     const refUpload = useRef<any>(null);
     const auth = useAppSelector((state) => state.auth);
@@ -23,7 +23,7 @@ const ClassificationFileImportWithoutCode: React.FC = () => {
 
     const uploadCSV = (e: any) => {
         const file = e.files[0];
-        const url = `http://localhost:3010/classification/addAClassificationFromExcel`;
+        const url: any = process.env.REACT_APP_API_CLASSIFICATION_IMPORT_WITH_CODE;
         const formData = new FormData();
 
         formData.append('file', file);
@@ -44,6 +44,7 @@ const ClassificationFileImportWithoutCode: React.FC = () => {
             });
             backToClassification();
         })
+
             .catch(err => {
                 toast.current.show({
                     severity: "error",
@@ -56,6 +57,7 @@ const ClassificationFileImportWithoutCode: React.FC = () => {
 
         refUpload.current.clear();
     }
+
     return (
         <>
             <div className="card">
@@ -64,17 +66,22 @@ const ClassificationFileImportWithoutCode: React.FC = () => {
                 )
                     : (
                         <>
-                            <h5>{t("Classification File Import Without Code")}</h5>
+                            <h5>{t("Classification File Import With Code")}</h5>
                             <p
                                 className="mt-4 cursor-pointer"
                                 style={{ color: "blue" }}
-                                onClick={() => window.location.href = "http://localhost:3000/documents/classification-without-code.xlsx"}
+                                onClick={() => {
+                                    let URL: any = process.env.REACT_APP_API_CLASSIFICATION_SAMPLE_DATA_WITH_CODE;
+                                    window.location.href = URL;
+                                }
+                                }
                             >
                                 {t("Download to see a sample classification file")}
                             </p>
                             <FileUpload
                                 name="upfile[]"
-                                accept="csv/*"
+                                accept="/*"
+                                className="mt-4"
                                 maxFileSize={1000000}
                                 chooseLabel={t("Select File")}
                                 uploadLabel={t("Upload")}
@@ -82,12 +89,15 @@ const ClassificationFileImportWithoutCode: React.FC = () => {
                                 customUpload={true}
                                 uploadHandler={uploadCSV}
                                 ref={refUpload}
+
                             />
                         </>
-                    )}
+                    )
+                }
+
             </div>
         </>
     )
 };
 
-export default ClassificationFileImportWithoutCode;
+export default ClassificationFileImportWithCode;
