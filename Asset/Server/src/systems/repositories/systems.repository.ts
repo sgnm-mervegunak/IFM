@@ -423,7 +423,7 @@ export class SystemsRepository implements SystemsInterface<System> {
 
         const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
           [Neo4jLabelEnum.SYSTEM],
-          { key: node[0].get('n').properties.key },
+          { key: node.properties.key },
           ['Virtual'],
           { isDeleted: false },
           RelationName.CREATED_BY,

@@ -622,7 +622,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
         deletedNode = await this.neo4jService.updateByIdAndFilter(+_id, {}, [], { isDeleted: true, isActive: false });
         const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
           [Neo4jLabelEnum.COMPONENT],
-          { key: typeNode[0].get('n').properties.key },
+          { key: typeNode.properties.key },
           ['Virtual'],
           { isDeleted: false },
           RelationName.CREATED_BY,
@@ -643,13 +643,13 @@ export class ComponentRepository implements ComponentInterface<Component> {
 
       return deletedNode;
     } catch (error) {
-      const { code, message } = error.response;
+      const code = error.response?.code;
       if (code === CustomAssetError.HAS_CHILDREN) {
         throw new HttpException({ message: error.response.message }, 400);
       } else if (code === 5005) {
         AssetNotFoundException(_id);
       } else {
-        throw new HttpException(message, code);
+        throw new HttpException(error, 500);
       }
     }
   }
