@@ -19,11 +19,6 @@ export default [
       { label: "Joint Space", icon: "pi pi-th-large", to: "/jointspace" },
       { label: "Zone", icon: "pi pi-flag-fill", to: "/zone" },
       { label: "Contact", icon: "pi pi-id-card", to: "/contact" },
-      // {
-      //   label: "Structure-Component",
-      //   icon: "pi pi-share-alt",
-      //   to: "/structure-asset",
-      // },
       {
         label: "Asset",
         icon: "pi pi-fw pi-database",
@@ -39,11 +34,16 @@ export default [
             to: "/asset-components",
           },
           {
-            label: "System",
+            label: "Systems",
             icon: "pi pi-fw pi-angle-right",
             to: "/asset-systems",
           },
         ],
+      },
+      {
+        label: "Structure Asset",
+        icon: "pi pi-share-alt",
+        to: "/structure-asset",
       },
     ],
   },

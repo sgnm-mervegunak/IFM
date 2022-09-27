@@ -515,7 +515,7 @@ const SetClassificationAdmin = () => {
           <Checkbox className="ml-3" onChange={e => setIsActive(e.checked)} checked={isActive}></Checkbox>
         </div>
       </Dialog>
-      <h1>{t("Classification Editing")}</h1>
+      <h1>{t("Classification Management")}</h1>
       <div className="field">
         <Tree
 

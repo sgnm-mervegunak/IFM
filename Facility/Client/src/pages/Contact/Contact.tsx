@@ -356,7 +356,7 @@ const Contact = () => {
         />
       </Dialog>
 
-      <h1>{t("Contact Editing")}</h1>
+      <h1>{t("Contact Management")}</h1>
       <div className="field">
         <Tree
           loading={loading}
