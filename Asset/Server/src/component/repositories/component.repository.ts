@@ -6,7 +6,19 @@ import {
 import { Component } from '../entities/component.entity';
 import { NestKafkaService, nodeHasChildException } from 'ifmcommon';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
-import { assignDtoPropToEntity, changeObjectKeyName, createDynamicCyperObject, CustomNeo4jError, dynamicFilterPropertiesAdder, dynamicFilterPropertiesAdderAndAddParameterKey, dynamicLabelAdder, dynamicNotLabelAdder, filterArrayForEmptyString, Neo4jService, tree_structure_not_found_by_realm_name_error } from 'sgnm-neo4j/dist';
+import {
+  assignDtoPropToEntity,
+  changeObjectKeyName,
+  createDynamicCyperObject,
+  CustomNeo4jError,
+  dynamicFilterPropertiesAdder,
+  dynamicFilterPropertiesAdderAndAddParameterKey,
+  dynamicLabelAdder,
+  dynamicNotLabelAdder,
+  filterArrayForEmptyString,
+  Neo4jService,
+  tree_structure_not_found_by_realm_name_error,
+} from 'sgnm-neo4j/dist';
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
 import { CreateComponentDto } from '../dto/create.component.dto';
 import { UpdateComponentDto } from '../dto/update.component.dto';
@@ -19,7 +31,10 @@ import { HttpRequestHandler } from 'src/common/class/http.request.helper.class';
 import { VirtualNodeCreator } from 'src/common/class/virtual.node.creator';
 import { ComponentInterface } from 'src/common/interface/component.interface';
 import * as moment from 'moment';
-import { avaiableCreateVirtualPropsGetter, avaiableUpdateVirtualPropsGetter } from 'src/common/func/virtual.node.props.functions';
+import {
+  avaiableCreateVirtualPropsGetter,
+  avaiableUpdateVirtualPropsGetter,
+} from 'src/common/func/virtual.node.props.functions';
 import { VirtualNodeHandler } from 'src/common/class/virtual.node.dealer';
 import { ConfigService } from '@nestjs/config';
 
@@ -131,7 +146,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
 
       const typeNode = await this.neo4jService.findChildrensByIdAndFilters(
         typesNode[0].get('n').identity.low,
-        {"isDeleted": false},
+        { isDeleted: false },
         [Neo4jLabelEnum.TYPE],
         {
           key: createComponentDto.parentKey,
@@ -144,7 +159,6 @@ export class ComponentRepository implements ComponentInterface<Component> {
         throw new HttpException(wrong_parent_error(), 400);
       }
 
-    
       const component = new Component();
       const componentFinalObject = assignDtoPropToEntity(component, createComponentDto);
       delete componentFinalObject['space'];
@@ -159,8 +173,17 @@ export class ComponentRepository implements ComponentInterface<Component> {
       componentNode.properties.name = uniqName;
       componentNode['properties']['id'] = componentNode['identity'].low;
       const componentUrl = `${process.env.COMPONENT_URL}/${componentNode.properties.key}`;
-      const result = { id: componentNode['identity'].low, labels: componentNode['labels'], properties: componentNode['properties'] };
-      await this.neo4jService.addParentRelationByIdAndFilters(result['id'], {}, typeNode[0].get('children').identity.low, {}); 
+      const result = {
+        id: componentNode['identity'].low,
+        labels: componentNode['labels'],
+        properties: componentNode['properties'],
+      };
+      await this.neo4jService.addParentRelationByIdAndFilters(
+        result['id'],
+        {},
+        typeNode[0].get('children').identity.low,
+        {},
+      );
 
       const finalObjectArray = avaiableCreateVirtualPropsGetter(createComponentDto);
 
@@ -170,7 +193,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
 
         const contact = await this.httpService.get(url, { authorization });
       }
-    
+
       await this.virtualNodeHandler.createVirtualNode(componentNode['identity'].low, componentUrl, finalObjectArray);
 
       return result;
@@ -361,14 +384,12 @@ export class ComponentRepository implements ComponentInterface<Component> {
         { isDeleted: false, isActive: true },
         RelationName.PARENT_OF,
       );
-      console.log(node);
       if (!node.length) {
         throw new HttpException(node_not_found(), 400);
       }
       const componentUrl = `${process.env.COMPONENT_URL}/${node[0].get('children').properties.key}`;
-      const finalObjectArray = await avaiableUpdateVirtualPropsGetter(updateComponentDto); 
+      const finalObjectArray = await avaiableUpdateVirtualPropsGetter(updateComponentDto);
       for (let index = 0; index < finalObjectArray.length; index++) {
-        console.log(finalObjectArray[index].newParentKey);
         const url =
           (await this.configService.get(finalObjectArray[index].url)) + '/' + finalObjectArray[index].newParentKey;
 
@@ -381,17 +402,12 @@ export class ComponentRepository implements ComponentInterface<Component> {
       delete updateComponentDto['createdBy'];
       delete updateComponentDto['warrantyGuarantorParts'];
       delete updateComponentDto['warrantyGuarantorLabor'];
-      const updatedNode = await this.neo4jService.updateByIdAndFilter(
-        +_id,
-        { isDeleted: false, isActive: true },
-        [],
-        updateComponentDto,
-      );
+
+      const updatedNode = await this.neo4jService.updateById(_id, updateComponentDto);
       if (!updatedNode) {
         throw new FacilityStructureNotFountException(_id);
       }
       return updatedNode;
-       
 
       // let structureUrl = '';
       // let structure;
@@ -558,8 +574,6 @@ export class ComponentRepository implements ComponentInterface<Component> {
       // delete updateComponentDto['warrantyGuarantorParts'];
       // delete updateComponentDto['warrantyGuarantorLabor'];
 
-
-
       // const updatedNode = await this.neo4jService.updateByIdAndFilter(
       //   +_id,
       //   { isDeleted: false, isActive: true },
@@ -603,17 +617,17 @@ export class ComponentRepository implements ComponentInterface<Component> {
         deletedNode = await this.neo4jService.updateByIdAndFilter(+_id, {}, [], { isDeleted: true, isActive: false });
         const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
           [Neo4jLabelEnum.COMPONENT],
-          {key: typeNode[0].get('n').properties.key },
+          { key: typeNode[0].get('n').properties.key },
           ['Virtual'],
           { isDeleted: false },
           RelationName.CREATED_BY,
-        ); 
+        );
         deletedVirtualNode = await this.neo4jService.updateByIdAndFilter(
           +virtualNode[0].get('children').identity.low,
           {},
           [],
-          {"isDeleted": true}
-        ); 
+          { isDeleted: true },
+        );
         await this.kafkaService.producerSendMessage(
           'deleteVirtualNodeRelations',
           JSON.stringify({ referenceKey: typeNode.properties.key }),
@@ -636,23 +650,21 @@ export class ComponentRepository implements ComponentInterface<Component> {
   }
 
   async findChildrenOfRootByRealm(header) {
-
     try {
       let { realm } = header;
-   
-      let node =  await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructure(
+
+      let node = await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructure(
         [Neo4jLabelEnum.TYPES],
         [],
-        {"isDeleted": false, realm},
+        { isDeleted: false, realm },
         [],
         ['Virtual'],
-        {"isDeleted": false},
-      ) 
-     
+        { isDeleted: false },
+      );
+
       if (!node) {
         throw new HttpException(node_not_found(), 400);
       }
-      
 
       node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
       return node;

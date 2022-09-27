@@ -50,7 +50,7 @@ export class TypesRepository implements GeciciInterface<Type> {
           record.get('children').properties.referenceKey;
       });
 
-      return nodes[0].get('parent').properties;
+      return nodes[0].get('parent');
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
