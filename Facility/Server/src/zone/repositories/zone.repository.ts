@@ -153,27 +153,41 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
   }
   ///////////////////////// Static DTO ////////////////////////////////////////////////////////////////////
   async update(_id: string, updateFacilityStructureDto, realm: string, language: string) {
-    const updateFacilityStructureDtoWithoutLabelsAndParentId = {};
-    Object.keys(updateFacilityStructureDto).forEach((element) => {
-      if (element != 'labels' && element != 'parentId') {
-        updateFacilityStructureDtoWithoutLabelsAndParentId[element] = updateFacilityStructureDto[element];
+    debugger;
+    try {
+      debugger
+
+      const updateFacilityStructureDtoWithoutLabelsAndParentId = {};
+      Object.keys(updateFacilityStructureDto).forEach((element) => {
+        if (element != 'labels' && element != 'parentId') {
+          updateFacilityStructureDtoWithoutLabelsAndParentId[element] = updateFacilityStructureDto[element];
+        }
+      });
+      const dynamicObject = createDynamicCyperObject(updateFacilityStructureDtoWithoutLabelsAndParentId);
+      const updatedNode = await this.neo4jService.updateById(_id, updateFacilityStructureDto);
+      if (!updatedNode) {
+        throw new FacilityStructureNotFountException(_id);
       }
-    });
-    const dynamicObject = createDynamicCyperObject(updateFacilityStructureDtoWithoutLabelsAndParentId);
-    const updatedNode = await this.neo4jService.updateById(_id, updateFacilityStructureDto);
-    if (!updatedNode) {
-      throw new FacilityStructureNotFountException(_id);
+      const result = {
+        id: updatedNode['identity'].low,
+        labels: updatedNode['labels'],
+        properties: updatedNode['properties'],
+      };
+      if (updateFacilityStructureDto['labels'] && updateFacilityStructureDto['labels'].length > 0) {
+        await this.neo4jService.removeLabel(_id, result['labels']);
+        await this.neo4jService.updateLabel(_id, updateFacilityStructureDto['labels']);
+      }
+      debugger
+      return updatedNode;
+
+    } catch (error) {
+      console.log(error, "ERRORRRRRRRRRRRRRRRRRRRRRR")
+      debugger
+
     }
-    const result = {
-      id: updatedNode['identity'].low,
-      labels: updatedNode['labels'],
-      properties: updatedNode['properties'],
-    };
-    if (updateFacilityStructureDto['labels'] && updateFacilityStructureDto['labels'].length > 0) {
-      await this.neo4jService.removeLabel(_id, result['labels']);
-      await this.neo4jService.updateLabel(_id, updateFacilityStructureDto['labels']);
-    }
-    return updatedNode;
+    debugger
+
+  
   }
 
   async delete(key: string, realm: string, language: string) {
