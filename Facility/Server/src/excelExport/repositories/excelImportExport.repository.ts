@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { errorMonitor } from 'events';
 import { Neo4jService } from 'sgnm-neo4j/dist';
-import { building_already_exist } from 'src/common/const/custom.classification.error';
+import { building_already_exist, building_already_exist_object, floor_already_exist, floor_already_exist_object } from 'src/common/const/custom.classification.error';
 
 
 import { ExcelImportExportInterface, HeaderInterface, MainHeaderInterface } from 'src/common/interface/excel.import.export.interface';
@@ -335,7 +335,7 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
   await this.neo4jService.write(cypher)
 
    }else {
-    building_already_exist()
+    throw new HttpException(building_already_exist_object(),400)
    }
    
    } catch (error) {
@@ -348,44 +348,59 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
 
   async addFloorsToBuilding(file: Express.Multer.File, header:MainHeaderInterface, buildingKey: string)
 {
-  let email:string;
-  const {realm}=header;
-
   let data=[]
+  try {
+    let email:string;
+    const {realm}=header;
   
+   
+    
+  
+    let buffer = new Uint8Array(file.buffer);
+    const workbook = new exceljs.Workbook();
+  
+  
+  await workbook.xlsx.load(buffer).then(function async(book) {
+      const firstSheet =  book.getWorksheet(4);
+      firstSheet.eachRow({ includeEmpty: false }, function(row) {
+        data.push(row.values);
+      });
+   })
+  
+  
+     for (let i = 1; i < data.length; i++) {
+      let checkFloor = await this.neo4jService.findChildrensByLabelsAndFilters(['Building'],{key:buildingKey},[`Floor`],{name:data[i][1]});
+      console.log(checkFloor.length)
+      if(checkFloor.length==0){
+        let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"FacilityFloorTypes",data[i][4],"f");
+  
+        if(typeof data[i][2]=='object'){
+          email=await data[i][2].text;
+        }else {
+          email= await data[i][2];
+        }
+    
+        let cypher=`MATCH (a:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b:Building {key:"${buildingKey}"}) \
+                    ${createdCypher} \
+                    MATCH (p {email:"${email}"}) \
+                    MERGE (f:Floor {code:"",name:"${data[i][1]}",isDeleted:false,isActive:true,nodeType:"Floor",description:"${data[i][8]}",tag:[],canDelete:true,canDisplay:true,key:"${this.keyGenerate()}",createdOn:"${data[i][3]}",elevation:"${data[i][9]}",height:"${data[i][10]}",externalSystem:"",externalObject:"",externalIdentifier:""}) \
+                    MERGE (b)-[:PARENT_OF]->(f)\
+                    ${createdRelationCypher} \
+                    MERGE (f)-[:CREATED_BY]->(p)`;
+    
+     await this.neo4jService.write(cypher);
 
-  let buffer = new Uint8Array(file.buffer);
-  const workbook = new exceljs.Workbook();
+      }else {
+        throw new HttpException(floor_already_exist_object(data[i][1]),400)
+      }
 
-
-await workbook.xlsx.load(buffer).then(function async(book) {
-    const firstSheet =  book.getWorksheet(4);
-    firstSheet.eachRow({ includeEmpty: false }, function(row) {
-      data.push(row.values);
-    });
- })
-
-
-   for (let i = 1; i < data.length; i++) {
-    let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"FacilityFloorTypes",data[i][4],"f");
-
-    if(typeof data[i][2]=='object'){
-      email=await data[i][2].text;
-    }else {
-      email= await data[i][2];
     }
+  } catch (error) {
+    if(error.response?.code===10004){
+      floor_already_exist(error.response?.name)
+    }
+   }
 
-    let cypher=`MATCH (a:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b:Building {key:"${buildingKey}"}) \
-                ${createdCypher} \
-                MATCH (p {email:"${email}"}) \
-                MERGE (f:Floor {code:"",name:"${data[i][1]}",isDeleted:false,isActive:true,nodeType:"Floor",description:"${data[i][8]}",tag:[],canDelete:true,canDisplay:true,key:"${this.keyGenerate()}",createdOn:"${data[i][3]}",elevation:"${data[i][9]}",height:"${data[i][10]}",externalSystem:"",externalObject:"",externalIdentifier:""}) \
-                MERGE (b)-[:PARENT_OF]->(f)\
-                ${createdRelationCypher} \
-                MERGE (f)-[:CREATED_BY]->(p)`;
-
- await this.neo4jService.write(cypher);
-
-  }
 
  }
 

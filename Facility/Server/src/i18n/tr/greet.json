@@ -35,6 +35,7 @@
   "CONTACT_HAS_CHILDREN_ERROR": "{email} başka kullanıcıların yaratıcısı olduğundan silinemez",
   "CLASSIFICATION_ALREADY_EXIST":"Bu Classification zaten mevcut.",
   "CLASSIFICATION_IMPORT_ERROR": "Bu dosya doğru import formatına sahip değil.",
-  "BUILDING_ALREADY_EXIST":"Bu bina zaten bulmakta."
+  "BUILDING_ALREADY_EXIST":"Bu bina zaten bulmaktadır.",
+  "FLOOR_ALREADY_EXIST":"{name} katı bulunmaktadır."
 
 }

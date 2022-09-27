@@ -38,7 +38,7 @@ import { WrongClassificationParentExceptions } from 'src/common/badRequestExcept
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
 import { has_children_error, wrong_parent_error } from 'src/common/const/custom.error.object';
 import { RelationName } from 'src/common/const/relation.name.enum';
-import { classification_already_exist, classification_import_error } from 'src/common/const/custom.classification.error';
+import { classification_already_exist, classification_already_exist_object, classification_import_error, classification_import_error_object } from 'src/common/const/custom.classification.error';
 
 const exceljs = require('exceljs');
 const { v4: uuidv4 } = require('uuid');
@@ -599,7 +599,7 @@ export class ClassificationRepository implements classificationInterface<Classif
       );
     }
   }else{
-    throw new classification_already_exist()
+    throw new HttpException(classification_already_exist_object(),400)
   }
    
       } catch (error) {
@@ -630,7 +630,7 @@ export class ClassificationRepository implements classificationInterface<Classif
       columnName=data.shift()
       for (let i = 1; i < data.length; i++) {
         if(!data[i].match(/[0-9a-zA-Z#-]{1,}(: )[a-zA-Z\s\(\)İĞÜŞÖÇığüşöç:]*/)){
-          throw new classification_import_error();
+          throw new HttpException(classification_import_error_object(), 400)
         }
         
       }
@@ -839,7 +839,7 @@ export class ClassificationRepository implements classificationInterface<Classif
       );
     }
   }else  {
-    throw new classification_already_exist()
+    throw new HttpException(classification_already_exist_object(),400)
   }
      
     } catch (error) {
