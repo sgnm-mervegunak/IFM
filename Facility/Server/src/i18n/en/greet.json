@@ -37,7 +37,10 @@
   "CLASSIFICATION_ALREADY_EXIST":"This Classification already exists.",
   "CLASSIFICATION_IMPORT_ERROR":"This file has not the correct import format.",
   "BUILDING_ALREADY_EXIST":"This building already exists",
-  "FLOOR_ALREADY_EXIST":" This floor {name} already exists"
+  "FLOOR_ALREADY_EXIST":"Floor {name} already exists",
+  "SPACE_ALREADY_EXIST":"Space {name} already exists",
+  "ZONE_ALREADY_EXIST":"Zone {name} already exists",
+  "CHECK_EXCEL":"It is a valid excel file"
 
 }
 

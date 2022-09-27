@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { errorMonitor } from 'events';
 import { Neo4jService } from 'sgnm-neo4j/dist';
-import { building_already_exist, building_already_exist_object, floor_already_exist, floor_already_exist_object } from 'src/common/const/custom.classification.error';
+import { building_already_exist, building_already_exist_object, floor_already_exist, floor_already_exist_object, space_already_exist, space_already_exist_object } from 'src/common/const/custom.classification.error';
 
 
 import { ExcelImportExportInterface, HeaderInterface, MainHeaderInterface } from 'src/common/interface/excel.import.export.interface';
@@ -370,7 +370,7 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
   
      for (let i = 1; i < data.length; i++) {
       let checkFloor = await this.neo4jService.findChildrensByLabelsAndFilters(['Building'],{key:buildingKey},[`Floor`],{name:data[i][1]});
-      console.log(checkFloor.length)
+
       if(checkFloor.length==0){
         let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"FacilityFloorTypes",data[i][4],"f");
   
@@ -406,141 +406,162 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
 
 async addSpacesToBuilding( file: Express.Multer.File, header:MainHeaderInterface, buildingKey: string)
 {
-  let email:string;
-const {realm}= header;
-
-  let data=[]
-  let categoryColumn=[];
-  let values:[string];
-  let buffer = new Uint8Array(file.buffer);
-  const workbook = new exceljs.Workbook();
-
-
-await workbook.xlsx.load(buffer).then(function async(book) {
-    const firstSheet =  book.getWorksheet(5);
-    firstSheet.eachRow({ includeEmpty: false }, function(row) {
-      data.push(row.values);
-    });
-
-    values= firstSheet.getColumn(4).values;
+  try {
+    let email:string;
+    const {realm}= header;
     
- })
 
-
- for (let index = 2; index < values.length; index++) {
+    
+      let data=[]
+      let categoryColumn=[];
+      let values:[string];
+      let buffer = new Uint8Array(file.buffer);
+      const workbook = new exceljs.Workbook();
+    
+    
+    await workbook.xlsx.load(buffer).then(function async(book) {
+        const firstSheet =  book.getWorksheet(5);
+        firstSheet.eachRow({ includeEmpty: false }, function(row) {
+          data.push(row.values);
+        });
+    
+        values= firstSheet.getColumn(4).values;
+        
+     })
+    
+    
+     for (let index = 2; index < values.length; index++) {
+         
+      const element = values[index].split(new RegExp(/\s{3,}|:\s{1,}/g));
      
-  const element = values[index].split(new RegExp(/\s{3,}|:\s{1,}/g));
+      categoryColumn.push(element);
+    }
+      for(let i=0;i<categoryColumn.length;i++){
+    
+        categoryColumn[i][0]=categoryColumn[i][0].replace(/ /g, '-')
+      }
+    
+    
+    
+    let long=10
+    
+    for (let index = 0; index < categoryColumn.length; index++) {
+      categoryColumn[index][0] = categoryColumn[index][0].replaceAll('-', '');
+    }
+    //
+    for (let index = 0; index < categoryColumn.length; index++) {
+      if (categoryColumn[index][0].length == 4) {
+        categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
+        for (let i = 0; i < (long - 4) / 2; i++) {
+          categoryColumn[index][0].push(['00']);
+        }
+        categoryColumn[index][0] = categoryColumn[index][0].join('-');
+      } else if (categoryColumn[index][0].length == 6) {
+        categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
+        for (let i = 0; i < (long - 6) / 2; i++) {
+          categoryColumn[index][0].push(['00']);
+        }
+        categoryColumn[index][0] = categoryColumn[index][0].join('-');
+      } else if (categoryColumn[index][0].length == 8) {
+        categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
+        for (let i = 0; i < (long - 8) / 2; i++) {
+          categoryColumn[index][0].push(['00']);
+        }
+        categoryColumn[index][0] = categoryColumn[index][0].join('-');
+      } else if (categoryColumn[index][0].length == 10) {
+        categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
+        for (let i = 0; i < (long - 10) / 2; i++) {
+          categoryColumn[index][0].push(['00']);
+        }
+        categoryColumn[index][0] = categoryColumn[index][0].join('-');
+      } 
+    }
+    
+    for (let i = 1; i < data.length; i++) {
+      let checkSpaces = await this.neo4jService.findChildrensByLabelsAndFilters(['Building'],{key:buildingKey},[`Space`],{name:data[i][1]});
+      if(checkSpaces.length == 0) {
+        let {createdCypher,createdRelationCypher} =await this.createCypherForClassification(realm,'OmniClass13',categoryColumn[i-1][0],"s")
+        if(typeof data[i][2]=='object'){
+          email=await data[i][2].text;
+        }else {
+          email= await data[i][2];
+        }
+      
+        let cypher=`MATCH (a:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b:Building {key:"${buildingKey}"}) \
+        MATCH (p {email:"${email}"}) \
+         ${createdCypher} \
+         MATCH (b)-[:PARENT_OF]->(f:Floor {name:"${data[i][5]}"})\
+         MERGE (s:Space {operatorCode:"",operatorName:"",code:"",name:"${data[i][1]}",architecturalCode:"",architecturalName:"${data[i][1]}",createdOn:"${data[i][3]}",description:"${data[i][6]}",key:"${this.keyGenerate()}",externalSystem:"${data[i][7]}",externalObject:"${data[i][8]}",externalIdentifier:"${data[i][9]}",tag:[],roomTag:["${data[i][10]}"],usableHeight:"${data[i][11]}",grossArea:"${data[i][12]}",netArea:"${data[i][13]}",images:[],canDisplay:true,isDeleted:false,isActive:true,nodeType:"Space",isBlocked:false,canDelete:true})\
+         MERGE (f)-[:PARENT_OF]->(s) MERGE (s)-[:CREATED_BY]->(p) ${createdRelationCypher};`
+        await this.neo4jService.write(cypher);
+      }else{
+        throw new HttpException(space_already_exist_object(data[i][1]),400) 
+      }
+
+   
+    
+    }
+  } catch (error) {
+    if(error.response?.code===10005){
+      space_already_exist(error.response?.name)
+    }
+   }
  
-  categoryColumn.push(element);
-}
-  for(let i=0;i<categoryColumn.length;i++){
-
-    categoryColumn[i][0]=categoryColumn[i][0].replace(/ /g, '-')
-  }
-
-
-
-let long=10
-
-for (let index = 0; index < categoryColumn.length; index++) {
-  categoryColumn[index][0] = categoryColumn[index][0].replaceAll('-', '');
-}
-//
-for (let index = 0; index < categoryColumn.length; index++) {
-  if (categoryColumn[index][0].length == 4) {
-    categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
-    for (let i = 0; i < (long - 4) / 2; i++) {
-      categoryColumn[index][0].push(['00']);
-    }
-    categoryColumn[index][0] = categoryColumn[index][0].join('-');
-  } else if (categoryColumn[index][0].length == 6) {
-    categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
-    for (let i = 0; i < (long - 6) / 2; i++) {
-      categoryColumn[index][0].push(['00']);
-    }
-    categoryColumn[index][0] = categoryColumn[index][0].join('-');
-  } else if (categoryColumn[index][0].length == 8) {
-    categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
-    for (let i = 0; i < (long - 8) / 2; i++) {
-      categoryColumn[index][0].push(['00']);
-    }
-    categoryColumn[index][0] = categoryColumn[index][0].join('-');
-  } else if (categoryColumn[index][0].length == 10) {
-    categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
-    for (let i = 0; i < (long - 10) / 2; i++) {
-      categoryColumn[index][0].push(['00']);
-    }
-    categoryColumn[index][0] = categoryColumn[index][0].join('-');
-  } 
-}
-
-for (let i = 1; i < data.length; i++) {
-
-  let {createdCypher,createdRelationCypher} =await this.createCypherForClassification(realm,'OmniClass13',categoryColumn[i-1][0],"s")
-  if(typeof data[i][2]=='object'){
-    email=await data[i][2].text;
-  }else {
-    email= await data[i][2];
-  }
-
-  let cypher=`MATCH (a:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b:Building {key:"${buildingKey}"}) \
-  MATCH (p {email:"${email}"}) \
-   ${createdCypher} \
-   MATCH (b)-[:PARENT_OF]->(f:Floor {name:"${data[i][5]}"})\
-   MERGE (s:Space {operatorCode:"",operatorName:"",code:"",name:"${data[i][1]}",architecturalCode:"",architecturalName:"${data[i][1]}",createdOn:"${data[i][3]}",description:"${data[i][6]}",key:"${this.keyGenerate()}",externalSystem:"${data[i][7]}",externalObject:"${data[i][8]}",externalIdentifier:"${data[i][9]}",tag:[],roomTag:["${data[i][10]}"],usableHeight:"${data[i][11]}",grossArea:"${data[i][12]}",netArea:"${data[i][13]}",images:[],canDisplay:true,isDeleted:false,isActive:true,nodeType:"Space",isBlocked:false,canDelete:true})\
-   MERGE (f)-[:PARENT_OF]->(s) MERGE (s)-[:CREATED_BY]->(p) ${createdRelationCypher};`
-  await this.neo4jService.write(cypher);
-
-}
    
 
 }
 
 async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, buildingKey: string){
-  let email:string;
-  const {realm}= header;
-  let data=[]
-  let buffer = new Uint8Array(file.buffer);
-  const workbook = new exceljs.Workbook();
 
-
-await workbook.xlsx.load(buffer).then(function async(book) {
-    const firstSheet =  book.getWorksheet(6);
-    firstSheet.eachRow({ includeEmpty: false }, function(row) {
-      data.push(row.values);
-    });
- })
-
-
- for (let i = 1; i <10; i++) {
+  try {
+    let email:string;
+    const {realm}= header;
+    let data=[]
+    let buffer = new Uint8Array(file.buffer);
+    const workbook = new exceljs.Workbook();
   
-    let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"FacilityZoneTypes",data[i][4],"zz");
-
-    if(typeof data[i][2]=='object'){
-      email=await data[i][2].text;
-    }else {
-      email= await data[i][2];
-    }
-
-  let cypher =`MATCH (b:Building {key:"${buildingKey}"})-[:PARENT_OF]->(z:Zones {name:"Zones"})\
-  MATCH (c:Space {name:"${data[i][5]}"})\
-  MATCH (p {email:"${email}"})\
-  ${createdCypher} \
-  ${await this.getZoneFromDb(buildingKey,data[i])} \
-  MERGE (z)-[:PARENT_OF]->(zz)  \
-  MERGE (c)-[:MERGEDZN]->(zz)  \
-  ${createdRelationCypher} \
-  MERGE (zz)-[:CREATED_BY]->(p);`
-
-
-   let data2 =await this.neo4jService.write(cypher)
-console.log(data2)
   
-}
-
+  await workbook.xlsx.load(buffer).then(function async(book) {
+      const firstSheet =  book.getWorksheet(6);
+      firstSheet.eachRow({ includeEmpty: false }, function(row) {
+        data.push(row.values);
+      });
+   })
+  
+  
+   for (let i = 1; i <data.length; i++) {
+    
+      let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"FacilityZoneTypes",data[i][4],"zz");
+  
+      if(typeof data[i][2]=='object'){
+        email=await data[i][2].text;
+      }else {
+        email= await data[i][2];
+      }
+  
+    let cypher =`MATCH (b:Building {key:"${buildingKey}"})-[:PARENT_OF]->(z:Zones {name:"Zones"})\
+    MATCH (c:Space {name:"${data[i][5]}"})\
+    MATCH (p {email:"${email}"})\
+    ${createdCypher} \
+    ${await this.getZoneFromDb(buildingKey,data[i])} \
+    MERGE (z)-[:PARENT_OF]->(zz)  \
+    MERGE (c)-[:MERGEDZN]->(zz)  \
+    ${createdRelationCypher} \
+    MERGE (zz)-[:CREATED_BY]->(p);`
+  
+  
+     let data2 =await this.neo4jService.write(cypher)
+  console.log(data2)
+    
+  }
+  
+  } catch (error) {
+    
+  }
+ 
  }
 
- async addContacts( file: Express.Multer.File,header:MainHeaderInterface)  {
+ async addContacts(file: Express.Multer.File,header:MainHeaderInterface)  {
   
   
   let email:string;

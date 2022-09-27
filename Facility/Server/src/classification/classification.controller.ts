@@ -177,4 +177,28 @@ export class ClassificationController {
 
   }
   
+  @Roles({ roles: [UserRoles.ADMIN] })
+  @NoCache()
+  @Post('checkExcelFile')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        }
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({
+    summary: 'check a excel file',
+  })
+  @ApiConsumes('multipart/form-data')
+  async checkExcelFile(@UploadedFile() file: Express.Multer.File) {
+    return this.classificationService.checkExcelFile(file);
+
+  }
+
 }

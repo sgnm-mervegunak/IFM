@@ -11,5 +11,6 @@ export interface classificationInterface<T> extends GeciciInterface<T> {
   addAClassificationWithCodeFromExcel(file: Express.Multer.File, realm: string, language: string):any
   getNodeByClassificationLanguageRealmAndCode( classificationName:string, language:string,realm:string,code:string): any;
   getNodeByLanguageRealmAndCode(language: string, realm: string, code: string): any;
+  checkExcelFile(file: Express.Multer.File):any
 
 }

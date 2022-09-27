@@ -107,4 +107,12 @@ export class ClassificationService {
   async getNodeByLanguageRealmAndCode(language: string, realm: string, code: string) {
     return await this.classificationRepository.getNodeByLanguageRealmAndCode(language, realm, code);
   }
+
+  @Span('check excel file for it is valid or not')
+  @OtelMethodCounter()
+  async checkExcelFile(file: Express.Multer.File) {
+    return await this.classificationRepository.checkExcelFile(file);
+  }
+
+  
 }

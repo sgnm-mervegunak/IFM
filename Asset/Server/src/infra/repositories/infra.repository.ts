@@ -530,7 +530,7 @@ export class InfraRepository implements InfraInterface {
 
         for (let i = 0; i < deneme4.length; i++) {
           let cypher = `MATCH (n:Classification {realm:"${realmName}"}) MERGE (b:${deneme4[i][0].name
-            }s_${language} {name:"${deneme4[i][0].name}",isDeleted:${deneme4[i][0].isDeleted
+            }_${language} {name:"${deneme4[i][0].name}",isDeleted:${deneme4[i][0].isDeleted
             },key:"${generateUuid()}",realm:"${realmName}",canDelete:false,isActive:true,canCopied:true,isRoot:true,canDisplay:true,language:"${language}"})  MERGE (n)-[:PARENT_OF]->(b)`;
           await this.neo4jService.write(cypher);
 

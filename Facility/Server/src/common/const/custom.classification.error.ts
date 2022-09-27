@@ -19,6 +19,13 @@ import { I18NEnums } from "./i18n.enum";
   export function floor_already_exist(name) {
     throw new HttpException({ key: I18NEnums.FLOOR_ALREADY_EXIST ,code:CustomClassificationError.FLOOR_ALREADY_EXIST,args:{name}}, HttpStatus.BAD_REQUEST);
   }
+  export function space_already_exist(name) {
+    throw new HttpException({ key: I18NEnums.SPACE_ALREADY_EXIST ,code:CustomClassificationError.SPACE_ALREADY_EXIST,args:{name}}, HttpStatus.BAD_REQUEST);
+  }
+
+  export function zone_already_exist(name) {
+    throw new HttpException({ key: I18NEnums.ZONE_ALREADY_EXIST ,code:CustomClassificationError.ZONE_ALREADY_EXIST,args:{name}}, HttpStatus.BAD_REQUEST);
+  }
 
 
   export function classification_import_error_object() {
@@ -48,5 +55,22 @@ import { I18NEnums } from "./i18n.enum";
     return {
       message: 'error',
       code: CustomClassificationError.BUILDING_ALREADY_EXIST
+    };
+  }
+
+  export function space_already_exist_object(name) {
+    return {
+      message: 'error',
+      code: CustomClassificationError.SPACE_ALREADY_EXIST,
+      name
+    };
+  }
+
+
+  export function zone_already_exist_object(name) {
+    return {
+      message: 'error',
+      code: CustomClassificationError.ZONE_ALREADY_EXIST,
+      name
     };
   }

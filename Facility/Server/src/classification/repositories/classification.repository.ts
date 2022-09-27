@@ -73,7 +73,7 @@ export class ClassificationRepository implements classificationInterface<Classif
     const classification = new Classification();
     const classificationObject = assignDtoPropToEntity(classification, createClassificationDto);
     let value;
-
+ //let checkClassification = await this.neo4jService.findChildrensByLabelsAndFilters([`${classificationObject.labels[0]}_${language}`],{realm},[`${classificationObject.labels[0]}`],{code:classificationObject.code});
     if (classificationObject['labels']) {
       value = await this.neo4jService.createNode(classificationObject, classificationObject['labels']);
       if (createClassificationDto['parentId']) {
@@ -628,12 +628,6 @@ export class ClassificationRepository implements classificationInterface<Classif
         data = firstSheet?.getColumn(1).values.filter((e) => e != null);
       });
       columnName=data.shift()
-      for (let i = 1; i < data.length; i++) {
-        if(!data[i].match(/[0-9a-zA-Z#-]{1,}(: )[a-zA-Z\s\(\)İĞÜŞÖÇığüşöç:]*/)){
-          throw new HttpException(classification_import_error_object(), 400)
-        }
-        
-      }
      
       let label = await columnName.replaceAll(' ', '_');
 
@@ -878,5 +872,37 @@ export class ClassificationRepository implements classificationInterface<Classif
       language
     });
     return deneme;
+  }
+
+  async checkExcelFile(file: Express.Multer.File) {
+    try {
+      let data = [];
+      let columnName;
+      let buffer = new Uint8Array(file.buffer);
+      const workbook = new exceljs.Workbook();
+  
+      await workbook.xlsx.load(buffer).then(function async(book) {
+        const firstSheet = book.getWorksheet(1);
+        data = firstSheet?.getColumn(1).values.filter((e) => e != null);
+      });
+      columnName=data.shift()
+      console.log(data)
+      for (let i = 1; i < data.length; i++) {
+        if(!data[i].match(/[0-9a-zA-Z#-]{1,}(: )[a-zA-Z\s\(\)İĞÜŞÖÇığüşöç:]*/)){
+          throw new HttpException(classification_import_error_object(), 400)
+        }
+        
+      }
+
+      return {statusCode:200}
+    } catch (error) {
+      if(error?.response?.code ===10002){
+        throw new classification_import_error();
+        
+      }
+      else {
+        //throw new classification_import_error();
+      }
+    }
   }
 }
