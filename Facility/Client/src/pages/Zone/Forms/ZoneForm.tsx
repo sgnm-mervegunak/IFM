@@ -15,6 +15,7 @@ import ZoneService from "../../../services/zone";
 import { useAppSelector } from "../../../app/hook";
 import DocumentUploadComponent from "../../FacilityStructure/Forms/FileUpload/DocumentUpload/DocumentUpload";
 import ImageUploadComponent from "../../FacilityStructure/Forms/FileUpload/ImageUpload/ImageUpload";
+import { clearScreenDown } from "readline";
 
 interface Params {
     submitted: boolean;
@@ -95,7 +96,7 @@ const ZoneForm = ({
     const [uploadFiles, setUploadFiles] = useState<any>({});
     const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
     const [formData, setFormData] = useState<any>();
-
+    const [categoryKey, setCategoryKey] = useState<any>();
     const [data, setData] = useState<any>();
 
 
@@ -201,14 +202,17 @@ const ZoneForm = ({
 
     const getNodeInfoForUpdate = (selectedNodeKey: string) => {
         FacilityStructureService.nodeInfo(selectedNodeKey)
-            .then(async(res) => {
+            .then(async (res) => {
                 // setSelectedFacilityType(res.data.properties.nodeType);
                 // res.data.properties.category = res.data.properties.classificationKey;
                 // res.data.properties.createdBy = res.data.properties.createdByKey;
                 await ClassificationsService.findClassificationByCode(res.data.properties?.category)
                     .then(
                         (clsf) => {
-                            res.data.properties.category = clsf.data[1]?._fields[0]?.properties?.key;
+                            res.data.properties.category = clsf.data[1]?._fields[0]?.properties?.key
+                            // console.log("zone category key: ", clsf.data[1]?._fields[0]?.properties?.key)
+                            setCodeCategory(clsf.data[1]?._fields[0]?.properties?.code);
+                            // console.log("zone category code: ", clsf.data[1]?._fields[0]?.properties?.code)
                         }
                     )
                     .catch((err) => {
@@ -323,7 +327,7 @@ const ZoneForm = ({
 
         } else {
             let updateNode: any = {};
-            FacilityStructureService.nodeInfo(selectedNodeKey)
+            FacilityStructureService.nodeInfo(selectedNodeKey.toString())
                 .then((res) => {
                     updateNode = {
                         name: data?.name,
@@ -333,7 +337,7 @@ const ZoneForm = ({
                         // category: codeCategory,
                         category: codeCategory,
                         // spaceNames: `${selectedSpaceNames.toString().replaceAll(",", ", ")}` || "",
-                        spaceNames: res.data?.properties?.spaceNames || "",
+                        spaceNames: res.data?.properties?.spaceNames.toString() || "",
                         nodeKeys: res.data?.properties?.nodeKeys || [],
                         createdBy: res.data?.properties?.createdBy || "",
                         createdOn: res.data?.properties?.createdOn || "",
@@ -343,8 +347,10 @@ const ZoneForm = ({
                         documents: data?.documents || "",
                     };
 
-                    console.log("update zone node: ", updateNode)
-                    FacilityStructureService.update(res.data.id, updateNode)
+                    // console.log("update zone node: ", updateNode)
+                    // console.log("props: ", res.data?.properties)
+
+                    ZoneService.update(res.data.id, updateNode)
                         .then((res) => {
                             toast.current.show({
                                 severity: "success",
@@ -372,9 +378,13 @@ const ZoneForm = ({
                     });
                 });
             setEditDia(false);
+            setCodeCategory("");
         }
     };
 
+    // useEffect(() => {
+    //     console.log("use effect ", codeCategory);
+    // }, [codeCategory])
 
     if (editDia && !data) {
         return null;
@@ -402,6 +412,7 @@ const ZoneForm = ({
                             {...register("code")}
                             style={{ width: "100%" }}
                             defaultValue={data?.code || ""}
+                            disabled={editDia ? true : false}
                         />
                         <p style={{ color: "red" }}>{errors.code?.message}</p>
                     </div>
@@ -450,6 +461,7 @@ const ZoneForm = ({
                                             (res) => {
                                                 field.onChange(e.value);
                                                 setCodeCategory(res.data.properties.code || "");
+                                                // console.log("set category code:", res.data.properties.code);
                                             }
                                         );
                                     }}

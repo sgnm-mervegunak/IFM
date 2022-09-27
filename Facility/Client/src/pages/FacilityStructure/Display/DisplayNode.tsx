@@ -35,7 +35,6 @@ const DisplayNode = ({ displayKey, docTypes=[] }: Params) => {
           .sort()
           .map((key, index) => {
             if (data[key] != "" && key != "key" && key != "Key") {
-              data[key].toString();
               if (key === "Tag" || key === "tag") {
                 return (
                   <div className="field" key={index}>
@@ -116,13 +115,13 @@ const DisplayNode = ({ displayKey, docTypes=[] }: Params) => {
                     <p>{status}</p>
                   </div>
                 );
-              } else if ((typeof data[key] === "string" || "number") && key != "name" && key != "isActive" && key != "canDelete" && key != "canDisplay" && key != "nodeKeys") {
+              } else if ((typeof data[key] === "string" || "number") && key != "name" && key != "isActive" && key != "canDelete" && key != "canDisplay" ) {
                 const parsed = key.replace(/([A-Z])/g, " $1"); //parse key value
                 const title = parsed.charAt(0).toUpperCase() + parsed.slice(1); //toUpperCase
                 return (
                   <div className="field" key={index}>
                     <h5 className="block"> {title}</h5>
-                    <p>{data[key] === "" ? "---" : data[key]}</p>
+                    <p>{data[key] === "" ? "---" : data[key].toString()}</p>
                   </div>
                 );
               }
