@@ -7,7 +7,12 @@ import {
 import { NestKafkaService, nodeHasChildException } from 'ifmcommon';
 import { assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError, Neo4jService } from 'sgnm-neo4j/dist';
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
-import { node_not_found, other_microservice_errors, wrong_parent_error } from 'src/common/const/custom.error.object';
+import {
+  has_children_error,
+  node_not_found,
+  other_microservice_errors,
+  wrong_parent_error,
+} from 'src/common/const/custom.error.object';
 import { CustomAssetError } from 'src/common/const/custom.error.enum';
 import { NodeNotFound, WrongIdProvided } from 'src/common/bad.request.exception';
 import * as moment from 'moment';
@@ -19,7 +24,10 @@ import { SystemsInterface } from 'src/common/interface/systems.interface';
 import { System } from '../entities/systems.entity';
 import { SystemsDto } from '../dto/systems.dto';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
-import { avaiableCreateVirtualPropsGetter, avaiableUpdateVirtualPropsGetter } from 'src/common/func/virtual.node.props.functions';
+import {
+  avaiableCreateVirtualPropsGetter,
+  avaiableUpdateVirtualPropsGetter,
+} from 'src/common/func/virtual.node.props.functions';
 import { VirtualNodeHandler } from 'src/common/class/virtual.node.dealer';
 import { ConfigService } from '@nestjs/config';
 
@@ -83,24 +91,22 @@ export class SystemsRepository implements SystemsInterface<System> {
   //   }
   // }
   async findRootByRealm(header) {
-
     try {
       let { realm } = header;
-      realm = 'IFM'  // test için kaldırılacaaaakkkk
-   
-      let node =  await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructure(
+      realm = 'IFM'; // test için kaldırılacaaaakkkk
+
+      let node = await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructure(
         [Neo4jLabelEnum.SYSTEMS],
         [],
-        {"isDeleted": false, realm},
+        { isDeleted: false, realm },
         [],
         ['Virtual'],
-        {"isDeleted": false},
-      ) 
-     
+        { isDeleted: false },
+      );
+
       if (!node) {
         throw new HttpException(node_not_found(), 400);
       }
-      
 
       node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
       return node;
@@ -133,17 +139,17 @@ export class SystemsRepository implements SystemsInterface<System> {
 
       const uniqnessCheck = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
         [Neo4jLabelEnum.SYSTEMS],
-        {isDeleted: false, realm},
+        { isDeleted: false, realm },
         [Neo4jLabelEnum.SYSTEM],
-        {isDeleted: false, name: systemsDto.name},
+        { isDeleted: false, name: systemsDto.name },
         RelationName.PARENT_OF,
-        RelationDirection.RIGHT
-      ) 
+        RelationDirection.RIGHT,
+      );
 
       if (uniqnessCheck.length) {
         throw new HttpException('name must be uniq', 400);
       }
-       
+
       const virtualNodeCreator = new VirtualNodeCreator(this.neo4jService);
       const system = new System();
       const systemObject = assignDtoPropToEntity(system, systemsDto);
@@ -159,7 +165,7 @@ export class SystemsRepository implements SystemsInterface<System> {
       };
       const systemUrl = `${process.env.SYSTEM_URL}/${systemNode.properties.key}`;
       await this.neo4jService.addParentRelationByIdAndFilters(result['id'], {}, rootNode[0].get('n').identity.low, {});
-      
+
       //CREATED BY relation with CONTACT module / CREATED_BY relation from contact to system relation
       const finalObjectArray = avaiableCreateVirtualPropsGetter(systemsDto);
       for (let index = 0; index < finalObjectArray.length; index++) {
@@ -168,8 +174,6 @@ export class SystemsRepository implements SystemsInterface<System> {
         const contact = await this.httpService.get(url, { authorization });
       }
       await this.virtualNodeHandler.createVirtualNode(systemNode['identity'].low, systemUrl, finalObjectArray);
-
-      
 
       //CREATED BY relation with CONTACT module / CREATED_OF relation from contact to system relation
       // const createContactUrl = `${process.env.CONTACT_URL}/${systemsDto.createdBy}`;
@@ -241,87 +245,96 @@ export class SystemsRepository implements SystemsInterface<System> {
   async update(_id: string, systemsDto: SystemsDto, header) {
     const { realm, authorization, language } = header;
 
-    const node = await this.neo4jService.findChildrensByChildIdAndFilters([Neo4jLabelEnum.SYSTEMS], { realm },
-         +_id, { isDeleted: false, isActive: true }, RelationName.PARENT_OF);
+    const node = await this.neo4jService.findChildrensByChildIdAndFilters(
+      [Neo4jLabelEnum.SYSTEMS],
+      { realm },
+      +_id,
+      { isDeleted: false, isActive: true },
+      RelationName.PARENT_OF,
+    );
     if (!node.length) {
       throw new HttpException(node_not_found(), 400);
     }
-     
-    if (node[0]["_fields"][0].properties.realm !== realm) {
-         throw new HttpException({ message: 'You dont have permission' }, 403);
-       }
+
+    if (node[0]['_fields'][0].properties.realm !== realm) {
+      throw new HttpException({ message: 'You dont have permission' }, 403);
+    }
 
     const systemUrl = `${process.env.SYSTEM_URL}/${node[0].get('children').properties.key}`;
-    
-    const finalObjectArray = await avaiableUpdateVirtualPropsGetter(systemsDto); 
-      for (let index = 0; index < finalObjectArray.length; index++) {
-        const url =
-          (await this.configService.get(finalObjectArray[index].url)) + '/' + finalObjectArray[index].newParentKey;
 
-        await this.httpService.get(url, { authorization });
-      }
+    const finalObjectArray = await avaiableUpdateVirtualPropsGetter(systemsDto);
+    for (let index = 0; index < finalObjectArray.length; index++) {
+      const url =
+        (await this.configService.get(finalObjectArray[index].url)) + '/' + finalObjectArray[index].newParentKey;
 
-      await this.virtualNodeHandler.updateVirtualNode(+_id, systemUrl, finalObjectArray);
-      delete systemsDto['createdBy'];
-      const category = systemsDto['category'];
-      delete systemsDto['category'];
-
-
-      const updatedNode = await this.neo4jService.updateByIdAndFilter(
-        +_id,
-        { isDeleted: false, isActive: true },
-        [],
-        systemsDto,
-      );
-      if (!updatedNode) {
-        throw new FacilityStructureNotFountException(_id);
-      }
-
- ////////////////////////////// update classified_by  relation, if category changed //////////////////////////////////
- const categories = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-  [],
-  { isDeleted: false, key: node[0]['_fields'][1].properties.key },
-  [],
-  { isDeleted: false },
-  RelationName.CLASSIFIED_BY,
-  RelationDirection.RIGHT,
-);
-const newCategories = await this.neo4jService.findChildrensByLabelsAndFilters(
-  ['Classification'],
-  {"isDeleted": false, "realm": node[0]["_fields"][0].properties.realm },
-  [],
-  {"isDeleted": false, "code": category }
-)
-if (categories && categories.length>0)  {
-if (categories[0]['_fields'][1]['properties'].code != category) {
-  for (let i=0; i<categories.length; i++) {
-     await this.neo4jService.deleteRelationByIdAndRelationNameWithoutFilters(
-          node[0]["_fields"][1].identity.low,
-          categories[i]['_fields'][1].identity.low,
-          RelationName.CLASSIFIED_BY,
-          RelationDirection.RIGHT       
-    );
-   }
-    for (let i = 0; i < newCategories.length; i++) {
-      await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
-        node[0]['_fields'][1].identity.low,
-        { isDeleted: false },
-        newCategories[i]['_fields'][1].identity.low,
-        { isDeleted: false },
-        RelationName.CLASSIFIED_BY,
-        RelationDirection.RIGHT,
-      );
+      await this.httpService.get(url, { authorization });
     }
-} 
-}
-else {
-  for (let i=0; i<newCategories.length; i++) {
-    await this.neo4jService.addRelationByIdAndRelationNameWithFilters(node[0]["_fields"][1].identity.low,{"isDeleted":false},
-    newCategories[i]['_fields'][1].identity.low, {"isDeleted":false}, RelationName.CLASSIFIED_BY, RelationDirection.RIGHT);
-  }
-}
 
-return updatedNode;
+    await this.virtualNodeHandler.updateVirtualNode(+_id, systemUrl, finalObjectArray);
+    delete systemsDto['createdBy'];
+    const category = systemsDto['category'];
+    delete systemsDto['category'];
+
+    const updatedNode = await this.neo4jService.updateByIdAndFilter(
+      +_id,
+      { isDeleted: false, isActive: true },
+      [],
+      systemsDto,
+    );
+    if (!updatedNode) {
+      throw new FacilityStructureNotFountException(_id);
+    }
+
+    ////////////////////////////// update classified_by  relation, if category changed //////////////////////////////////
+    const categories = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+      [],
+      { isDeleted: false, key: node[0]['_fields'][1].properties.key },
+      [],
+      { isDeleted: false },
+      RelationName.CLASSIFIED_BY,
+      RelationDirection.RIGHT,
+    );
+    const newCategories = await this.neo4jService.findChildrensByLabelsAndFilters(
+      ['Classification'],
+      { isDeleted: false, realm: node[0]['_fields'][0].properties.realm },
+      [],
+      { isDeleted: false, code: category },
+    );
+    if (categories && categories.length > 0) {
+      if (categories[0]['_fields'][1]['properties'].code != category) {
+        for (let i = 0; i < categories.length; i++) {
+          await this.neo4jService.deleteRelationByIdAndRelationNameWithoutFilters(
+            node[0]['_fields'][1].identity.low,
+            categories[i]['_fields'][1].identity.low,
+            RelationName.CLASSIFIED_BY,
+            RelationDirection.RIGHT,
+          );
+        }
+        for (let i = 0; i < newCategories.length; i++) {
+          await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
+            node[0]['_fields'][1].identity.low,
+            { isDeleted: false },
+            newCategories[i]['_fields'][1].identity.low,
+            { isDeleted: false },
+            RelationName.CLASSIFIED_BY,
+            RelationDirection.RIGHT,
+          );
+        }
+      }
+    } else {
+      for (let i = 0; i < newCategories.length; i++) {
+        await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
+          node[0]['_fields'][1].identity.low,
+          { isDeleted: false },
+          newCategories[i]['_fields'][1].identity.low,
+          { isDeleted: false },
+          RelationName.CLASSIFIED_BY,
+          RelationDirection.RIGHT,
+        );
+      }
+    }
+
+    return updatedNode;
 
     // if (systemsDto.createdBy) {
     //   await this.httpService.get(`${process.env.CONTACT_URL}/${systemsDto.createdBy}`, {
@@ -370,27 +383,27 @@ return updatedNode;
     // if (!updatedNode) {
     //   throw new FacilityStructureNotFountException(_id);
     // }
-   
   }
 
   async delete(_id: string, header) {
     try {
-      const {realm} = header;
+      const { realm } = header;
       //const node = await this.neo4jService.read(`match(n) where id(n)=$id return n`, { id: parseInt(_id) });
-      const node = await this.neo4jService.findByIdAndFilters(
-        +_id,
-        {"isDeleted": false},
-        []
-      )
+      const node = await this.neo4jService.findByIdAndFilters(+_id, { isDeleted: false }, []);
       // if (!node.records[0]) {
       //   throw new HttpException({ code: 5005 }, 404);
       // }
-     
+
       //await this.neo4jService.getParentById(_id);
-      const parentNode = await this.neo4jService.findChildrensByChildIdAndFilters([Neo4jLabelEnum.SYSTEMS], { realm },
-        +_id, { isDeleted: false, isActive: true }, RelationName.PARENT_OF);
+      const parentNode = await this.neo4jService.findChildrensByChildIdAndFilters(
+        [Neo4jLabelEnum.SYSTEMS],
+        { realm },
+        +_id,
+        { isDeleted: false, isActive: true },
+        RelationName.PARENT_OF,
+      );
       if (!parentNode || parentNode.length == 0) {
-         // hata fırlatılacak (??)
+        // hata fırlatılacak (??)
       }
 
       let deletedNode;
@@ -399,52 +412,42 @@ return updatedNode;
       // const hasChildren = await this.neo4jService.findChildrenById(_id);
       const hasChildren = await this.neo4jService.findChildrensByIdOneLevel(
         +_id,
-        {"isDeleted": false},
+        { isDeleted: false },
         ['Component'],
-        {"isDeleted": false},
-        RelationName.CONTAINS_COMPONENT
-      )
+        { isDeleted: false },
+        RelationName.CONTAINS_COMPONENT,
+      );
 
       if (hasChildren['length'] == 0) {
-        deletedNode = await this.neo4jService.updateByIdAndFilter(
-          +_id,
-          {},
-          [],
-          {"isDeleted": true, "isActive": false}
-        )
-        
+        deletedNode = await this.neo4jService.updateByIdAndFilter(+_id, {}, [], { isDeleted: true, isActive: false });
+
         const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
           [Neo4jLabelEnum.SYSTEM],
-          {key: node[0].get('n').properties.key },
+          { key: node[0].get('n').properties.key },
           ['Virtual'],
           { isDeleted: false },
           RelationName.CREATED_BY,
-        ); 
+        );
         deletedVirtualNode = await this.neo4jService.updateByIdAndFilter(
           +virtualNode[0].get('children').identity.low,
           {},
           [],
-          {"isDeleted": true}
+          { isDeleted: true },
         );
-       
+
         await this.kafkaService.producerSendMessage(
           'deleteVirtualNodeRelations',
           JSON.stringify({ referenceKey: node.properties.key }),
         );
-        
+      } else {
+        throw new HttpException(has_children_error({ id: _id }), 400);
       }
-      else {
-        throw new HttpException('node has parent relation ', 400);
-      }
-      
-      
-
 
       return deletedNode;
     } catch (error) {
       const { code, message } = error.response;
-      if (code === CustomNeo4jError.HAS_CHILDREN) {
-        nodeHasChildException(_id);
+      if (code === CustomAssetError.HAS_CHILDREN) {
+        throw new HttpException({ message: error.response.message }, 400);
       } else if (code === 5005) {
         AssetNotFoundException(_id);
       } else {

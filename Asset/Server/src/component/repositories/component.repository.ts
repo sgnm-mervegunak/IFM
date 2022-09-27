@@ -24,7 +24,12 @@ import { CreateComponentDto } from '../dto/create.component.dto';
 import { UpdateComponentDto } from '../dto/update.component.dto';
 import { NodeNotFound, WrongIdProvided } from 'src/common/bad.request.exception';
 import { CustomAssetError } from 'src/common/const/custom.error.enum';
-import { wrong_parent_error, other_microservice_errors, node_not_found } from 'src/common/const/custom.error.object';
+import {
+  wrong_parent_error,
+  other_microservice_errors,
+  node_not_found,
+  has_children_error,
+} from 'src/common/const/custom.error.object';
 import { RelationName } from 'src/common/const/relation.name.enum';
 import { SpaceType } from 'src/common/const/space.type.enum';
 import { HttpRequestHandler } from 'src/common/class/http.request.helper.class';
@@ -633,14 +638,14 @@ export class ComponentRepository implements ComponentInterface<Component> {
           JSON.stringify({ referenceKey: typeNode.properties.key }),
         );
       } else {
-        throw new HttpException('node has parent relation ', 400);
+        throw new HttpException(has_children_error({ id: _id }), 400);
       }
 
       return deletedNode;
     } catch (error) {
       const { code, message } = error.response;
-      if (code === CustomNeo4jError.HAS_CHILDREN) {
-        nodeHasChildException(_id);
+      if (code === CustomAssetError.HAS_CHILDREN) {
+        throw new HttpException({ message: error.response.message }, 400);
       } else if (code === 5005) {
         AssetNotFoundException(_id);
       } else {

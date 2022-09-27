@@ -10,7 +10,12 @@ import { assignDtoPropToEntity, CustomNeo4jError, Neo4jService } from 'sgnm-neo4
 import { CreateTypesDto } from '../dto/create.types.dto';
 import { UpdateTypesDto } from '../dto/update.tpes.dto';
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
-import { invalid_classification, node_not_found, wrong_parent_error } from 'src/common/const/custom.error.object';
+import {
+  has_children_error,
+  invalid_classification,
+  node_not_found,
+  wrong_parent_error,
+} from 'src/common/const/custom.error.object';
 import { CustomAssetError } from 'src/common/const/custom.error.enum';
 import { NodeNotFound, WrongIdProvided } from 'src/common/bad.request.exception';
 import { RelationName } from 'src/common/const/relation.name.enum';
@@ -295,14 +300,14 @@ export class TypesRepository implements GeciciInterface<Type> {
           JSON.stringify({ referenceKey: typeNode.properties.key }),
         );
       } else {
-        throw new HttpException('node has parent relation ', 400);
+        throw new HttpException(has_children_error({ id: _id }), 400);
       }
 
       return deletedNode;
     } catch (error) {
       const code = error.response?.code;
-      if (code === CustomNeo4jError.HAS_CHILDREN) {
-        nodeHasChildException(_id);
+      if (code === CustomAssetError.HAS_CHILDREN) {
+        throw new HttpException({ message: error.response.message }, 400);
       } else if (code === 5005) {
         AssetNotFoundException(_id);
       } else if (code === 5001) {
