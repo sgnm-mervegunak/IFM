@@ -659,7 +659,7 @@ console.log(data2)
   }
 
 
-  async getZoneFromDb(buildingKey,data){
+  async getZoneFromDb(buildingKey:string,data:string[]){
 
 
     let cypher =`MATCH (b:Building {key:"${buildingKey}"})-[:PARENT_OF]->(zz:Zones {name:"Zones"})-[:PARENT_OF]->(z:Zone {name:"${data[1]}"}) return z`;
