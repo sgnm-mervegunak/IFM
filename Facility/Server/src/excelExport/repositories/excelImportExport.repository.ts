@@ -1,5 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { errorMonitor } from 'events';
 import { Neo4jService } from 'sgnm-neo4j/dist';
+import { building_already_exist } from 'src/common/const/custom.classification.error';
 
 
 import { ExcelImportExportInterface, HeaderInterface, MainHeaderInterface } from 'src/common/interface/excel.import.export.interface';
@@ -275,10 +277,10 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
 
 
  async addBuildingWithCobie( file: Express.Multer.File,header:MainHeaderInterface){
-   
-    let email:string;
+   try {
     const {realm}= header;
-
+    let email:string;
+    
     let data=[]
     let values:[string];
     let buffer = new Uint8Array(file.buffer);
@@ -290,56 +292,58 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
       firstSheet.eachRow({ includeEmpty: false }, function(row) {
         data.push(row.values);
       });
-  
-  
-      
+
       values= firstSheet.getColumn(4).values;
-      
-  
    })
   
+   let checkBuilding = await this.neo4jService.findChildrensByLabelsAndFilters(['FacilityStructure'],{realm},[`Building`],{name:data[1][1]});
+   if(checkBuilding.length==0){
+    let categoryCode = await data[1][4].split(":");
   
+    let code =await categoryCode[0].replaceAll(" ","-")
+   
+   // add digits to code  
+    let getClassificationType=`MATCH (n:OmniClass11_en {realm:"${realm}"}) return n`
+    let codeData= await this.neo4jService.write(getClassificationType)
+    console.log(codeData)
+    let abc = codeData.records[0]["_fields"][0].properties.code
+   
+    for (let index = 0; index = (abc.length-code.length)/3; index++) {
+     
+       code=await code+"-00"
+    }
   
-   let categoryCode = await data[1][4].split(":");
-  
-   let code =await categoryCode[0].replaceAll(" ","-")
-  
-  
-  
-  // add digits to code  
-   let getClassificationType=`MATCH (n:OmniClass11_en {realm:"${realm}"}) return n`
-   let codeData= await this.neo4jService.write(getClassificationType)
-   console.log(codeData)
-   let abc = codeData.records[0]["_fields"][0].properties.code
-  
-   for (let index = 0; index = (abc.length-code.length)/3; index++) {
-    
-      code=await code+"-00"
-   }
-  
+       let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"OmniClass11",code,"b");
  
-  
-      let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"OmniClass11",code,"b");
+       if(typeof data[1][2]=='object'){
+         email=await data[1][2].text;
+       }else {
+         email= await data[1][2];
+       }
+   
+   //cypher query for building 
+   let cypher=`MATCH (r:FacilityStructure {realm:"${realm}"}) \
+   ${createdCypher} \
+   MATCH (p {email:"${email}"} ) \
+   MERGE (b:Building {name:"${data[1][1]}",createdOn:"${data[1][3]}",projectName:"${data[1][5]}",siteName:"${data[1][6]}",areaMeasurement:"${data[1][11]}",externalSystem:"${data[1][12]}",externalObject:"${data[1][13]}", \
+   externalIdentifier:"${data[1][14]}",externalSiteObject:"${data[1][15]}",externalSiteIdentifier:"${data[1][16]}",externalFacilityObject:"${data[1][17]}",externalFacilityIdentifier:"${data[1][18]}", \
+   description:"${data[1][19]}",projectDescription:"${data[1][20]}",siteDescription:"${data[1][21]}",phase:"${data[1][22]}",address:"",status:"${data[1][23]}",owner:"",operator:"",contractor:"",handoverDate:"",operationStartDate:"",warrantyExpireDate:"",tag:[],canDisplay:true,key:"${this.keyGenerate()}",canDelete:true,isActive:true,isDeleted:false, \
+   nodeType:"Building"}) MERGE (js:JointSpaces {key:"${this.keyGenerate()}",canDelete:false,canDisplay:false,isActive:true,isDeleted:false,name:"Joint Space"})\ 
+   MERGE (zs:Zones {key:"${this.keyGenerate()}",canDelete:false,canDisplay:false,isActive:true,isDeleted:false,name:"Zones"})\ 
+   MERGE (b)-[:PARENT_OF]->(zs) MERGE (b)-[:PARENT_OF]->(js)  MERGE (r)-[:PARENT_OF]->(b) ${createdRelationCypher} MERGE (b)-[:CREATED_BY]->(p) ;`
+   
+  await this.neo4jService.write(cypher)
 
-      if(typeof data[1][2]=='object'){
-        email=await data[1][2].text;
-      }else {
-        email= await data[1][2];
-      }
-  
-  // cypher query for building 
-  let cypher=`MATCH (r:FacilityStructure {realm:"${realm}"}) \
-  ${createdCypher} \
-  MATCH (p {email:"${email}"} ) \
-  MERGE (b:Building {name:"${data[1][1]}",createdOn:"${data[1][3]}",projectName:"${data[1][5]}",siteName:"${data[1][6]}",areaMeasurement:"${data[1][11]}",externalSystem:"${data[1][12]}",externalObject:"${data[1][13]}", \
-  externalIdentifier:"${data[1][14]}",externalSiteObject:"${data[1][15]}",externalSiteIdentifier:"${data[1][16]}",externalFacilityObject:"${data[1][17]}",externalFacilityIdentifier:"${data[1][18]}", \
-  description:"${data[1][19]}",projectDescription:"${data[1][20]}",siteDescription:"${data[1][21]}",phase:"${data[1][22]}",address:"",status:"${data[1][23]}",owner:"",operator:"",contractor:"",handoverDate:"",operationStartDate:"",warrantyExpireDate:"",tag:[],canDisplay:true,key:"${this.keyGenerate()}",canDelete:true,isActive:true,isDeleted:false, \
-  nodeType:"Building"}) MERGE (js:JointSpaces {key:"${this.keyGenerate()}",canDelete:false,canDisplay:false,isActive:true,isDeleted:false,name:"Joint Space"})\ 
-  MERGE (zs:Zones {key:"${this.keyGenerate()}",canDelete:false,canDisplay:false,isActive:true,isDeleted:false,name:"Zones"})\ 
-  MERGE (b)-[:PARENT_OF]->(zs) MERGE (b)-[:PARENT_OF]->(js)  MERGE (r)-[:PARENT_OF]->(b) ${createdRelationCypher} MERGE (b)-[:CREATED_BY]->(p) ;`
-  
-   let value =await this.neo4jService.write(cypher)
-  console.log(value)
+   }else {
+    building_already_exist()
+   }
+   
+   } catch (error) {
+    if(error.response?.code===10003){
+      building_already_exist()
+    }
+   }
+    
   }
 
   async addFloorsToBuilding(file: Express.Multer.File, header:MainHeaderInterface, buildingKey: string)

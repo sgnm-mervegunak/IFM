@@ -35,7 +35,8 @@
   "NOT_UNIQUE":"{val} already exist.",
   "CONTACT_HAS_CHILDREN_ERROR": "{email} can not be deleted, because it is creator of else users.",
   "CLASSIFICATION_ALREADY_EXIST":"This Classification already exists.",
-  "CLASSIFICATION_IMPORT_ERROR":"This file has not the correct import format."
+  "CLASSIFICATION_IMPORT_ERROR":"This file has not the correct import format.",
+  "BUILDING_ALREADY_EXIST":"This building already exists"
 
 }
 

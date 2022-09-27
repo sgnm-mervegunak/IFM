@@ -10,3 +10,8 @@ import { I18NEnums } from "./i18n.enum";
   export function classification_already_exist() {
     throw new HttpException({ key: I18NEnums.CLASSIFICATION_ALREADY_EXIST ,code:CustomClassificationError.CLASSIFICATION_ALREADY_EXIST}, HttpStatus.BAD_REQUEST);
   }
+
+
+  export function building_already_exist() {
+    throw new HttpException({ key: I18NEnums.BUILDING_ALREADY_EXIST ,code:CustomClassificationError.BUILDING_ALREADY_EXIST}, HttpStatus.BAD_REQUEST);
+  }
