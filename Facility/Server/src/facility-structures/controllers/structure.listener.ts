@@ -4,8 +4,9 @@ import { EventPattern, Payload } from '@nestjs/microservices';
 import { catchError, firstValueFrom, map } from 'rxjs';
 import { assignDtoPropToEntity, Neo4jService } from 'sgnm-neo4j/dist';
 import { VirtualNode } from 'src/common/baseobject/virtual.node';
-import { CreateKafkaObject } from 'src/common/const/kafka.object.type';
+import { CreateKafkaObject, UpdateKafkaObject } from 'src/common/const/kafka.object.type';
 import { AssetNotFoundException } from 'src/common/notFoundExceptions/not.found.exception';
+import * as moment from 'moment';
 
 @Controller('structureListener')
 export class StructureListenerController {
@@ -44,6 +45,50 @@ export class StructureListenerController {
     } catch (error) {
       throw new HttpException(error, 400);
     }
+  }
+
+  @EventPattern('updateStructureRelation')
+  async updateStructureListener(@Payload() message) {
+    try {
+      if (!message.value?.referenceKey) {
+        throw new HttpException('key is not provided by service', 400);
+      }
+      const virtualObject: UpdateKafkaObject = message.value;
+      // const component = await this.componentService.findOneNode(message.value?.key, realm);
+      const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        [],
+        { key: virtualObject.exParentKey },
+        virtualObject.virtualNodeLabels,
+        { referenceKey: virtualObject.referenceKey, isDeleted: false },
+        virtualObject.relationName,
+      );
+
+      await this.neo4jService.updateByIdAndFilter(virtualNode[0].get('children').identity.low, {}, [], {
+        isDeleted: true,
+        updatedAt: moment().format('YYYY-MM-DD HH:mm:ss'),
+      });
+      let newVirtualNodeObject = new VirtualNode();
+      newVirtualNodeObject['referenceKey'] = virtualObject.referenceKey;
+      newVirtualNodeObject['url'] = virtualObject.url;
+
+      const newVirtualNode = await this.neo4jService.createNode(newVirtualNodeObject, virtualObject.virtualNodeLabels);
+      console.log(newVirtualNode);
+
+      await this.neo4jService.addRelationByLabelsAndFiltersAndRelationName(
+        [],
+        { key: virtualObject.newParentKey },
+        [],
+        { key: newVirtualNode.properties.key },
+        virtualObject.relationName,
+      );
+      await this.neo4jService.addRelationByLabelsAndFiltersAndRelationName(
+        [],
+        { key: virtualObject.newParentKey },
+        [],
+        { key: newVirtualNode.properties.key },
+        'HAS_VIRTUAL_RELATION',
+      );
+    } catch (error) {}
   }
 
   @EventPattern('deleteAsset')
