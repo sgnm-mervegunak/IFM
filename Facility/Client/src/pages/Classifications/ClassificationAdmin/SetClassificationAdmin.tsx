@@ -13,8 +13,9 @@ import { Menu } from 'primereact/menu';
 import { v4 as uuidv4 } from "uuid";
 import { useTranslation } from "react-i18next";
 
-import ClassificationsService from "../../services/classifications";
-import { useAppSelector } from "../../app/hook";
+import ClassificationsService from "../../../services/classifications";
+import { useAppSelector } from "../../../app/hook";
+import ClassificationForm from "./Forms/ClassificationForm";
 
 interface Node {
   cantDeleted: boolean;
@@ -41,6 +42,7 @@ interface Node {
 const SetClassificationAdmin = () => {
   const [selectedNodeKey, setSelectedNodeKey] = useState("");
   const [expandedKeys, setExpandedKeys] = useState({});
+  const [expandedKey, setExpandedKey] = useState({});
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
   const [code, setCode] = useState("");
@@ -60,6 +62,8 @@ const SetClassificationAdmin = () => {
   const menuImport = useRef({ current: { toggle: () => { } } } as any);
   const { t } = useTranslation(["common"]);
   const language = useAppSelector((state) => state.language.language);
+  const [submitted, setSubmitted] = useState(false);
+  const [isUpdate, setIsUpdate] = useState(false);
 
   const menu = [
     {
@@ -73,26 +77,27 @@ const SetClassificationAdmin = () => {
       label: t("Edit Item"),
       icon: "pi pi-pencil",
       command: () => {
-        ClassificationsService.nodeInfo(selectedNodeKey)
-          .then((res) => {
-            if (res.data.properties.code !== undefined) {
-              setCodeShow(true);
-            }
-            setName(res.data.properties.name || "");
-            setCode(res.data.properties.code || "");
-            setTag(res.data.properties.tag || []);
-            setIsActive(res.data.properties.isActive);
-          })
-          .catch((err) => {
-            toast.current.show({
-              severity: "error",
-              summary: t("Error"),
-              detail: err.response ? err.response.data.message : err.message,
-              life: 4000,
-            });
-            getClassification();
-            setEditDia(false);
-          });
+        // ClassificationsService.nodeInfo(selectedNodeKey)
+        //   .then((res) => {
+        //     if (res.data.properties.code !== undefined) {
+        //       setCodeShow(true);
+        //     }
+        //     setName(res.data.properties.name || "");
+        //     setCode(res.data.properties.code || "");
+        //     setTag(res.data.properties.tag || []);
+        //     setIsActive(res.data.properties.isActive);
+        //   })
+        //   .catch((err) => {
+        //     toast.current.show({
+        //       severity: "error",
+        //       summary: t("Error"),
+        //       detail: err.response ? err.response.data.message : err.message,
+        //       life: 4000,
+        //     });
+        //     getClassification();
+        //     setEditDia(false);
+        //   });
+        setIsUpdate(true);
         setEditDia(true);
       },
     },
@@ -116,10 +121,11 @@ const SetClassificationAdmin = () => {
       }
       else if (res.data.root.children) {
         let _expandedKey: { [key: string]: boolean } = {};
-        let rootKey:string=res.data.root.key;
-        _expandedKey[rootKey]=true;
+        let rootKey: string = res.data.root.key;
+        _expandedKey[rootKey] = true;
+        Object.assign(_expandedKey, expandedKey);
         setExpandedKeys(_expandedKey);
-        
+
         setData([res.data.root] || []);
         let temp = JSON.parse(JSON.stringify([res.data.root] || []));
         fixNodes(temp)
@@ -365,7 +371,7 @@ const SetClassificationAdmin = () => {
         <Button
           label={t("Add")}
           icon="pi pi-check"
-          onClick={() => addItem(selectedNodeKey)}
+          onClick={() => setSubmitted(true)}
           autoFocus
         />
       </div>
@@ -391,7 +397,7 @@ const SetClassificationAdmin = () => {
           label={t("Save")}
           icon="pi pi-check"
           onClick={() => {
-            editItem(selectedNodeKey);
+            setSubmitted(true)
             setCodeShow(false);
           }}
           autoFocus
@@ -454,26 +460,18 @@ const SetClassificationAdmin = () => {
           setAddDia(false);
         }}
       >
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
-          <InputText
-            value={code}
-            onChange={(event) => setCode(event.target.value)}
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
-          <InputText
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field structureChips">
-          <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
-          <Chips value={tag} onChange={(e) => setTag(e.value)} style={{ width: '100%' }} />
-        </div>
+        <ClassificationForm
+          submitted={submitted}
+          setSubmitted={setSubmitted}
+          selectedNodeKey={selectedNodeKey}
+          editDia={editDia}
+          getClassification={getClassification}
+          setAddDia={setAddDia}
+          setEditDia={setEditDia}
+          isUpdate={isUpdate}
+          setIsUpdate={setIsUpdate}
+          contactData={data}
+        />
       </Dialog>
       <Dialog
         header={t("Edit Item")}
@@ -488,32 +486,19 @@ const SetClassificationAdmin = () => {
           setCodeShow(false);
         }}
       >
-        {codeShow && (
-          <div className="field">
-            <h5 style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
-            <InputText
-              value={code}
-              onChange={(event) => setCode(event.target.value)}
-              style={{ width: '100%' }}
-              disabled
-            />
-          </div>)}
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
-          <InputText
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div className="field structureChips">
-          <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
-          <Chips value={tag} onChange={(e) => setTag(e.value)} style={{ width: '100%' }} />
-        </div>
-        <div className="field flex">
-          <h5 style={{ marginBottom: "0.5em" }}>{t("Is Active")}</h5>
-          <Checkbox className="ml-3" onChange={e => setIsActive(e.checked)} checked={isActive}></Checkbox>
-        </div>
+        <ClassificationForm
+          submitted={submitted}
+          setSubmitted={setSubmitted}
+          selectedNodeKey={selectedNodeKey}
+          editDia={editDia}
+          getClassification={getClassification}
+          setAddDia={setAddDia}
+          setEditDia={setEditDia}
+          isUpdate={isUpdate}
+          setIsUpdate={setIsUpdate}
+          contactData={data}
+        />
+
       </Dialog>
       <h1>{t("Classification Management")}</h1>
       <div className="field">
@@ -522,7 +507,10 @@ const SetClassificationAdmin = () => {
           loading={loading}
           value={data}
           expandedKeys={expandedKeys}
-          onToggle={e => setExpandedKeys(e.value)}
+          onToggle={e => {
+            setExpandedKeys(e.value);
+            setExpandedKey(e.value);
+          }}
           dragdropScope="-"
           contextMenuSelectionKey={selectedNodeKey ? selectedNodeKey : ""}
           onContextMenuSelectionChange={(event: any) =>

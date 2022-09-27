@@ -73,7 +73,7 @@ export class ClassificationRepository implements classificationInterface<Classif
     const classification = new Classification();
     const classificationObject = assignDtoPropToEntity(classification, createClassificationDto);
     let value;
-
+    console.log(classificationObject);
     if (classificationObject['labels']) {
       value = await this.neo4jService.createNode(classificationObject, classificationObject['labels']);
       if (createClassificationDto['parentId']) {
