@@ -6,6 +6,7 @@ export enum CustomClassificationError {
   SPACE_ALREADY_EXIST= 10005,
   ZONE_ALREADY_EXIST= 10006,
   CONTACT_ALREADY_EXIST= 10007,
+  DEFAULT_ERROR= 10008,
   
   }
   

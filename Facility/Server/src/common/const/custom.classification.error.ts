@@ -31,7 +31,7 @@ import { I18NEnums } from "./i18n.enum";
     throw new HttpException({ key: I18NEnums.CONTACT_ALREADY_EXIST ,code:CustomClassificationError.CONTACT_ALREADY_EXIST,args:{name}}, HttpStatus.BAD_REQUEST);
   }
   export function default_error() {
-    throw new HttpException({ key: I18NEnums.DEFAULT_ERROR}, HttpStatus.BAD_REQUEST);
+    throw new HttpException({ key: I18NEnums.DEFAULT_ERROR,code:CustomClassificationError.DEFAULT_ERROR}, HttpStatus.BAD_REQUEST);
   }
 
 
