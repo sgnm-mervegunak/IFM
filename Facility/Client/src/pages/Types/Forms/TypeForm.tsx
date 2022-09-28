@@ -142,10 +142,10 @@ const TypeForm = ({
   };
 
   const getClassificationCategory = async () => {
-    await ClassificationsService.findAllActiveByLabel({
-      label: "OmniClass11"
+    await AssetClassificationsService.findAllActiveByLabel({
+      label: "OmniClass23"
     }).then((res) => {
-      let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
+      let temp = JSON.parse(JSON.stringify([res.data.root] || []));
       fixNodes(temp);
       setClassificationCategory(temp);
     });
@@ -207,7 +207,7 @@ const TypeForm = ({
     TypesService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
         let temp = {};
-        await ClassificationsService.findClassificationByCodeAndLanguage("OmniClass11", res.data.properties.category).then(clsf1 => {
+        await AssetClassificationsService.findClassificationByCodeAndLanguage("OmniClass23", res.data.properties.category).then(clsf1 => {
           setCodeCategory(res.data.properties.category);
           res.data.properties.category = clsf1.data.key
           temp = res.data.properties;
@@ -538,7 +538,7 @@ const TypeForm = ({
                     value={field.value}
                     options={classificationCategory}
                     onChange={(e) => {
-                      ClassificationsService.nodeInfo(e.value as string)
+                      AssetClassificationsService.nodeInfo(e.value as string)
                         .then((res) => {
                           field.onChange(e.value)
                           setCodeCategory(res.data.properties.code || "");
