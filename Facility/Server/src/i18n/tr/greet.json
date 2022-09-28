@@ -40,6 +40,7 @@
   "SPACE_ALREADY_EXIST":"{name} alanı bulunmaktadır.",
   "ZONE_ALREADY_EXIST":"{name} bölgesi bulunmaktadır.",
   "CHECK_EXCEL":"Excel dosyanız başarıyla doğrulandı.",
-  "CONTACT_ALREADY_EXIST":"{name} emaili ile bir kayıt bulunmaktadır."
+  "CONTACT_ALREADY_EXIST":"{name} emaili ile bir kayıt bulunmaktadır.",
+  "DEFAULT_ERROR":"Bir şeyler yanlış gidiyor."
 
 }

@@ -30,6 +30,10 @@ import { I18NEnums } from "./i18n.enum";
   export function contact_already_exist(name) {
     throw new HttpException({ key: I18NEnums.CONTACT_ALREADY_EXIST ,code:CustomClassificationError.CONTACT_ALREADY_EXIST,args:{name}}, HttpStatus.BAD_REQUEST);
   }
+  export function default_error() {
+    throw new HttpException({ key: I18NEnums.DEFAULT_ERROR}, HttpStatus.BAD_REQUEST);
+  }
+
 
   export function classification_import_error_object() {
     return {
@@ -89,7 +93,7 @@ import { I18NEnums } from "./i18n.enum";
   // export function  normal_error_object(name) {
   //   return {
   //     message: 'error',
-  //     code: CustomClassificationError.CONTACT_ALREADY_EXIST,
+  //     code: CustomClassificationError.DEFAULT_ERROR,
   //     name
   //   };
   // }

@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { errorMonitor } from 'events';
 import { Neo4jService } from 'sgnm-neo4j/dist';
-import { building_already_exist, building_already_exist_object, contact_already_exist, contact_already_exist_object, floor_already_exist, floor_already_exist_object, space_already_exist, space_already_exist_object, zone_already_exist, zone_already_exist_object } from 'src/common/const/custom.classification.error';
+import { building_already_exist, building_already_exist_object, contact_already_exist, contact_already_exist_object, floor_already_exist, floor_already_exist_object, space_already_exist, space_already_exist_object, zone_already_exist, zone_already_exist_object,default_error } from 'src/common/const/custom.classification.error';
 
 
 import { ExcelImportExportInterface, HeaderInterface, MainHeaderInterface } from 'src/common/interface/excel.import.export.interface';
@@ -342,7 +342,7 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
     if(error.response?.code===10003){
       building_already_exist()
     }else {
-      
+      default_error()
     }
    }
     
@@ -401,7 +401,7 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
     if(error.response?.code===10004){
       floor_already_exist(error.response?.name)
     }else {
-      
+      default_error()
     }
    }
 
@@ -509,7 +509,7 @@ async addSpacesToBuilding( file: Express.Multer.File, header:MainHeaderInterface
     if(error.response?.code===10005){
       space_already_exist(error.response?.name)
     }else {
-      
+      default_error()
     }
    }
  
@@ -572,7 +572,7 @@ async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, 
     if(error.response?.code===10006){
       zone_already_exist(error.response?.name)
     }else {
-      
+      default_error()
     }
    }
  
@@ -693,7 +693,7 @@ async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, 
     if(error.response?.code===10007){
       contact_already_exist(error.response?.name)
     }else {
-
+      default_error()
     }
 
    }
