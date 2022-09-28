@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 
 import ComponentService from "../../../services/components";
 import ClassificationsService from "../../../services/classifications";
+import AssetClassificationsService from "../../../services/assetclassifications";
 import ContactService from "../../../services/contact";
 import FacilityStructureService from "../../../services/facilitystructure";
 import { useAppSelector } from "../../../app/hook";
@@ -70,6 +71,7 @@ const TypeForm = ({
 }: Params) => {
 
   const [classificationCategory, setClassificationCategory] = useState<Node[]>([]);
+  const [classificationDurationUnit, setClassificationDurationUnit] = useState<Node[]>([]);
   const [spaces, setSpaces] = useState<Node[]>([]);
   const [spaceType, setSpaceType] = useState("");
   const [contact, setContact] = useState<any>([]);
@@ -77,7 +79,7 @@ const TypeForm = ({
   const [uploadFiles, setUploadFiles] = useState<any>({});
   const { toast } = useAppSelector((state) => state.toast);
   const { t } = useTranslation(["common"]);
-  const [codeDurationUnit, setCodeDurationUnit] = useState("");
+  const [codeWarrantyDurationUnit, setCodeWarrantyCodeDurationUnit] = useState("");
 
   const [data, setData] = useState<any>();
 
@@ -181,10 +183,22 @@ const TypeForm = ({
       });
   };
 
+  const getClassificationDurationUnit = async () => {
+    await AssetClassificationsService.findAllActiveByLabel({
+      label: "DurationUnit"
+    }).then((res) => {
+
+      let temp = JSON.parse(JSON.stringify([res.data.root] || []));
+      fixNodes(temp);
+      setClassificationDurationUnit(temp);
+    });
+  };
+
   useEffect(() => {
     getClassificationCategory();
     getContact();
     getSpaces();
+    getClassificationDurationUnit();
   }, []);
 
   useEffect(() => {
@@ -258,7 +272,7 @@ const TypeForm = ({
         warrantyDurationParts: data?.warrantyDurationParts,
         warrantyGuarantorLabor: data?.warrantyGuarantorLabor,
         warrantyDurationLabor: data?.warrantyDurationLabor,
-        warrantyDurationUnit: data?.warrantyDurationUnit,
+        warrantyDurationUnit: codeWarrantyDurationUnit,
         images: data?.images || "",
         documents: data?.documents || "",
         parentKey: selectedNodeKey,
@@ -347,7 +361,7 @@ const TypeForm = ({
         warrantyDurationParts: data?.warrantyDurationParts,
         warrantyGuarantorLabor: data?.warrantyGuarantorLabor,
         warrantyDurationLabor: data?.warrantyDurationLabor,
-        warrantyDurationUnit: data?.warrantyDurationUnit,
+        warrantyDurationUnit: codeWarrantyDurationUnit,
         images: data?.images || "",
         documents: data?.documents || "",
         parentKey: selectedNodeKey,
@@ -692,12 +706,12 @@ const TypeForm = ({
                 render={({ field }) => (
                   <TreeSelect
                     value={field.value}
-                    options={classificationCategory}
+                    options={classificationDurationUnit}
                     onChange={(e) => {
                       ClassificationsService.nodeInfo(e.value as string)
                         .then((res) => {
                           field.onChange(e.value)
-                          setCodeDurationUnit(res.data.properties.code || "");
+                          setCodeWarrantyCodeDurationUnit(res.data.properties.code || "");
                         })
                     }}
                     filter
