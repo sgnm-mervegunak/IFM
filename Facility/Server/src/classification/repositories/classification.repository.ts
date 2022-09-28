@@ -38,7 +38,7 @@ import { WrongClassificationParentExceptions } from 'src/common/badRequestExcept
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
 import { has_children_error, wrong_parent_error } from 'src/common/const/custom.error.object';
 import { RelationName } from 'src/common/const/relation.name.enum';
-import { classification_already_exist, classification_already_exist_object, classification_import_error, classification_import_error_object } from 'src/common/const/custom.classification.error';
+import { classification_already_exist, classification_already_exist_object, classification_import_error, classification_import_error_object, default_error } from 'src/common/const/custom.classification.error';
 
 const exceljs = require('exceljs');
 const { v4: uuidv4 } = require('uuid');
@@ -607,8 +607,12 @@ export class ClassificationRepository implements classificationInterface<Classif
           throw new classification_already_exist()
           
         }
-        else {
+        else if(error?.response?.code ===10002){
           throw new classification_import_error();
+        }
+
+        else {
+          default_error()
         }
       }
     
@@ -841,8 +845,12 @@ export class ClassificationRepository implements classificationInterface<Classif
         throw new classification_already_exist()
         
       }
-      else {
+      else if(error?.response?.code ===10002){
         throw new classification_import_error();
+      }
+
+      else {
+        default_error()
       }
     }
    
@@ -901,7 +909,7 @@ export class ClassificationRepository implements classificationInterface<Classif
         
       }
       else {
-        //throw new classification_import_error();
+        default_error()
       }
     }
   }

@@ -23,7 +23,10 @@ import {
 import { RelationName } from 'src/common/const/relation.name.enum';
 import {
   classification_already_exist,
+  classification_already_exist_object,
   classification_import_error,
+  classification_import_error_object,
+  default_error,
 } from 'src/common/const/custom.classification.error';
 import { CustomAssetError } from 'src/common/const/custom.error.enum';
 import { WrongClassificationParentExceptions } from 'src/common/const/badRequestExceptions/bad.request.exception';
@@ -568,8 +571,12 @@ export class ClassificationRepository implements classificationInterface<Classif
     } catch (error) {
       if (error?.response?.code === 10001) {
         throw new classification_already_exist();
-      } else {
+      } else if(error?.response?.code ===10002){
         throw new classification_import_error();
+      }
+
+      else {
+        default_error()
       }
     }
   }
@@ -588,11 +595,6 @@ export class ClassificationRepository implements classificationInterface<Classif
         data = firstSheet?.getColumn(1).values.filter((e) => e != null);
       });
       columnName = data.shift();
-      for (let i = 1; i < data.length; i++) {
-        if (!data[i].match(/[0-9a-zA-Z#-]{1,}(: )[a-zA-Z\s\(\)İĞÜŞÖÇığüşöç:]*/)) {
-          throw new classification_import_error();
-        }
-      }
 
       let label = await columnName.replaceAll(' ', '_');
 
@@ -795,13 +797,17 @@ export class ClassificationRepository implements classificationInterface<Classif
           );
         }
       } else {
-        throw new classification_already_exist();
+        throw new HttpException(classification_already_exist_object(),400)
       }
     } catch (error) {
       if (error?.response?.code === 10001) {
         throw new classification_already_exist();
-      } else {
+      } else if(error?.response?.code ===10002){
         throw new classification_import_error();
+      }
+
+      else {
+        default_error()
       }
     }
   }
@@ -842,5 +848,37 @@ export class ClassificationRepository implements classificationInterface<Classif
       language,
     });
     return deneme;
+  }
+
+  async checkExcelFile(file: Express.Multer.File) {
+    try {
+      let data = [];
+      let columnName;
+      let buffer = new Uint8Array(file.buffer);
+      const workbook = new exceljs.Workbook();
+  
+      await workbook.xlsx.load(buffer).then(function async(book) {
+        const firstSheet = book.getWorksheet(1);
+        data = firstSheet?.getColumn(1).values.filter((e) => e != null);
+      });
+      columnName=data.shift()
+      console.log(data)
+      for (let i = 1; i < data.length; i++) {
+        if(!data[i].match(/[0-9a-zA-Z#-]{1,}(: )[a-zA-Z\s\(\)İĞÜŞÖÇığüşöç:]*/)){
+          throw new HttpException(classification_import_error_object(), 400)
+        }
+        
+      }
+
+      return {statusCode:200}
+    } catch (error) {
+      if(error?.response?.code ===10002){
+        throw new classification_import_error();
+        
+      }
+      else {
+        default_error()
+      }
+    }
   }
 }
