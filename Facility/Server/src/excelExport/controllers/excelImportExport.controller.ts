@@ -8,6 +8,7 @@ import { UserRoles } from 'src/common/const/keycloak.role.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('ExcelImportExport')
+@ApiBearerAuth('JWT-auth')
 @Controller('ExcelImportExport')
 export class ExcelImportExportController { 
   constructor(private readonly excelImportExport: ExcelImportExportService) {}
