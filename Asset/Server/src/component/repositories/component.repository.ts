@@ -164,6 +164,10 @@ export class ComponentRepository implements ComponentInterface<Component> {
         throw new HttpException(wrong_parent_error(), 400);
       }
 
+      if (!createComponentDto.name || createComponentDto.name.trim() === '' || createComponentDto.name === '') {
+        createComponentDto.name = typeNode[0].get('children').properties.name;
+      }
+
       const component = new Component();
       const componentFinalObject = assignDtoPropToEntity(component, createComponentDto);
       delete componentFinalObject['space'];
@@ -174,8 +178,11 @@ export class ComponentRepository implements ComponentInterface<Component> {
 
       const componentNode = await this.neo4jService.createNode(componentFinalObject, [Neo4jLabelEnum.COMPONENT]);
       const uniqName = componentNode.properties.name + ' ' + componentNode.identity.low;
-      await this.neo4jService.updateByIdAndFilter(componentNode.identity.low, {}, [], { name: uniqName });
-      componentNode.properties.name = uniqName;
+
+      const updatedNode = await this.neo4jService.updateByIdAndFilter(componentNode.identity.low, {}, [], {
+        name: uniqName,
+      });
+
       componentNode['properties']['id'] = componentNode['identity'].low;
       const componentUrl = `${process.env.COMPONENT_URL}/${componentNode.properties.key}`;
       const result = {
@@ -196,7 +203,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
         const url =
           (await this.configService.get(finalObjectArray[index].url)) + '/' + finalObjectArray[index].referenceKey;
 
-        const contact = await this.httpService.get(url, { authorization });
+        await this.httpService.get(url, { authorization });
       }
 
       await this.virtualNodeHandler.createVirtualNode(componentNode['identity'].low, componentUrl, finalObjectArray);

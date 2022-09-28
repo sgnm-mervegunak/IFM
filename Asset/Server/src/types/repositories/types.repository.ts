@@ -120,9 +120,10 @@ export class TypesRepository implements GeciciInterface<Type> {
       });
 
       if (!createTypesDto.name || createTypesDto.name.trim() === '') {
+        console.log(createTypesDto.name);
         createTypesDto['name'] = manufacturer.properties.company + ' ' + createTypesDto.modelNo;
       }
-
+      console.log(createTypesDto.name);
       const uniqnessCheck = await this.neo4jService.findChildrensByLabelsAndFilters(
         [Neo4jLabelEnum.TYPES],
         { realm },
@@ -142,6 +143,7 @@ export class TypesRepository implements GeciciInterface<Type> {
       delete typeObject['createdBy'];
       delete typeObject['warrantyGuarantorParts'];
       delete typeObject['warrantyGuarantorLabor'];
+      console.log(typeObject);
 
       const finalObjectArray = avaiableCreateVirtualPropsGetter(createTypesDto);
 
