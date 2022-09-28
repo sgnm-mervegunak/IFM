@@ -536,9 +536,8 @@ async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, 
   
   
    for (let i = 1; i <data.length; i++) {
-    let checkZone = await this.neo4jService.findChildrensByLabelsAndFilters(['Building'],{key:buildingKey},[`Zone`],{name:data[i][1]});
-    console.log(checkZone.length)
-    if(checkZone.length==0){
+    //let checkZone = await this.neo4jService.findChildrensByLabelsAndFilters(['Building'],{key:buildingKey},[`Zone`],{name:data[i][1]});
+
 
       let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"FacilityZoneTypes",data[i][4],"zz");
   
@@ -560,11 +559,8 @@ async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, 
   
   
      let data2 =await this.neo4jService.write(cypher)
-  console.log(data2)
     
-    }else {
-      throw new HttpException(zone_already_exist_object(data[i][1]),400)
-    }
+    
     
   }
   
