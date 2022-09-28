@@ -67,6 +67,7 @@ const TypeForm = ({
 }: Params) => {
 
   const [classificationCategory, setClassificationCategory] = useState<Node[]>([]);
+  const [classificationDurationUnit, setClassificationDurationUnit] = useState<Node[]>([]);
   const [assetType, setAssetType] = useState<Node[]>([]);
   const [contact, setContact] = useState<any>([]);
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
@@ -76,6 +77,7 @@ const TypeForm = ({
   const [codeCategory, setCodeCategory] = useState("");
   const [codeAssetType, setCodeAssetType] = useState("");
   const [codeDurationUnit, setCodeDurationUnit] = useState("");
+  const [codeWarrantyDurationUnit, setCodeWarrantyCodeDurationUnit] = useState("");
 
   const [data, setData] = useState<any>();
 
@@ -149,10 +151,22 @@ const TypeForm = ({
     });
   };
 
+  const getClassificationDurationUnit = async () => {
+    await AssetClassificationsService.findAllActiveByLabel({
+      label: "DurationUnit"
+    }).then((res) => {
+
+      let temp = JSON.parse(JSON.stringify([res.data.root] || []));
+      fixNodes(temp);
+      setClassificationDurationUnit(temp);
+    });
+  };
+
   const getAssetType = async () => {
     await AssetClassificationsService.findAllActiveByLabel({
       label: "AssetTypes"
     }).then((res) => {
+
       let temp = JSON.parse(JSON.stringify([res.data.root] || []));
       fixNodes(temp);
       setAssetType(temp);
@@ -172,6 +186,7 @@ const TypeForm = ({
     getClassificationCategory();
     getAssetType();
     getContact();
+    getClassificationDurationUnit();
   }, []);
 
   useEffect(() => {
@@ -209,9 +224,18 @@ const TypeForm = ({
             setData(res.data.properties);
           })
 
-        await ClassificationsService.findClassificationByCodeAndLanguage("OmniClass11", res.data.properties.durationUnit).then(clsf3 => {
+        await AssetClassificationsService.findClassificationByCodeAndLanguage("DurationUnit", res.data.properties.durationUnit).then(clsf3 => {
           setCodeDurationUnit(res.data.properties.durationUnit);
           res.data.properties.durationUnit = clsf3.data.key
+          temp = res.data.properties;
+        })
+          .catch((err) => {
+            setData(res.data.properties);
+          })
+
+        await AssetClassificationsService.findClassificationByCodeAndLanguage("DurationUnit", res.data.properties.warrantydurationUnit).then(clsf3 => {
+          setCodeDurationUnit(res.data.properties.durationUnit);
+          res.data.properties.warrantydurationUnit = clsf3.data.key
           temp = res.data.properties;
         })
           .catch((err) => {
@@ -262,7 +286,7 @@ const TypeForm = ({
         warrantyDurationParts: Number(data?.warrantyDurationParts),
         warrantyGuarantorLabor: data?.warrantyGuarantorLabor,
         warrantyDurationLabor: Number(data?.warrantyDurationLabor),
-        warrantyDurationUnit: data?.warrantyDurationUnit,
+        warrantyDurationUnit: codeWarrantyDurationUnit,
         replacementCost: Number(data?.replacementCost),
         expectedLife: Number(data?.expectedLife),
         durationUnit: codeDurationUnit, //Düzeltilecek
@@ -285,9 +309,9 @@ const TypeForm = ({
         documents: data?.documents || "",
         images: data?.images || "",
       };
-      
+
       console.log(newNode);
-      
+
 
       TypesService.create(newNode)
         .then(async (res) => {
@@ -362,7 +386,7 @@ const TypeForm = ({
         warrantyDurationParts: Number(data?.warrantyDurationParts),
         warrantyGuarantorLabor: data?.warrantyGuarantorLabor,
         warrantyDurationLabor: Number(data?.warrantyDurationLabor),
-        warrantyDurationUnit: data?.warrantyDurationUnit,
+        warrantyDurationUnit: codeWarrantyDurationUnit,
         replacementCost: Number(data?.replacementCost),
         expectedLife: Number(data?.expectedLife),
         durationUnit: codeDurationUnit, //Düzeltilecek
@@ -695,12 +719,12 @@ const TypeForm = ({
                 render={({ field }) => (
                   <TreeSelect
                     value={field.value}
-                    options={classificationCategory}
+                    options={classificationDurationUnit}
                     onChange={(e) => {
-                      ClassificationsService.nodeInfo(e.value as string)
+                      AssetClassificationsService.nodeInfo(e.value as string)
                         .then((res) => {
                           field.onChange(e.value)
-                          setCodeCategory(res.data.properties.code || "");
+                          setCodeWarrantyCodeDurationUnit(res.data.properties.code || "");
                         })
                     }}
                     filter
@@ -745,9 +769,9 @@ const TypeForm = ({
                 render={({ field }) => (
                   <TreeSelect
                     value={field.value}
-                    options={classificationCategory}
+                    options={classificationDurationUnit}
                     onChange={(e) => {
-                      ClassificationsService.nodeInfo(e.value as string)
+                      AssetClassificationsService.nodeInfo(e.value as string)
                         .then((res) => {
                           field.onChange(e.value)
                           setCodeDurationUnit(res.data.properties.code || "");
