@@ -41,6 +41,7 @@
   "ZONE_ALREADY_EXIST":"{name} bölgesi bulunmaktadır.",
   "CHECK_EXCEL":"Excel dosyanız başarıyla doğrulandı.",
   "CONTACT_ALREADY_EXIST":"{name} emaili ile bir kayıt bulunmaktadır.",
-  "DEFAULT_ERROR":"Bir şeyler yanlış gitti."
+  "DEFAULT_ERROR":"Bir şeyler yanlış gitti.",
+  "SPACE_HAS_ALREADY_RELATION":"Bölgelerden bazıları aynı alanları içeriyor"
 
 }

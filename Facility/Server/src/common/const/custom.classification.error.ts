@@ -27,6 +27,9 @@ import { I18NEnums } from "./i18n.enum";
     throw new HttpException({ key: I18NEnums.ZONE_ALREADY_EXIST ,code:CustomClassificationError.ZONE_ALREADY_EXIST,args:{name}}, HttpStatus.BAD_REQUEST);
   }
  
+  export function space_has_already_relation() {
+    throw new HttpException({ key: I18NEnums.SPACE_HAS_ALREADY_RELATION ,code:CustomClassificationError.SPACE_HAS_ALREADY_RELATION}, HttpStatus.BAD_REQUEST);
+  }
   export function contact_already_exist(name) {
     throw new HttpException({ key: I18NEnums.CONTACT_ALREADY_EXIST ,code:CustomClassificationError.CONTACT_ALREADY_EXIST,args:{name}}, HttpStatus.BAD_REQUEST);
   }
@@ -81,6 +84,12 @@ import { I18NEnums } from "./i18n.enum";
       name
     };
   }
+  export function space_has_already_relation_object() {
+    return {
+      message: 'error',
+      code: CustomClassificationError.SPACE_HAS_ALREADY_RELATION,
+    };
+  }
 
   export function  contact_already_exist_object(name) {
     return {
@@ -89,11 +98,3 @@ import { I18NEnums } from "./i18n.enum";
       name
     };
   }
-
-  // export function  normal_error_object(name) {
-  //   return {
-  //     message: 'error',
-  //     code: CustomClassificationError.DEFAULT_ERROR,
-  //     name
-  //   };
-  // }
