@@ -60,7 +60,7 @@ const ImportZone = ({ setImportDia }: { setImportDia: any }) => {
           toast.current.show({
             severity: "error",
             summary: "Error",
-            detail: err.response ? err.response.data.message : err.message,
+            detail: err.response ? err.response.data.message : err.message, //
             life: 2000,
           });
         });
