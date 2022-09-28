@@ -55,12 +55,12 @@ const ImportZone = ({ setImportDia }: { setImportDia: any }) => {
             life: 3000,
           });
         })
-        .catch((e) => {
+        .catch((err) => {
           setLoading(false);
           toast.current.show({
             severity: "error",
             summary: "Error",
-            detail: e.toString(),
+            detail: err.response ? err.response.data.message : err.message, //
             life: 2000,
           });
         });
