@@ -180,18 +180,21 @@ export class ComponentRepository implements ComponentInterface<Component> {
       const uniqName = componentNode.properties.name + ' ' + componentNode.identity.low;
 
       const updatedNode = await this.neo4jService.updateByIdAndFilter(componentNode.identity.low, {}, [], {
+        id: componentNode['identity'].low,
         name: uniqName,
       });
+      console.log(updatedNode);
 
       componentNode['properties']['id'] = componentNode['identity'].low;
+      //componentNode['properties']['name'] = uniqName;
       const componentUrl = `${process.env.COMPONENT_URL}/${componentNode.properties.key}`;
-      const result = {
-        id: componentNode['identity'].low,
-        labels: componentNode['labels'],
-        properties: componentNode['properties'],
-      };
+      // const result = {
+      //   id: componentNode['identity'].low,
+      //   labels: componentNode['labels'],
+      //   properties: componentNode['properties'],
+      // };
       await this.neo4jService.addParentRelationByIdAndFilters(
-        result['id'],
+        componentNode.identity.low,
         {},
         typeNode[0].get('children').identity.low,
         {},
@@ -208,7 +211,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
 
       await this.virtualNodeHandler.createVirtualNode(componentNode['identity'].low, componentUrl, finalObjectArray);
 
-      return result;
+      return updatedNode;
 
       // let structureUrl = '';
       // let structure;
@@ -406,6 +409,10 @@ export class ComponentRepository implements ComponentInterface<Component> {
           (await this.configService.get(finalObjectArray[index].url)) + '/' + finalObjectArray[index].newParentKey;
 
         await this.httpService.get(url, { authorization });
+      }
+
+      if (!updateComponentDto.name || updateComponentDto.name.trim() === '' || updateComponentDto.name === '') {
+        delete updateComponentDto['name'];
       }
 
       await this.virtualNodeHandler.updateVirtualNode(+_id, componentUrl, finalObjectArray);
