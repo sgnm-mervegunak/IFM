@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { errorMonitor } from 'events';
 import { Neo4jService } from 'sgnm-neo4j/dist';
-import { building_already_exist, building_already_exist_object, floor_already_exist, floor_already_exist_object, space_already_exist, space_already_exist_object } from 'src/common/const/custom.classification.error';
+import { building_already_exist, building_already_exist_object, contact_already_exist, contact_already_exist_object, floor_already_exist, floor_already_exist_object, space_already_exist, space_already_exist_object, zone_already_exist, zone_already_exist_object } from 'src/common/const/custom.classification.error';
 
 
 import { ExcelImportExportInterface, HeaderInterface, MainHeaderInterface } from 'src/common/interface/excel.import.export.interface';
@@ -341,6 +341,8 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
    } catch (error) {
     if(error.response?.code===10003){
       building_already_exist()
+    }else {
+      
     }
    }
     
@@ -398,6 +400,8 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
   } catch (error) {
     if(error.response?.code===10004){
       floor_already_exist(error.response?.name)
+    }else {
+      
     }
    }
 
@@ -504,6 +508,8 @@ async addSpacesToBuilding( file: Express.Multer.File, header:MainHeaderInterface
   } catch (error) {
     if(error.response?.code===10005){
       space_already_exist(error.response?.name)
+    }else {
+      
     }
    }
  
@@ -530,7 +536,10 @@ async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, 
   
   
    for (let i = 1; i <data.length; i++) {
-    
+    let checkZone = await this.neo4jService.findChildrensByLabelsAndFilters(['Building'],{key:buildingKey},[`Zone`],{name:data[i][1]});
+    console.log(checkZone.length)
+    if(checkZone.length==0){
+
       let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"FacilityZoneTypes",data[i][4],"zz");
   
       if(typeof data[i][2]=='object'){
@@ -553,22 +562,29 @@ async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, 
      let data2 =await this.neo4jService.write(cypher)
   console.log(data2)
     
+    }else {
+      throw new HttpException(zone_already_exist_object(data[i][1]),400)
+    }
+    
   }
   
   } catch (error) {
-    
-  }
+    if(error.response?.code===10006){
+      zone_already_exist(error.response?.name)
+    }else {
+      
+    }
+   }
  
  }
 
  async addContacts(file: Express.Multer.File,header:MainHeaderInterface)  {
-  
-  
-  let email:string;
+  try {
+    let email:string;
   let createdByEmail:string;
   const {realm}= header;
 
-
+ 
     let data=[]
     let categoryColumn=[];
     let values:[string];
@@ -642,7 +658,7 @@ async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, 
   }
   
   for (let i = 1; i < data.length; i++) {
-  
+    
     let {createdCypher,createdRelationCypher} =await this.createCypherForClassification(realm,'OmniClass34',categoryColumn[i-1][0],"p")
 
     if(typeof data[i][1]=='object'){
@@ -650,24 +666,39 @@ async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, 
     }else {
       email= await data[i][1];
     }
-
     if(typeof data[i][2]=='object'){
       createdByEmail=await data[i][2].text;
     }else {
       createdByEmail= await data[i][2];
     }
-  
-  
-    let cypher=`MATCH (c:Contact {realm:"${realm}"}) ${createdCypher} \
-    MERGE (p {email:"${email}",createdOn:"${data[i][3]}",company:"${data[i][5]}", phone:"${data[i][6]}",externalSystem:"${data[i][7]}",externalObject:"${data[i][8]}",externalIdentifier:"${data[i][9]}",department:"${data[i][10]}",organizationCode:"${data[i][11]}", \
-    givenName:"${data[i][12]}",familyName:"${data[i][13]}",street:"${data[i][14]}",postalBox:"${data[i][15]}",town:"${data[i][16]}",stateRegion:"${data[i][17]}",postalCode:"${data[i][18]}",country:"${data[i][19]}",canDisplay:true,isDeleted:false,isActive:true,className:"Contact",key:"${this.keyGenerate()}",canDelete:true} )\
-    MERGE (c)-[:PARENT_OF]->(p)  ${createdRelationCypher}`
-    let data2 =await this.neo4jService.write(cypher);
-  console.log(data2)
-  }
 
-  let cypher2 = `MATCH (p {email:"${email}"}) MATCH (p2 {email:"${createdByEmail}"}) MERGE (p)-[:CREATED_BY]->(p2)`
-  let data3 =await this.neo4jService.write(cypher2);
+    let checkEmail = await this.neo4jService.findChildrensByLabelsAndFilters(['Contact'],{realm},[],{email});
+    if(checkEmail.length==0){
+      let cypher=`MATCH (c:Contact {realm:"${realm}"}) ${createdCypher} \
+      MERGE (p {email:"${email}",createdOn:"${data[i][3]}",company:"${data[i][5]}", phone:"${data[i][6]}",externalSystem:"${data[i][7]}",externalObject:"${data[i][8]}",externalIdentifier:"${data[i][9]}",department:"${data[i][10]}",organizationCode:"${data[i][11]}", \
+      givenName:"${data[i][12]}",familyName:"${data[i][13]}",street:"${data[i][14]}",postalBox:"${data[i][15]}",town:"${data[i][16]}",stateRegion:"${data[i][17]}",postalCode:"${data[i][18]}",country:"${data[i][19]}",canDisplay:true,isDeleted:false,isActive:true,className:"Contact",key:"${this.keyGenerate()}",canDelete:true} )\
+      MERGE (c)-[:PARENT_OF]->(p)  ${createdRelationCypher}`
+      let data2 =await this.neo4jService.write(cypher);
+    console.log(data2)
+
+    let cypher2 = `MATCH (p {email:"${email}"}) MATCH (p2 {email:"${createdByEmail}"}) MERGE (p)-[:CREATED_BY]->(p2)`
+    let data3 =await this.neo4jService.write(cypher2);
+    }else{
+      throw new HttpException(contact_already_exist_object(email),400)
+    }
+  
+    }
+   
+  } catch (error) {
+    if(error.response?.code===10007){
+      contact_already_exist(error.response?.name)
+    }else {
+
+    }
+
+   }
+  
+  
   };
 
 
