@@ -228,7 +228,7 @@ const StructureAsset = () => {
                             title={t("Edit Assets")}
                           />
 
-                          <Button
+                          {/* <Button
                             icon="pi pi-eye"
                             className="p-button-rounded p-button-secondary p-button-text"
                             aria-label="Display Item"
@@ -238,7 +238,7 @@ const StructureAsset = () => {
                               setDisplayKey(data.key);
                             }}
                             title={t("Show Assets")}
-                          />
+                          /> */}
                         </>
                       )
                     }

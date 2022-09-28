@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { errorMonitor } from 'events';
 import { Neo4jService } from 'sgnm-neo4j/dist';
-import { building_already_exist, building_already_exist_object, contact_already_exist, contact_already_exist_object, floor_already_exist, floor_already_exist_object, space_already_exist, space_already_exist_object, zone_already_exist, zone_already_exist_object,default_error } from 'src/common/const/custom.classification.error';
+import { building_already_exist, building_already_exist_object, contact_already_exist, contact_already_exist_object, floor_already_exist, floor_already_exist_object, space_already_exist, space_already_exist_object, zone_already_exist, zone_already_exist_object,default_error, space_has_already_relation_object, space_has_already_relation } from 'src/common/const/custom.classification.error';
 
 
 import { ExcelImportExportInterface, HeaderInterface, MainHeaderInterface } from 'src/common/interface/excel.import.export.interface';
@@ -536,10 +535,10 @@ async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, 
   
   
    for (let i = 1; i <data.length; i++) {
-    //let checkZone = await this.neo4jService.findChildrensByLabelsAndFilters(['Building'],{key:buildingKey},[`Zone`],{name:data[i][1]});
-
-
-      let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"FacilityZoneTypes",data[i][4],"zz");
+   
+   let abc =await this.neo4jService.findChildrenNodesByLabelsAndRelationName(['Space'],{name:data[i][5]},[],{name:data[i][1],isDeleted:false},"MERGEDZN");
+    if(abc.length==0){
+  let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"FacilityZoneTypes",data[i][4],"zz");
   
       if(typeof data[i][2]=='object'){
         email=await data[i][2].text;
@@ -558,16 +557,21 @@ async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, 
     MERGE (zz)-[:CREATED_BY]->(p);`
   
   
-     let data2 =await this.neo4jService.write(cypher)
-    
-    
+     await this.neo4jService.write(cypher)
+    }else {
+      throw new HttpException(space_has_already_relation_object(),400)
+    }
+
     
   }
   
   } catch (error) {
     if(error.response?.code===10006){
       zone_already_exist(error.response?.name)
-    }else {
+    }else if(error.response?.code===10009){
+      space_has_already_relation()
+    }
+    else {
       default_error()
     }
    }

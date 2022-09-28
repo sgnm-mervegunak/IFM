@@ -203,7 +203,7 @@ const SetType = () => {
 
   return (
     <div className="container">
-      <Toolbar
+      {/* <Toolbar
         className="mb-4"
         right={() => (
           <>
@@ -215,7 +215,7 @@ const SetType = () => {
             />
           </>
         )}
-      />
+      /> */}
 
       {(() => {
         if (canDelete === false) {
