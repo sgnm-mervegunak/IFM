@@ -419,6 +419,27 @@ export class SystemsRepository implements SystemsInterface<System> {
       );
 
       if (hasChildren['length'] == 0) {
+        ////////////////////////////// update classified_by  relation, if category changed //////////////////////////////////
+        const categories = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+        [],
+        { isDeleted: false, key: node[0]['_fields'][1].properties.key },
+        [],
+        { isDeleted: false },
+        RelationName.CLASSIFIED_BY,
+        RelationDirection.RIGHT,
+        );
+        
+        for (let i = 0; i < categories.length; i++) {
+          await this.neo4jService.deleteRelationByIdAndRelationNameWithoutFilters(
+            node[0]['_fields'][1].identity.low,
+            categories[i]['_fields'][1].identity.low,
+            RelationName.CLASSIFIED_BY,
+            RelationDirection.RIGHT,
+          );
+        }
+
+
+
         deletedNode = await this.neo4jService.updateByIdAndFilter(+_id, {}, [], { isDeleted: true, isActive: false });
 
         const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
