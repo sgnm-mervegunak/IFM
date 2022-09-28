@@ -21,5 +21,6 @@
   "LENGTH": "{property} needs to be at least {constraints.0} and at most  {constraints.1} characters long",
   "DUBLICATE_ERROR": "given properties #{errorProperties} are already exist",
   "CLASSIFICATION_ALREADY_EXIST":"This Classification already exists.",
-  "CLASSIFICATION_IMPORT_ERROR":"This file has not the correct import format."
+  "CLASSIFICATION_IMPORT_ERROR":"This file has not the correct import format.",
+  "DEFAULT_ERROR":"Something is wrong"
 }

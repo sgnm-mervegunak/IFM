@@ -428,13 +428,15 @@ export class SystemsRepository implements SystemsInterface<System> {
           { isDeleted: false },
           RelationName.CREATED_BY,
         );
-        deletedVirtualNode = await this.neo4jService.updateByIdAndFilter(
-          +virtualNode[0].get('children').identity.low,
-          {},
-          [],
-          { isDeleted: true },
-        );
-
+        if (virtualNode && virtualNode.length > 0) {
+          deletedVirtualNode = await this.neo4jService.updateByIdAndFilter(
+            +virtualNode[0].get('children').identity.low,
+            {},
+            [],
+            { isDeleted: true },
+          );
+        }
+        
         await this.kafkaService.producerSendMessage(
           'deleteVirtualNodeRelations',
           JSON.stringify({ referenceKey: node.properties.key }),

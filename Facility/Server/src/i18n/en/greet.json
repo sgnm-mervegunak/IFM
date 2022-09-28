@@ -40,7 +40,9 @@
   "FLOOR_ALREADY_EXIST":"Floor {name} already exists",
   "SPACE_ALREADY_EXIST":"Space {name} already exists",
   "ZONE_ALREADY_EXIST":"Zone {name} already exists",
-  "CHECK_EXCEL":"It is a valid excel file"
+  "CHECK_EXCEL":"It is a valid excel file",
+  "CONTACT_ALREADY_EXIST":"Email {name} already exists",
+  "DEFAULT_ERROR":"Something is wrong"
 
 }
 

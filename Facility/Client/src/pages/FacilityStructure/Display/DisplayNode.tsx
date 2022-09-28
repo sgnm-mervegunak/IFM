@@ -4,6 +4,7 @@ import FacilityStructureService from "../../../services/facilitystructure";
 import DocumentItem from "../Forms/FileUpload/DocumentUpload/DocumentItem";
 import ImageItem from "../Forms/FileUpload/ImageUpload/ImageItem";
 import ClassificationService from "../../../services/classifications";
+import ZoneService from "../../../services/zone";
 
 interface Params {
   displayKey: string;
@@ -20,10 +21,17 @@ const DisplayNode = ({ displayKey, docTypes=[] }: Params) => {
   useEffect(() => {
     FacilityStructureService.nodeInfo(displayKey).then((res) => {
       setType(res.data.properties.nodeType);
-      setData(res.data.properties);
       console.log("*data", res.data.properties);
-
-    });
+     if (res.data.properties.nodeType === "Zone") {
+        ZoneService.nodeInfo(displayKey).then((zoneRes) => {
+          setData(zoneRes.data.properties);
+       })
+     } else {
+       setData(res.data.properties);
+     }
+      
+    }
+    );
   }, [displayKey]);
 
   return (
@@ -95,6 +103,7 @@ const DisplayNode = ({ displayKey, docTypes=[] }: Params) => {
                   </div>
                 );
               } else if (key === "category") {
+               
                 ClassificationService.findClassificationByCode(data[key]).then((res) => { //will be refactor
                   setCategory(res.data[0]?._fields[0]?.properties?.name);
                 });
