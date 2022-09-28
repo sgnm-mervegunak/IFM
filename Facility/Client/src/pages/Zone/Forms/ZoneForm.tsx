@@ -201,7 +201,7 @@ const ZoneForm = ({
     }, [watch]);
 
     const getNodeInfoForUpdate = (selectedNodeKey: string) => {
-        FacilityStructureService.nodeInfo(selectedNodeKey)
+        ZoneService.nodeInfo(selectedNodeKey)
             .then(async (res) => {
                 // setSelectedFacilityType(res.data.properties.nodeType);
                 // res.data.properties.category = res.data.properties.classificationKey;
@@ -210,14 +210,14 @@ const ZoneForm = ({
                     .then(
                         (clsf) => {
                             res.data.properties.category = clsf.data[1]?._fields[0]?.properties?.key
-                            // console.log("zone category key: ", clsf.data[1]?._fields[0]?.properties?.key)
                             setCodeCategory(clsf.data[1]?._fields[0]?.properties?.code);
-                            // console.log("zone category code: ", clsf.data[1]?._fields[0]?.properties?.code)
+
                         }
                     )
                     .catch((err) => {
                         console.log("err", err);
                     })
+
 
                 setData(res.data.properties);
             })
@@ -347,8 +347,7 @@ const ZoneForm = ({
                         documents: data?.documents || "",
                     };
 
-                    // console.log("update zone node: ", updateNode)
-                    // console.log("props: ", res.data?.properties)
+                    console.log("will be updated node: ", updateNode)
 
                     ZoneService.update(res.data.id, updateNode)
                         .then((res) => {
@@ -382,9 +381,6 @@ const ZoneForm = ({
         }
     };
 
-    // useEffect(() => {
-    //     console.log("use effect ", codeCategory);
-    // }, [codeCategory])
 
     if (editDia && !data) {
         return null;
@@ -461,7 +457,6 @@ const ZoneForm = ({
                                             (res) => {
                                                 field.onChange(e.value);
                                                 setCodeCategory(res.data.properties.code || "");
-                                                // console.log("set category code:", res.data.properties.code);
                                             }
                                         );
                                     }}

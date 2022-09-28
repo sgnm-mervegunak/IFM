@@ -9,8 +9,8 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { v4 as uuidv4 } from "uuid";
 
-import ClassificationsService from "../../services/classifications";
-import { useAppSelector } from "../../app/hook";
+import ClassificationsService from "../../../services/classifications";
+import { useAppSelector } from "../../../app/hook";
 
 interface Node {
   cantDeleted: boolean;

@@ -13,7 +13,7 @@ import { useTranslation } from "react-i18next";
 
 import StructureAssetService from "../../services/structureAsset";
 import ComponentService from "../../services/components";
-import FacilityService from "../../services/facility";
+import FacilityStructureService from "../../services/facilitystructure";
 import DefineFacility from "../../components/Facility/DefineFacility";
 import { useAppSelector } from "../../app/hook";
 import ComponentForm from "./Forms/ComponentForm";
@@ -116,6 +116,7 @@ const SetTypes = () => {
   const dt = useRef(null);
   const navigate = useNavigate();
   const menu = useRef(null);
+  const [spaceName, setSpaceName] = useState("");
 
   const params = useParams();
   const spaceKey: any = params.id;
@@ -131,6 +132,9 @@ const SetTypes = () => {
   };
 
   const getComponents = () => {
+    console.log("getComponents");
+    console.log("spaceKey", spaceKey);
+
     StructureAssetService.findAll(spaceKey)
       .then((res) => {
         console.log(res.data);
@@ -153,6 +157,21 @@ const SetTypes = () => {
     getComponents();
   }, []);
 
+  useEffect(() => {
+    FacilityStructureService.nodeInfo(spaceKey)
+      .then(async (res) => {
+        setSpaceName(res.data.properties.name);
+      })
+      .catch((err) => {
+        toast.current.show({
+          severity: "error",
+          summary: t("Error"),
+          detail: err.response ? err.response.data.message : err.message,
+          life: 4000,
+        });
+      });
+  }, [])
+
   const leftToolbarTemplate = () => {
     return (
       <React.Fragment>
@@ -169,8 +188,9 @@ const SetTypes = () => {
   const renderSearch = () => {
     return (
       <React.Fragment>
+
         <div className="flex justify-content-between">
-          <h5 className="m-0">Manage Components</h5>
+          <h5 className="m-0">Space Name : {spaceName}</h5>
           <span className="p-input-icon-left">
             <i className="pi pi-search" />
             <InputText value={globalFilter} onChange={(e) => { setGlobalFilter(e.target.value) }} placeholder="Search" />
@@ -327,11 +347,11 @@ const SetTypes = () => {
               sortable
               style={{ width: "20%" }}
             />
-            <Column
+            {/* <Column
               body={actionBodyTemplate}
               exportable={false}
               style={{ minWidth: '8rem' }}
-            />
+            /> */}
           </DataTable>
         </div>
 

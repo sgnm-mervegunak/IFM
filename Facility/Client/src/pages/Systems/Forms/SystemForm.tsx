@@ -84,6 +84,7 @@ const SystemForm = ({
 
   const schema = yup.object({
     name: yup.string().required(t("This area is required.")).max(50, t("This area accepts max 50 characters.")),
+    category: yup.string().required(t("This area is required.")),
     createdBy: yup.string().required(t("This area is required.")),
   });
 

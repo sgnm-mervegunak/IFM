@@ -148,7 +148,7 @@ const TypeForm = ({
     FacilityStructureService.nodeInfo(spaceKey)
       .then(async (res) => {
         console.log(res.data);
-        
+
         setSpaceType(res.data.properties.nodeType);
       })
       .catch((err) => {
@@ -174,7 +174,7 @@ const TypeForm = ({
   }, [submitted]);
 
 
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
     if (editDia === false) {
       let updateNode: any = {};
       updateNode = {
@@ -184,7 +184,7 @@ const TypeForm = ({
 
       console.log(componentId);
       console.log(updateNode);
-      
+
       ComponentService.update(componentId, updateNode)
         .then(async (res) => {
           toast.current.show({
@@ -194,7 +194,9 @@ const TypeForm = ({
             life: 4000,
           });
 
-          getComponents();
+          setTimeout(() => {
+            getComponents();
+          }, 500);
         })
         .catch((err) => {
           toast.current.show({
