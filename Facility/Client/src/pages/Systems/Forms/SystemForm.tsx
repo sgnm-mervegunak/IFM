@@ -124,7 +124,7 @@ const SystemForm = ({
     await AssetClassificationsService.findAllActiveByLabel({
       label: "OmniClass21"
     }).then((res) => {
-      let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
+      let temp = JSON.parse(JSON.stringify([res.data.root] || []));
       fixNodes(temp);
       setClassificationCategory(temp);
     });
@@ -179,12 +179,16 @@ const SystemForm = ({
   const getNodeInfoForUpdate = (selectedNodeKey: string) => {
     SystemService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
-        console.log(res.data);
-        if (spaceType === "") {
-          setSpaceType(res.data.nodeType);
-        }
-        setData(res.data.properties);
-
+        let temp = {};
+        await AssetClassificationsService.findClassificationByCodeAndLanguage("OmniClass21", res.data.properties.category).then(clsf1 => {
+          setCodeCategory(res.data.properties.category);
+          res.data.properties.category = clsf1.data.key
+          temp = res.data.properties;
+        })
+          .catch((err) => {
+            setData(res.data.properties);
+          })
+        setData(temp);
       })
       .catch((err) => {
         toast.current.show({
@@ -417,7 +421,7 @@ const SystemForm = ({
                         })
                     }}
                     filter
-                    placeholder="Select Type"
+                    placeholder=""
                     style={{ width: "100%" }}
                   />
                 )}
@@ -470,7 +474,7 @@ const SystemForm = ({
                       field.onChange(e.value)
                     }}
                     filter
-                    placeholder="Select Type"
+                    placeholder=""
                     style={{ width: "100%" }}
                   />
                 )}

@@ -31,7 +31,7 @@ export class StructureListenerController {
 
       virtualNodeObject = assignDtoPropToEntity(virtualNodeObject, virtualObject);
       delete virtualNodeObject['relationName'];
-      delete virtualNodeObject['virtualNodeLabel'];
+      delete virtualNodeObject['virtualNodeLabels'];
 
       const value = await this.neo4jService.createNode(virtualNodeObject, virtualObject.virtualNodeLabels);
 

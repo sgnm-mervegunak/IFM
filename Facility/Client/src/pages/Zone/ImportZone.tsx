@@ -41,12 +41,29 @@ const ImportZone = ({ setImportDia }: { setImportDia: any }) => {
       const formData = new FormData();
 
       formData.append("file", file);
-      ExportService.importZones(selectedBuilding.key, formData).then((res) => {
+      ExportService.importZones(selectedBuilding.key, formData)
+        .then((res) => {
         console.log("ok");
         console.log(res.data);
         setLoading(false);
         setImportDia(false);
-      });
+
+          toast.current.show({
+            severity: 'success',
+            summary: 'Successful',
+            detail: 'Zones Imported',
+            life: 3000,
+          });
+        })
+        .catch((e) => {
+          setLoading(false);
+          toast.current.show({
+            severity: "error",
+            summary: "Error",
+            detail: e.toString(),
+            life: 2000,
+          });
+        });
     } else {
       toast.current.show({
         severity: "error",
