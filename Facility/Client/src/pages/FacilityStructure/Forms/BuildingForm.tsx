@@ -383,14 +383,17 @@ const BuildingForm = ({
           }
 
           // delete files
+          
           for (let item of deleteFiles) {
             let temp = item.image_url.split("/");
-            let urlIndex = temp.findIndex(
-              (item: any) => item === "172.30.99.120:9000"
-            );
+            // let urlIndex = temp.findIndex(
+            //   (item: any) => item === "172.30.99.120:9000"
+            // );
+            let urlIndex = temp.findIndex((item: any) => item === "ifm")
             let temp2 = temp.slice(urlIndex + 1);
-
-            await DeleteAnyFile(temp2[0], temp2.slice(1).join("/"));
+            
+            await DeleteAnyFile("ifm", temp2.join("/"))
+            // await DeleteAnyFile(temp2[0], temp2.slice(1).join("/"));
           }
 
           // update node
