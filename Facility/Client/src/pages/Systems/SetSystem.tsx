@@ -201,7 +201,7 @@ const SetSystem = () => {
 
   return (
     <div className="container">
-      <Toolbar
+      {/* <Toolbar
         className="mb-4"
         right={() => (
           <>
@@ -213,7 +213,7 @@ const SetSystem = () => {
             />
           </>
         )}
-      />
+      /> */}
 
       {(() => {
         if (nodeType === "Component") {
