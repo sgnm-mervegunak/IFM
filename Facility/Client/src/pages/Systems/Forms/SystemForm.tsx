@@ -417,7 +417,7 @@ const SystemForm = ({
                         })
                     }}
                     filter
-                    placeholder="Select Type"
+                    placeholder=""
                     style={{ width: "100%" }}
                   />
                 )}
@@ -470,7 +470,7 @@ const SystemForm = ({
                       field.onChange(e.value)
                     }}
                     filter
-                    placeholder="Select Type"
+                    placeholder=""
                     style={{ width: "100%" }}
                   />
                 )}

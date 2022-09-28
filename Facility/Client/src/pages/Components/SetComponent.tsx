@@ -204,7 +204,7 @@ const SetComponent = () => {
 
   return (
     <div className="container">
-      <Toolbar
+      {/* <Toolbar
         className="mb-4"
         right={() => (
           <>
@@ -216,7 +216,7 @@ const SetComponent = () => {
             />
           </>
         )}
-      />
+      /> */}
 
       {(() => {
         if (nodeType === "Component") {

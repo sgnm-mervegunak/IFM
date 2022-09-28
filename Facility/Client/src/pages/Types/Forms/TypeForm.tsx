@@ -233,9 +233,9 @@ const TypeForm = ({
             setData(res.data.properties);
           })
 
-        await AssetClassificationsService.findClassificationByCodeAndLanguage("DurationUnit", res.data.properties.warrantydurationUnit).then(clsf3 => {
-          setCodeDurationUnit(res.data.properties.durationUnit);
-          res.data.properties.warrantydurationUnit = clsf3.data.key
+        await AssetClassificationsService.findClassificationByCodeAndLanguage("DurationUnit", res.data.properties.warrantyDurationUnit).then(clsf3 => {
+          setCodeDurationUnit(res.data.properties.warrantyDurationUnit);
+          res.data.properties.warrantyDurationUnit = clsf3.data.key
           temp = res.data.properties;
         })
           .catch((err) => {
@@ -410,6 +410,9 @@ const TypeForm = ({
         images: data?.images || "",
       };
 
+      console.log(updateNode);
+      
+
       TypesService.update(selectedNodeId, updateNode)
         .then(async (res) => {
           toast.current.show({
@@ -542,7 +545,7 @@ const TypeForm = ({
                         })
                     }}
                     filter
-                    placeholder="Select Type"
+                    placeholder=""
                     style={{ width: "100%" }}
                   />
                 )}
@@ -579,7 +582,7 @@ const TypeForm = ({
                         })
                     }}
                     filter
-                    placeholder="Select Type"
+                    placeholder=""
                     style={{ width: "100%" }}
                   />
                 )}
@@ -601,7 +604,7 @@ const TypeForm = ({
                       field.onChange(e.value)
                     }}
                     filter
-                    placeholder="Select Type"
+                    placeholder=""
                     style={{ width: "100%" }}
                   />
                 )}
@@ -623,7 +626,7 @@ const TypeForm = ({
                       field.onChange(e.value)
                     }}
                     filter
-                    placeholder="Select Type"
+                    placeholder=""
                     style={{ width: "100%" }}
                   />
                 )}
@@ -656,7 +659,7 @@ const TypeForm = ({
                       field.onChange(e.value)
                     }}
                     filter
-                    placeholder="Select Type"
+                    placeholder=""
                     style={{ width: "100%" }}
                   />
                 )}
@@ -690,7 +693,7 @@ const TypeForm = ({
                       field.onChange(e.value)
                     }}
                     filter
-                    placeholder="Select Type"
+                    placeholder=""
                     style={{ width: "100%" }}
                   />
                 )}
@@ -728,7 +731,7 @@ const TypeForm = ({
                         })
                     }}
                     filter
-                    placeholder="Select Type"
+                    placeholder=""
                     style={{ width: "100%" }}
                   />
                 )}
@@ -778,7 +781,7 @@ const TypeForm = ({
                         })
                     }}
                     filter
-                    placeholder="Select Type"
+                    placeholder=""
                     style={{ width: "100%" }}
                   />
                 )}

@@ -83,12 +83,6 @@ const TypeForm = ({
 
   const [data, setData] = useState<any>();
 
-  console.log(submitted,
-    selectedNodeKey,
-    selectedNodeId,
-    editDia,);
-
-
   const schema = yup.object({
     name: yup.string().max(50, t("This area accepts max 50 characters.")),
     description: yup.string().required(t("This area is required.")).max(256, t("This area accepts max 256 characters.")),
@@ -218,10 +212,17 @@ const TypeForm = ({
   const getNodeInfoForUpdate = (selectedNodeKey: string) => {
     ComponentService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
-        console.log(res.data);
+        await AssetClassificationsService.findClassificationByCodeAndLanguage("DurationUnit", res.data.properties.warrantyDurationUnit).then(clsf3 => {
+          setCodeWarrantyCodeDurationUnit(res.data.properties.durationUnit);
+          res.data.properties.warrantyDurationUnit = clsf3.data.key
+        })
+          .catch((err) => {
+            setData(res.data.properties);
+          })
         if (spaceType === "") {
           setSpaceType(res.data.nodeType);
         }
+        // setData(temp);
         setData(res.data.properties);
 
       })
@@ -482,7 +483,7 @@ const TypeForm = ({
                         })
                     }}
                     filter
-                    placeholder="Select Space"
+                    placeholder=""
                     style={{ width: "100%" }}
                   />
                 )}
@@ -535,7 +536,7 @@ const TypeForm = ({
                       field.onChange(e.value)
                     }}
                     filter
-                    placeholder="Select Type"
+                    placeholder=""
                     style={{ width: "100%" }}
                   />
                 )}
@@ -643,7 +644,7 @@ const TypeForm = ({
                       field.onChange(e.value)
                     }}
                     filter
-                    placeholder="Select Type"
+                    placeholder=""
                     style={{ width: "100%" }}
                   />
                 )}
@@ -677,7 +678,7 @@ const TypeForm = ({
                       field.onChange(e.value)
                     }}
                     filter
-                    placeholder="Select Type"
+                    placeholder=""
                     style={{ width: "100%" }}
                   />
                 )}
@@ -708,14 +709,14 @@ const TypeForm = ({
                     value={field.value}
                     options={classificationDurationUnit}
                     onChange={(e) => {
-                      ClassificationsService.nodeInfo(e.value as string)
+                      AssetClassificationsService.nodeInfo(e.value as string)
                         .then((res) => {
                           field.onChange(e.value)
                           setCodeWarrantyCodeDurationUnit(res.data.properties.code || "");
                         })
                     }}
                     filter
-                    placeholder="Select Type"
+                    placeholder=""
                     style={{ width: "100%" }}
                   />
                 )}
