@@ -15,5 +15,6 @@ export interface classificationInterface<T>  {
   addAClassificationWithCodeFromExcel(file: Express.Multer.File,header):any
   getNodeByClassificationLanguageRealmAndCode( classificationName:string, code:string,header): any;
   getNodeByLanguageRealmAndCode( code: string,header): any;
+  checkExcelFile(file: Express.Multer.File):any
 
 }
