@@ -234,7 +234,7 @@ const TypeForm = ({
           })
 
         await AssetClassificationsService.findClassificationByCodeAndLanguage("DurationUnit", res.data.properties.warrantyDurationUnit).then(clsf3 => {
-          setCodeDurationUnit(res.data.properties.warrantyDurationUnit);
+          setCodeWarrantyCodeDurationUnit(res.data.properties.warrantyDurationUnit);
           res.data.properties.warrantyDurationUnit = clsf3.data.key
           temp = res.data.properties;
         })
