@@ -4,20 +4,11 @@ import {
   FacilityStructureNotFountException,
 } from '../../common/notFoundExceptions/not.found.exception';
 import { Component } from '../entities/component.entity';
-import { NestKafkaService, nodeHasChildException } from 'ifmcommon';
-import { GeciciInterface } from 'src/common/interface/gecici.interface';
+import { NestKafkaService } from 'ifmcommon';
 import {
   assignDtoPropToEntity,
-  changeObjectKeyName,
-  createDynamicCyperObject,
   CustomNeo4jError,
-  dynamicFilterPropertiesAdder,
-  dynamicFilterPropertiesAdderAndAddParameterKey,
-  dynamicLabelAdder,
-  dynamicNotLabelAdder,
-  filterArrayForEmptyString,
   Neo4jService,
-  tree_structure_not_found_by_realm_name_error,
 } from 'sgnm-neo4j/dist';
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
 import { CreateComponentDto } from '../dto/create.component.dto';
@@ -31,7 +22,6 @@ import {
   has_children_error,
 } from 'src/common/const/custom.error.object';
 import { RelationName } from 'src/common/const/relation.name.enum';
-import { SpaceType } from 'src/common/const/space.type.enum';
 import { HttpRequestHandler } from 'src/common/class/http.request.helper.class';
 import { VirtualNodeCreator } from 'src/common/class/virtual.node.creator';
 import { ComponentInterface } from 'src/common/interface/component.interface';
@@ -42,6 +32,8 @@ import {
 } from 'src/common/func/virtual.node.props.functions';
 import { VirtualNodeHandler } from 'src/common/class/virtual.node.dealer';
 import { ConfigService } from '@nestjs/config';
+import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
+import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
 
 @Injectable()
 export class ComponentRepository implements ComponentInterface<Component> {
@@ -51,9 +43,11 @@ export class ComponentRepository implements ComponentInterface<Component> {
     private readonly httpService: HttpRequestHandler,
     private readonly virtualNodeHandler: VirtualNodeHandler,
     private readonly configService: ConfigService,
+    private readonly nodeRelationHandler: NodeRelationHandler,
   ) {}
   async findByKey(key: string, header) {
     try {
+      const {realm, language, authorization} = header;
       const nodes = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.COMPONENT], { key });
       if (!nodes.length) {
         throw new AssetNotFoundException(key);
@@ -94,6 +88,18 @@ export class ComponentRepository implements ComponentInterface<Component> {
       );
       nodes[0].get('n').properties['warrantyGuarantorParts'] =
         warrantyGuaranorPartsNode[0].get('children').properties.referenceKey;
+
+      
+      const warrantyDurationUnitNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+          [Neo4jLabelEnum.COMPONENT],
+          { key: nodes[0].get('n').properties.key },
+          [],
+          { isDeleted: false, language: language },
+          RelationName.CLASSIFIED_BY,
+        );
+        nodes[0].get('n').properties['warrantyDurationUnit'] =
+        warrantyDurationUnitNode[0].get('children').properties.key;  
+
 
       return nodes[0]['_fields'][0];
     } catch (error) {
@@ -175,7 +181,9 @@ export class ComponentRepository implements ComponentInterface<Component> {
       delete componentFinalObject['createdBy'];
       delete componentFinalObject['warrantyGuarantorParts'];
       delete componentFinalObject['warrantyGuarantorLabor'];
-
+      const warrantyDurationUnit = componentFinalObject['warrantyDurationUnit'];
+      delete componentFinalObject['warrantyDurationUnit'];
+      
       const componentNode = await this.neo4jService.createNode(componentFinalObject, [Neo4jLabelEnum.COMPONENT]);
       const uniqName = componentNode.properties.name + ' ' + componentNode.identity.low;
 
@@ -186,13 +194,13 @@ export class ComponentRepository implements ComponentInterface<Component> {
       console.log(updatedNode);
 
       componentNode['properties']['id'] = componentNode['identity'].low;
-      //componentNode['properties']['name'] = uniqName;
+      componentNode['properties']['name'] = uniqName;
       const componentUrl = `${process.env.COMPONENT_URL}/${componentNode.properties.key}`;
-      // const result = {
-      //   id: componentNode['identity'].low,
-      //   labels: componentNode['labels'],
-      //   properties: componentNode['properties'],
-      // };
+       const result = {
+         id: componentNode['identity'].low,
+         labels: componentNode['labels'],
+         properties: componentNode['properties'],
+       };
       await this.neo4jService.addParentRelationByIdAndFilters(
         componentNode.identity.low,
         {},
@@ -208,10 +216,21 @@ export class ComponentRepository implements ComponentInterface<Component> {
 
         await this.httpService.get(url, { authorization });
       }
-
       await this.virtualNodeHandler.createVirtualNode(componentNode['identity'].low, componentUrl, finalObjectArray);
 
-      return updatedNode;
+    /////////////////////////////////// create classified_by  relation for duration unit //////////////////////////////////////////////////////  
+    const newWarrantyDurationUnits = await this.nodeRelationHandler.getNewCategories(realm, warrantyDurationUnit);
+    let categoriesArr = [];
+    let newCategoriesArr = [];
+    let relationArr = [];
+    let _root_idArr = [];
+    newCategoriesArr.push(newWarrantyDurationUnits);
+    relationArr.push(RelationName.CLASSIFIED_BY);
+    _root_idArr.push(componentNode.identity.low);
+    await this.nodeRelationHandler.manageNodesRelations(categoriesArr, newCategoriesArr,relationArr,_root_idArr);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      return result;
 
       
     } catch (error) {
@@ -248,12 +267,28 @@ export class ComponentRepository implements ComponentInterface<Component> {
       if (!node.length) {
         throw new HttpException(node_not_found(), 400);
       }
+
+    /////////////////////////////////// update classified_by  relation, if duration unit changed //////////////////////////////////////////////////////  
+    const warrantyDurationUnit = updateComponentDto['warrantyDurationUnit'];
+    delete updateComponentDto['warrantyDurationUnit'];
+    const oldWarrantyDurationUnits = await this.nodeRelationHandler.getOldCategories(node[0]['_fields'][1].properties.key, RelationName.CLASSIFIED_BY); 
+    const newWarrantyDurationUnits = await this.nodeRelationHandler.getNewCategories(realm, warrantyDurationUnit);
+    let categoriesArr = [];
+    let newCategoriesArr = [];
+    let relationArr = [];
+    let _root_idArr = [];
+    categoriesArr.push(oldWarrantyDurationUnits);
+    newCategoriesArr.push(newWarrantyDurationUnits);
+    relationArr.push(RelationName.CLASSIFIED_BY);
+    _root_idArr.push(node[0]['_fields'][1].identity.low);
+    await this.nodeRelationHandler.manageNodesRelations(categoriesArr, newCategoriesArr,relationArr,_root_idArr);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
       const componentUrl = `${process.env.COMPONENT_URL}/${node[0].get('children').properties.key}`;
       const finalObjectArray = await avaiableUpdateVirtualPropsGetter(updateComponentDto);
       for (let index = 0; index < finalObjectArray.length; index++) {
         const url =
           (await this.configService.get(finalObjectArray[index].url)) + '/' + finalObjectArray[index].newParentKey;
-
         await this.httpService.get(url, { authorization });
       }
 
@@ -305,24 +340,41 @@ export class ComponentRepository implements ComponentInterface<Component> {
       const hasChildrenArray = await this.neo4jService.findChildrensByIdAndFilters(+_id, {}, [], {}, 'PARENT_OF');
 
       if (hasChildrenArray.length === 0) {
-        deletedNode = await this.neo4jService.updateByIdAndFilter(+_id, {}, [], { isDeleted: true, isActive: false });
+        //delete virtual nodes in this database
         const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
           [Neo4jLabelEnum.COMPONENT],
           { key: typeNode.properties.key },
           ['Virtual'],
           { isDeleted: false },
-          RelationName.CREATED_BY,
+          RelationName.HAS_VIRTUAL_RELATION
         );
-        deletedVirtualNode = await this.neo4jService.updateByIdAndFilter(
-          +virtualNode[0].get('children').identity.low,
-          {},
-          [],
-          { isDeleted: true },
-        );
+        virtualNode.forEach( async (item)=> {
+          await this.neo4jService.updateByIdAndFilter(
+            +item.get('children').identity.low,
+            {},
+            [],
+            { isDeleted: true },
+          );
+        });
+        //delete virtual nodes in target database
         await this.kafkaService.producerSendMessage(
           'deleteVirtualNodeRelations',
           JSON.stringify({ referenceKey: typeNode.properties.key }),
         );
+
+        //delete warrantyunit relations in this database
+        let categoriesArr = [];
+        let relationArr = [];
+        let _root_idArr = [];
+        const oldWarrantyDurationUnits = await this.nodeRelationHandler.getOldCategories(typeNode.properties.key, RelationName.CLASSIFIED_BY); 
+        categoriesArr.push(oldWarrantyDurationUnits);
+        relationArr.push(RelationName.CLASSIFIED_BY);
+        _root_idArr.push(typeNode.identity.low);
+
+        await this.nodeRelationHandler.deleteNodesRelations(categoriesArr, relationArr, _root_idArr)
+
+        deletedNode = await this.neo4jService.updateByIdAndFilter(+_id, {}, [], { isDeleted: true, isActive: false });
+
       } else {
         throw new HttpException(has_children_error({ id: _id }), 400);
       }
