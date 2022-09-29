@@ -134,7 +134,7 @@ export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
       const jointSpaceEntity = new JointSpace();
       jointSpaceEntity['jointSpaceTitle'] = title;
       const jointSpaceObject = assignDtoPropToEntity(jointSpaceEntity, createJointSpaceDto);
-      //delete jointSpaceObject['nodeKeys'];
+      delete jointSpaceObject['nodeKeys'];
       const jointSpace = await this.neo4jService.createNode(jointSpaceObject, ['JointSpace']);
       await this.neo4jService.addRelations(jointSpace.identity.low, jointSpacesNode[0].get('children').identity.low);
       spaceNodes.map(async (element) => {
