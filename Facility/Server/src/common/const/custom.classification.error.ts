@@ -36,6 +36,15 @@ import { I18NEnums } from "./i18n.enum";
   export function default_error() {
     throw new HttpException({ key: I18NEnums.DEFAULT_ERROR,code:CustomClassificationError.DEFAULT_ERROR}, HttpStatus.BAD_REQUEST);
   }
+  export function there_are_no_spaces() {
+    throw new HttpException({ key: I18NEnums.THERE_ARE_NO_SPACES,code:CustomClassificationError.THERE_ARE_NO_SPACES}, HttpStatus.NOT_FOUND);
+  }
+  export function there_are_no_jointSpaces() {
+    throw new HttpException({ key: I18NEnums.THERE_ARE_NO_JOINTSPACES,code:CustomClassificationError.THERE_ARE_NO_JOINTSPACES}, HttpStatus.NOT_FOUND);
+  }
+  export function there_are_no_zones() {
+    throw new HttpException({ key: I18NEnums.THERE_ARE_NO_ZONES,code:CustomClassificationError.THERE_ARE_NO_ZONES}, HttpStatus.NOT_FOUND);
+  }
 
 
   export function classification_import_error_object() {
@@ -96,5 +105,26 @@ import { I18NEnums } from "./i18n.enum";
       message: 'error',
       code: CustomClassificationError.CONTACT_ALREADY_EXIST,
       name
+    };
+  }
+
+  export function  there_are_no_spaces_object() {
+    return {
+      message: 'error',
+      code: CustomClassificationError.THERE_ARE_NO_SPACES,
+    };
+  }
+
+  export function  there_are_no_jointSpaces_object() {
+    return {
+      message: 'error',
+      code: CustomClassificationError.THERE_ARE_NO_JOINTSPACES,
+    };
+  }
+
+  export function  there_are_no_zones_object() {
+    return {
+      message: 'error',
+      code: CustomClassificationError.THERE_ARE_NO_ZONES,
     };
   }

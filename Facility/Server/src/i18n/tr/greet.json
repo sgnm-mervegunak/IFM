@@ -42,6 +42,9 @@
   "CHECK_EXCEL":"Excel dosyanız başarıyla doğrulandı.",
   "CONTACT_ALREADY_EXIST":"{name} emaili ile bir kayıt bulunmaktadır.",
   "DEFAULT_ERROR":"Bir şeyler yanlış gitti.",
-  "SPACE_HAS_ALREADY_RELATION":"Bölgelerden bazıları aynı alanları içeriyor"
+  "SPACE_HAS_ALREADY_RELATION":"Bölgelerden bazıları aynı alanları içeriyor",
+  "THERE_ARE_NO_SPACES":"Bu bina hiç alan içermiyor.",
+  "THERE_ARE_NO_JOINTSPACES":"Bu bina hiç birleştirilmiş alan içermiyor.",
+  "THERE_ARE_NO_ZONES":"Bu bina hiç bölge içermiyor."
 
 }
