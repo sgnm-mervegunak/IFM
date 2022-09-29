@@ -34,6 +34,13 @@ export class StructureController {
     const { language, realm } = header;
     return this.facilityStructuresService.update(key, updateFacilityStructureDto, realm, language);
   }
+  @Get('')
+  @Roles({ roles: [UserRoles.ADMIN] })
+  @NoCache()
+  findOne(@Headers() header) {
+    const { language, realm } = header;
+    return this.facilityStructuresService.findOne(realm, language);
+  }
 
   @Roles({ roles: [UserRoles.ADMIN] })
   //@Unprotected()
@@ -42,6 +49,33 @@ export class StructureController {
   findOneNode(@Param('key') key: string, @Headers() header) {
     const { language, realm } = header;
     return this.facilityStructuresService.findOneNode(key, realm, language);
+  }
+
+  @Get('/structuretypes/:label')
+  @Roles({ roles: [UserRoles.ADMIN] })
+  //@Unprotected()
+  @NoCache()
+  findOneFirstLevel(@Param('label') label: string, @Headers() header) {
+    const { language, realm } = header;
+    return this.facilityStructuresService.findOneFirstLevel(label, realm, language);
+  }
+
+  @Get('/structurefirstlevel/nodes/:label')
+  @Roles({ roles: [UserRoles.ADMIN] })
+  //@Unprotected()
+  @NoCache()
+  findStructureFirstLevelNodes(@Param('label') label: string, @Headers() header) {
+    const { language, realm } = header;
+    return this.facilityStructuresService.findStructureFirstLevelNodes(label, realm, language);
+  }
+
+  @Get('/structuretypes/properties/all/:typename')
+  @Roles({ roles: [UserRoles.ADMIN] })
+  //@Unprotected()
+  @NoCache()
+  findChildrenByFacilityTypeNode(@Param('typename') typename: string, @Headers() header) {
+    const { language, realm } = header;
+    return this.facilityStructuresService.findChildrenByFacilityTypeNode(typename, realm, language);
   }
 
   @Delete(':id')
@@ -56,41 +90,6 @@ export class StructureController {
   changeNodeBranch(@Param('id') id: string, @Param('target_parent_id') target_parent_id: string, @Headers() header) {
     const { language, realm } = header;
     return this.facilityStructuresService.changeNodeBranch(id, target_parent_id, realm, language);
-  }
-
-  @Get('/structuretypes/:label')
-  @Roles({ roles: [UserRoles.ADMIN] })
-  //@Unprotected()
-  @NoCache()
-  findOneFirstLevel(@Param('label') label: string, @Headers() header) {
-    const { language, realm } = header;
-    return this.facilityStructuresService.findOneFirstLevel(label, realm, language);
-  }
-
-  @Get('/structuretypes/properties/all/:typename')
-  @Roles({ roles: [UserRoles.ADMIN] })
-  //@Unprotected()
-  @NoCache()
-  findChildrenByFacilityTypeNode(@Param('typename') typename: string, @Headers() header) {
-    const { language, realm } = header;
-    return this.facilityStructuresService.findChildrenByFacilityTypeNode(typename, realm, language);
-  }
-
-  @Get('')
-  @Roles({ roles: [UserRoles.ADMIN] })
-  @NoCache()
-  findOne(@Headers() header) {
-    const { language, realm } = header;
-    return this.facilityStructuresService.findOne(realm, language);
-  }
-
-  @Get('/structurefirstlevel/nodes/:label')
-  @Roles({ roles: [UserRoles.ADMIN] })
-  //@Unprotected()
-  @NoCache()
-  findStructureFirstLevelNodes(@Param('label') label: string, @Headers() header) {
-    const { language, realm } = header;
-    return this.facilityStructuresService.findStructureFirstLevelNodes(label, realm, language);
   }
 
   // @Unprotected()
