@@ -208,8 +208,8 @@ const JointSpaceForm = ({
     defaultValues: {
       ...data,
       jointStartDate: editDia ? data?.jointStartDate : new Date(),
-      jointEndDate: editDia
-        ? data?.jointStartDate
+      jointEndDate: editDia 
+        ? data?.jointEndDate
         : Date.parse("YYYY-MM-DD HH:mm:ss") || "",
     },
     resolver: yupResolver(schema),
@@ -296,6 +296,10 @@ const JointSpaceForm = ({
       getNodeInfoAndEdit(selectedNodeKey);
     }
   }, [isUpdate]);
+
+     useEffect(() => {
+       watch((value, { name, type }) => console.log(value, name, type));
+     }, [watch]);
 
   //   const fixNodes = (nodes: Node[]) => {
   //     if (!nodes || nodes.length === 0) {
@@ -465,7 +469,7 @@ const JointSpaceForm = ({
               grossArea: data?.properties?.grossArea || [],
               netArea: data?.properties?.netArea || [],
               jointStartDate: data?.properties?.jointStartDate,
-              jointEndDate: data?.properties?.jointEndDate,
+              jointEndDate: data?.properties?.jointEndDate || Date.parse("YYYY-MM-DD HH:mm:ss") || "",
               nodeKeys: res.data?.properties?.nodeKeys || [],
               labels: [labels[0]],
               formTypeId: formTypeId,
@@ -490,13 +494,13 @@ const JointSpaceForm = ({
               grossArea: data?.grossArea || [],
               netArea: data?.netArea || [],
               jointStartDate: data?.jointStartDate,
-              jointEndDate: data?.jointEndDate,
+              jointEndDate: data?.jointEndDate || Date.parse("YYYY-MM-DD HH:mm:ss") || "",
               nodeKeys: res.data?.properties?.nodeKeys || [],
               formTypeId: formTypeId,
               isActive: isActive,
             };
           }
-          console.log("update node:------", updateNode)
+          console.log("update node:------", updateNode);
           JointSpaceService.update(res.data.id, updateNode)
             .then((res) => {
               toast.current.show({
@@ -553,9 +557,12 @@ const JointSpaceForm = ({
     return null;
   }
 
-
   return (
-    <form onClick={() => { console.log("form data", data) }}>
+    <form
+      onClick={() => {
+        console.log("form data", data);
+      }}
+    >
       <TabView>
         <TabPanel header={t("Form")}>
           <div className="formgrid grid">
@@ -821,7 +828,7 @@ const JointSpaceForm = ({
             <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Joint End Date")}</h5>
               <Controller
-                defaultValue={new Date(data?.jointEndDate) || ""}
+                defaultValue={new Date(data?.jointEndDate) || Date.parse("YYYY-MM-DD HH:mm:ss") || ""}
                 name="jointEndDate"
                 control={control}
                 render={({ field }) => (
