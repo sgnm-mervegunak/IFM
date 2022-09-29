@@ -152,10 +152,12 @@ const JointSpaceForm = ({
       .string()
       .required(t("This area is required."))
       .max(50, t("This area accepts max 50 characters.")),
-    code: yup
-      .string()
-      .required(t("This area is required."))
-      .max(50, t("This area accepts max 50 characters.")),
+    code: editDia
+      ? yup.string().max(50, t("This area accepts max 50 characters."))
+      : yup
+          .string()
+          .required(t("This area is required."))
+          .max(50, t("This area accepts max 50 characters.")),
     architecturalCode: yup
       .string()
       .max(50, t("This area accepts max 50 characters.")),
@@ -206,7 +208,9 @@ const JointSpaceForm = ({
     defaultValues: {
       ...data,
       jointStartDate: editDia ? data?.jointStartDate : new Date(),
-      jointEndDate: editDia ? data?.jointStartDate : Date.parse("YYYY-MM-DD HH:mm:ss") || "",
+      jointEndDate: editDia
+        ? data?.jointStartDate
+        : Date.parse("YYYY-MM-DD HH:mm:ss") || "",
     },
     resolver: yupResolver(schema),
   });
@@ -275,8 +279,7 @@ const JointSpaceForm = ({
             setCodeCategory(clsf.data[0]?._fields[0]?.properties?.code)
           });
 
-
-        setData(res.data[0]?._fields[0]?.properties)
+        setData(res.data[0]?._fields[0]?.properties);
       })
       .catch((err) => {
         toast.current.show({
@@ -328,7 +331,6 @@ const JointSpaceForm = ({
   };
 
   const onSubmit = (data: any) => {
-
     if (editDia === false) {
       let newNode: any = {};
       newNode = {
@@ -434,7 +436,6 @@ const JointSpaceForm = ({
     } else {
       let updateNode: any = {};
 
-
       FacilityStructureService.nodeInfo(selectedNodeKey) //selectednodekey
         .then((res) => {
           if (labels.length > 0) {
@@ -470,8 +471,6 @@ const JointSpaceForm = ({
               formTypeId: formTypeId,
               isActive: isActive,
             };
-
-
           } else {
             updateNode = {
               architecturalName: data?.architecturalName,
@@ -495,8 +494,6 @@ const JointSpaceForm = ({
               nodeKeys: res.data?.properties?.nodeKeys || [],
               formTypeId: formTypeId,
               isActive: isActive,
-
-
             };
           }
           console.log("update node:------", updateNode)
@@ -528,6 +525,27 @@ const JointSpaceForm = ({
           });
         });
       setEditDia(false);
+
+
+          reset({
+            name: "",
+            code: "",
+            architecturalCode: "",
+            architecturalName: "",
+            operatorName: "",
+            operatorCode: "",
+            tag: "",
+            category: "",
+            usage: "",
+            status: "",
+            description: "",
+            roomTag: "",
+            usableHeight: "",
+            grossArea: "",
+            netArea: "",
+            jointStartDate: new Date(),
+            jointEndDate: "",
+          });
     }
   };
 
