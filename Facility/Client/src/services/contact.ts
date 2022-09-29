@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const url = process.env.REACT_APP_API_URL + "contact";
+const url = process.env.REACT_APP_API_FACILITY + "contact";
 
 interface PaginationParams {
     page?: number;

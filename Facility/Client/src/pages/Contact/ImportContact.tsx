@@ -12,7 +12,7 @@ interface Params {
     getContact: () => void;
 }
 
-const ImportContact = ({ setImportDia, getContact}: Params) => {
+const ImportContact = ({ setImportDia, getContact }: Params) => {
     const { toast } = useAppSelector((state) => state.toast);
     const refUpload = useRef<any>(null);
     const auth = useAppSelector((state) => state.auth);
@@ -22,7 +22,7 @@ const ImportContact = ({ setImportDia, getContact}: Params) => {
 
     const uploadCSV = (e: any) => {
         const file = e.files[0];
-        const url = 'http://localhost:3010/ExcelImportExport/addContacts';
+        const url = process.env.REACT_APP_API_FACILITY + 'ExcelImportExport/addContacts';
         const formData = new FormData();
 
         formData.append('file', file);

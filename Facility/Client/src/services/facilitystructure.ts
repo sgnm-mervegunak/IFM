@@ -1,8 +1,8 @@
 import axios from "axios";
 
-const url = process.env.REACT_APP_API_URL + "structure";
-const url2 = process.env.REACT_APP_API_URL + "structureAssetRelation/";
-const url3 = process.env.REACT_APP_API_URL + "structureWinformRelation/";
+const url = process.env.REACT_APP_API_FACILITY + "structure";
+const url2 = process.env.REACT_APP_API_FACILITY + "structureAssetRelation/";
+const url3 = process.env.REACT_APP_API_FACILITY + "structureWinformRelation/";
 
 interface PaginationParams {
     page?: number;
