@@ -1,7 +1,6 @@
 import axios from "axios";
 
-const url = process.env.REACT_APP_API_URL2 + "type/properties/active/";
-// const url = "http://localhost:3002/";
+const url = process.env.REACT_APP_API_WINFORM + "type/properties/active/";
 
 
 const findAll = async () => {

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const url = process.env.REACT_APP_API_URL + "zone/";
+const url = process.env.REACT_APP_API_FACILITY + "zone/";
 
 interface ZoneInterface {
     name: string;

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const url = process.env.REACT_APP_API_URL + 'ExcelImportExport/';
+const url = process.env.REACT_APP_API_FACILITY + 'ExcelImportExport/';
 
 interface ExportDto{
   buildingKeys: string[];

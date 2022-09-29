@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 const url = process.env.REACT_APP_API_URL2 + 'test/';
-// const url = "http://localhost:3002/";
 
 const findAll = async () => {
   return axios.get(url);

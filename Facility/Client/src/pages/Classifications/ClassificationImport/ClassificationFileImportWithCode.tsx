@@ -5,6 +5,7 @@ import { ProgressSpinner } from 'primereact/progressspinner';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 import { useAppSelector } from "../../../app/hook";
 
@@ -23,7 +24,7 @@ const ClassificationFileImportWithCode: React.FC = () => {
 
     const uploadCSV = (e: any) => {
         const file = e.files[0];
-        const url: any = process.env.REACT_APP_API_CLASSIFICATION_IMPORT_WITH_CODE;
+        const url: any = process.env.REACT_APP_API_FACILITY + 'classification/addAClassificationWithCodeFromExcel';
         const formData = new FormData();
 
         formData.append('file', file);
@@ -67,22 +68,19 @@ const ClassificationFileImportWithCode: React.FC = () => {
                     : (
                         <>
                             <h5>{t("Classification File Import With Code")}</h5>
-                            <p
-                                className="mt-4 cursor-pointer"
-                                style={{ color: "blue" }}
-                                onClick={() => {
-                                    let URL: any = process.env.REACT_APP_API_CLASSIFICATION_SAMPLE_DATA_WITH_CODE;
-                                    window.location.href = URL;
-                                }
-                                }
-                            >
-                                {t("Download to see a sample classification file")}
+                            <p className="mt-6">
+                                <Link
+                                    to="/documents/classification-sample-data-with-code.xlsx"
+                                    target="_blank"
+                                    download>{t("Download to see a sample classification file")}
+                                </Link>
                             </p>
+
                             <FileUpload
                                 name="upfile[]"
                                 accept="/*"
                                 className="mt-4"
-                                maxFileSize={1000000}
+                                maxFileSize={10000000}
                                 chooseLabel={t("Select File")}
                                 uploadLabel={t("Upload")}
                                 cancelLabel={t("Cancel")}
