@@ -103,6 +103,12 @@ const ZoneForm = ({
     const schema = yup.object({
         name: yup.string().required(t("This area is required.")).max(50, t("This area accepts max 50 characters.")),
         category: yup.string().required(t("This area is required.")),
+        code: editDia
+            ? yup.string().max(50, t("This area accepts max 50 characters."))
+            : yup
+                .string()
+                .required(t("This area is required."))
+                .max(50, t("This area accepts max 50 characters.")),
     });
 
     const { register, handleSubmit, watch, formState: { errors }, control, reset, formState, formState: { isSubmitSuccessful }, } = useForm({
@@ -209,9 +215,13 @@ const ZoneForm = ({
                 await ClassificationsService.findClassificationByCode(res.data.properties?.category)
                     .then(
                         (clsf) => {
-                            res.data.properties.category = clsf.data[1]?._fields[0]?.properties?.key
+                            if (clsf.data[1]?._fields[0]?.properties.key) {
+                                res.data.properties.category = clsf.data[1]._fields[0].properties.key
+                            }
+                            else {
+                                res.data.properties.category = clsf.data[0]?._fields[0]?.properties.key
+                            }
                             setCodeCategory(clsf.data[1]?._fields[0]?.properties?.code);
-
                         }
                     )
                     .catch((err) => {
@@ -281,7 +291,7 @@ const ZoneForm = ({
                                 let resFile = await UploadAnyFile(
                                     res.data.key + "/" + item,
                                     file.file
-                                    );
+                                );
                                 delete resFile.data.message;
                                 temp[item].push({ ...resFile.data, main: file.main });
                             } else {
@@ -301,7 +311,7 @@ const ZoneForm = ({
 
                         temp[item] = JSON.stringify(temp[item]);
                     }
-                   
+
 
                     await ZoneService.update(res.data.id, { ...newNode, ...temp })
 
