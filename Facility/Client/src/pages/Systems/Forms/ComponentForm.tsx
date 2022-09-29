@@ -222,7 +222,7 @@ const ComponentForm = ({
   };
 
   const UploadAnyFile = (folderName: string, file: any) => {
-    const url = process.env.REACT_APP_API_MINIO_URL + "file-upload/single";
+    const url = process.env.REACT_APP_API_MINIO + "file-upload/single";
     const formData = new FormData();
 
     formData.append("file", file);
@@ -232,7 +232,7 @@ const ComponentForm = ({
   };
 
   const DeleteAnyFile = (realmName: string, fileName: string) => {
-    const url = process.env.REACT_APP_API_MINIO_URL + "file-upload/removeOne";
+    const url = process.env.REACT_APP_API_MINIO + "file-upload/removeOne";
 
     return axios.delete(url, { data: { fileName, realmName } });
   };

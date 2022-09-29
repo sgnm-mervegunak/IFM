@@ -52,44 +52,7 @@ export class SystemsRepository implements SystemsInterface<System> {
     }
   }
 
-  // async findRootByRealm(header) {
-  //   try {
-  //     const { realm } = header;
-  //     const node = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-  //       [Neo4jLabelEnum.SYSTEMS],
-  //       {
-  //         realm,
-  //         isDeleted: false,
-  //         isActive: true,
-  //       },
-  //       [Neo4jLabelEnum.SYSTEM],
-  //       { isDeleted: false },
-  //       'PARENT_OF',
-  //     );
-  //     if (!node.length) {
-  //       throw new HttpException(node_not_found(), 400);
-  //     }
-  //     const systemArray = node.map((element) => {
-  //       element.get('children').properties['id'] = element.get('children').identity.low;
-  //       return element.get('children').properties;
-  //     });
-  //     return systemArray;
-  //   } catch (error) {
-  //     const code = error.response?.code;
-
-  //     if (code >= 1000 && code <= 1999) {
-  //     } else if (code >= 5000 && code <= 5999) {
-  //       if (error.response?.code == CustomNeo4jError.ADD_CHILDREN_RELATION_BY_ID_ERROR) {
-  //       }
-  //     } else if (code >= 9500 && code <= 9750) {
-  //       if (error.response?.code == CustomAssetError.NODE_NOT_FOUND) {
-  //         NodeNotFound();
-  //       }
-  //     } else {
-  //       throw new HttpException(error, 500);
-  //     }
-  //   }
-  // }
+  
   async findRootByRealm(header) {
     try {
       let { realm } = header;
@@ -175,24 +138,6 @@ export class SystemsRepository implements SystemsInterface<System> {
       }
       await this.virtualNodeHandler.createVirtualNode(systemNode['identity'].low, systemUrl, finalObjectArray);
 
-      //CREATED BY relation with CONTACT module / CREATED_OF relation from contact to system relation
-      // const createContactUrl = `${process.env.CONTACT_URL}/${systemsDto.createdBy}`;
-      // const virtualContactDto = { referenceKey: systemsDto.createdBy, url: createContactUrl };
-
-      // virtualNodeCreator.createVirtualNode(
-      //   systemNode['identity'].low,
-      //   [Neo4jLabelEnum.VIRTUAL, Neo4jLabelEnum.CONTACT],
-      //   virtualContactDto,
-      //   RelationName.CREATED_BY,
-      // );
-      // const createdByKafkaObject: CreateKafkaObject = {
-      //   parentKey: systemsDto.createdBy,
-      //   referenceKey: systemNode.properties.key,
-      //   url: systemUrl,
-      //   relationName: RelationName.CREATOR_OF,
-      //   virtualNodeLabels: [Neo4jLabelEnum.SYSTEM, Neo4jLabelEnum.VIRTUAL],
-      // };
-      // await this.kafkaService.producerSendMessage('createContactRelation', JSON.stringify(createdByKafkaObject));
 
       // CLASSIFIED_BY relation creation
       const languages = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
@@ -336,53 +281,6 @@ export class SystemsRepository implements SystemsInterface<System> {
 
     return updatedNode;
 
-    // if (systemsDto.createdBy) {
-    //   await this.httpService.get(`${process.env.CONTACT_URL}/${systemsDto.createdBy}`, {
-    //     authorization,
-    //   });
-    // }
-
-    // const virtualNodeCreator = new VirtualNodeCreator(this.neo4jService);
-
-    // if (systemsDto.createdBy) {
-    //   const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
-    //     [Neo4jLabelEnum.SYSTEM],
-    //     { key: node[0].get('children').properties.key },
-    //     [],
-    //     { isDeleted: false },
-    //     RelationName.CREATED_BY,
-    //   );
-    //   if (virtualNode[0].get('children').properties.referenceKey !== systemsDto.createdBy) {
-    //     const createContactUrl = `${process.env.CONTACT_URL}/${systemsDto.createdBy}`;
-
-    //     const createdByKafkaObject = {
-    //       exParentKey: virtualNode[0].get('children').properties.referenceKey,
-    //       newParentKey: systemsDto.createdBy,
-    //       referenceKey: virtualNode[0].get('parent').properties.key,
-    //       url: systemUrl,
-    //       relationName: RelationName.CREATOR_OF,
-    //       virtualNodeLabels: [Neo4jLabelEnum.SYSTEM, Neo4jLabelEnum.VIRTUAL],
-    //     };
-
-    //     await this.kafkaService.producerSendMessage('updateContactRelation', JSON.stringify(createdByKafkaObject));
-    //     await this.neo4jService.updateByIdAndFilter(virtualNode[0].get('children').identity.low, {}, [], {
-    //       url: createContactUrl,
-    //       referenceKey: systemsDto.createdBy,
-    //       updatedOn: moment().format('YYYY-MM-DD HH:mm:ss'),
-    //     });
-    //   }
-    // }
-
-    // const updatedNode = await this.neo4jService.updateByIdAndFilter(
-    //   +_id,
-    //   { isDeleted: false, isActive: true },
-    //   [],
-    //   systemsDto,
-    // );
-
-    // if (!updatedNode) {
-    //   throw new FacilityStructureNotFountException(_id);
-    // }
   }
 
   async delete(_id: string, header) {

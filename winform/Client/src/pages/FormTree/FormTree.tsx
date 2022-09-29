@@ -194,7 +194,6 @@ const FormTree = () => {
   const rightToolbarTemplate = () => {
     return (
       <React.Fragment>
-        <Menu model={items} popup ref={menu} id="popup_menu" />
         <Button className="mr-2" label="Import" icon="pi pi-upload" onClick={(event) => menu.current.toggle(event)} aria-controls="popup_menu" aria-haspopup />
         <Button
           label="Export"
@@ -205,23 +204,6 @@ const FormTree = () => {
       </React.Fragment>
     );
   };
-
-  const items = [
-    {
-      label: 'Download Sample File',
-      icon: 'pi pi-download',
-      command: () => {
-        window.location.href = 'http://localhost:3000/documents/classification-sample-data.csv'
-      }
-    },
-    {
-      label: 'Upload File',
-      icon: 'pi pi-upload',
-      command: () => {
-        navigate("/classifications/fileimport");
-      }
-    }
-  ];
 
   const exportCSV = () => {
     dt.current.exportCSV();

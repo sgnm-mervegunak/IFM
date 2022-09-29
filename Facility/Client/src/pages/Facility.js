@@ -180,23 +180,6 @@ const Facility = () => {
     );
   };
 
-  const items = [
-    {
-      label: 'Download Sample File',
-      icon: 'pi pi-download',
-      command: () => {
-        window.location.href = 'http://localhost:3000/documents/facility-sample-data.csv'
-      }
-    },
-    {
-      label: 'Upload File',
-      icon: 'pi pi-upload',
-      command: () => {
-        navigate("/facility/fileimport");
-      }
-    }
-  ];
-
   const facilityNameBodyTemplate = (rowData) => {
     return (
       <>

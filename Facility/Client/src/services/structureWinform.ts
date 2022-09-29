@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const url = process.env.REACT_APP_API_URL + "structureWinformRelation/";
+const url = process.env.REACT_APP_API_FACILITY + "structureWinformRelation/";
 
 interface FormInterface {
     formKey: string;
