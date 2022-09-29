@@ -559,6 +559,7 @@ const JointSpaceForm = ({
                 {...register("code")}
                 style={{ width: "100%" }}
                 defaultValue={data?.code || ""}
+                disabled={editDia ? true : false}
               />
               <p style={{ color: "red" }}>{errors.code?.message}</p>
             </div>
