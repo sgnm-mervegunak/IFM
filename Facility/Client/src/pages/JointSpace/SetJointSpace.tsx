@@ -70,6 +70,7 @@ const SetJointSpace = () => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [selectedKeysName, setSelectedKeysName] = useState<string[]>([]);
   const [selectedNodeKey, setSelectedNodeKey] = useState<any>([]);
+  const [selectedNodeKeys, setSelectedNodeKeys] = useState<any>([]);
   const [deleteNodeKey, setDeleteNodeKey] = useState<any>("");
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>();
@@ -409,36 +410,43 @@ const SetJointSpace = () => {
           isUpdate={isUpdate}
           setIsUpdate={setIsUpdate}
           jointSpaceData={data}
+          setSelectedNodeKeys={setSelectedNodeKeys}
+          selectedNodeKeys={selectedNodeKeys}
         />
       </Dialog>
 
-      <Dialog
-        header="Edit Item"
-        visible={editDia}
-        style={{ width: "40vw" }}
-        footer={renderFooterEdit}
-        onHide={() => {
-          setEditDia(false);
-        }}
-      >
-        <JointSpaceForm
-          submitted={submitted}
-          setSubmitted={setSubmitted}
-          selectedNodeKey={selectedNodeKey}
-          setSelectedNodeKey={setSelectedNodeKey}
-          selectedSpaceKeys={selectedKeys}
-          selectedKeysName={selectedKeysName}
-          editDia={editDia}
-          getJointSpace={getJointSpace}
-          setAddDia={setAddDia}
-          setEditDia={setEditDia}
-          setSelectedSpaceKeys={setSelectedKeys}
-          setSelectedKeysName={setSelectedKeysName}
-          isUpdate={isUpdate}
-          setIsUpdate={setIsUpdate}
-          jointSpaceData={data}
-        />
-      </Dialog>
+      <div>
+
+        <Dialog
+          header="Edit Item"
+          visible={editDia}
+          style={{ width: "60vw" }}
+          footer={renderFooterEdit}
+          onHide={() => {
+            setEditDia(false);
+          }}
+        >
+          <JointSpaceForm
+            submitted={submitted}
+            setSubmitted={setSubmitted}
+            selectedNodeKey={selectedNodeKey}
+            setSelectedNodeKey={setSelectedNodeKey}
+            selectedSpaceKeys={selectedKeys}
+            selectedKeysName={selectedKeysName}
+            setSelectedKeysName={setSelectedKeysName}
+            editDia={editDia}
+            getJointSpace={getJointSpace}
+            setAddDia={setAddDia}
+            setEditDia={setEditDia}
+            setSelectedSpaceKeys={setSelectedKeys}
+            isUpdate={isUpdate}
+            setIsUpdate={setIsUpdate}
+            jointSpaceData={data}
+            setSelectedNodeKeys={setSelectedNodeKeys}
+            selectedNodeKeys={selectedNodeKeys}
+          />
+        </Dialog>
+      </div>
 
       <h3>{t("Joint Space")}</h3>
       <div>
@@ -462,6 +470,11 @@ const SetJointSpace = () => {
       </div>
       <div className="field mt-4">
         <Tree
+          onContextMenu={(event: any) => {
+            // setSelectedFacilityType(event.node.nodeType);
+            cm.current.show(event.originalEvent);
+            console.log("original", event.originalEvent)
+          }}
           loading={loading}
           value={data}
           dragdropScope="-"
@@ -478,13 +491,12 @@ const SetJointSpace = () => {
             );
           }}
           onSelectionChange={(event: any) => {
-            console.log(event);
-
-            setSelectedNodeKey(event.value);
+            // setSelectedNodeKey(event.value);
+            setSelectedNodeKeys(event.value);
             setSelectedKeys(Object.keys(event.value));
             // findKeyName(Object.keys(event.value));
           }}
-          selectionKeys={selectedNodeKey}
+          selectionKeys={selectedNodeKeys}
           propagateSelectionUp={false}
           className="font-bold"
           nodeTemplate={(data: Node, options) => (
@@ -519,6 +531,23 @@ const SetJointSpace = () => {
                           setDisplayKey(data.key);
                         }}
                         title={t("Display")}
+                      />
+                    ) : null}
+                  </span>
+                  <span>
+                    {data.nodeType === "JointSpace" ? (
+                      <Button
+                        icon="pi pi-pencil"
+                        className="p-button-rounded p-button-secondary p-button-text"
+                        aria-label="Edit Item"
+                        onClick={() => {
+                          console.log("data key", data.key)
+                          setSelectedNodeKey(data.key);
+                          // let dataKey: any = data.key;
+                          setIsUpdate(true);
+                          setEditDia(true);
+                        }}
+                        title={t("Edit Item")}
                       />
                     ) : null}
                   </span>

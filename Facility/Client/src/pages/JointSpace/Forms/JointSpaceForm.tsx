@@ -73,6 +73,8 @@ interface Params {
   submitted: boolean;
   setSubmitted: any;
   selectedNodeKey: string;
+  selectedNodeKeys: string;
+  setSelectedNodeKeys: React.Dispatch<React.SetStateAction<string[]>>;
   selectedSpaceKeys: string[];
   selectedKeysName: string[];
   editDia: boolean;
@@ -91,6 +93,8 @@ const JointSpaceForm = ({
   submitted,
   setSubmitted,
   selectedNodeKey,
+  selectedNodeKeys,
+  setSelectedNodeKeys,
   selectedSpaceKeys,
   selectedKeysName,
   setSelectedKeysName,
@@ -115,6 +119,7 @@ const JointSpaceForm = ({
   const [formTypeId, setFormTypeId] = useState<any>(undefined);
   const [labels, setLabels] = useState<string[]>([]);
   const [isActive, setIsActive] = useState<boolean>(true);
+  const [categoryKey, setCategoryKey] = useState<any>();
   //   const [delDia, setDelDia] = useState<boolean>(false);
   //   const [formDia, setFormDia] = useState<boolean>(false);
   const { toast } = useAppSelector((state) => state.toast);
@@ -200,8 +205,8 @@ const JointSpaceForm = ({
   } = useForm({
     defaultValues: {
       ...data,
-      jointStartDate: new Date(),
-      jointEndDate: Date.parse("YYYY-MM-DD HH:mm:ss") || "",
+      jointStartDate: editDia ? data?.jointStartDate : new Date(),
+      jointEndDate: editDia ? data?.jointStartDate : Date.parse("YYYY-MM-DD HH:mm:ss") || "",
     },
     resolver: yupResolver(schema),
   });
@@ -252,15 +257,26 @@ const JointSpaceForm = ({
   }, [submitted]);
 
   const getNodeInfoAndEdit = (selectedNodeKey: string) => {
-    FacilityStructureService.nodeInfo(selectedNodeKey)
-      .then((res) => {
-        console.log(res.data);
-        setSelectedFacilityType(res.data.properties.nodeType);
+    JointSpaceService.nodeInfo(selectedNodeKey)
+
+      .then(async (res) => {
+        // setSelectedFacilityType(res.data.properties.nodeType);
 
         // setName(res.data.properties.name || "");
         // setTag(res.data.properties.tag || []);
         // setIsActive(res.data.properties.isActive);
         // setFormTypeId(res.data.properties.formTypeId);
+
+        ClassificationsService.findClassificationByCode(res.data[0]?._fields[0]?.properties?.category)
+          .then((clsf) => {
+
+            res.data[0]._fields[0].properties.category = clsf.data[0]?._fields[0]?.properties?.key //------------
+            setCategoryKey(clsf.data[0]?._fields[0]?.properties?.key.toString())
+            setCodeCategory(clsf.data[0]?._fields[0]?.properties?.code)
+          });
+
+
+        setData(res.data[0]?._fields[0]?.properties)
       })
       .catch((err) => {
         toast.current.show({
@@ -312,9 +328,9 @@ const JointSpaceForm = ({
   };
 
   const onSubmit = (data: any) => {
+
     if (editDia === false) {
       let newNode: any = {};
-
       newNode = {
         architecturalName: data?.architecturalName,
         architecturalCode: data?.architecturalCode,
@@ -371,7 +387,7 @@ const JointSpaceForm = ({
           for (let item in temp) {
             temp[item] = JSON.stringify(temp[item]);
           }
-          FacilityStructureService.update(res.data.key, {
+          JointSpaceService.update(res.data.key, {
             ...newNode,
             ...temp,
           });
@@ -382,6 +398,7 @@ const JointSpaceForm = ({
           // setSelectedKeys([]);
           setSelectedKeysName([]);
           setSelectedNodeKey([]);
+          setSelectedNodeKeys([]);
           setAddDia(false);
           getJointSpace();
 
@@ -416,35 +433,79 @@ const JointSpaceForm = ({
         });
     } else {
       let updateNode: any = {};
-      FacilityStructureService.nodeInfo(data.key) //selectednodekey
-        .then((responseStructure) => {
+
+
+      FacilityStructureService.nodeInfo(selectedNodeKey) //selectednodekey
+        .then((res) => {
           if (labels.length > 0) {
             updateNode = {
-              ...data,
-              name: data?.name,
-              tag: data?.tag,
-              isActive: isActive,
-              description: "",
+              // ...data,
+              // name: data?.name,
+              // tag: data?.tag,
+              // isActive: isActive,
+              // description: "",
+              // labels: [labels[0]],
+              // formTypeId: formTypeId,
+
+              architecturalName: data?.properties?.architecturalName,
+              architecturalCode: data?.properties?.architecturalCode,
+              name: data?.properties?.name, //selectedKeysName.toString().replaceAll(",", "-"),
+              code: res.data?.properties?.code,
+              operatorName: data?.properties?.operatorName,
+              operatorCode: data?.properties?.operatorCode,
+              tag: data?.properties?.tag,
+              //m2: data?.m2,
+              category: codeCategory,
+              usage: codeUsage,
+              status: codeStatus,
+              description: data?.properties?.description,
+              roomTag: data?.properties?.roomTag || [],
+              usableHeight: data?.properties?.usableHeight || [],
+              grossArea: data?.properties?.grossArea || [],
+              netArea: data?.properties?.netArea || [],
+              jointStartDate: data?.properties?.jointStartDate,
+              jointEndDate: data?.properties?.jointEndDate,
+              nodeKeys: res.data?.properties?.nodeKeys || [],
               labels: [labels[0]],
               formTypeId: formTypeId,
+              isActive: isActive,
             };
+
+
           } else {
             updateNode = {
-              ...data,
-              name: data?.name,
+              architecturalName: data?.architecturalName,
+              architecturalCode: data?.architecturalCode,
+              name: data?.name, //selectedKeysName.toString().replaceAll(",", "-"),
+              code: res.data?.properties?.code,
+              operatorName: data?.operatorName,
+              operatorCode: data?.operatorCode,
               tag: data?.tag,
-              isActive: isActive,
-              description: "",
+              //m2: data?.m2,
+              category: codeCategory,
+              usage: codeUsage,
+              status: codeStatus,
+              description: data?.description,
+              roomTag: data?.roomTag || [],
+              usableHeight: data?.usableHeight || [],
+              grossArea: data?.grossArea || [],
+              netArea: data?.netArea || [],
+              jointStartDate: data?.jointStartDate,
+              jointEndDate: data?.jointEndDate,
+              nodeKeys: res.data?.properties?.nodeKeys || [],
               formTypeId: formTypeId,
+              isActive: isActive,
+
+
             };
           }
-
-          FacilityStructureService.update(selectedNodeKey, updateNode)
+          console.log("update node:------", updateNode)
+          JointSpaceService.update(res.data.id, updateNode)
             .then((res) => {
               toast.current.show({
                 severity: "success",
                 summary: t("Successful"),
-                detail: t("Contact Updated"),
+                detail: t("Joint Space Updated"),
                 life: 3000,
               });
               getJointSpace();
@@ -474,8 +535,9 @@ const JointSpaceForm = ({
     return null;
   }
 
+
   return (
-    <form>
+    <form onClick={() => { console.log("form data", data) }}>
       <TabView>
         <TabPanel header={t("Form")}>
           <div className="formgrid grid">
@@ -575,7 +637,7 @@ const JointSpaceForm = ({
             <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
               <Controller
-                defaultValue={data?.category}
+                defaultValue={categoryKey || data?.category}
                 name="category"
                 control={control}
                 render={({ field }) => (
