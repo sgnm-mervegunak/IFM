@@ -33,7 +33,7 @@ interface Node {
   parentId?: string;
   email?: string;
   canDelete?: boolean;
-  _type?: string;
+  className?: string;
 }
 
 const SetSystem = () => {
@@ -216,10 +216,11 @@ const SetSystem = () => {
       /> */}
 
       {(() => {
-        if (nodeType === "Component") {
-          return <ContextMenu model={menu2} ref={cm} />;
-        } else {
+        if (canDelete === false) {
           return <ContextMenu model={menu1} ref={cm} />;
+        } 
+        else {
+          return <ContextMenu model={menu2} ref={cm} />;
         }
       })()}
 
@@ -294,9 +295,10 @@ const SetSystem = () => {
             console.log(event.node);
             
             cm.current.show(event.originalEvent);
-            // if (event.node.canDelete === false) {
+            // if (event.node.canDelete === true) {
             //   cm.current.hide(event.originalEvent);
             // }
+            
           }}
           filter
           filterBy="name,code"
@@ -324,7 +326,7 @@ const SetSystem = () => {
                     }
 
                     {
-                      data._type === "Component" && (
+                      data.className === "System" && (
                         <>
                           <Button
                             icon="pi pi-pencil"

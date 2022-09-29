@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const url = process.env.REACT_APP_API_URL + "jointspace/";
+const url = process.env.REACT_APP_API_FACILITY + "jointspace/";
 
 interface JointSpaceInterface {
     ArchitecturalName: string;

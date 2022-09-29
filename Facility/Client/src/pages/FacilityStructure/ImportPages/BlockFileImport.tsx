@@ -8,18 +8,18 @@ import { useNavigate } from 'react-router-dom';
 
 interface Params {
     selectedNodeKey: string;
-  }
+}
 
-const BlockFileImport = ({selectedNodeKey}:Params) => {
+const BlockFileImport = ({ selectedNodeKey }: Params) => {
     const toast = useRef<any>();
     const refUpload = useRef<any>(null);
     const auth = useAppSelector((state) => state.auth);
     const [token, setToken] = useState(auth.auth.token);
     const history = useNavigate();
 
-    const uploadCSV = (e:any) => {
+    const uploadCSV = (e: any) => {
         const file = e.files[0];
-        const url = 'http://localhost:3010/classification/addAClassificationWithCodeFromExcel/IFM/EN';
+        const url = process.env.REACT_APP_API_FACILITY + 'classification/addAClassificationWithCodeFromExcel/IFM/EN';
         const formData = new FormData();
 
         formData.append('file', file);
@@ -40,10 +40,10 @@ const BlockFileImport = ({selectedNodeKey}:Params) => {
         refUpload.current.clear();
         function backToFacility() {
             history('/facilitystructure');
-          }
-          
-          setTimeout(backToFacility, 1200);
-        
+        }
+
+        setTimeout(backToFacility, 1200);
+
     }
     return (
         <>

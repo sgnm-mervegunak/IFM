@@ -265,7 +265,7 @@ const SetFacilityStructure2 = () => {
   };
 
   const UploadAnyFile = (folderName: string, file: any) => {
-    const url = "http://localhost:3004/file-upload/single";
+    const url = process.env.REACT_APP_API_MINIO+"file-upload/single";
     const formData = new FormData();
 
     formData.append("file", file);
@@ -276,7 +276,7 @@ const SetFacilityStructure2 = () => {
 
 
   const DeleteAnyFile = (realmName: string, fileName: string) => {
-    const url = "http://localhost:3004/file-upload/removeOne";
+    const url = process.env.REACT_APP_API_MINIO+"file-upload/removeOne";
 
     return axios.delete(url, { data: { fileName, realmName } })
   };

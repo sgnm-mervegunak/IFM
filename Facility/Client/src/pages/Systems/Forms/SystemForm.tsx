@@ -179,6 +179,8 @@ const SystemForm = ({
   const getNodeInfoForUpdate = (selectedNodeKey: string) => {
     SystemService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
+        console.log(res.data);
+        
         let temp = {};
         await AssetClassificationsService.findClassificationByCodeAndLanguage("OmniClass21", res.data.properties.category).then(clsf1 => {
           setCodeCategory(res.data.properties.category);
@@ -201,7 +203,7 @@ const SystemForm = ({
   };
 
   const UploadAnyFile = (folderName: string, file: any) => {
-    const url = process.env.REACT_APP_API_MINIO_URL + "file-upload/single";
+    const url = process.env.REACT_APP_API_MINIO + "file-upload/single";
     const formData = new FormData();
 
     formData.append("file", file);
@@ -211,7 +213,7 @@ const SystemForm = ({
   };
 
   const DeleteAnyFile = (realmName: string, fileName: string) => {
-    const url = process.env.REACT_APP_API_MINIO_URL + "file-upload/removeOne";
+    const url = process.env.REACT_APP_API_MINIO + "file-upload/removeOne";
 
     return axios.delete(url, { data: { fileName, realmName } });
   };
