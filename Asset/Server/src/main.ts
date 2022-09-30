@@ -60,7 +60,7 @@ async function bootstrap() {
     );
     app.enableCors();
     await app.startAllMicroservices();
-    await app.listen(3014);
+    await app.listen( configService.get('ASSET_APP_PORT'));
   } catch (error) {
     console.log(error);
   }
