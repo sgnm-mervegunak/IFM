@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Param, Headers } from '@nestjs/common';
 import { Unprotected } from 'nest-keycloak-connect';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { NoCache } from 'ifmcommon';
@@ -10,9 +10,16 @@ import { LazyLoadingService } from '../services/lazyLoading.service';
 export class LazyLoadingController {
   constructor(private readonly lazyLoadingService: LazyLoadingService) {}
   @Unprotected()
-  @Get('/:key')
+  @Get('/:key/:leafType')
   @NoCache()
-  load(@Param('key') key: string) {
-    return this.lazyLoadingService.load(key);
+  loadByKey(@Param('key') key: string, @Param('leafType') leafType: string, @Headers() header) {
+    return this.lazyLoadingService.loadByKey(key, leafType, header);
+  }
+
+  @Unprotected()
+  @Get('/:label')
+  @NoCache()
+  loadByLabel(@Param('label') label: string, @Headers() header) {
+    return this.lazyLoadingService.loadByLabel(label, header);
   }
 }

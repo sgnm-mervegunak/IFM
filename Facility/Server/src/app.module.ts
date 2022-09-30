@@ -25,6 +25,7 @@ import { ExcelImportExportModule } from './excelExport/excelImportExport.module'
 import { ContactModule } from './contact/contact.module';
 import { OrganizationModule } from './organization/organization.module';
 import { InfraModule } from './infra/infra.module';
+import { LazyLoadingModule } from './lazyLoading/lazyLoading.module';
 
 @Module({
   imports: [
@@ -122,6 +123,7 @@ import { InfraModule } from './infra/infra.module';
     ZoneModule,
 
     ExcelImportExportModule,
+    LazyLoadingModule,
   ],
   providers: [
     //to cache all get request

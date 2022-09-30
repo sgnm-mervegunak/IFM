@@ -1,3 +1,4 @@
 export interface LazyLoadingInterface {
-  load(key: string): any;
+  loadByKey(key: string, leafType: string, header): any;
+  loadByLabel(label: string, header): any;
 }
