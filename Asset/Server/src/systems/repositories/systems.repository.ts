@@ -30,6 +30,7 @@ import {
 } from 'src/common/func/virtual.node.props.functions';
 import { VirtualNodeHandler } from 'src/common/class/virtual.node.dealer';
 import { ConfigService } from '@nestjs/config';
+import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
 
 @Injectable()
 export class SystemsRepository implements SystemsInterface<System> {
@@ -39,12 +40,38 @@ export class SystemsRepository implements SystemsInterface<System> {
     private readonly httpService: HttpRequestHandler,
     private readonly virtualNodeHandler: VirtualNodeHandler,
     private readonly configService: ConfigService,
+    private readonly nodeRelationHandler: NodeRelationHandler,
   ) {}
   async findByKey(key: string, header) {
+     const {language} = header;
     try {
       const nodes = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.SYSTEM], { key });
       if (!nodes.length) {
         throw new AssetNotFoundException(key);
+      }
+
+      const createdByNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        [Neo4jLabelEnum.SYSTEM],
+        { key: nodes[0].get('n').properties.key },
+        ['Virtual'],
+        { isDeleted: false },
+        RelationName.CREATED_BY,
+      );
+      if (createdByNode.length>0) {
+      nodes[0].get('n').properties['createdBy'] = createdByNode[0].get('children').properties.referenceKey;
+      }
+      
+
+      const categoryNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        [Neo4jLabelEnum.SYSTEM],
+        { key: nodes[0].get('n').properties.key },
+        [],
+        { isDeleted: false, language: language },
+        RelationName.CLASSIFIED_BY
+      );
+      if (categoryNode.length>0) {
+        nodes[0].get('n').properties['category'] =
+        categoryNode[0].get('children').properties.code;  
       }
       return nodes[0]['_fields'][0];
     } catch (error) {
@@ -139,34 +166,47 @@ export class SystemsRepository implements SystemsInterface<System> {
       await this.virtualNodeHandler.createVirtualNode(systemNode['identity'].low, systemUrl, finalObjectArray);
 
 
-      // CLASSIFIED_BY relation creation
-      const languages = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-        ['Language_Config'],
-        { isDeleted: false, realm: realm },
-        [],
-        { isDeleted: false },
-        RelationName.PARENT_OF,
-      );
-      let classificationRootNone = 'OmniClass21';
-      languages.map(async (record) => {
-        let lang = record['_fields'][1].properties.name;
-        let nodeClass = await this.neo4jService.findChildrensByLabelsAndFilters(
-          [classificationRootNone + '_' + lang],
-          { isDeleted: false, realm: realm },
-          [],
-          { language: lang, code: systemsDto['category'] },
-        );
-        if (nodeClass && nodeClass.length && nodeClass.length == 1) {
-          await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
-            systemNode['identity'].low,
-            { isDeleted: false },
-            nodeClass[0]['_fields'][1].identity.low,
-            { isDeleted: false },
-            RelationName.CLASSIFIED_BY,
-            RelationDirection.RIGHT,
-          );
-        }
-      });
+      // CLASSIFIED_BY relation creation 
+    let newCategoriesArr = [];
+    let relationArr = [];
+    let _root_idArr = [];   
+    const newCategories = await this.nodeRelationHandler.getNewCategories(realm, systemsDto['category']);
+
+    if (newCategories.length > 0) {
+      newCategoriesArr.push(newCategories); 
+    }
+
+    relationArr.push(RelationName.CLASSIFIED_BY);
+    _root_idArr.push(systemNode.identity.low);
+    await this.nodeRelationHandler.manageNodesRelations([], newCategoriesArr,relationArr,_root_idArr);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      // const languages = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+      //   ['Language_Config'],
+      //   { isDeleted: false, realm: realm },
+      //   [],
+      //   { isDeleted: false },
+      //   RelationName.PARENT_OF,
+      // );
+      // let classificationRootNone = 'OmniClass21';
+      // languages.map(async (record) => {
+      //   let lang = record['_fields'][1].properties.name;
+      //   let nodeClass = await this.neo4jService.findChildrensByLabelsAndFilters(
+      //     [classificationRootNone + '_' + lang],
+      //     { isDeleted: false, realm: realm },
+      //     [],
+      //     { language: lang, code: systemsDto['category'] },
+      //   );
+      //   if (nodeClass && nodeClass.length && nodeClass.length == 1) {
+      //     await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
+      //       systemNode['identity'].low,
+      //       { isDeleted: false },
+      //       nodeClass[0]['_fields'][1].identity.low,
+      //       { isDeleted: false },
+      //       RelationName.CLASSIFIED_BY,
+      //       RelationDirection.RIGHT,
+      //     );
+      //   }
+      // });
       return result;
     } catch (error) {
       const code = error.response?.code;
@@ -204,9 +244,29 @@ export class SystemsRepository implements SystemsInterface<System> {
     if (node[0]['_fields'][0].properties.realm !== realm) {
       throw new HttpException({ message: 'You dont have permission' }, 403);
     }
+    ///////////// update classified_by relations for category //////////////////  
+    const category = systemsDto['category'];
+    delete systemsDto['category'];
+    const newCategories = await this.nodeRelationHandler.getNewCategories(realm, category);
+    const oldCategories = await this.nodeRelationHandler.getOldCategories(node[0]['_fields'][1].properties.key, RelationName.CLASSIFIED_BY); 
+   
+    let categoriesArr = [];
+    let newCategoriesArr = [];
+    let relationArr = [];
+    let _root_idArr = [];
+
+    if (oldCategories.length > 0) {
+      categoriesArr.push(oldCategories);
+    }
+    if (newCategories.length > 0) {
+      newCategoriesArr.push(newCategories); 
+    }
+    relationArr.push(RelationName.CLASSIFIED_BY);
+    _root_idArr.push(node[0]['_fields'][1].identity.low);
+    await this.nodeRelationHandler.manageNodesRelations(categoriesArr, newCategoriesArr,relationArr,_root_idArr);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     const systemUrl = `${process.env.SYSTEM_URL}/${node[0].get('children').properties.key}`;
-
     const finalObjectArray = await avaiableUpdateVirtualPropsGetter(systemsDto);
     for (let index = 0; index < finalObjectArray.length; index++) {
       const url =
@@ -214,12 +274,8 @@ export class SystemsRepository implements SystemsInterface<System> {
 
       await this.httpService.get(url, { authorization });
     }
-
     await this.virtualNodeHandler.updateVirtualNode(+_id, systemUrl, finalObjectArray);
     delete systemsDto['createdBy'];
-    const category = systemsDto['category'];
-    delete systemsDto['category'];
-
     const updatedNode = await this.neo4jService.updateByIdAndFilter(
       +_id,
       { isDeleted: false, isActive: true },
@@ -229,70 +285,14 @@ export class SystemsRepository implements SystemsInterface<System> {
     if (!updatedNode) {
       throw new FacilityStructureNotFountException(_id);
     }
-
-    ////////////////////////////// update classified_by  relation, if category changed //////////////////////////////////
-    const categories = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-      [],
-      { isDeleted: false, key: node[0]['_fields'][1].properties.key },
-      [],
-      { isDeleted: false },
-      RelationName.CLASSIFIED_BY,
-      RelationDirection.RIGHT,
-    );
-    const newCategories = await this.neo4jService.findChildrensByLabelsAndFilters(
-      ['Classification'],
-      { isDeleted: false, realm: node[0]['_fields'][0].properties.realm },
-      [],
-      { isDeleted: false, code: category },
-    );
-    if (categories && categories.length > 0) {
-      if (categories[0]['_fields'][1]['properties'].code != category) {
-        for (let i = 0; i < categories.length; i++) {
-          await this.neo4jService.deleteRelationByIdAndRelationNameWithoutFilters(
-            node[0]['_fields'][1].identity.low,
-            categories[i]['_fields'][1].identity.low,
-            RelationName.CLASSIFIED_BY,
-            RelationDirection.RIGHT,
-          );
-        }
-        for (let i = 0; i < newCategories.length; i++) {
-          await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
-            node[0]['_fields'][1].identity.low,
-            { isDeleted: false },
-            newCategories[i]['_fields'][1].identity.low,
-            { isDeleted: false },
-            RelationName.CLASSIFIED_BY,
-            RelationDirection.RIGHT,
-          );
-        }
-      }
-    } else {
-      for (let i = 0; i < newCategories.length; i++) {
-        await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
-          node[0]['_fields'][1].identity.low,
-          { isDeleted: false },
-          newCategories[i]['_fields'][1].identity.low,
-          { isDeleted: false },
-          RelationName.CLASSIFIED_BY,
-          RelationDirection.RIGHT,
-        );
-      }
-    }
-
     return updatedNode;
-
   }
 
   async delete(_id: string, header) {
     try {
       const { realm } = header;
-      //const node = await this.neo4jService.read(`match(n) where id(n)=$id return n`, { id: parseInt(_id) });
       const node = await this.neo4jService.findByIdAndFilters(+_id, { isDeleted: false }, []);
-      // if (!node.records[0]) {
-      //   throw new HttpException({ code: 5005 }, 404);
-      // }
 
-      //await this.neo4jService.getParentById(_id);
       const parentNode = await this.neo4jService.findChildrensByChildIdAndFilters(
         [Neo4jLabelEnum.SYSTEMS],
         { realm },
@@ -317,27 +317,19 @@ export class SystemsRepository implements SystemsInterface<System> {
       );
 
       if (hasChildren['length'] == 0) {
-        ////////////////////////////// update classified_by  relation, if category changed //////////////////////////////////
-        const categories = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-        [],
-        { isDeleted: false, key: node[0]['_fields'][1].properties.key },
-        [],
-        { isDeleted: false },
-        RelationName.CLASSIFIED_BY,
-        RelationDirection.RIGHT,
-        );
-        
-        for (let i = 0; i < categories.length; i++) {
-          await this.neo4jService.deleteRelationByIdAndRelationNameWithoutFilters(
-            node[0]['_fields'][1].identity.low,
-            categories[i]['_fields'][1].identity.low,
-            RelationName.CLASSIFIED_BY,
-            RelationDirection.RIGHT,
-          );
-        }
+         //delete classified_by relations in this database
+         let categoriesArr = [];
+         let relationArr = [];
+         let _root_idArr = [];
 
-
-
+         const oldCategories = await this.nodeRelationHandler.getOldCategories(node.properties.key, RelationName.CLASSIFIED_BY);
+         
+         categoriesArr.push(oldCategories);
+         relationArr.push(RelationName.CLASSIFIED_BY);
+         _root_idArr.push(node.identity.low);
+         await this.nodeRelationHandler.deleteNodesRelations(categoriesArr, relationArr, _root_idArr) 
+         //////////////////////////////////////////////
+         
         deletedNode = await this.neo4jService.updateByIdAndFilter(+_id, {}, [], { isDeleted: true, isActive: false });
 
         const virtualNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
