@@ -6,7 +6,7 @@ import { RelationName } from 'src/common/const/relation.name.enum';
 
 @Injectable()
 export class LazyLoadingRepository implements LazyLoadingInterface {
-  constructor(private readonly neo4jService: Neo4jService) {}
+  constructor(private readonly neo4jService: Neo4jService) { }
 
   async loadByLabel(label: string, header) {
     // try {
@@ -62,18 +62,20 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
           realm: 'IFM',
         },
       );
-      console.log(temp);
+      console.log(temp.records[0]['_fields'][0])
 
-      const children = temp.records.map((item) => item['_fields'][0]);
+      const temp2 = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(['FacilityStructure'], { isDeleted: false, realm: 'IFM', isActive: true }, [], { canDisplay: true }, 'PARENT_OF')
+
+      const children = temp2.map((item) => item.get('children'));
       for (const item of children) {
-        const childrenOfItem = await this.neo4jService.read(
-          `match(n{isDeleted:false,key:$key,isActive:true})-[:PARENT_OF]->(r) return r`,
-          {
-            key: item.properties.key,
-          },
-        );
-        item.leaf = childrenOfItem.records.map((item) => item['_fields'][0]).length <= 0;
+
+        const childrenOfItem = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel([], { key: item.properties.key }, [], { canDisplay: true }, 'PARENT_OF')
+        item.leaf = childrenOfItem.map((item) => {
+
+          item.get('children')
+        }).length <= 0;
       }
+
       return { ...node[0].get('n'), children };
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -82,29 +84,19 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
 
   async loadByKey(key: string, leafType: string, header) {
     try {
-      const node = await this.neo4jService.findOneNodeByKey('a583fb5c-3891-47f8-94c5-91612f7cacb9');
+      const node = await this.neo4jService.findByLabelAndFilters([],{key});
 
       if (!node) {
         throw new HttpException({ key: I18NEnums.CLASSIFICATION_NOT_FOUND, args: { key: key } }, HttpStatus.NOT_FOUND);
       }
-      const temp = await this.neo4jService.read(
-        `match(n{isDeleted:false,key:$key,isActive:true})-[:PARENT_OF]->(r) return r`,
-        {
-          key: key,
-        },
-      );
+      const temp2 = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel([], { isDeleted: false, key, isActive: true }, [], { canDisplay: true }, 'PARENT_OF')
 
-      const children = temp.records.map((item) => item['_fields'][0]);
+      const children = temp2.map((item) => item.get('children'));
       for (const item of children) {
-        const childrenOfItem = await this.neo4jService.read(
-          `match(n{isDeleted:false,key:$key,isActive:true})-[:PARENT_OF]->(r) return r`,
-          {
-            key: item.properties.key,
-          },
-        );
-        item.leaf = childrenOfItem.records.map((item) => item['_fields'][0]).length <= 0;
+        const childrenOfItem = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel([], { isDeleted: false, key: item.properties.key, isActive: true }, [], { canDisplay: true }, 'PARENT_OF')
+        item.leaf = childrenOfItem.map((item) => item.get('children')).length <= 0;
       }
-      return { ...node, children };
+      return { ...node[0].get('n'), children };
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
