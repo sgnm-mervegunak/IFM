@@ -219,9 +219,11 @@ const TypeForm = ({
           .catch((err) => {
             setData(res.data.properties);
           })
-        if (spaceType === "") {
-          setSpaceType(res.data.nodeType);
-        }
+        await FacilityStructureService.nodeInfo(res.data.properties.space)
+          .then((res2) => {
+            setSpaceType(res2.data.properties.nodeType);
+          })
+
         // setData(temp);
         setData(res.data.properties);
 
