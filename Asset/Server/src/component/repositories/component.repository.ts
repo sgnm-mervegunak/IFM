@@ -60,7 +60,9 @@ export class ComponentRepository implements ComponentInterface<Component> {
         { isDeleted: false },
         RelationName.CREATED_BY,
       );
+      if (createdByNode.length>0) {
       nodes[0].get('n').properties['createdBy'] = createdByNode[0].get('children').properties.referenceKey;
+      }
 
       const spaceNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
         [Neo4jLabelEnum.COMPONENT],
@@ -69,7 +71,9 @@ export class ComponentRepository implements ComponentInterface<Component> {
         { isDeleted: false },
         RelationName.LOCATED_IN,
       );
-      nodes[0].get('n').properties['space'] = spaceNode[0].get('children').properties.referenceKey;
+      if (spaceNode.length>0) {
+      nodes[0].get('n').properties['space'] = spaceNode[0].get('children').properties.referenceKey;4
+      }
       const warrantyGuaranorLaborNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
         [Neo4jLabelEnum.COMPONENT],
         { key: nodes[0].get('n').properties.key },
@@ -77,8 +81,10 @@ export class ComponentRepository implements ComponentInterface<Component> {
         { isDeleted: false },
         RelationName.WARRANTY_GUARANTOR_LABOR,
       );
+      if (warrantyGuaranorLaborNode.length>0) {
       nodes[0].get('n').properties['warrantyGuarantorLabor'] =
         warrantyGuaranorLaborNode[0].get('children').properties.referenceKey;
+      }
       const warrantyGuaranorPartsNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
         [Neo4jLabelEnum.COMPONENT],
         { key: nodes[0].get('n').properties.key },
@@ -86,9 +92,10 @@ export class ComponentRepository implements ComponentInterface<Component> {
         { isDeleted: false },
         RelationName.WARRANTY_GUARANTOR_PARTS,
       );
+      if (warrantyGuaranorPartsNode.length>0) {
       nodes[0].get('n').properties['warrantyGuarantorParts'] =
         warrantyGuaranorPartsNode[0].get('children').properties.referenceKey;
-
+      }
       
       const warrantyDurationUnitNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
           [Neo4jLabelEnum.COMPONENT],
@@ -97,9 +104,11 @@ export class ComponentRepository implements ComponentInterface<Component> {
           { isDeleted: false, language: language },
           RelationName.CLASSIFIED_BY,
         );
-        nodes[0].get('n').properties['warrantyDurationUnit'] =
-        warrantyDurationUnitNode[0].get('children').properties.key;  
-
+        if (warrantyDurationUnitNode.length>0) {
+          nodes[0].get('n').properties['warrantyDurationUnit'] =
+          warrantyDurationUnitNode[0].get('children').properties.key;  
+        }
+        
 
       return nodes[0]['_fields'][0];
     } catch (error) {
