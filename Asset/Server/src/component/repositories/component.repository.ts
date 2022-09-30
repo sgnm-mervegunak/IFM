@@ -102,7 +102,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
           { key: nodes[0].get('n').properties.key },
           [],
           { isDeleted: false, language: language },
-          RelationName.CLASSIFIED_BY,
+          RelationName.WARRANTY_DURATION_UNIT_BY,
         );
         if (warrantyDurationUnitNode.length>0) {
           nodes[0].get('n').properties['warrantyDurationUnit'] =
