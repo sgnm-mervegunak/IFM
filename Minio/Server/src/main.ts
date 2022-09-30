@@ -7,13 +7,14 @@ import { kafkaOptions } from './common/configs/message.broker.options';
 import { kafkaConf } from './common/const/kafka.conf';
 import { MinioTopis } from './common/const/kafta.topic.enum';
 import { LoggingInterceptor } from './common/interceptors/logger.interceptor';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   //to get i18nService from app module
   const i18NService = app.get<I18nService>(I18nService);
-
+  const configService = app.get<ConfigService>(ConfigService);
   app.connectMicroservice(kafkaOptions);
   const config = new DocumentBuilder()
     .setTitle('Minio File Microservice Endpoints')
@@ -39,6 +40,6 @@ async function bootstrap() {
   app.useGlobalInterceptors(new LoggingInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter(i18NService, kafkaConf, MinioTopis.MINIO_EXCEPTIONS));
   await app.startAllMicroservices();
-  await app.listen(3013);
+  await app.listen( configService.get('MINIO_APP_PORT'));
 }
 bootstrap();

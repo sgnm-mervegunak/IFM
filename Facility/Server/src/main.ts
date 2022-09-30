@@ -8,12 +8,13 @@ import trial from './tracing';
 import { i18nValidationErrorFactory, I18nValidationExceptionFilter } from 'nestjs-i18n';
 import { kafkaConf } from './common/const/kafka.conf';
 import { Neo4jErrorFilter } from 'sgnm-neo4j';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   try {
     await trial.start();
     const app = await NestFactory.create(AppModule, { abortOnError: false });
-
+    const configService = app.get<ConfigService>(ConfigService);
     app.connectMicroservice(kafkaOptions);
 
     const config = new DocumentBuilder()
@@ -49,7 +50,7 @@ async function bootstrap() {
     );
     app.enableCors();
     await app.startAllMicroservices();
-    await app.listen(3010);
+    await app.listen( configService.get('FACILITY_APP_PORT') );
   } catch (error) {
     console.log(error);
   }
