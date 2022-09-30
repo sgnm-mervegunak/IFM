@@ -106,7 +106,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
         );
         if (warrantyDurationUnitNode.length>0) {
           nodes[0].get('n').properties['warrantyDurationUnit'] =
-          warrantyDurationUnitNode[0].get('children').properties.key;  
+          warrantyDurationUnitNode[0].get('children').properties.code;  
         }
         
 
@@ -236,7 +236,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
     if (newWarrantyDurationUnits.length > 0) {
       newCategoriesArr.push(newWarrantyDurationUnits); 
     }
-    relationArr.push(RelationName.CLASSIFIED_BY);
+    relationArr.push(RelationName.WARRANTY_DURATION_UNIT_BY);
     _root_idArr.push(componentNode.identity.low);
     await this.nodeRelationHandler.manageNodesRelations(categoriesArr, newCategoriesArr,relationArr,_root_idArr);
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -282,7 +282,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
     /////////////////////////////////// update classified_by  relation, if duration unit changed //////////////////////////////////////////////////////  
     const warrantyDurationUnit = updateComponentDto['warrantyDurationUnit'];
     delete updateComponentDto['warrantyDurationUnit'];
-    const oldWarrantyDurationUnits = await this.nodeRelationHandler.getOldCategories(node[0]['_fields'][1].properties.key, RelationName.CLASSIFIED_BY); 
+    const oldWarrantyDurationUnits = await this.nodeRelationHandler.getOldCategories(node[0]['_fields'][1].properties.key, RelationName.WARRANTY_DURATION_UNIT_BY); 
     const newWarrantyDurationUnits = await this.nodeRelationHandler.getNewCategories(realm, warrantyDurationUnit);
     let categoriesArr = [];
     let newCategoriesArr = [];
@@ -294,7 +294,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
     if (newWarrantyDurationUnits.length > 0) {
       newCategoriesArr.push(newWarrantyDurationUnits); 
     }
-    relationArr.push(RelationName.CLASSIFIED_BY);
+    relationArr.push(RelationName.WARRANTY_DURATION_UNIT_BY);
     _root_idArr.push(node[0]['_fields'][1].identity.low);
     await this.nodeRelationHandler.manageNodesRelations(categoriesArr, newCategoriesArr,relationArr,_root_idArr);
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -381,7 +381,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
         let categoriesArr = [];
         let relationArr = [];
         let _root_idArr = [];
-        const oldWarrantyDurationUnits = await this.nodeRelationHandler.getOldCategories(typeNode.properties.key, RelationName.CLASSIFIED_BY); 
+        const oldWarrantyDurationUnits = await this.nodeRelationHandler.getOldCategories(typeNode.properties.key, RelationName.WARRANTY_DURATION_UNIT_BY); 
         categoriesArr.push(oldWarrantyDurationUnits);
         relationArr.push(RelationName.CLASSIFIED_BY);
         _root_idArr.push(typeNode.identity.low);
