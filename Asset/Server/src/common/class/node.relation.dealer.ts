@@ -17,6 +17,7 @@ export class NodeRelationHandler {
   ) {}
   
   async  getOldCategories(key: string, relation: string)   {
+
     const oldCategories = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
       [],
       { isDeleted: false, key: key },
