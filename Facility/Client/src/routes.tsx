@@ -9,6 +9,7 @@ import Facility from "./pages/Facility";
 import Classifications from "./pages/Classifications/Classifications";
 import { NotFound } from "./layouts/App/pages/NotFound";
 import SetClassificationAdmin from "./pages/Classifications/ClassificationAdmin/SetClassificationAdmin";
+import SetClassificationAdminLazy from "./pages/Classifications/ClassificationAdmin/SetClassificationAdminLazy";
 import FacilityStructure from "./pages/FacilityStructure/FacilityStructure";
 import SetFacilityStructure from "./pages/FacilityStructure/SetFacilityStructure";
 import FormGenerate from "./pages/FormGenerate/FormGenerate";
@@ -44,7 +45,7 @@ export default function Router() {
         // { path: "facility", element: <Facility /> },
         { path: "facility", element: <Facility2 /> },
         // { path: "classifications", element: <Classifications /> },
-        { path: "classifications", element: auth.auth.type === "facility_client_role_admin" ? <SetClassificationAdmin /> : <SetClassificationUser /> },
+        { path: "classifications", element: auth.auth.type === "facility_client_role_admin" ? <SetClassificationAdminLazy /> : <SetClassificationUser /> },
         { path: "jointspace", element: <JointSpace /> },
         { path: "zone", element: <Zone /> },
         { path: "facilitystructure", element: <SetFacilityStructure /> },

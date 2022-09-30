@@ -16,4 +16,11 @@ export class LazyLoadingService {
   async loadByLabel(label: string, header) {
     return await this.lazyLoadingRepository.loadByLabel(label, header);
   }
+
+  async loadClassification(key: string, header) {
+    return await this.lazyLoadingRepository.loadClassification(key, header);
+  }
+  async getClassificationRootAndChildrenByLanguageAndRealm(realm: string, language: string) {
+    return await this.lazyLoadingRepository.getClassificationRootAndChildrenByLanguageAndRealm(realm, language);
+  }
 }
