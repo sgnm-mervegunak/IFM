@@ -43,11 +43,11 @@ interface Node {
 const JointSpace = () => {
   const navigate = useNavigate();
   const [data, setData] = useState<Node[]>([]);
-  const [addDia, setAddDia] = useState(false);
-  const [code, setCode] = useState("");
-  const [name, setName] = useState("");
-  const [labelClass, setLabelClass] = useState("");
-  const [tag, setTag] = useState<string[]>([]);
+  // const [addDia, setAddDia] = useState(false);
+  // const [code, setCode] = useState("");
+  // const [name, setName] = useState("");
+  // const [labelClass, setLabelClass] = useState("");
+  // const [tag, setTag] = useState<string[]>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [loading, setLoading] = useState(false);
   const [exportDia, setExportDia] = useState(false);
@@ -81,41 +81,6 @@ const JointSpace = () => {
       });
   };
 
-  const addItem = () => {
-    // const _classification: Node = {
-    //   name: name,
-    //   key: uuidv4(),
-    //   tag: tag,
-    //   description:"",
-    //   labels: [],
-    // };
-
-    // FacilityStructureService.create(_classification)
-    //   .then((res) => {
-    //     toast.current.show({
-    //       severity: "success",
-    //       summary: "Successful",
-    //       detail: "Classification Created",
-    //       life: 3000,
-    //     });
-    //     loadLazyData();
-    //   })
-    //   .catch((err) => {
-    //     toast.current.show({
-    //       severity: "error",
-    //       summary: "Error",
-    //       detail: err.response ? err.response.data.message : err.message,
-    //       life: 20000,
-    //     });
-    //   });
-
-    setAddDia(false);
-    setName("");
-    setCode("");
-    setLabelClass("");
-    setTag([]);
-  };
-
   const header = (
     <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
       <h3 className="m-0">{/*t("Joint Space")*/}</h3>
@@ -129,28 +94,6 @@ const JointSpace = () => {
       </span>
     </div>
   );
-
-  const renderFooter = () => {
-    return (
-      <div>
-        <Button
-          label="Cancel"
-          icon="pi pi-times"
-          onClick={() => {
-            setAddDia(false);
-            setName("");
-          }}
-          className="p-button-text"
-        />
-        <Button
-          label="Add"
-          icon="pi pi-check"
-          onClick={() => addItem()}
-          autoFocus
-        />
-      </div>
-    );
-  };
 
   return (
     <div className="card">
@@ -224,42 +167,6 @@ const JointSpace = () => {
         <Column field="name" header={t("Name")} sortable></Column>
         <Column field="nodeType" header={t("Facility Type")} sortable></Column>
       </DataTable>
-      <Dialog
-        header="Add New Facility Structure"
-        visible={addDia}
-        style={{ width: "40vw" }}
-        footer={renderFooter}
-        onHide={() => {
-          setName("");
-          setAddDia(false);
-        }}
-      >
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Code</h5>
-          <InputText
-            value={code}
-            onChange={(event) => setCode(event.target.value)}
-          />
-        </div>
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Name</h5>
-          <InputText
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-          />
-        </div>
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>Label</h5>
-          <InputText
-            value={labelClass}
-            onChange={(event) => setLabelClass(event.target.value)}
-          />
-        </div>
-        <div className="field">
-          <h5 style={{ marginBottom: "0.5em" }}>HashTag</h5>
-          <Chips value={tag} onChange={(e) => setTag(e.value)} />
-        </div>
-      </Dialog>
     </div>
   );
 };

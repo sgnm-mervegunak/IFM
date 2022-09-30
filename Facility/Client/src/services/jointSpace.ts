@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const url = process.env.REACT_APP_API_URL + "jointspace/";
+const url = process.env.REACT_APP_API_FACILITY + "jointspace/";
 
 interface JointSpaceInterface {
     ArchitecturalName: string;
@@ -32,11 +32,17 @@ const remove = async (key: string) => {
     return axios.delete(url + key);
 };
 
+const nodeInfo = async (key: string) => {
+    return axios.get(`${url}${key}`);
+};
+
 const service = {
     findBuildingWithKey,
     createJointSpace,
     remove,
-    update
+    update,
+    nodeInfo
+
 };
 
 export default service;

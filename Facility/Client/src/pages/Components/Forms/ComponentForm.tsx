@@ -213,15 +213,17 @@ const TypeForm = ({
     ComponentService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
         await AssetClassificationsService.findClassificationByCodeAndLanguage("DurationUnit", res.data.properties.warrantyDurationUnit).then(clsf3 => {
-          setCodeWarrantyCodeDurationUnit(res.data.properties.durationUnit);
+          setCodeWarrantyCodeDurationUnit(res.data.properties.warrantyDurationUnit);
           res.data.properties.warrantyDurationUnit = clsf3.data.key
         })
           .catch((err) => {
             setData(res.data.properties);
           })
-        if (spaceType === "") {
-          setSpaceType(res.data.nodeType);
-        }
+        await FacilityStructureService.nodeInfo(res.data.properties.space)
+          .then((res2) => {
+            setSpaceType(res2.data.properties.nodeType);
+          })
+
         // setData(temp);
         setData(res.data.properties);
 
@@ -237,7 +239,7 @@ const TypeForm = ({
   };
 
   const UploadAnyFile = (folderName: string, file: any) => {
-    const url = process.env.REACT_APP_API_MINIO_URL + "file-upload/single";
+    const url = process.env.REACT_APP_API_MINIO + "file-upload/single";
     const formData = new FormData();
 
     formData.append("file", file);
@@ -247,7 +249,7 @@ const TypeForm = ({
   };
 
   const DeleteAnyFile = (realmName: string, fileName: string) => {
-    const url = process.env.REACT_APP_API_MINIO_URL + "file-upload/removeOne";
+    const url = process.env.REACT_APP_API_MINIO + "file-upload/removeOne";
 
     return axios.delete(url, { data: { fileName, realmName } });
   };
@@ -278,8 +280,6 @@ const TypeForm = ({
         documents: data?.documents || "",
         parentKey: selectedNodeKey,
       };
-      console.log(newNode);
-
 
       ComponentService.create(newNode)
         .then(async (res) => {
@@ -289,7 +289,6 @@ const TypeForm = ({
             detail: t("Component Created"),
             life: 4000,
           });
-          console.log(res.data);
           // let newForm: any = {};
           // newForm = {
           //     referenceKey: formTypeId,
@@ -325,7 +324,6 @@ const TypeForm = ({
 
 
           await ComponentService.update(res.data.properties.id, {
-            ...newNode,
             ...temp,
           });
           setUploadFiles({});
@@ -367,9 +365,6 @@ const TypeForm = ({
         documents: data?.documents || "",
         parentKey: selectedNodeKey,
       };
-
-      console.log(updateNode);
-
 
       ComponentService.update(selectedNodeId, updateNode)
         .then(async (res) => {
@@ -740,8 +735,6 @@ const TypeForm = ({
                     label={"images"}
                     value={field.value}
                     onChange={(e: any) => {
-                      console.log(e);
-
                       field.onChange(e)
                     }}
                     deleteFiles={deleteFiles}

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const url = process.env.REACT_APP_API_URL + "classification";
+const url = process.env.REACT_APP_API_FACILITY + "classification";
 
 // interface PaginationParams {
 //   page?: number;

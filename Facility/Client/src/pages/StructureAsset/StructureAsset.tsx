@@ -217,15 +217,15 @@ const StructureAsset = () => {
                       data.nodeType === "Space" && (
                         <>
                           <Button
-                            icon="pi pi-pencil"
+                            icon="pi pi-window-maximize"
                             className="p-button-rounded p-button-secondary p-button-text"
-                            aria-label="Edit Item"
+                            aria-label="Show Components"
                             onClick={() => {
                               setSelectedNodeKey(data.key);
                               let dataKey: any = data.key;
                               navigate(`/structure-asset/${dataKey}`);
                             }}
-                            title={t("Edit Assets")}
+                            title={t("Show Components")}
                           />
 
                           {/* <Button

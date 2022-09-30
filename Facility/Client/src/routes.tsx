@@ -9,7 +9,6 @@ import Facility from "./pages/Facility";
 import Classifications from "./pages/Classifications/Classifications";
 import { NotFound } from "./layouts/App/pages/NotFound";
 import SetClassificationAdmin from "./pages/Classifications/ClassificationAdmin/SetClassificationAdmin";
-import FacilityFileImport from "./pages/FacilityFileImport";
 import FacilityStructure from "./pages/FacilityStructure/FacilityStructure";
 import SetFacilityStructure from "./pages/FacilityStructure/SetFacilityStructure";
 import FormGenerate from "./pages/FormGenerate/FormGenerate";
@@ -66,11 +65,6 @@ export default function Router() {
       path: "/facilitystructure",
       element: <AppLayout />,
       children: [{ path: ":id", element: <SetFacilityStructure /> }],
-    },
-    {
-      path: "/facility",
-      element: <AppLayout />,
-      children: [{ path: "fileimport", element: <FacilityFileImport /> }],
     },
     {
       path: "/classifications",

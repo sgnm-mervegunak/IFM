@@ -150,7 +150,6 @@ const ContactForm = ({
       let newNode: any = {};
       ContactService.nodeInfo(selectedNodeKey)
         .then((res) => {
-          console.log(res.data);
           newNode = {
             parentId: res.data.id,
             name: data?.email,

@@ -7,6 +7,7 @@ import { ComponentRepository } from './repositories/component.repository';
 import { ComponentService } from './services/component.service';
 import { HttpRequestHandler } from 'src/common/class/http.request.helper.class';
 import { VirtualNodeHandler } from 'src/common/class/virtual.node.dealer';
+import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
 
 @Module({
   imports: [HttpModule],
@@ -24,6 +25,10 @@ import { VirtualNodeHandler } from 'src/common/class/virtual.node.dealer';
     {
       provide: VirtualNodeHandler,
       useClass: VirtualNodeHandler,
+    },
+    {
+      provide: NodeRelationHandler,
+      useClass: NodeRelationHandler,
     },
 
 

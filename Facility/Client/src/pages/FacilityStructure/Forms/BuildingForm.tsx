@@ -105,10 +105,6 @@ const BuildingForm = ({
     resolver: yupResolver(schema)
   });
 
-  useEffect(() => {
-    watch((value, { name, type }) => console.log(value, name, type));
-  }, [watch])
-
   const buildingStructures = [
     "Building-Floor-Block",
     "Building-Block-Floor",
@@ -202,7 +198,7 @@ const BuildingForm = ({
   };
 
   const UploadAnyFile = (folderName: string, file: any) => {
-    const url = process.env.REACT_APP_API_MINIO_URL+"file-upload/single";
+    const url = process.env.REACT_APP_API_MINIO + "file-upload/single";
     const formData = new FormData();
 
     formData.append("file", file);
@@ -212,7 +208,7 @@ const BuildingForm = ({
   };
 
   const DeleteAnyFile = (realmName: string, fileName: string) => {
-    const url = process.env.REACT_APP_API_MINIO_URL+"file-upload/removeOne";
+    const url = process.env.REACT_APP_API_MINIO + "file-upload/removeOne";
 
     return axios.delete(url, { data: { fileName, realmName } });
   };
@@ -249,8 +245,6 @@ const BuildingForm = ({
         siteDescription: data?.siteDescription,
         siteName: data?.siteName,
       };
-      console.log(newNode);
-
 
       FacilityStructureService.createStructure(selectedNodeKey, newNode)
         .then(async (res) => {
@@ -342,9 +336,6 @@ const BuildingForm = ({
         siteName: data?.siteName,
       };
 
-      console.log(updateNode);
-
-
       FacilityStructureService.update(selectedNodeKey, updateNode)
         .then(async (res) => {
           toast.current.show({
@@ -383,14 +374,17 @@ const BuildingForm = ({
           }
 
           // delete files
+
           for (let item of deleteFiles) {
             let temp = item.image_url.split("/");
-            let urlIndex = temp.findIndex(
-              (item: any) => item === "172.30.99.120:9000"
-            );
+            // let urlIndex = temp.findIndex(
+            //   (item: any) => item === "172.30.99.120:9000"
+            // );
+            let urlIndex = temp.findIndex((item: any) => item === "ifm")
             let temp2 = temp.slice(urlIndex + 1);
 
-            await DeleteAnyFile(temp2[0], temp2.slice(1).join("/"));
+            await DeleteAnyFile("ifm", temp2.join("/"))
+            // await DeleteAnyFile(temp2[0], temp2.slice(1).join("/"));
           }
 
           // update node
@@ -510,8 +504,6 @@ const BuildingForm = ({
                     onChange={(e) => {
                       ClassificationsService.nodeInfo(e.value as string)
                         .then((res) => {
-                          console.log(res.data);
-
                           field.onChange(e.value)
                           setCodeStatus(res.data.properties.code || "");
                         })
@@ -821,8 +813,6 @@ const BuildingForm = ({
                     label={"images"}
                     value={field.value}
                     onChange={(e: any) => {
-                      console.log(e);
-
                       field.onChange(e)
                     }}
                     deleteFiles={deleteFiles}

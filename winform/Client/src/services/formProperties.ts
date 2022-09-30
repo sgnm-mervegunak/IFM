@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const url = process.env.REACT_APP_API_URL + "type/properties/";
+const url = process.env.REACT_APP_API_WINFORM + "type/properties/";
 
 const findAll = async () => {
   return axios.get(url);
