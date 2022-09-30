@@ -213,7 +213,7 @@ const TypeForm = ({
     ComponentService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
         await AssetClassificationsService.findClassificationByCodeAndLanguage("DurationUnit", res.data.properties.warrantyDurationUnit).then(clsf3 => {
-          setCodeWarrantyCodeDurationUnit(res.data.properties.durationUnit);
+          setCodeWarrantyCodeDurationUnit(res.data.properties.warrantyDurationUnit);
           res.data.properties.warrantyDurationUnit = clsf3.data.key
         })
           .catch((err) => {

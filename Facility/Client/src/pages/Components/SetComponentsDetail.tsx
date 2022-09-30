@@ -99,7 +99,7 @@ const SetTypes = () => {
       .then((res) => {
         console.log(res.data);
         
-        setComponents(res.data);
+        setComponents(res.data.root.children);
       })
       .catch((err) => {
         toast.current.show({
