@@ -155,9 +155,9 @@ const JointSpaceForm = ({
     code: editDia
       ? yup.string().max(50, t("This area accepts max 50 characters."))
       : yup
-          .string()
-          .required(t("This area is required."))
-          .max(50, t("This area accepts max 50 characters.")),
+        .string()
+        .required(t("This area is required."))
+        .max(50, t("This area accepts max 50 characters.")),
     architecturalCode: yup
       .string()
       .max(50, t("This area accepts max 50 characters.")),
@@ -208,7 +208,7 @@ const JointSpaceForm = ({
     defaultValues: {
       ...data,
       jointStartDate: editDia ? data?.jointStartDate : new Date(),
-      jointEndDate: editDia 
+      jointEndDate: editDia
         ? data?.jointEndDate
         : Date.parse("YYYY-MM-DD HH:mm:ss") || "",
     },
@@ -297,9 +297,9 @@ const JointSpaceForm = ({
     }
   }, [isUpdate]);
 
-     useEffect(() => {
-       watch((value, { name, type }) => console.log(value, name, type));
-     }, [watch]);
+  useEffect(() => {
+    watch((value, { name, type }) => console.log(value, name, type));
+  }, [watch]);
 
   //   const fixNodes = (nodes: Node[]) => {
   //     if (!nodes || nodes.length === 0) {
@@ -325,7 +325,7 @@ const JointSpaceForm = ({
   //   };
 
   const UploadAnyFile = (folderName: string, file: any) => {
-    const url = "http://localhost:3004/file-upload/single";
+    const url = process.env.REACT_APP_API_MINIO + "file-upload/single";
     const formData = new FormData();
 
     formData.append("file", file);
@@ -531,25 +531,25 @@ const JointSpaceForm = ({
       setEditDia(false);
 
 
-          reset({
-            name: "",
-            code: "",
-            architecturalCode: "",
-            architecturalName: "",
-            operatorName: "",
-            operatorCode: "",
-            tag: "",
-            category: "",
-            usage: "",
-            status: "",
-            description: "",
-            roomTag: "",
-            usableHeight: "",
-            grossArea: "",
-            netArea: "",
-            jointStartDate: new Date(),
-            jointEndDate: "",
-          });
+      reset({
+        name: "",
+        code: "",
+        architecturalCode: "",
+        architecturalName: "",
+        operatorName: "",
+        operatorCode: "",
+        tag: "",
+        category: "",
+        usage: "",
+        status: "",
+        description: "",
+        roomTag: "",
+        usableHeight: "",
+        grossArea: "",
+        netArea: "",
+        jointStartDate: new Date(),
+        jointEndDate: "",
+      });
     }
   };
 

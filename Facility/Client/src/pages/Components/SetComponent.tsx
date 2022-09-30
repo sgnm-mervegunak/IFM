@@ -86,7 +86,6 @@ const SetComponent = () => {
   const getComponents = () => {
     ComponentService.findAll()
       .then((res) => {
-        console.log(res.data);
         
         if (!res.data.root.children) {
           let temp = JSON.parse(
@@ -296,8 +295,7 @@ const SetComponent = () => {
               setSelectedNodeId(event.node._id.low);
             }
             setNodeType(event.node.className);
-            console.log(event.node);
-            
+     
             cm.current.show(event.originalEvent);
             if (event.node.canDelete === false) {
               cm.current.hide(event.originalEvent);

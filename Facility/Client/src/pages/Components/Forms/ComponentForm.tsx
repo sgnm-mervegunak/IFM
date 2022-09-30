@@ -280,8 +280,6 @@ const TypeForm = ({
         documents: data?.documents || "",
         parentKey: selectedNodeKey,
       };
-      console.log(newNode);
-
 
       ComponentService.create(newNode)
         .then(async (res) => {
@@ -291,7 +289,6 @@ const TypeForm = ({
             detail: t("Component Created"),
             life: 4000,
           });
-          console.log(res.data);
           // let newForm: any = {};
           // newForm = {
           //     referenceKey: formTypeId,
@@ -368,9 +365,6 @@ const TypeForm = ({
         documents: data?.documents || "",
         parentKey: selectedNodeKey,
       };
-
-      console.log(updateNode);
-
 
       ComponentService.update(selectedNodeId, updateNode)
         .then(async (res) => {
@@ -741,8 +735,6 @@ const TypeForm = ({
                     label={"images"}
                     value={field.value}
                     onChange={(e: any) => {
-                      console.log(e);
-
                       field.onChange(e)
                     }}
                     deleteFiles={deleteFiles}

@@ -145,13 +145,6 @@ const SpaceForm = ({
     });
   };
 
-  useEffect(
-    () => {
-      console.log("dataaaa: ", data);
-
-    }
-    , [data])
-
   useEffect(() => {
     getClassificationSpaceCategory();
     getClassificationStatus();
@@ -218,7 +211,7 @@ const SpaceForm = ({
   };
 
   const UploadAnyFile = (folderName: string, file: any) => {
-    const url = process.env.REACT_APP_API_MINIO+"file-upload/single";
+    const url = process.env.REACT_APP_API_MINIO + "file-upload/single";
     const formData = new FormData();
 
     formData.append("file", file);
@@ -228,7 +221,7 @@ const SpaceForm = ({
   };
 
   const DeleteAnyFile = (realmName: string, fileName: string) => {
-    const url = process.env.REACT_APP_API_MINIO+"file-upload/removeOne";
+    const url = process.env.REACT_APP_API_MINIO + "file-upload/removeOne";
 
     return axios.delete(url, { data: { fileName, realmName } });
   };
@@ -366,7 +359,6 @@ const SpaceForm = ({
                   file.file
                 );
                 delete resFile.data.message;
-                console.log(resFile)
                 temp[item].push({ ...resFile.data, type: file.type });
               }
             }
@@ -668,8 +660,6 @@ const SpaceForm = ({
                     label={"images"}
                     value={field.value}
                     onChange={(e: any) => {
-                      console.log(e);
-
                       field.onChange(e)
                     }}
                     deleteFiles={deleteFiles}

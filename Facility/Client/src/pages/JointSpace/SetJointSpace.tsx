@@ -196,11 +196,11 @@ const SetJointSpace = () => {
     }
   };
 
-  const DeleteAnyFile = (realmName: string, fileName: string) => {
-    const url = "http://localhost:3004/file-upload/removeOne";
+  // const DeleteAnyFile = (realmName: string, fileName: string) => {
+  //   const url = "http://localhost:3004/file-upload/removeOne";
 
-    return axios.delete(url, { data: { fileName, realmName } });
-  };
+  //   return axios.delete(url, { data: { fileName, realmName } });
+  // };
 
   // const editItem = (key: string) => {
   //   let updateNode: any = {};
