@@ -38,6 +38,37 @@ export class LazyLoadingController {
     return this.lazyLoadingService.loadClassificationWithPath(classificationPathDto.path, realm, language);
   }
 
+  @Roles({ roles: [UserRoles.ADMIN, UserRoles.USER] })
+  // @Unprotected()
+  @Get('/loadActiveClassification/:key')
+  @NoCache()
+  loadActiveClassification(@Param('key') key: string, @Headers() header) {
+    return this.lazyLoadingService.loadClassificationByIsActive(key, header, true);
+  }
+
+  @Roles({ roles: [UserRoles.ADMIN, UserRoles.USER] })
+  // @Unprotected()
+  @Get('/getActiveClassificationRootAndChildrenByLanguageAndRealm')
+  @NoCache()
+  getActiveClassificationRootAndChildrenByLanguageAndRealm(@Param('label') label: string, @Headers() header) {
+    const { language, realm } = header;
+    return this.lazyLoadingService.getClassificationRootAndChildrenByLanguageAndRealmAndIsActive(realm, language, true);
+  }
+
+  @Roles({ roles: [UserRoles.ADMIN, UserRoles.USER] })
+  // @Unprotected()
+  @Post('/loadActiveClassificationWithPath')
+  @NoCache()
+  loadActiveClassificationWithPath(@Body() classificationPathDto: ClassificationPathDto, @Headers() header) {
+    const { language, realm } = header;
+    return this.lazyLoadingService.loadClassificationWithPathByIsActive(
+      classificationPathDto.path,
+      realm,
+      language,
+      true,
+    );
+  }
+
   @Unprotected()
   @Get('/:key/:leafType')
   @NoCache()

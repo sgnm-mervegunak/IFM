@@ -176,7 +176,7 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
       }
       const temp2 = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
         [],
-        { isDeleted: false, key, isActive: true },
+        { isDeleted: false, key },
         [],
         { canDisplay: true, isDeleted: false },
         'PARENT_OF',
@@ -186,7 +186,7 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
       for (const item of children) {
         const childrenOfItem = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
           [],
-          { isDeleted: false, key: item.properties.key, isActive: true },
+          { isDeleted: false, key: item.properties.key },
           [],
           { canDisplay: true, isDeleted: false },
           'PARENT_OF',
@@ -210,6 +210,118 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
       }
       for (const item of path) {
         const loadedChildren = await this.loadClassification(item, null);
+        temp[item].children = loadedChildren.children.map((child: any) => ({
+          ...child.properties,
+          id: child.identity.low,
+          leaf: child.leaf,
+        }));
+        for (const it of temp[item].children) {
+          temp[it.key] = it;
+        }
+      }
+      return rootWithChildren;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async getClassificationRootAndChildrenByLanguageAndRealmAndIsActive(
+    realm: string,
+    language: string,
+    isActive: boolean,
+  ) {
+    try {
+      const root_node = await this.neo4jService.findByLabelAndFilters(
+        ['Classification'],
+        { isDeleted: false, realm: realm, isActive },
+        [],
+      );
+      const root_id = root_node[0]['_fields'][0]['identity'].low;
+      const firstNodes = await this.neo4jService.findChildrensByIdOneLevel(
+        root_id,
+        { isDeleted: false, isActive },
+        [],
+        { isDeleted: false, isActive },
+        'PARENT_OF',
+      );
+
+      const childrenByLanguage = firstNodes.filter((item) => item['_fields'][1]['labels'][0].endsWith('_' + language));
+
+      const children = await Promise.all(
+        childrenByLanguage.map(async (item) => {
+          const temp = await this.neo4jService.findChildrensByIdOneLevel(
+            item['_fields'][1]['identity'].low,
+            { isDeleted: false, isActive },
+            [],
+            { isDeleted: false, isActive },
+            'PARENT_OF',
+          );
+          return {
+            ...item['_fields'][1].properties,
+            id: item['_fields'][1]['identity'].low,
+            leaf: temp.length <= 0,
+          };
+        }),
+      );
+
+      return {
+        ...root_node[0]['_fields'][0].properties,
+        id: root_id,
+        leaf: children.length <= 0,
+        children,
+      };
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async loadClassificationByIsActive(key: string, header, isActive: boolean) {
+    try {
+      const node = await this.neo4jService.findByLabelAndFilters([], { key, isActive });
+
+      if (!node) {
+        throw new HttpException({ key: I18NEnums.CLASSIFICATION_NOT_FOUND, args: { key: key } }, HttpStatus.NOT_FOUND);
+      }
+      const temp2 = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+        [],
+        { isDeleted: false, key, isActive },
+        [],
+        { canDisplay: true, isDeleted: false, isActive },
+        'PARENT_OF',
+      );
+
+      const children = temp2.map((item) => item.get('children'));
+      for (const item of children) {
+        const childrenOfItem = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+          [],
+          { isDeleted: false, key: item.properties.key, isActive },
+          [],
+          { canDisplay: true, isDeleted: false, isActive },
+          'PARENT_OF',
+        );
+        item.leaf = childrenOfItem.map((item) => item.get('children')).length <= 0;
+      }
+      return { ...node[0].get('n'), children };
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  async loadClassificationWithPathByIsActive(path: string[], realm: string, language: string, isActive: boolean) {
+    try {
+      const rootWithChildren: any = await this.getClassificationRootAndChildrenByLanguageAndRealmAndIsActive(
+        realm,
+        language,
+        isActive,
+      );
+
+      // referans tutucu
+      const temp: any = new Map();
+
+      for (const item of rootWithChildren.children) {
+        temp[item.key] = item;
+      }
+      for (const item of path) {
+        const loadedChildren = await this.loadClassificationByIsActive(item, null, isActive);
         temp[item].children = loadedChildren.children.map((child: any) => ({
           ...child.properties,
           id: child.identity.low,

@@ -17,6 +17,7 @@ import Facility2 from "./pages/Facility2";
 import Contact from "./pages/Contact/Contact";
 import { useAppSelector } from "./app/hook";
 import SetClassificationUser from "./pages/Classifications/ClassificationUser/SetClassificationUser";
+import SetClassificationUserLazy from "./pages/Classifications/ClassificationUser/SetClassificationUserLazy";
 import SetFacilityStructure2 from "./pages/FacilityStructure/SetFacilityStructure2";
 import JointSpace from "./pages/JointSpace/JointSpace";
 import Zone from "./pages/Zone/Zone";
@@ -45,7 +46,7 @@ export default function Router() {
         // { path: "facility", element: <Facility /> },
         { path: "facility", element: <Facility2 /> },
         // { path: "classifications", element: <Classifications /> },
-        { path: "classifications", element: auth.auth.type === "facility_client_role_admin" ? <SetClassificationAdminLazy /> : <SetClassificationUser /> },
+        { path: "classifications", element: auth.auth.type === "facility_client_role_admin" ? <SetClassificationAdminLazy /> : <SetClassificationUserLazy /> },
         { path: "jointspace", element: <JointSpace /> },
         { path: "zone", element: <Zone /> },
         { path: "facilitystructure", element: <SetFacilityStructure /> },
