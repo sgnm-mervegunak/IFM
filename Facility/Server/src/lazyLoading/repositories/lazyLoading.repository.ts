@@ -114,9 +114,9 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
           { canDisplay: true },
           'PARENT_OF',
         );
-        item.leaf = childrenOfItem.map((item) => item.get('children')).length <= 0
+        item.leaf = childrenOfItem.map((item) => item.get('children')).length <= 0 || item.labels.includes(leafType)
       }
-      children.map((item) => item.leaf = !item.labels.includes(leafType));
+      
       return { ...node[0].get('n'), children };
 
     } catch (error) {
