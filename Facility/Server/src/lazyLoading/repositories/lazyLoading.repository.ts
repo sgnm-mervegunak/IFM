@@ -6,7 +6,7 @@ import { RelationName } from 'src/common/const/relation.name.enum';
 
 @Injectable()
 export class LazyLoadingRepository implements LazyLoadingInterface {
-  constructor(private readonly neo4jService: Neo4jService) {}
+  constructor(private readonly neo4jService: Neo4jService) { }
 
   async loadByLabel(label: string, header) {
     // try {
@@ -57,16 +57,18 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
         );
       }
 
+
       const firstLevelChildren = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-        ['FacilityStructure'],
+        [label],
         { isDeleted: false, realm: 'IFM', isActive: true },
         [],
         { canDisplay: true },
         'PARENT_OF',
       );
 
-      const firstLevelChildrensChildren = firstLevelChildren.map((item) => item.get('children'));
-      for (const item of firstLevelChildrensChildren) {
+      const children = firstLevelChildren.map((item) => item.get('children'));
+
+      for (const item of children) {
         const childrenOfItem = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
           [],
           { key: item.properties.key },
@@ -78,9 +80,10 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
           childrenOfItem.map((item) => {
             item.get('children');
           }).length <= 0;
+
       }
 
-      return { ...node[0].get('n'), firstLevelChildrensChildren };
+      return { ...node[0].get('n'), children };
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -88,10 +91,10 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
 
   async loadByKey(key: string, leafType: string, header) {
     try {
-      const node = await this.neo4jService.findByLabelAndFilters([]);
+      const node = await this.neo4jService.findByLabelAndFilters([], { key,isDeleted:false });
 
       if (!node.length) {
-        throw new HttpException({ key: I18NEnums.CLASSIFICATION_NOT_FOUND, args: { key: key } }, HttpStatus.NOT_FOUND);
+        throw new HttpException({ key: I18NEnums.CLASSIFICATION_NOT_FOUND, args: { key } }, HttpStatus.NOT_FOUND);
       }
       const firstLevelChildren = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
         [],
@@ -101,8 +104,9 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
         'PARENT_OF',
       );
 
-      const firstLevelChildrensChildren = firstLevelChildren.map((item) => item.get('children'));
-      for (const item of firstLevelChildrensChildren) {
+      const children = firstLevelChildren.map((item) => item.get('children'));
+
+      for (const item of children) {
         const childrenOfItem = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
           [],
           { isDeleted: false, key: item.properties.key, isActive: true },
@@ -110,9 +114,11 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
           { canDisplay: true },
           'PARENT_OF',
         );
-        item.leaf = childrenOfItem.map((item) => item.get('children')).length <= 0;
+        item.leaf = childrenOfItem.map((item) => item.get('children')).length <= 0
       }
-      return { ...node, firstLevelChildrensChildren };
+      children.map((item) => item.leaf = !item.labels.includes(leafType));
+      return { ...node[0].get('n'), children };
+
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
