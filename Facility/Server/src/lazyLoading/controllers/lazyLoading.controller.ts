@@ -1,9 +1,10 @@
-import { Controller, Get, Param, Headers } from '@nestjs/common';
+import { Controller, Get, Param, Headers, Post, Body } from '@nestjs/common';
 import { Roles, Unprotected } from 'nest-keycloak-connect';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { NoCache } from 'ifmcommon';
 import { LazyLoadingService } from '../services/lazyLoading.service';
 import { UserRoles } from 'src/common/const/keycloak.role.enum';
+import { ClassificationPathDto } from '../dto/classification-path.dto';
 
 @ApiTags('LazyLoading')
 @ApiBearerAuth('JWT-auth')
@@ -26,6 +27,15 @@ export class LazyLoadingController {
   getClassificationRootAndChildrenByLanguageAndRealm(@Param('label') label: string, @Headers() header) {
     const { language, realm } = header;
     return this.lazyLoadingService.getClassificationRootAndChildrenByLanguageAndRealm(realm, language);
+  }
+
+  @Roles({ roles: [UserRoles.ADMIN, UserRoles.USER] })
+  // @Unprotected()
+  @Post('/loadClassificationWithPath')
+  @NoCache()
+  loadClassificationWithPath(@Body() classificationPathDto: ClassificationPathDto, @Headers() header) {
+    const { language, realm } = header;
+    return this.lazyLoadingService.loadClassificationWithPath(classificationPathDto.path, realm, language);
   }
 
   @Unprotected()

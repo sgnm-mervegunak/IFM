@@ -6,7 +6,7 @@ import { RelationName } from 'src/common/const/relation.name.enum';
 
 @Injectable()
 export class LazyLoadingRepository implements LazyLoadingInterface {
-  constructor(private readonly neo4jService: Neo4jService) { }
+  constructor(private readonly neo4jService: Neo4jService) {}
 
   async loadByLabel(label: string, header) {
     // try {
@@ -57,7 +57,6 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
         );
       }
 
-
       const firstLevelChildren = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
         [label],
         { isDeleted: false, realm: 'IFM', isActive: true },
@@ -80,7 +79,6 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
           childrenOfItem.map((item) => {
             item.get('children');
           }).length <= 0;
-
       }
 
       return { ...node[0].get('n'), children };
@@ -91,7 +89,7 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
 
   async loadByKey(key: string, leafType: string, header) {
     try {
-      const node = await this.neo4jService.findByLabelAndFilters([], { key,isDeleted:false });
+      const node = await this.neo4jService.findByLabelAndFilters([], { key, isDeleted: false });
 
       if (!node.length) {
         throw new HttpException({ key: I18NEnums.CLASSIFICATION_NOT_FOUND, args: { key } }, HttpStatus.NOT_FOUND);
@@ -114,15 +112,15 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
           { canDisplay: true },
           'PARENT_OF',
         );
-        item.leaf = childrenOfItem.map((item) => item.get('children')).length <= 0 || item.labels.includes(leafType)
+        item.leaf = childrenOfItem.map((item) => item.get('children')).length <= 0 || item.labels.includes(leafType);
       }
-      
-      return { ...node[0].get('n'), children };
 
+      return { ...node[0].get('n'), children };
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
   async getClassificationRootAndChildrenByLanguageAndRealm(realm: string, language: string) {
     try {
       const root_node = await this.neo4jService.findByLabelAndFilters(
@@ -131,7 +129,6 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
         [],
       );
       const root_id = root_node[0]['_fields'][0]['identity'].low;
-      const _id = root_node[0]['_fields'][0]['identity'];
       const firstNodes = await this.neo4jService.findChildrensByIdOneLevel(
         root_id,
         { isDeleted: false },
@@ -142,9 +139,9 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
 
       const childrenByLanguage = firstNodes.filter((item) => item['_fields'][1]['labels'][0].endsWith('_' + language));
 
-      const childrenOfChildrenWithChildrenProperties = await Promise.all(
+      const children = await Promise.all(
         childrenByLanguage.map(async (item) => {
-          const children = await this.neo4jService.findChildrensByIdOneLevel(
+          const temp = await this.neo4jService.findChildrensByIdOneLevel(
             item['_fields'][1]['identity'].low,
             { isDeleted: false },
             [],
@@ -154,10 +151,7 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
           return {
             ...item['_fields'][1].properties,
             id: item['_fields'][1]['identity'].low,
-            children: children.map((child: any) => ({
-              ...child['_fields'][1].properties,
-              id: child['_fields'][1]['identity'].low,
-            })),
+            leaf: temp.length <= 0,
           };
         }),
       );
@@ -165,7 +159,8 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
       return {
         ...root_node[0]['_fields'][0].properties,
         id: root_id,
-        children: childrenOfChildrenWithChildrenProperties,
+        leaf: children.length <= 0,
+        children,
       };
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -199,6 +194,32 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
         item.leaf = childrenOfItem.map((item) => item.get('children')).length <= 0;
       }
       return { ...node[0].get('n'), children };
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  async loadClassificationWithPath(path: string[], realm: string, language: string) {
+    try {
+      const rootWithChildren: any = await this.getClassificationRootAndChildrenByLanguageAndRealm(realm, language);
+
+      // referans tutucu
+      const temp: any = new Map();
+
+      for (const item of rootWithChildren.children) {
+        temp[item.key] = item;
+      }
+      for (const item of path) {
+        const loadedChildren = await this.loadClassification(item, null);
+        temp[item].children = loadedChildren.children.map((child: any) => ({
+          ...child.properties,
+          id: child.identity.low,
+          leaf: child.leaf,
+        }));
+        for (const it of temp[item].children) {
+          temp[it.key] = it;
+        }
+      }
+      return rootWithChildren;
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }

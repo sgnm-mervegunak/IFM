@@ -9,6 +9,14 @@ const getClassificationRootAndChildrenByLanguageAndRealm = async () => {
 const loadClassification = async (key: string) => {
   return axios.get(url + "/loadClassification/" + key);
 };
-const service = {getClassificationRootAndChildrenByLanguageAndRealm,loadClassification};
+
+const loadClassificationWithPath = async (path: string[]) => {
+  return axios.post(url + "/loadClassificationWithPath/", { path });
+};
+const service = {
+  getClassificationRootAndChildrenByLanguageAndRealm,
+  loadClassification,
+  loadClassificationWithPath,
+};
 
 export default service;

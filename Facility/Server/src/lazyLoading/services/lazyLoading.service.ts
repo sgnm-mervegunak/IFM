@@ -23,4 +23,7 @@ export class LazyLoadingService {
   async getClassificationRootAndChildrenByLanguageAndRealm(realm: string, language: string) {
     return await this.lazyLoadingRepository.getClassificationRootAndChildrenByLanguageAndRealm(realm, language);
   }
+  async loadClassificationWithPath(path: string[], realm: string, language: string) {
+    return await this.lazyLoadingRepository.loadClassificationWithPath(path, realm, language);
+  }
 }

@@ -3,4 +3,5 @@ export interface LazyLoadingInterface {
   loadByLabel(label: string, header): any;
   loadClassification(label: string, header): any;
   getClassificationRootAndChildrenByLanguageAndRealm(realm: string, language: string): any;
+  loadClassificationWithPath(path: string[], realm: string, language: string): any;
 }

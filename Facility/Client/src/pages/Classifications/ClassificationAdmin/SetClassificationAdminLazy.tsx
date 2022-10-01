@@ -164,12 +164,13 @@ const SetClassificationAdmin = () => {
     setLoadedNode([]);
     LazyLoadingService.getClassificationRootAndChildrenByLanguageAndRealm()
       .then((res) => {
-        res.data.children = res.data.children.map((item: any) => {
-          item.leaf = item.children.length === 0;
-          delete item.children;
-          return item;
-        });
-        setData([{ ...res.data, leaf: res.data.children.length === 0 }]);
+        // res.data.children = res.data.children.map((item: any) => {
+        //   item.leaf = item.children.length === 0;
+        //   delete item.children;
+        //   return item;
+        // });
+        // setData([{ ...res.data, leaf: res.data.children.length === 0 }]);
+        setData([res.data]);
         let _expandedKey: { [key: string]: boolean } = {};
         let rootKey: string = res.data.key;
         _expandedKey[rootKey] = true;
@@ -221,48 +222,15 @@ const SetClassificationAdmin = () => {
 
   const RollBack = async () => {
     setLoading(true);
-    LazyLoadingService.getClassificationRootAndChildrenByLanguageAndRealm()
-      .then(async (res) => {
-        try {
-          res.data.children = res.data.children.map((item: any) => {
-            item.leaf = item.children.length === 0;
-            delete item.children;
-            return item;
-          });
-          let treeData = { ...res.data, leaf: res.data.children.length === 0 };
-          const _expandedKeys: any = {};
-          _expandedKeys[res.data.key] = true;
-          const temp: any = new Map();
-          for (let item of treeData.children) {
-            temp[item.key] = item;
-          }
-          for (let item of loadedNode) {
-            const result = await LazyLoadingService.loadClassification(item);
-            _expandedKeys[item] = true;
-            temp[item].children = result.data.children.map((child: any) => ({
-              ...child.properties,
-              id: child.identity.low,
-              leaf: child.leaf,
-            }));
-            for (let it of temp[item].children) {
-              temp[it.key] = it;
-            }
-          }
-          setData([treeData]);
-          setExpandedKeys({ ..._expandedKeys });
-          setLoading(false);
-        } catch (error: any) {
-          toast.current.show({
-            severity: "error",
-            summary: t("Error"),
-            detail: error.response
-              ? error.response.data.message
-              : error.message,
-            life: 4000,
-          });
-        }
+    LazyLoadingService.loadClassificationWithPath(loadedNode)
+      .then((res) => {
+        console.log(res.data);
+        setData([res.data]);
+        setLoading(false);
       })
       .catch((err) => {
+        console.log(err);
+
         toast.current.show({
           severity: "error",
           summary: t("Error"),
