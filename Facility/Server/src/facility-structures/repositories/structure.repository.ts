@@ -48,10 +48,13 @@ import {
 import { CustomTreeError } from 'src/common/const/custom.error.enum';
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
 import { BaseFacilitySpaceObject } from 'src/common/baseobject/base.facility.space.object';
+import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
 
 @Injectable()
 export class FacilityStructureRepository implements FacilityInterface<any> {
-  constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) {}
+  constructor(private readonly neo4jService: Neo4jService, 
+              private readonly kafkaService: NestKafkaService,
+              private readonly nodeRelationHandler:NodeRelationHandler) {}
 
   //REVISED FOR NEW NEO4J
   async findOneByRealm(realm: string, language: string) {

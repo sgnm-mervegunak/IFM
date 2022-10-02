@@ -233,9 +233,8 @@ export class ComponentRepository implements ComponentInterface<Component> {
     let newCategoriesArr = [];
     let relationArr = [];
     let _root_idArr = [];
-    if (newWarrantyDurationUnits.length > 0) {
+
       newCategoriesArr.push(newWarrantyDurationUnits); 
-    }
     relationArr.push(RelationName.WARRANTY_DURATION_UNIT_BY);
     _root_idArr.push(componentNode.identity.low);
     await this.nodeRelationHandler.manageNodesRelations(categoriesArr, newCategoriesArr,relationArr,_root_idArr);
@@ -288,14 +287,12 @@ export class ComponentRepository implements ComponentInterface<Component> {
     let newCategoriesArr = [];
     let relationArr = [];
     let _root_idArr = [];
-    if (oldWarrantyDurationUnits.length > 0) {
+
       categoriesArr.push(oldWarrantyDurationUnits);
-    }
-    if (newWarrantyDurationUnits.length > 0) {
       newCategoriesArr.push(newWarrantyDurationUnits); 
-    }
     relationArr.push(RelationName.WARRANTY_DURATION_UNIT_BY);
     _root_idArr.push(node[0]['_fields'][1].identity.low);
+    
     await this.nodeRelationHandler.manageNodesRelations(categoriesArr, newCategoriesArr,relationArr,_root_idArr);
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
