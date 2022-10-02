@@ -202,59 +202,6 @@ const SetJointSpace = () => {
     return axios.delete(url, { data: { fileName, realmName } });
   };
 
-  // const editItem = (key: string) => {
-  //   let updateNode: any = {};
-  //   FacilityStructureService.nodeInfo(key)
-  //     .then((responseStructure) => {
-  //       if (labels.length > 0) {
-  //         updateNode = {
-  //           name: name,
-  //           tag: tag,
-  //           isActive: isActive,
-  //           description: "",
-  //           labels: [labels[0]],
-  //           formTypeId: formTypeId,
-  //         };
-  //       } else {
-  //         updateNode = {
-  //           name: name,
-  //           tag: tag,
-  //           isActive: isActive,
-  //           description: "",
-  //           formTypeId: formTypeId,
-  //         }
-  //       }
-
-  //       FacilityStructureService.update(responseStructure.data.id, updateNode)
-  //         .then((res) => {
-  //           toast.current.show({
-  //             severity: "success",
-  //             summary: "Successful",
-  //             detail: "Structure Updated",
-  //             life: 3000,
-  //           });
-  //           getJointSpace();
-  //         })
-  //         .catch((err) => {
-  //           toast.current.show({
-  //             severity: "error",
-  //             summary: "Error",
-  //             detail: err.response ? err.response.data.message : err.message,
-  //             life: 2000,
-  //           });
-  //         });
-  //     })
-  //     .catch((err) => {
-  //       toast.current.show({
-  //         severity: "error",
-  //         summary: "Error",
-  //         detail: err.response ? err.response.data.message : err.message,
-  //         life: 2000,
-  //       });
-  //     });
-
-  //   setEditDia(false);
-  // }
 
   const deleteItem = (key: string) => {
     JointSpaceService.remove(key)
