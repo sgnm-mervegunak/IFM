@@ -1,14 +1,6 @@
-import { HttpException, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { NestKafkaService } from 'ifmcommon/dist';
+import { Injectable } from '@nestjs/common';
 import { Neo4jService } from 'sgnm-neo4j/dist';
-import * as moment from 'moment';
-import { CreateKafka, CreateKafkaObject, UpdateKafka } from '../const/kafka.object.type';
-import { RelationName } from '../const/relation.name.enum';
-import { VirtualNode } from '../baseobject/virtual.node';
-import { Neo4jLabelEnum } from '../const/neo4j.label.enum';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
-import { string } from 'joi';
 
 @Injectable()
 export class NodeRelationHandler {
@@ -26,7 +18,10 @@ export class NodeRelationHandler {
       relation,
       RelationDirection.RIGHT,
     );
-    return oldCategories;
+    if (oldCategories.length > 0) {
+      return oldCategories;
+    }
+    return [];
   }
   
   async  getNewCategories(realm: string, code: string)   {
@@ -37,7 +32,10 @@ export class NodeRelationHandler {
       [],
       { isDeleted: false, code: code},
     );
-    return newCategories;
+    if (newCategories.length > 0) {
+      return newCategories;
+    }
+    return [];
   }
 
   async  manageNodesRelations(categoriesArr: object[], newCategoriesArr: object[], relationArr: string[], _root_idArr: string[])   {
@@ -48,7 +46,10 @@ export class NodeRelationHandler {
         let newCategories = newCategoriesArr[j];
         let relation = relationArr[j];
         let _root_id = _root_idArr[j];
-      if (categories[0]['_fields'][1]['properties'].code != newCategories[0]['_fields'][1]['properties'].code) {
+      if ((categories['length'] == 0 &&  newCategories['length'] > 0) || 
+          (categories['length'] > 0 && newCategories['length'] > 0 && 
+           categories[0]['_fields'][1]['properties'].code != newCategories[0]['_fields'][1]['properties'].code)
+         ) {
         for (let i = 0; i < categories['length']; i++) {
           await this.neo4jService.deleteRelationByIdAndRelationNameWithoutFilters(
             +_root_id,

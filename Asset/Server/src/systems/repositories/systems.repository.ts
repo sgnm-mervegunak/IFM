@@ -172,41 +172,12 @@ export class SystemsRepository implements SystemsInterface<System> {
     let _root_idArr = [];   
     const newCategories = await this.nodeRelationHandler.getNewCategories(realm, systemsDto['category']);
 
-    if (newCategories.length > 0) {
-      newCategoriesArr.push(newCategories); 
-    }
 
+      newCategoriesArr.push(newCategories); 
     relationArr.push(RelationName.CLASSIFIED_BY);
     _root_idArr.push(systemNode.identity.low);
     await this.nodeRelationHandler.manageNodesRelations([], newCategoriesArr,relationArr,_root_idArr);
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-      // const languages = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-      //   ['Language_Config'],
-      //   { isDeleted: false, realm: realm },
-      //   [],
-      //   { isDeleted: false },
-      //   RelationName.PARENT_OF,
-      // );
-      // let classificationRootNone = 'OmniClass21';
-      // languages.map(async (record) => {
-      //   let lang = record['_fields'][1].properties.name;
-      //   let nodeClass = await this.neo4jService.findChildrensByLabelsAndFilters(
-      //     [classificationRootNone + '_' + lang],
-      //     { isDeleted: false, realm: realm },
-      //     [],
-      //     { language: lang, code: systemsDto['category'] },
-      //   );
-      //   if (nodeClass && nodeClass.length && nodeClass.length == 1) {
-      //     await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
-      //       systemNode['identity'].low,
-      //       { isDeleted: false },
-      //       nodeClass[0]['_fields'][1].identity.low,
-      //       { isDeleted: false },
-      //       RelationName.CLASSIFIED_BY,
-      //       RelationDirection.RIGHT,
-      //     );
-      //   }
-      // });
+    
       return result;
     } catch (error) {
       const code = error.response?.code;
@@ -255,14 +226,11 @@ export class SystemsRepository implements SystemsInterface<System> {
     let relationArr = [];
     let _root_idArr = [];
 
-    if (oldCategories.length > 0) {
       categoriesArr.push(oldCategories);
-    }
-    if (newCategories.length > 0) {
       newCategoriesArr.push(newCategories); 
-    }
     relationArr.push(RelationName.CLASSIFIED_BY);
-    _root_idArr.push(node[0]['_fields'][1].identity.low);
+    _root_idArr.push(node[0]['_fields'][1].identity.low)
+    
     await this.nodeRelationHandler.manageNodesRelations(categoriesArr, newCategoriesArr,relationArr,_root_idArr);
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
