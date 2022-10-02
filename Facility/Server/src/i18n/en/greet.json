@@ -43,7 +43,9 @@
   "CHECK_EXCEL":"It is a valid excel file",
   "CONTACT_ALREADY_EXIST":"Email {name} already exists",
   "DEFAULT_ERROR":"Something is wrong",
-  "SPACE_HAS_ALREADY_RELATION":"One of Zone has a same spaces"
-
+  "SPACE_HAS_ALREADY_RELATION":"One of Zone has a same spaces",
+  "THERE_ARE_NO_SPACES":"This building has no any spaces",
+  "THERE_ARE_NO_JOINTSPACES":"This building has no any jointspaces",
+  "THERE_ARE_NO_ZONES":"This building has no any zones"
 }
 

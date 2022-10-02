@@ -132,13 +132,9 @@ const SetTypes = () => {
   };
 
   const getComponents = () => {
-    console.log("getComponents");
-    console.log("spaceKey", spaceKey);
 
     StructureAssetService.findAll(spaceKey)
       .then((res) => {
-        console.log(res.data);
-
         setComponents(res.data);
       })
       .catch((err) => {

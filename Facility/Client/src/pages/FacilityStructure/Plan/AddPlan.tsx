@@ -30,7 +30,7 @@ const AddPlan = ({
   React.useEffect(() => {
     if (submitted) {
       const url = process.env.REACT_APP_API_FACILITY + "structure";
-      const plannerUrl = process.env.REACT_APP_API_PLANNER_SERVER_URL+"/plan/"
+      const plannerUrl = process.env.REACT_APP_API_PLANNER_SERVER+"/plan/"
       axios
         .post(plannerUrl, { key: selectedNodeKey })
         .then((res) => {

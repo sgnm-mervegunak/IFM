@@ -60,7 +60,9 @@ export class ComponentRepository implements ComponentInterface<Component> {
         { isDeleted: false },
         RelationName.CREATED_BY,
       );
+      if (createdByNode.length>0) {
       nodes[0].get('n').properties['createdBy'] = createdByNode[0].get('children').properties.referenceKey;
+      }
 
       const spaceNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
         [Neo4jLabelEnum.COMPONENT],
@@ -69,7 +71,9 @@ export class ComponentRepository implements ComponentInterface<Component> {
         { isDeleted: false },
         RelationName.LOCATED_IN,
       );
-      nodes[0].get('n').properties['space'] = spaceNode[0].get('children').properties.referenceKey;
+      if (spaceNode.length>0) {
+      nodes[0].get('n').properties['space'] = spaceNode[0].get('children').properties.referenceKey;4
+      }
       const warrantyGuaranorLaborNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
         [Neo4jLabelEnum.COMPONENT],
         { key: nodes[0].get('n').properties.key },
@@ -77,8 +81,10 @@ export class ComponentRepository implements ComponentInterface<Component> {
         { isDeleted: false },
         RelationName.WARRANTY_GUARANTOR_LABOR,
       );
+      if (warrantyGuaranorLaborNode.length>0) {
       nodes[0].get('n').properties['warrantyGuarantorLabor'] =
         warrantyGuaranorLaborNode[0].get('children').properties.referenceKey;
+      }
       const warrantyGuaranorPartsNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
         [Neo4jLabelEnum.COMPONENT],
         { key: nodes[0].get('n').properties.key },
@@ -86,20 +92,23 @@ export class ComponentRepository implements ComponentInterface<Component> {
         { isDeleted: false },
         RelationName.WARRANTY_GUARANTOR_PARTS,
       );
+      if (warrantyGuaranorPartsNode.length>0) {
       nodes[0].get('n').properties['warrantyGuarantorParts'] =
         warrantyGuaranorPartsNode[0].get('children').properties.referenceKey;
-
+      }
       
       const warrantyDurationUnitNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
           [Neo4jLabelEnum.COMPONENT],
           { key: nodes[0].get('n').properties.key },
           [],
           { isDeleted: false, language: language },
-          RelationName.CLASSIFIED_BY,
+          RelationName.WARRANTY_DURATION_UNIT_BY,
         );
-        nodes[0].get('n').properties['warrantyDurationUnit'] =
-        warrantyDurationUnitNode[0].get('children').properties.key;  
-
+        if (warrantyDurationUnitNode.length>0) {
+          nodes[0].get('n').properties['warrantyDurationUnit'] =
+          warrantyDurationUnitNode[0].get('children').properties.code;  
+        }
+        
 
       return nodes[0]['_fields'][0];
     } catch (error) {
@@ -224,8 +233,10 @@ export class ComponentRepository implements ComponentInterface<Component> {
     let newCategoriesArr = [];
     let relationArr = [];
     let _root_idArr = [];
-    newCategoriesArr.push(newWarrantyDurationUnits);
-    relationArr.push(RelationName.CLASSIFIED_BY);
+    if (newWarrantyDurationUnits.length > 0) {
+      newCategoriesArr.push(newWarrantyDurationUnits); 
+    }
+    relationArr.push(RelationName.WARRANTY_DURATION_UNIT_BY);
     _root_idArr.push(componentNode.identity.low);
     await this.nodeRelationHandler.manageNodesRelations(categoriesArr, newCategoriesArr,relationArr,_root_idArr);
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -271,15 +282,19 @@ export class ComponentRepository implements ComponentInterface<Component> {
     /////////////////////////////////// update classified_by  relation, if duration unit changed //////////////////////////////////////////////////////  
     const warrantyDurationUnit = updateComponentDto['warrantyDurationUnit'];
     delete updateComponentDto['warrantyDurationUnit'];
-    const oldWarrantyDurationUnits = await this.nodeRelationHandler.getOldCategories(node[0]['_fields'][1].properties.key, RelationName.CLASSIFIED_BY); 
+    const oldWarrantyDurationUnits = await this.nodeRelationHandler.getOldCategories(node[0]['_fields'][1].properties.key, RelationName.WARRANTY_DURATION_UNIT_BY); 
     const newWarrantyDurationUnits = await this.nodeRelationHandler.getNewCategories(realm, warrantyDurationUnit);
     let categoriesArr = [];
     let newCategoriesArr = [];
     let relationArr = [];
     let _root_idArr = [];
-    categoriesArr.push(oldWarrantyDurationUnits);
-    newCategoriesArr.push(newWarrantyDurationUnits);
-    relationArr.push(RelationName.CLASSIFIED_BY);
+    if (oldWarrantyDurationUnits.length > 0) {
+      categoriesArr.push(oldWarrantyDurationUnits);
+    }
+    if (newWarrantyDurationUnits.length > 0) {
+      newCategoriesArr.push(newWarrantyDurationUnits); 
+    }
+    relationArr.push(RelationName.WARRANTY_DURATION_UNIT_BY);
     _root_idArr.push(node[0]['_fields'][1].identity.low);
     await this.nodeRelationHandler.manageNodesRelations(categoriesArr, newCategoriesArr,relationArr,_root_idArr);
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -366,7 +381,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
         let categoriesArr = [];
         let relationArr = [];
         let _root_idArr = [];
-        const oldWarrantyDurationUnits = await this.nodeRelationHandler.getOldCategories(typeNode.properties.key, RelationName.CLASSIFIED_BY); 
+        const oldWarrantyDurationUnits = await this.nodeRelationHandler.getOldCategories(typeNode.properties.key, RelationName.WARRANTY_DURATION_UNIT_BY); 
         categoriesArr.push(oldWarrantyDurationUnits);
         relationArr.push(RelationName.CLASSIFIED_BY);
         _root_idArr.push(typeNode.identity.low);

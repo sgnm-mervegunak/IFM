@@ -153,18 +153,6 @@ const SetFacilityStructure2 = () => {
   //     type: 'OTP',
   //   }
 
-  //   axios.post('http://localhost:3001/formgenerate', data, {
-  //     headers: headers
-  //   })
-  //     .then((response) => {
-  //       console.log()
-  //     })
-  //     .catch((error) => {
-  //       console.log(error)
-  //     })
-
-  // }
-
   useEffect(() => {
     getForms();
     // handleClick();

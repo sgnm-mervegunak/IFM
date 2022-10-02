@@ -27,6 +27,7 @@ import {
   avaiableUpdateVirtualPropsGetter,
 } from 'src/common/func/virtual.node.props.functions';
 import * as moment from 'moment';
+import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
 @Injectable()
 export class TypesRepository implements GeciciInterface<Type> {
   constructor(
@@ -35,9 +36,11 @@ export class TypesRepository implements GeciciInterface<Type> {
     private readonly httpService: HttpRequestHandler,
     private readonly virtualNodeHandler: VirtualNodeHandler,
     private readonly configService: ConfigService,
+    private readonly nodeRelationHandler: NodeRelationHandler,
   ) {}
   async findByKey(key: string, header) {
     try {
+      const {language} = header;
       const nodes = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
         [Neo4jLabelEnum.TYPE],
         { key, isDeleted: false },
@@ -54,6 +57,55 @@ export class TypesRepository implements GeciciInterface<Type> {
         nodes[0].get('parent').properties[record.get('children').properties.type] =
           record.get('children').properties.referenceKey;
       });
+      
+      const warrantyDurationUnitNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        [Neo4jLabelEnum.TYPE],
+        { key: nodes[0].get('parent').properties.key },
+        [],
+        { isDeleted: false, language: language },
+        RelationName.WARRANTY_DURATION_UNIT_BY,
+      );
+      if (warrantyDurationUnitNode.length>0) {
+        nodes[0].get('parent').properties['warrantyDurationUnit'] =
+        warrantyDurationUnitNode[0].get('children').properties.code;  
+      }
+     
+
+      const durationUnitNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        [Neo4jLabelEnum.TYPE],
+        { key: nodes[0].get('parent').properties.key },
+        [],
+        { isDeleted: false, language: language },
+        RelationName.DURATION_UNIT_BY,
+      );
+      if (durationUnitNode.length>0) {
+        nodes[0].get('parent').properties['durationUnit'] =
+        durationUnitNode[0].get('children').properties.code;  
+      }
+
+      const categoryNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        [Neo4jLabelEnum.TYPE],
+        { key: nodes[0].get('parent').properties.key },
+        [],
+        { isDeleted: false, language: language },
+        RelationName.CLASSIFIED_BY,
+      );
+      if (categoryNode.length>0) {
+        nodes[0].get('parent').properties['category'] =
+        categoryNode[0].get('children').properties.code;  
+      }
+
+      const assetTypeNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        [Neo4jLabelEnum.TYPE],
+        { key: nodes[0].get('parent').properties.key },
+        [],
+        { isDeleted: false, language: language },
+        RelationName.ASSET_TYPE_BY,
+      );
+      if (assetTypeNode.length>0) {
+        nodes[0].get('parent').properties['assetType'] =
+        assetTypeNode[0].get('children').properties.code;  
+      }
 
       return nodes[0].get('parent');
     } catch (error) {
@@ -144,6 +196,11 @@ export class TypesRepository implements GeciciInterface<Type> {
       delete typeObject['warrantyGuarantorParts'];
       delete typeObject['warrantyGuarantorLabor'];
 
+      delete typeObject['assetType'];
+      delete typeObject['warrantyDurationUnit'];
+      delete typeObject['durationUnit'];
+      delete typeObject['category'];
+
       const finalObjectArray = avaiableCreateVirtualPropsGetter(createTypesDto);
 
       for (let index = 0; index < finalObjectArray.length; index++) {
@@ -162,6 +219,35 @@ export class TypesRepository implements GeciciInterface<Type> {
       const typeUrl = `${process.env.TYPE_URL}/${typeNode.properties.key}`;
 
       await this.virtualNodeHandler.createVirtualNode(typeNode.identity.low, typeUrl, finalObjectArray);
+
+    /////////////////////////////////// create classified_by  relations for duration unit, warranty duration unit, asset type, category ////////////  
+  
+    let newCategoriesArr = [];
+    let relationArr = [];
+    let _root_idArr = [];   
+    const newAssetTypes = await this.nodeRelationHandler.getNewCategories(realm, createTypesDto['assetType']);
+    const newWarrantyDurationUnits = await this.nodeRelationHandler.getNewCategories(realm, createTypesDto['warrantyDurationUnit']);
+    const newDurationUnits = await this.nodeRelationHandler.getNewCategories(realm, createTypesDto['durationUnit']);
+    const newCategories = await this.nodeRelationHandler.getNewCategories(realm, createTypesDto['category']);
+
+
+    if (newAssetTypes.length > 0) {
+      newCategoriesArr.push(newAssetTypes); 
+    }
+    if (newWarrantyDurationUnits.length > 0) {
+      newCategoriesArr.push(newWarrantyDurationUnits); 
+    }
+    if (newDurationUnits.length > 0) {
+      newCategoriesArr.push(newDurationUnits); 
+    }
+    if (newCategories.length > 0) {
+      newCategoriesArr.push(newCategories); 
+    }
+
+    relationArr.push(RelationName.ASSET_TYPE_BY,RelationName.WARRANTY_DURATION_UNIT_BY,RelationName.DURATION_UNIT_BY, RelationName.CLASSIFIED_BY);
+    _root_idArr.push(typeNode.identity.low,typeNode.identity.low,typeNode.identity.low,typeNode.identity.low);
+    await this.nodeRelationHandler.manageNodesRelations([], newCategoriesArr,relationArr,_root_idArr);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       return result;
     } catch (error) {
@@ -211,6 +297,73 @@ export class TypesRepository implements GeciciInterface<Type> {
           throw new HttpException(invalid_classification(), 400);
         }
       }
+      
+      
+    /////////////////////////////////// update classified_by  relations for duration unit, warranty duration unit, asset type, category //////////////////  
+    const warrantyDurationUnit = updateTypeDto['warrantyDurationUnit'];
+    delete updateTypeDto['warrantyDurationUnit'];
+    const durationUnit = updateTypeDto['durationUnit'];
+    delete updateTypeDto['durationUnit'];
+    const category = updateTypeDto['category'];
+    delete updateTypeDto['category'];
+    const assetType = updateTypeDto['assetType'];
+    delete updateTypeDto['assetType'];
+
+    const newAssetTypes = await this.nodeRelationHandler.getNewCategories(realm, assetType);
+    const newWarrantyDurationUnits = await this.nodeRelationHandler.getNewCategories(realm, warrantyDurationUnit);
+    const newDurationUnits = await this.nodeRelationHandler.getNewCategories(realm, durationUnit);
+    const newCategories = await this.nodeRelationHandler.getNewCategories(realm, category);
+
+    const oldCategories = await this.nodeRelationHandler.getOldCategories(node[0]['_fields'][1].properties.key, RelationName.CLASSIFIED_BY); 
+    const oldAssetTypes = await this.nodeRelationHandler.getOldCategories(node[0]['_fields'][1].properties.key, RelationName.ASSET_TYPE_BY); 
+    const oldDurationUnits = await this.nodeRelationHandler.getOldCategories(node[0]['_fields'][1].properties.key, RelationName.DURATION_UNIT_BY); 
+    const oldWarrantyDurationUnits = await this.nodeRelationHandler.getOldCategories(node[0]['_fields'][1].properties.key, RelationName.WARRANTY_DURATION_UNIT_BY); 
+
+
+    let categoriesArr = [];
+    let newCategoriesArr = [];
+    let relationArr = [];
+    let _root_idArr = [];
+    if (oldWarrantyDurationUnits.length > 0) {
+      categoriesArr.push(oldWarrantyDurationUnits);
+    }
+    if (newWarrantyDurationUnits.length > 0) {
+      newCategoriesArr.push(newWarrantyDurationUnits); 
+    }
+    relationArr.push(RelationName.WARRANTY_DURATION_UNIT_BY);
+    _root_idArr.push(node[0]['_fields'][1].identity.low);
+
+    if (oldDurationUnits.length > 0) {
+      categoriesArr.push(oldDurationUnits);
+    }
+    if (newDurationUnits.length > 0) {
+      newCategoriesArr.push(newDurationUnits); 
+    }
+    relationArr.push(RelationName.DURATION_UNIT_BY);
+    _root_idArr.push(node[0]['_fields'][1].identity.low);
+
+    if (oldCategories.length > 0) {
+      categoriesArr.push(oldCategories);
+    }
+    if (newCategories.length > 0) {
+      newCategoriesArr.push(newCategories); 
+    }
+    relationArr.push(RelationName.CLASSIFIED_BY);
+    _root_idArr.push(node[0]['_fields'][1].identity.low);
+
+    if (oldAssetTypes.length > 0) {
+      categoriesArr.push(oldAssetTypes);
+    }
+    if (newAssetTypes.length > 0) {
+      newCategoriesArr.push(newAssetTypes); 
+    }
+    relationArr.push(RelationName.ASSET_TYPE_BY);
+    _root_idArr.push(node[0]['_fields'][1].identity.low);
+
+
+    await this.nodeRelationHandler.manageNodesRelations(categoriesArr, newCategoriesArr,relationArr,_root_idArr);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
       const typeUrl = `${process.env.TYPE_URL}/${node[0].get('children').properties.key}`;
 
@@ -278,8 +431,7 @@ export class TypesRepository implements GeciciInterface<Type> {
       );
 
       if (hasChildrenArray.length === 0) {
-        deletedNode = await this.neo4jService.updateByIdAndFilter(+_id, {}, [], { isDeleted: true, isActive: false });
-
+      
         const virtualNodes = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
           [Neo4jLabelEnum.TYPE],
           { key: typeNode.properties.key },
@@ -300,6 +452,23 @@ export class TypesRepository implements GeciciInterface<Type> {
           'deleteVirtualNodeRelations',
           JSON.stringify({ referenceKey: typeNode.properties.key }),
         );
+
+         //delete warrantyunit relations in this database
+         let categoriesArr = [];
+         let relationArr = [];
+         let _root_idArr = [];
+         const oldWarrantyDurationUnits = await this.nodeRelationHandler.getOldCategories(typeNode.properties.key, RelationName.WARRANTY_DURATION_UNIT_BY);
+         const olDurationUnits = await this.nodeRelationHandler.getOldCategories(typeNode.properties.key, RelationName.DURATION_UNIT_BY);
+         const oldCategories = await this.nodeRelationHandler.getOldCategories(typeNode.properties.key, RelationName.CLASSIFIED_BY);
+         const oldTypeNodes = await this.nodeRelationHandler.getOldCategories(typeNode.properties.key, RelationName.ASSET_TYPE_BY); 
+         categoriesArr.push(oldWarrantyDurationUnits,olDurationUnits,oldCategories,oldTypeNodes);
+         relationArr.push(RelationName.WARRANTY_DURATION_UNIT_BY, RelationName.DURATION_UNIT_BY, RelationName.CLASSIFIED_BY, RelationName.ASSET_TYPE_BY);
+         _root_idArr.push(typeNode.identity.low,typeNode.identity.low,typeNode.identity.low,typeNode.identity.low);
+         await this.nodeRelationHandler.deleteNodesRelations(categoriesArr, relationArr, _root_idArr) 
+         //////////////////////////////////////////////
+
+         deletedNode = await this.neo4jService.updateByIdAndFilter(+_id, {}, [], { isDeleted: true, isActive: false });
+
       } else {
         throw new HttpException(has_children_error({ id: _id }), 400);
       }

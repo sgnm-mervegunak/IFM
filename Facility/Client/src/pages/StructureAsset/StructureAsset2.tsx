@@ -12,7 +12,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 
 import FacilityStructureService from "../../services/facilitystructure";
-import AssetService from "../../services/asset";
 import StructureAssetService from "../../services/structureAsset";
 import FormTypeService from "../../services/formType";
 import { useAppSelector } from "../../app/hook";
@@ -59,28 +58,28 @@ const StructureAsset2 = () => {
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
 
-  const getAssetList = async () => {
-    await AssetService.findOne(realm).then((res) => {
-      let temp = JSON.parse(JSON.stringify([res.data.root] || []));
-      const iconAssetNodes = (nodes: Node[]) => {
-        if (!nodes || nodes.length === 0) {
-          return;
-        }
-        for (let i of nodes) {
-          iconAssetNodes(i.children)
-          i.icon = "pi pi pi-cog";
-          i.label = i.name;
-        }
-      };
-      iconAssetNodes(temp);
+  // const getAssetList = async () => {
+  //   await AssetService.findOne(realm).then((res) => {
+  //     let temp = JSON.parse(JSON.stringify([res.data.root] || []));
+  //     const iconAssetNodes = (nodes: Node[]) => {
+  //       if (!nodes || nodes.length === 0) {
+  //         return;
+  //       }
+  //       for (let i of nodes) {
+  //         iconAssetNodes(i.children)
+  //         i.icon = "pi pi pi-cog";
+  //         i.label = i.name;
+  //       }
+  //     };
+  //     iconAssetNodes(temp);
 
-      setAssetData(temp);
-    });
-  };
+  //     setAssetData(temp);
+  //   });
+  // };
 
-  useEffect(() => {
-    getAssetList();
-  }, []);
+  // useEffect(() => {
+  //   getAssetList();
+  // }, []);
 
   const getNodeInfoAndEdit = (selectedNodeKey: string) => {
     FacilityStructureService.nodeInfo(selectedNodeKey)

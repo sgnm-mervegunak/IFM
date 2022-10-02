@@ -539,7 +539,7 @@ export class ClassificationRepository implements classificationInterface<Classif
     });
    let label= await data[0].replaceAll(' ', '_');
 
-    let checkClassification = await this.neo4jService.findByLabelAndFilters([`${label}_${language}`],{realm})
+    let checkClassification = await this.neo4jService.findByLabelAndFilters([`${label}_${language}`],{realm,isDeleted:false})
   if(checkClassification.length==0){
     function key() {
       return uuidv4();
@@ -635,7 +635,7 @@ export class ClassificationRepository implements classificationInterface<Classif
      
       let label = await columnName.replaceAll(' ', '_');
 
-      let checkClassification = await this.neo4jService.findByLabelAndFilters([`${label}_${language}`],{realm});
+      let checkClassification = await this.neo4jService.findByLabelAndFilters([`${label}_${language}`],{realm,isDeleted: false});
 
     if(checkClassification.length==0){
         let deneme = [];
