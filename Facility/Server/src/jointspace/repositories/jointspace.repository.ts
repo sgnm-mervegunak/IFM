@@ -8,9 +8,12 @@ import * as moment from 'moment';
 import { JointSpaceAndZoneInterface } from 'src/common/interface/joint.space.zone.interface';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 
+import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
+import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
+
 @Injectable()
 export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
-  constructor(private readonly neo4jService: Neo4jService) {}
+  constructor(private readonly neo4jService: Neo4jService, private readonly nodeRelationHandler:NodeRelationHandler) {}
   async findOneByRealm(key: string, realm: string, language: string) {
     const buildingNode = await this.neo4jService.findChildrensByLabelsOneLevel(
       ['FacilityStructure'],
@@ -134,7 +137,14 @@ export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
       const jointSpaceEntity = new JointSpace();
       jointSpaceEntity['jointSpaceTitle'] = title;
       const jointSpaceObject = assignDtoPropToEntity(jointSpaceEntity, createJointSpaceDto);
+      const createdBy = jointSpaceObject['createdBy'];
       delete jointSpaceObject['nodeKeys'];
+      delete jointSpaceObject['usage'];
+      delete jointSpaceObject['category'];
+      delete jointSpaceObject['createdBy'];
+      delete jointSpaceObject['status'];
+
+
       const jointSpace = await this.neo4jService.createNode(jointSpaceObject, ['JointSpace']);
       await this.neo4jService.addRelations(jointSpace.identity.low, jointSpacesNode[0].get('children').identity.low);
       spaceNodes.map(async (element) => {
@@ -148,41 +158,43 @@ export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
         );
       });
 
-      //////////////////////////////////////////////  CREATED_BY and CLASSIFIED_BY relations  ////////////////////////////////////////////////////
-      const contactNode = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-        ['Contact'],
-        {"isDeleted": false, "realm": realm},
-        [],
-        {"isDeleted": false, "email":  jointSpaceEntity['createdBy']},
-        "PARENT_OF"
-        );
-        if (contactNode && contactNode.length && contactNode.length == 1) {
-          await this.neo4jService.addRelationByIdAndRelationNameWithFilters(jointSpace.identity.low,{"isDeleted":false},
-                                contactNode[0]["_fields"][1].identity.low, {"isDeleted":false}, RelationName.CREATED_BY, RelationDirection.RIGHT);
-        }
-
-          const languages = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-           ['Language_Config'],
-           {"isDeleted": false, "realm": realm},
-           [],
-           {"isDeleted": false},
-           "PARENT_OF"
-           );
-           let classificationRootNone='OmniClass13';
-           languages.map(async (record) => {
-             let lang = record['_fields'][1].properties.name;
-   
-             let nodeClass = await this.neo4jService.findChildrensByLabelsAndFilters(
-                 [classificationRootNone+'_'+lang],
-                 {"isDeleted": false, "realm": realm},
-                 [],
-                 {"language": lang, "code": createJointSpaceDto["category"]}
-               );
-             if (nodeClass && nodeClass.length && nodeClass.length == 1) {
-                 await this.neo4jService.addRelationByIdAndRelationNameWithFilters(jointSpace.identity.low,{"isDeleted":false},
-                                        nodeClass[0]["_fields"][1].identity.low, {"isDeleted":false}, RelationName.CLASSIFIED_BY, RelationDirection.RIGHT);
-             }
-           });   
+      //////////////////////////////////////////////  CREATED_BY,CLASSIFIED_BY , USAGE_BY, STATUS_BY relations  ///////////////////////////////////////
+      
+          let newCategoriesArr = [];
+          let relationArr = [];
+          let _root_idArr = [];   
+          const newCategories = await this.nodeRelationHandler.getNewCategories(realm, createJointSpaceDto['category']);
+          const newUsages = await this.nodeRelationHandler.getNewCategories(realm, createJointSpaceDto['usage']);
+          const newStatus= await this.nodeRelationHandler.getNewCategories(realm, createJointSpaceDto['status']);
+          const contactNode = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+            ['Contact'],
+            {"isDeleted": false, "realm": realm},
+            [],
+            {"isDeleted": false, "email":  createdBy},
+            "PARENT_OF"
+            );
+  
+          
+            newCategoriesArr.push(newCategories); 
+            relationArr.push(RelationName.CLASSIFIED_BY);
+            _root_idArr.push(jointSpace.identity.low);
+         
+          
+            newCategoriesArr.push(newUsages); 
+            relationArr.push(RelationName.USAGE_BY);
+            _root_idArr.push(jointSpace.identity.low);
+          
+          
+            newCategoriesArr.push(newStatus); 
+            relationArr.push(RelationName.STATUS_BY);
+            _root_idArr.push(jointSpace.identity.low);
+         
+          
+            newCategoriesArr.push(contactNode); 
+            relationArr.push(RelationName.CREATED_BY);
+            _root_idArr.push(jointSpace.identity.low);
+          
+          await this.nodeRelationHandler.manageNodesRelations([], newCategoriesArr,relationArr,_root_idArr);
                   
       ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -199,7 +211,7 @@ export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
   async update(_id: string, updateFacilityStructureDto,realm: string, language: string) {
     const updateFacilityStructureDtoWithoutLabelsAndParentId = {};
     Object.keys(updateFacilityStructureDto).forEach((element) => {
-      if (element != 'labels' && element != 'parentId') {
+      if (element != 'labels' && element != 'parentId' && element != 'category' && element != 'usage' && element != 'createdBy' && element != 'status')  {
         updateFacilityStructureDtoWithoutLabelsAndParentId[element] = updateFacilityStructureDto[element];
       }
     });
@@ -208,6 +220,49 @@ export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
     if (!updatedNode) {
       throw new FacilityStructureNotFountException(_id);
     }
+    
+    /////////////////////////////////// update CLASSIFIED_BY , USAGE_BY, STATUS_BY //////////////////  
+    const category = updateFacilityStructureDto['category'];
+    const usage = updateFacilityStructureDto['usage'];
+    const status = updateFacilityStructureDto['status'];
+
+
+    const newCategories = await this.nodeRelationHandler.getNewCategories(realm, category);
+    const newUsages = await this.nodeRelationHandler.getNewCategories(realm, usage);
+    const newStatus = await this.nodeRelationHandler.getNewCategories(realm, status);
+    
+
+    const oldCategories = await this.nodeRelationHandler.getOldCategories(updatedNode.properties.key, RelationName.CLASSIFIED_BY); 
+    const oldUsages = await this.nodeRelationHandler.getOldCategories(updatedNode.properties.key, RelationName.USAGE_BY); 
+    const oldStatus = await this.nodeRelationHandler.getOldCategories(updatedNode.properties.key, RelationName.STATUS_BY); 
+   
+
+    let categoriesArr = [];
+    let newCategoriesArr = [];
+    let relationArr = [];
+    let _root_idArr = [];
+
+
+      categoriesArr.push(oldCategories);
+      newCategoriesArr.push(newCategories); 
+    relationArr.push(RelationName.CLASSIFIED_BY);
+    _root_idArr.push(updatedNode.identity.low);
+
+      categoriesArr.push(oldUsages);
+      newCategoriesArr.push(newUsages); 
+    relationArr.push(RelationName.USAGE_BY);
+    _root_idArr.push(updatedNode.identity.low);
+
+
+      categoriesArr.push(oldStatus);
+      newCategoriesArr.push(newStatus); 
+    relationArr.push(RelationName.STATUS_BY);
+    _root_idArr.push(updatedNode.identity.low);
+
+    await this.nodeRelationHandler.manageNodesRelations(categoriesArr, newCategoriesArr,relationArr,_root_idArr);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    
     const result = {
       id: updatedNode['identity'].low,
       labels: updatedNode['labels'],
@@ -245,6 +300,22 @@ export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
 
     //check type and has active merged relationship and updateJointSpace property
 
+    //delete CLASSIFIED_BY , USAGE_BY, STATUS_BY relations in this database /////////////////////////////////////////////////////
+    let categoriesArr = [];
+    let relationArr = [];
+    let _root_idArr = [];
+
+    const oldCategories = await this.nodeRelationHandler.getOldCategories(node[0].get('n').properties.key, RelationName.CLASSIFIED_BY); 
+    const oldUsages = await this.nodeRelationHandler.getOldCategories(node[0].get('n').properties.key, RelationName.USAGE_BY); 
+    const oldStatus = await this.nodeRelationHandler.getOldCategories(node[0].get('n').properties.key, RelationName.STATUS_BY); 
+    const oldCreatedBy = await this.nodeRelationHandler.getOldCategories(node[0].get('n').properties.key, RelationName.CREATED_BY); 
+    
+    categoriesArr.push(oldCategories, oldUsages, oldStatus, oldCreatedBy);
+    relationArr.push(RelationName.CLASSIFIED_BY, RelationName.USAGE_BY, RelationName.STATUS_BY, RelationName.CREATED_BY);
+    _root_idArr.push(node[0].get('n').identity.low, node[0].get('n').identity.low, node[0].get('n').identity.low, node[0].get('n').identity.low);
+    await this.nodeRelationHandler.deleteNodesRelations(categoriesArr, relationArr, _root_idArr) 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     const deletedNode = await this.neo4jService.updateById(node[0].get('n').identity.low, {
       isActive: false,
       isDeleted: true,
@@ -258,6 +329,51 @@ export class JointSpaceRepository implements JointSpaceAndZoneInterface<any> {
     const node = await this.neo4jService.findByLabelAndFilters([], { key }, ['Virtual']);
     if (!node.length) {
       throw new FacilityStructureNotFountException(key);
+    }
+
+    const categoryNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+      [Neo4jLabelEnum.JOINT_SPACE],
+      { key: node[0].get('n').properties.key },
+      [],
+      { isDeleted: false, language: language },
+      RelationName.CLASSIFIED_BY
+    );
+    if (categoryNode.length>0) {
+      node[0].get('n').properties['category'] =
+      categoryNode[0].get('children').properties.code;  
+    }
+    const usageNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+      [Neo4jLabelEnum.JOINT_SPACE],
+      { key: node[0].get('n').properties.key },
+      [],
+      { isDeleted: false, language: language },
+      RelationName.USAGE_BY
+    );
+    if (usageNode.length>0) {
+      node[0].get('n').properties['usage'] =
+      usageNode[0].get('children').properties.code;  
+    }
+    const statusNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+      [Neo4jLabelEnum.JOINT_SPACE],
+      { key: node[0].get('n').properties.key },
+      [],
+      { isDeleted: false, language: language },
+      RelationName.STATUS_BY
+    );
+    if (statusNode.length>0) {
+      node[0].get('n').properties['status'] =
+      statusNode[0].get('children').properties.code;  
+    }
+    const contactNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+      [Neo4jLabelEnum.CONTACT],
+      { key: node[0].get('n').properties.key },
+      [],
+      { isDeleted: false },
+      RelationName.CREATED_BY
+    );
+    if (contactNode.length>0) {
+      node[0].get('n').properties['createdBy'] =
+      contactNode[0].get('children').properties.key;  
     }
     return node;
   }
