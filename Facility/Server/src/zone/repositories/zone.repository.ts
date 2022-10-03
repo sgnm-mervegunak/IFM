@@ -8,10 +8,12 @@ const exceljs = require('exceljs');
 import { generateUuid } from 'src/common/baseobject/base.virtual.node.object';
 import { JointSpaceAndZoneInterface } from 'src/common/interface/joint.space.zone.interface';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
+import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
+import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
 
 @Injectable()
 export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
-  constructor(private readonly neo4jService: Neo4jService) { }
+  constructor(private readonly neo4jService: Neo4jService, private readonly nodeRelationHandler:NodeRelationHandler) { }
 
   async findOneByRealm(key: string, realm: string, language: string) {
     let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
@@ -87,6 +89,10 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
     //create new Zone node and add relations to relating Zones node and space nodes
     const zoneEntity = new Zone();
     const zoneObject = assignDtoPropToEntity(zoneEntity, createZoneDto);
+    const createdBy = zoneObject['createdBy'];
+    //const createdBy="";
+    delete zoneObject['createdBy'];
+    delete zoneObject['category'];
     delete zoneObject['nodeKeys'];
     const zone = await this.neo4jService.createNode(zoneObject, ['Zone']);
     await this.neo4jService.addRelations(zone.identity.low, zonesNode[0].get('children').identity.low);
@@ -99,55 +105,29 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
       );
     });
 
-    //////////////////////////////////////////////  CREATED_BY and CLASSIFIED_BY relations  ////////////////////////////////////////////////////
-    const contactNode = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-      ['Contact'],
-      { isDeleted: false, realm: realm },
-      [],
-      { isDeleted: false, email: zoneEntity['createdBy'] },
-      'PARENT_OF',
-    );
-    if (contactNode && contactNode.length && contactNode.length == 1) {
-      await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
-        zone.identity.low,
-        { isDeleted: false },
-        contactNode[0]['_fields'][1].identity.low,
-        { isDeleted: false },
-        RelationName.CREATED_BY,
-        RelationDirection.RIGHT,
-      );
-    }
 
-    const languages = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-      ['Language_Config'],
-      { isDeleted: false, realm: realm },
-      [],
-      { isDeleted: false },
-      'PARENT_OF',
-    );
-    let classificationRootNone = 'FacilityZoneTypes';
-    languages.map(async (record) => {
-      let lang = record['_fields'][1].properties.name;
+ //////////////////////////////////////////////  CREATED_BY,CLASSIFIED_BY relations  ///////////////////////////////////////
+      
+ let newCategoriesArr = [];
+ let relationArr = [];
+ let _root_idArr = [];   
+ const newCategories = await this.nodeRelationHandler.getNewCategories(realm, createZoneDto['category']);
+ const contactNode = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+   ['Contact'],
+   {"isDeleted": false, "realm": realm},
+   [],
+   {"isDeleted": false, "email":  createdBy},
+   "PARENT_OF"
+   );
 
-      let nodeClass = await this.neo4jService.findChildrensByLabelsAndFilters(
-        [classificationRootNone + '_' + lang],
-        { isDeleted: false, realm: realm },
-        [],
-        { language: lang, code: createZoneDto['category'] },
-      );
-      if (nodeClass && nodeClass.length && nodeClass.length == 1) {
-        await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
-          zone.identity.low,
-          { isDeleted: false },
-          nodeClass[0]['_fields'][1].identity.low,
-          { isDeleted: false },
-          RelationName.CLASSIFIED_BY,
-          RelationDirection.RIGHT,
-        );
-      }
-    });
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+   newCategoriesArr.push(newCategories); 
+   newCategoriesArr.push(contactNode); 
+ relationArr.push(RelationName.CLASSIFIED_BY,RelationName.CREATED_BY);
+ _root_idArr.push(zone.identity.low,zone.identity.low);
+ await this.nodeRelationHandler.manageNodesRelations([], newCategoriesArr,relationArr,_root_idArr);  
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     return { ...zone.properties, id: zone.identity.low };
   }
@@ -159,7 +139,7 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
 
       const updateFacilityStructureDtoWithoutLabelsAndParentId = {};
       Object.keys(updateFacilityStructureDto).forEach((element) => {
-        if (element != 'labels' && element != 'parentId') {
+        if  (element != 'labels' && element != 'parentId' && element != 'category' &&  element != 'createdBy') {
           updateFacilityStructureDtoWithoutLabelsAndParentId[element] = updateFacilityStructureDto[element];
         }
       });
@@ -168,6 +148,25 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
       if (!updatedNode) {
         throw new FacilityStructureNotFountException(_id);
       }
+
+      /////////////////////////////////// update CLASSIFIED_BY  //////////////////  
+    const category = updateFacilityStructureDto['category'];
+    const newCategories = await this.nodeRelationHandler.getNewCategories(realm, category);
+    const oldCategories = await this.nodeRelationHandler.getOldCategories(updatedNode.properties.key, RelationName.CLASSIFIED_BY); 
+   
+    let categoriesArr = [];
+    let newCategoriesArr = [];
+    let relationArr = [];
+    let _root_idArr = [];
+
+      categoriesArr.push(oldCategories);
+      newCategoriesArr.push(newCategories); 
+    relationArr.push(RelationName.CLASSIFIED_BY);
+    _root_idArr.push(updatedNode.identity.low);
+
+    await this.nodeRelationHandler.manageNodesRelations(categoriesArr, newCategoriesArr,relationArr,_root_idArr);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
       const result = {
         id: updatedNode['identity'].low,
         labels: updatedNode['labels'],
@@ -182,13 +181,8 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
       return updatedNode;
 
     } catch (error) {
-      console.log(error, "ERROR--------------------")
-
-
+      console.log(error, "ERROR--------------------");
     }
-
-
-
   }
 
   async delete(key: string, realm: string, language: string) {
@@ -202,16 +196,19 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
       throw new HttpException('Node not found', HttpStatus.NOT_FOUND);
     }
 
-    // const mergedZnNodes = await this.neo4jService.read(
-    //   `match(n {key:$key}) match(p) match(p)-[:MERGEDZN]->(n) return p`,
-    //   { key: node.records[0]['_fields'][0].properties.key },
-    // );
-
-    // mergedZnNodes.records.map(async (mergedNode) => {
-    //   await this.neo4jService.updateById(mergedNode['_fields'][0].identity.low, { isBlocked: false });
-    // });
-
-    //check type and has active merged relationship and updateZone property
+     //delete CLASSIFIED_BY, CREATED_BY relations in this database /////////////////////////////////////////////////////
+     let categoriesArr = [];
+     let relationArr = [];
+     let _root_idArr = [];
+ 
+     const oldCategories = await this.nodeRelationHandler.getOldCategories(node['records'][0].get('n').properties.key, RelationName.CLASSIFIED_BY); 
+     const oldCreatedBy = await this.nodeRelationHandler.getOldCategories(node['records'][0].get('n').properties.key, RelationName.CREATED_BY); 
+     
+     categoriesArr.push(oldCategories,oldCreatedBy);
+     relationArr.push(RelationName.CLASSIFIED_BY, RelationName.CREATED_BY);
+     _root_idArr.push(node['records'][0].get('n').identity.low, node['records'][0].get('n').identity.low);
+     await this.nodeRelationHandler.deleteNodesRelations(categoriesArr, relationArr, _root_idArr) 
+     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     const deletedNode = await this.neo4jService.updateById(node.records[0]['_fields'][0].identity.low, {
       isActive: false,
@@ -225,6 +222,29 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
     const node = await this.neo4jService.findOneNodeByKey(key);
     if (!node) {
       throw new FacilityStructureNotFountException(key);
+    }
+    const categoryNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+      [Neo4jLabelEnum.ZONE],
+      { key: node.properties.key },
+      [],
+      { isDeleted: false, language: language },
+      RelationName.CLASSIFIED_BY
+    );
+    if (categoryNode.length>0) {
+      node.properties['category'] =
+      categoryNode[0].get('children').properties.code;  
+    }
+
+    const contactNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+      [Neo4jLabelEnum.CONTACT],
+      { key: node.properties.key },
+      [],
+      { isDeleted: false },
+      RelationName.CREATED_BY
+    );
+    if (contactNode.length>0) {
+      node.properties['createdBy'] =
+      contactNode[0].get('children').properties.key;  
     }
     return node;
   }

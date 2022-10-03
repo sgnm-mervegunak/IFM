@@ -1,21 +1,27 @@
-FROM node:14
+FROM node:16-alpine AS builder
 
-# Create app directory, this is in our container/in our image
 WORKDIR /usr/src/app
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
 COPY package*.json ./
 
-RUN npm install 
-# If you are building your code for production
-# RUN npm ci --only=production
+RUN npm install --legacy-peer-deps
 
-# Bundle app source
 COPY . .
 
-RUN npm run build
+RUN npm run build && \
+    chgrp -R 0 /usr/src/app/dist && \
+    chmod -R g=u /usr/src/app/dist
 
-EXPOSE 3001
+FROM node:16-alpine
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+RUN npm ci --omit=dev --legacy-peer-deps
+
+COPY --from=builder /usr/src/app/dist ./dist
+
+EXPOSE 3000
+
 CMD [ "node", "dist/main" ]

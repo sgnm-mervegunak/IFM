@@ -14,6 +14,7 @@ import { WinformRelationRepository } from './repositories/winform.relation.repos
 import { WinformDataOperationController } from './controllers/winform.data_operation.controller';
 import { WinformDataOperationService } from './services/winform.data_operation.service';
 import { WinformDataOperationRepository } from './repositories/winform.data_opreation.repository';
+import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
 
 @Module({
   imports: [HttpModule],
@@ -38,6 +39,10 @@ import { WinformDataOperationRepository } from './repositories/winform.data_opre
     {
       provide: RepositoryEnums.WINFORM_STRUCTURE_DATA_OPERATION,
       useClass: WinformDataOperationRepository,
+    },
+    {
+      provide: NodeRelationHandler,
+      useClass: NodeRelationHandler,
     },
   ],
   exports: [StructureService],

@@ -208,9 +208,7 @@ const JointSpaceForm = ({
     defaultValues: {
       ...data,
       jointStartDate: editDia ? data?.jointStartDate : new Date(),
-      jointEndDate: editDia
-        ? data?.jointEndDate
-        : Date.parse("YYYY-MM-DD HH:mm:ss") || "",
+      jointEndDate: editDia ? data?.jointEndDate : "",
     },
     resolver: yupResolver(schema),
   });
@@ -260,26 +258,37 @@ const JointSpaceForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [submitted]);
 
-  const getNodeInfoAndEdit = (selectedNodeKey: string) => {
-    JointSpaceService.nodeInfo(selectedNodeKey)
+  const getNodeInfoAndEdit = async (selectedNodeKey: string) => {
+    await JointSpaceService.nodeInfo(selectedNodeKey)
 
       .then(async (res) => {
-        // setSelectedFacilityType(res.data.properties.nodeType);
 
-        // setName(res.data.properties.name || "");
-        // setTag(res.data.properties.tag || []);
-        // setIsActive(res.data.properties.isActive);
-        // setFormTypeId(res.data.properties.formTypeId);
+        await ClassificationsService.findClassificationByCode(
+          res.data[0]?._fields[0]?.properties?.category
+        ).then((clsf) => {
+          res.data[0]._fields[0].properties.category =
+            clsf.data[0]?._fields[0]?.properties?.key; //------------
+          setCodeCategory(clsf.data[0]?._fields[0]?.properties?.code);
+        });
 
-        ClassificationsService.findClassificationByCode(res.data[0]?._fields[0]?.properties?.category)
-          .then((clsf) => {
+        await ClassificationsService.findClassificationByCode(
+          res.data[0]?._fields[0]?.properties?.status
+        ).then((clsf1) => {
+          res.data[0]._fields[0].properties.status =
+            clsf1.data[0]?._fields[0]?.properties?.key; //------------
+          setCodeStatus(clsf1.data[0]?._fields[0]?.properties?.code);
+        });
 
-            res.data[0]._fields[0].properties.category = clsf.data[0]?._fields[0]?.properties?.key //------------
-            setCategoryKey(clsf.data[0]?._fields[0]?.properties?.key.toString())
-            setCodeCategory(clsf.data[0]?._fields[0]?.properties?.code)
-          });
+        await ClassificationsService.findClassificationByCode(
+          res.data[0]?._fields[0]?.properties?.usage
+        ).then((clsf1) => {
+          res.data[0]._fields[0].properties.usage =
+            clsf1.data[0]?._fields[0]?.properties?.key; //------------
+          setCodeUsage(clsf1.data[0]?._fields[0]?.properties?.code);
+        });
 
         setData(res.data[0]?._fields[0]?.properties);
+
       })
       .catch((err) => {
         toast.current.show({
@@ -295,34 +304,13 @@ const JointSpaceForm = ({
     if (isUpdate) {
       getNodeInfoAndEdit(selectedNodeKey);
     }
+    setIsUpdate(false);
   }, [isUpdate]);
 
   useEffect(() => {
     watch((value, { name, type }) => console.log(value, name, type));
   }, [watch]);
 
-  //   const fixNodes = (nodes: Node[]) => {
-  //     if (!nodes || nodes.length === 0) {
-  //       return;
-  //     }
-  //     for (let i of nodes) {
-  //       fixNodes(i.children);
-  //       i.icon = "pi pi-fw pi-building";
-  //       i.label = i.name || i.Name;
-  //       if (
-  //         (i.nodeType === "Space" || i.nodeType === "JointSpace") &&
-  //         i.isBlocked !== true
-  //       ) {
-  //         i.selectable = true;
-  //       } else {
-  //         i.selectable = false;
-  //       }
-
-  //       if (i.name === "Joint Space") {
-  //         i.icon = "pi pi-fw pi-star-fill";
-  //       }
-  //     }
-  //   };
 
   const UploadAnyFile = (folderName: string, file: any) => {
     const url = process.env.REACT_APP_API_MINIO + "file-upload/single";
@@ -408,25 +396,6 @@ const JointSpaceForm = ({
           setAddDia(false);
           getJointSpace();
 
-          reset({
-            name: "",
-            code: "",
-            architecturalCode: "",
-            architecturalName: "",
-            operatorName: "",
-            operatorCode: "",
-            tag: "",
-            category: "",
-            usage: "",
-            status: "",
-            description: "",
-            roomTag: "",
-            usableHeight: "",
-            grossArea: "",
-            netArea: "",
-            jointStartDate: new Date(),
-            jointEndDate: "",
-          });
         })
         .catch((err) => {
           toast.current.show({
@@ -440,7 +409,7 @@ const JointSpaceForm = ({
     } else {
       let updateNode: any = {};
 
-      FacilityStructureService.nodeInfo(selectedNodeKey) //selectednodekey
+      FacilityStructureService.nodeInfo(selectedNodeKey) 
         .then((res) => {
           if (labels.length > 0) {
             updateNode = {
@@ -469,7 +438,7 @@ const JointSpaceForm = ({
               grossArea: data?.properties?.grossArea || [],
               netArea: data?.properties?.netArea || [],
               jointStartDate: data?.properties?.jointStartDate,
-              jointEndDate: data?.properties?.jointEndDate || Date.parse("YYYY-MM-DD HH:mm:ss") || "",
+              jointEndDate: data?.properties?.jointEndDate || "",
               nodeKeys: res.data?.properties?.nodeKeys || [],
               labels: [labels[0]],
               formTypeId: formTypeId,
@@ -494,7 +463,7 @@ const JointSpaceForm = ({
               grossArea: data?.grossArea || [],
               netArea: data?.netArea || [],
               jointStartDate: data?.jointStartDate,
-              jointEndDate: data?.jointEndDate || Date.parse("YYYY-MM-DD HH:mm:ss") || "",
+              jointEndDate: data?.jointEndDate || "",
               nodeKeys: res.data?.properties?.nodeKeys || [],
               formTypeId: formTypeId,
               isActive: isActive,
@@ -510,6 +479,7 @@ const JointSpaceForm = ({
                 life: 3000,
               });
               getJointSpace();
+
             })
             .catch((err) => {
               toast.current.show({
@@ -663,7 +633,7 @@ const JointSpaceForm = ({
             <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
               <Controller
-                defaultValue={categoryKey || data?.category}
+                defaultValue={data?.category}
                 name="category"
                 control={control}
                 render={({ field }) => (
@@ -828,7 +798,9 @@ const JointSpaceForm = ({
             <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Joint End Date")}</h5>
               <Controller
-                defaultValue={new Date(data?.jointEndDate) || Date.parse("YYYY-MM-DD HH:mm:ss") || ""}
+                defaultValue={
+                  data?.jointEndDate ? new Date(data?.jointEndDate) : ""
+                }
                 name="jointEndDate"
                 control={control}
                 render={({ field }) => (

@@ -231,18 +231,12 @@ export class TypesRepository implements GeciciInterface<Type> {
     const newCategories = await this.nodeRelationHandler.getNewCategories(realm, createTypesDto['category']);
 
 
-    if (newAssetTypes.length > 0) {
+
       newCategoriesArr.push(newAssetTypes); 
-    }
-    if (newWarrantyDurationUnits.length > 0) {
       newCategoriesArr.push(newWarrantyDurationUnits); 
-    }
-    if (newDurationUnits.length > 0) {
-      newCategoriesArr.push(newDurationUnits); 
-    }
-    if (newCategories.length > 0) {
+      newCategoriesArr.push(newDurationUnits);
       newCategoriesArr.push(newCategories); 
-    }
+    
 
     relationArr.push(RelationName.ASSET_TYPE_BY,RelationName.WARRANTY_DURATION_UNIT_BY,RelationName.DURATION_UNIT_BY, RelationName.CLASSIFIED_BY);
     _root_idArr.push(typeNode.identity.low,typeNode.identity.low,typeNode.identity.low,typeNode.identity.low);
@@ -324,39 +318,27 @@ export class TypesRepository implements GeciciInterface<Type> {
     let newCategoriesArr = [];
     let relationArr = [];
     let _root_idArr = [];
-    if (oldWarrantyDurationUnits.length > 0) {
+
       categoriesArr.push(oldWarrantyDurationUnits);
-    }
-    if (newWarrantyDurationUnits.length > 0) {
       newCategoriesArr.push(newWarrantyDurationUnits); 
-    }
     relationArr.push(RelationName.WARRANTY_DURATION_UNIT_BY);
     _root_idArr.push(node[0]['_fields'][1].identity.low);
 
-    if (oldDurationUnits.length > 0) {
+    
       categoriesArr.push(oldDurationUnits);
-    }
-    if (newDurationUnits.length > 0) {
       newCategoriesArr.push(newDurationUnits); 
-    }
     relationArr.push(RelationName.DURATION_UNIT_BY);
     _root_idArr.push(node[0]['_fields'][1].identity.low);
 
-    if (oldCategories.length > 0) {
+
       categoriesArr.push(oldCategories);
-    }
-    if (newCategories.length > 0) {
       newCategoriesArr.push(newCategories); 
-    }
     relationArr.push(RelationName.CLASSIFIED_BY);
     _root_idArr.push(node[0]['_fields'][1].identity.low);
 
-    if (oldAssetTypes.length > 0) {
+
       categoriesArr.push(oldAssetTypes);
-    }
-    if (newAssetTypes.length > 0) {
       newCategoriesArr.push(newAssetTypes); 
-    }
     relationArr.push(RelationName.ASSET_TYPE_BY);
     _root_idArr.push(node[0]['_fields'][1].identity.low);
 
