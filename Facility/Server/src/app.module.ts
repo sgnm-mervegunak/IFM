@@ -13,7 +13,10 @@ import { HistoryModule } from './kiramenKatibin/history.module';
 import * as redisStore from 'cache-manager-redis-store';
 import { LoggerModule } from './trace_logger/trace.logger.module';
 import { OpenTelemetryModuleConfig } from './common/configs/opentelemetry.options';
+
 //import { Neo4jModule } from 'sgnm-neo4j';
+import { Neo4jModule } from './sgnm-neo4j/src';
+
 import { i18nOptions } from './common/configs/i18n.options';
 import { KeycloakModule } from './common/keycloak/keycloak.module';
 import { ClassificationModule } from './classification/classification.module';
