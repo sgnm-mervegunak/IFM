@@ -60,13 +60,13 @@ export class StructureController {
     return this.facilityStructuresService.findOneFirstLevel(label, realm, language);
   }
 
-  @Get('/structurefirstlevel/nodes/:label')
+  @Get('/lazyloading/:key/:leafType')
   @Roles({ roles: [UserRoles.ADMIN] })
   //@Unprotected()
   @NoCache()
-  findStructureFirstLevelNodes(@Param('label') label: string, @Headers() header) {
+  findStructureFirstLevelNodes(@Param('key') key: string, @Param('leafType') leafType: string, @Headers() header) {
     const { language, realm } = header;
-    return this.facilityStructuresService.findStructureFirstLevelNodes(label, realm, language);
+    return this.facilityStructuresService.findStructureFirstLevelNodes(key, leafType, realm, language);
   }
 
   @Get('/structuretypes/properties/all/:typename')

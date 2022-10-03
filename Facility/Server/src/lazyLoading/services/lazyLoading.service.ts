@@ -9,12 +9,12 @@ export class LazyLoadingService {
     private readonly lazyLoadingRepository: LazyLoadingInterface,
   ) {}
 
-  async loadByKey(key: string, leafType: string, header) {
-    return await this.lazyLoadingRepository.loadByKey(key, leafType, header);
+  async loadByKey(key: string, leafType: string) {
+    return await this.lazyLoadingRepository.loadByKey(key, leafType, {}, {});
   }
 
-  async loadByLabel(label: string, header) {
-    return await this.lazyLoadingRepository.loadByLabel(label, header);
+  async loadByLabel(label: string) {
+    return await this.lazyLoadingRepository.loadByLabel(label, {}, {});
   }
 
   async loadClassification(key: string, header) {

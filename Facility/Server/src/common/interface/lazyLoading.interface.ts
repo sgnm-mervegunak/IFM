@@ -1,6 +1,6 @@
 export interface LazyLoadingInterface {
-  loadByKey(key: string, leafType: string, header): any;
-  loadByLabel(label: string, header): any;
+  loadByKey(key: string, leafType: string, rootFilters: object, childFilters: object): any;
+  loadByLabel(label: string, rootFilters: object, childFilters: object): any;
   loadClassification(label: string, header): any;
   getClassificationRootAndChildrenByLanguageAndRealm(realm: string, language: string): any;
   loadClassificationWithPath(path: string[], realm: string, language: string): any;

@@ -69,17 +69,17 @@ export class LazyLoadingController {
     );
   }
 
-  @Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN, UserRoles.USER] })
   @Get('/:key/:leafType')
   @NoCache()
   loadByKey(@Param('key') key: string, @Param('leafType') leafType: string, @Headers() header) {
-    return this.lazyLoadingService.loadByKey(key, leafType, header);
+    return this.lazyLoadingService.loadByKey(key, leafType);
   }
 
-  @Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN, UserRoles.USER] })
   @Get('/:label')
   @NoCache()
   loadByLabel(@Param('label') label: string, @Headers() header) {
-    return this.lazyLoadingService.loadByLabel(label, header);
+    return this.lazyLoadingService.loadByLabel(label);
   }
 }
