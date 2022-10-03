@@ -65,23 +65,44 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
         'PARENT_OF',
       );
 
-      const children = firstLevelChildren.map((item) => item.get('children'));
+      const root_id = node[0].get('n').identity.low;
 
-      for (const item of children) {
-        const childrenOfItem = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-          [],
-          { key: item.properties.key },
-          [],
-          { canDisplay: true },
-          'PARENT_OF',
-        );
-        item.leaf =
-          childrenOfItem.map((item) => {
-            item.get('children');
-          }).length <= 0;
-      }
+      // const children = firstLevelChildren.map((item) => item.get('children'));
 
-      return { ...node[0].get('n'), children };
+      // for (const item of children) {
+      //   const childrenOfItem = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+      //     [],
+      //     { isDeleted: false, key: item.properties.key, isActive: true },
+      //     [],
+      //     { canDisplay: true },
+      //     'PARENT_OF',
+      //   );
+      //   item.leaf = childrenOfItem.map((item) => item.get('children')).length <= 0 || item.labels.includes(leafType);
+      // }
+      const children = await Promise.all(
+        firstLevelChildren.map(async (item) => {
+          const firstLevelChildrensChildren = await this.neo4jService.findChildrensByIdOneLevel(
+            item.get('children').identity.low,
+            { isDeleted: false },
+            [],
+            { isDeleted: false },
+            'PARENT_OF',
+          );
+          return {
+            labels: item.get('children').labels,
+            ...item.get('children').properties,
+            id: item.get('children').identity.low,
+            leaf: firstLevelChildrensChildren.length <= 0,
+          };
+        }),
+      );
+
+      return {
+        ...node[0].get('n').properties,
+        id: root_id,
+        leaf: children.length <= 0,
+        children,
+      };
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -102,20 +123,44 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
         'PARENT_OF',
       );
 
-      const children = firstLevelChildren.map((item) => item.get('children'));
+      const root_id = node[0].get('n').identity.low;
 
-      for (const item of children) {
-        const childrenOfItem = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-          [],
-          { isDeleted: false, key: item.properties.key, isActive: true },
-          [],
-          { canDisplay: true },
-          'PARENT_OF',
-        );
-        item.leaf = childrenOfItem.map((item) => item.get('children')).length <= 0 || item.labels.includes(leafType);
-      }
+      // const children = firstLevelChildren.map((item) => item.get('children'));
 
-      return { ...node[0].get('n'), children };
+      // for (const item of children) {
+      //   const childrenOfItem = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+      //     [],
+      //     { isDeleted: false, key: item.properties.key, isActive: true },
+      //     [],
+      //     { canDisplay: true },
+      //     'PARENT_OF',
+      //   );
+      //   item.leaf = childrenOfItem.map((item) => item.get('children')).length <= 0 || item.labels.includes(leafType);
+      // }
+      const children = await Promise.all(
+        firstLevelChildren.map(async (item) => {
+          const firstLevelChildrensChildren = await this.neo4jService.findChildrensByIdOneLevel(
+            item.get('children').identity.low,
+            { isDeleted: false },
+            [],
+            { isDeleted: false },
+            'PARENT_OF',
+          );
+          return {
+            labels: item.get('children').labels,
+            ...item.get('children').properties,
+            id: item.get('children').identity.low,
+            leaf: firstLevelChildrensChildren.length <= 0 || item.get('children').labels.includes(leafType),
+          };
+        }),
+      );
+
+      return {
+        ...node[0].get('n').properties,
+        id: root_id,
+        leaf: children.length <= 0,
+        children,
+      };
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
