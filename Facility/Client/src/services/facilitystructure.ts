@@ -95,6 +95,14 @@ const getFacilityTypeProperties = async (
     return axios.get(url + "/structuretypes/" + "properties/" + "all" + "/" + second_child_node_name);
 };
 
+const getOneByLabel = ()=>{
+    return axios.get("http://localhost:3010/lazyLoading/FacilityStructure")
+}
+
+const getOneByKey = (key:string)=>{
+    return axios.get("http://localhost:3010/lazyLoading/"+key+'/Space')
+}
+
 const service = {
     findAll,
     findAssets,
@@ -108,7 +116,9 @@ const service = {
     getFacilityTypes,
     getFacilityTypeProperties,
     createStructure,
-    findStuctureFirstLevel
+    findStuctureFirstLevel,
+    getOneByLabel,
+    getOneByKey
 };
 
 export default service;
