@@ -49,36 +49,45 @@ import { CustomTreeError } from 'src/common/const/custom.error.enum';
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
 import { BaseFacilitySpaceObject } from 'src/common/baseobject/base.facility.space.object';
 import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
+import { LazyLoadingRepository } from 'src/common/class/lazyLoading.dealer';
 
 @Injectable()
 export class FacilityStructureRepository implements FacilityInterface<any> {
-  constructor(private readonly neo4jService: Neo4jService, 
-              private readonly kafkaService: NestKafkaService,
-              private readonly nodeRelationHandler:NodeRelationHandler) {}
+  constructor(
+    private readonly neo4jService: Neo4jService,
+    private readonly kafkaService: NestKafkaService,
+    private readonly nodeRelationHandler: NodeRelationHandler,
+    private readonly lazyLoadingDealer: LazyLoadingRepository,
+  ) {}
 
   //REVISED FOR NEW NEO4J
   async findOneByRealm(realm: string, language: string) {
-    let node = await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructure(
-      ['FacilityStructure'],
-      [],
-      {realm: realm, isDeleted: false},
-      [],
-      ['Zone','JointSpace'],
-      {isDeleted: false, canDisplay: true }
-    ) 
-
-    // let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
+    // let node = await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructure(
     //   ['FacilityStructure'],
+    //   [],
     //   { realm: realm, isDeleted: false },
     //   [],
+    //   ['Zone', 'JointSpace'],
     //   { isDeleted: false, canDisplay: true },
     // );
-    if (!node) {
-      throw new FacilityStructureNotFountException(realm);
-    }
-    node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
 
-    return node;
+    // // let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
+    // //   ['FacilityStructure'],
+    // //   { realm: realm, isDeleted: false },
+    // //   [],
+    // //   { isDeleted: false, canDisplay: true },
+    // // );
+    // if (!node) {
+    //   throw new FacilityStructureNotFountException(realm);
+    // }
+    // node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
+
+    const tree = await this.lazyLoadingDealer.loadByLabel(
+      'FacilityStructure',
+      { realm, isDeleted: false },
+      { isDeleted: false, canDisplay: true },
+    );
+    return tree;
   }
 
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
@@ -892,22 +901,30 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
   }
 
   //REVISED FOR NEW NEO4J
-  async findStructureFirstLevelNodes(label: string, realm: string, language: string) {
+  async findStructureFirstLevelNodes(key: string, leafType, realm: string, language: string) {
     try {
-      let node = await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructureOneLevel(
-        [label],
-        ['Virtual'],
-        { isDeleted: false, realm: realm },
-        [],
-        ['Virtual'],
+      // let node = await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructureOneLevel(
+      //   [label],
+      //   ['Virtual'],
+      //   { isDeleted: false, realm: realm },
+      //   [],
+      //   ['Virtual'],
+      //   { isDeleted: false, canDisplay: true },
+      // );
+
+      // node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
+
+      // return node['root']['children'];
+
+      const tree = await this.lazyLoadingDealer.loadByKey(
+        key,
+        leafType,
+        { isDeleted: false },
         { isDeleted: false, canDisplay: true },
       );
-
-      node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
-
-      return node['root']['children'];
+      return tree;
     } catch (error) {
-      let code = error.response?.code;
+      const code = error.response?.code;
       if (code >= 1000 && code <= 1999) {
         if (error.response?.code == CustomIfmCommonError.EXAMPLE1) {
         }
@@ -917,7 +934,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
           error.response?.code == CustomNeo4jError.FIND_WITH_CHILDREN_BY_REALM_AS_TREE_ERROR ||
           error.response?.code == CustomNeo4jError.FIND_WITH_CHILDREN_BY_REALM_AS_TREE__FIND_BY_REALM_ERROR
         ) {
-          throw new FindWithChildrenByRealmAsTreeException(realm, label);
+          throw new FindWithChildrenByRealmAsTreeException(realm, 'label');
         }
       } else if (code >= 9000 && code <= 9999) {
       } else {
