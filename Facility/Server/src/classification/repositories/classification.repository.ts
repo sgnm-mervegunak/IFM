@@ -1,47 +1,16 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
-// import { CustomNeo4jError, Neo4jService } from 'sgnm-neo4j';
+import { CustomNeo4jError, Neo4jService } from 'sgnm-neo4j';
+//import { CustomNeo4jError, Neo4jService } from 'src/sgnm-neo4j/src';
 
 import { CreateClassificationDto } from '../dto/create-classification.dto';
 import { UpdateClassificationDto } from '../dto/update-classification.dto';
 import { Classification } from '../entities/classification.entity';
-import {
-  ClassificationNotFountException,
-  FacilityStructureNotFountException,
-} from 'src/common/notFoundExceptions/not.found.exception';
-import { CustomTreeError } from 'src/common/const/custom.error.enum';
-import {
-  createDynamicCyperObject,
-  Neo4jService,
-  dynamicLabelAdder,
-  dynamicFilterPropertiesAdder,
-  dynamicNotLabelAdder,
-  dynamicUpdatePropertyAdder,
-  node_not_found,
-  create_node__must_entered_error,
-  createDynamicCyperCreateQuery,
-  create_node__node_not_created_error,
-  filterArrayForEmptyString,
-  find_with_children_by_realm_as_tree__find_by_realm_error,
-  find_with_children_by_realm_as_tree_error,
-  library_server_error,
-  tree_structure_not_found_by_realm_name_error,
-  CustomNeo4jError,
-  required_fields_must_entered,
-} from 'sgnm-neo4j/dist';
-import { classificationInterface } from 'src/common/interface/classification.interface';
-
-import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
-import { QueryResult } from 'neo4j-driver-core';
-import { I18NEnums } from 'src/common/const/i18n.enum';
-import { WrongClassificationParentExceptions } from 'src/common/badRequestExceptions/bad.request.exception';
-import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
-import { has_children_error, wrong_parent_error } from 'src/common/const/custom.error.object';
-import { RelationName } from 'src/common/const/relation.name.enum';
-import { classification_already_exist, classification_already_exist_object, classification_import_error, classification_import_error_object, default_error } from 'src/common/const/custom.classification.error';
-
-const exceljs = require('exceljs');
-const { v4: uuidv4 } = require('uuid');
+import { BaseGraphDatabaseInterfaceRepository, nodeHasChildException } from 'ifmcommon';
+import { ClassificationNotFountException } from 'src/common/notFoundExceptions/not.found.exception';
+import { assignDtoPropToEntity, createDynamicCyperObject } from 'src/common/func/neo4js.func';
+import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
+import { CustomNeo4jError, Neo4jService } from 'src/sgnm-neo4j/src';
 
 @Injectable()
 export class ClassificationRepository implements classificationInterface<Classification> {

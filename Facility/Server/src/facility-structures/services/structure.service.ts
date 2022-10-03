@@ -45,8 +45,8 @@ export class StructureService {
   findOne(realm: string, language: string) {
     return this.facilityStructureRepository.findOneByRealm(realm, language);
   }
-  findStructureFirstLevelNodes(label: string, realm: string, language: string) {
-    return this.facilityStructureRepository.findStructureFirstLevelNodes(label, realm, language);
+  findStructureFirstLevelNodes(key: string, leafType, realm: string, language: string) {
+    return this.facilityStructureRepository.findStructureFirstLevelNodes(key, leafType, realm, language);
   }
   addPlanToFloor(key: string, realm: string, language: string) {
     return this.facilityStructureRepository.addPlanToFloor(key, realm, language);

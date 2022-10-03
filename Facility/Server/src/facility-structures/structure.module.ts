@@ -15,10 +15,17 @@ import { WinformDataOperationController } from './controllers/winform.data_opera
 import { WinformDataOperationService } from './services/winform.data_operation.service';
 import { WinformDataOperationRepository } from './repositories/winform.data_opreation.repository';
 import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
+import { LazyLoadingRepository } from 'src/common/class/lazyLoading.dealer';
 
 @Module({
   imports: [HttpModule],
-  controllers: [StructureController, AssetRelationController, StructureListenerController, WinformRelationController, WinformDataOperationController],
+  controllers: [
+    StructureController,
+    AssetRelationController,
+    StructureListenerController,
+    WinformRelationController,
+    WinformDataOperationController,
+  ],
   providers: [
     StructureService,
     AssetRelationService,
@@ -43,6 +50,10 @@ import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
     {
       provide: NodeRelationHandler,
       useClass: NodeRelationHandler,
+    },
+    {
+      provide: LazyLoadingRepository,
+      useClass: LazyLoadingRepository,
     },
   ],
   exports: [StructureService],
