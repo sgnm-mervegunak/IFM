@@ -25,7 +25,7 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
         childFilters,
         'PARENT_OF',
       );
-      if (firstLevelChildren.length) {
+      if (!firstLevelChildren.length) {
         return {};
       }
 
@@ -75,7 +75,7 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
         childFilters,
         'PARENT_OF',
       );
-      if (firstLevelChildren.length) {
+      if (!firstLevelChildren.length) {
         return {};
       }
 
