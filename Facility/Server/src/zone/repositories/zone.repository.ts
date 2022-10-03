@@ -89,7 +89,8 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
     //create new Zone node and add relations to relating Zones node and space nodes
     const zoneEntity = new Zone();
     const zoneObject = assignDtoPropToEntity(zoneEntity, createZoneDto);
-    const createdBy = zoneObject['createdby'];
+    const createdBy = zoneObject['createdBy'];
+    //const createdBy="";
     delete zoneObject['createdBy'];
     delete zoneObject['category'];
     delete zoneObject['nodeKeys'];
@@ -200,12 +201,12 @@ export class ZoneRepository implements JointSpaceAndZoneInterface<any> {
      let relationArr = [];
      let _root_idArr = [];
  
-     const oldCategories = await this.nodeRelationHandler.getOldCategories(node[0].get('n').properties.key, RelationName.CLASSIFIED_BY); 
-     const oldCreatedBy = await this.nodeRelationHandler.getOldCategories(node[0].get('n').properties.key, RelationName.CREATED_BY); 
+     const oldCategories = await this.nodeRelationHandler.getOldCategories(node['records'][0].get('n').properties.key, RelationName.CLASSIFIED_BY); 
+     const oldCreatedBy = await this.nodeRelationHandler.getOldCategories(node['records'][0].get('n').properties.key, RelationName.CREATED_BY); 
      
      categoriesArr.push(oldCategories,oldCreatedBy);
      relationArr.push(RelationName.CLASSIFIED_BY, RelationName.CREATED_BY);
-     _root_idArr.push(node[0].get('n').identity.low, node[0].get('n').identity.low);
+     _root_idArr.push(node['records'][0].get('n').identity.low, node['records'][0].get('n').identity.low);
      await this.nodeRelationHandler.deleteNodesRelations(categoriesArr, relationArr, _root_idArr) 
      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
