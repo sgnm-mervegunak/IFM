@@ -46,7 +46,7 @@ const SetClassificationAdmin = () => {
   const [expandedKeys, setExpandedKeys] = useState({});
   const [expandedKey, setExpandedKey] = useState({});
 
-  const [loadedNode, setLoadedNode] = useState<any[]>([]);
+  const [loadedNode, setLoadedNode] = useState<any>({});
 
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
@@ -161,7 +161,7 @@ const SetClassificationAdmin = () => {
   }, [language]);
 
   const getClassificationRootAndChildren = () => {
-    setLoadedNode([]);
+    setLoadedNode({});
     LazyLoadingService.getClassificationRootAndChildrenByLanguageAndRealm()
       .then((res) => {
         // res.data.children = res.data.children.map((item: any) => {
@@ -194,9 +194,16 @@ const SetClassificationAdmin = () => {
 
       LazyLoadingService.loadClassification(event.node.key)
         .then((res) => {
-          console.log(res.data);
+          setLoadedNode((prev: any) => {
+            for (const item of res.data.children) {
+              prev[item.properties.key] = prev[event.node.key]
+                ? [...prev[event.node.key], event.node.key]
+                : [event.node.key];
+            }
 
-          setLoadedNode((prev: any) => [...prev, res.data.properties.key]);
+            return prev;
+          });
+
           event.node.children = res.data.children.map((child: any) => ({
             ...child.properties,
             id: child.identity.low,
@@ -222,9 +229,15 @@ const SetClassificationAdmin = () => {
 
   const RollBack = async () => {
     setLoading(true);
-    LazyLoadingService.loadClassificationWithPath(loadedNode)
+    LazyLoadingService.loadClassificationWithPath(loadedNode[selectedNodeKey])
       .then((res) => {
-        console.log(res.data);
+        let _expandedKeys: any = {
+          [res.data.key]: true,
+        };
+        for (let item of loadedNode[selectedNodeKey]) {
+          _expandedKeys[item] = true;
+        }
+        setExpandedKeys({ ..._expandedKeys });
         setData([res.data]);
         setLoading(false);
       })

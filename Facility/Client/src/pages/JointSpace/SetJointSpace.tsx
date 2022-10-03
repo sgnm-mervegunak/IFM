@@ -215,8 +215,9 @@ const SetJointSpace = () => {
         getJointSpace();
         setSelectedNodeKey([]);
         setSelectedKeys([]);
+        setSelectedNodeKeys([]);
         setSelectedKeysName([]);
-        setDisplay(false);
+        setDisplay(false); 
       })
       .catch((err) => {
         toast.current.show({
@@ -442,6 +443,8 @@ const SetJointSpace = () => {
             setSelectedNodeKeys(event.value);
             setSelectedKeys(Object.keys(event.value));
             // findKeyName(Object.keys(event.value));
+            console.log("selected node keys: ", selectedNodeKeys);
+            console.log("selected keys: ", selectedKeys);
           }}
           selectionKeys={selectedNodeKeys}
           propagateSelectionUp={false}
