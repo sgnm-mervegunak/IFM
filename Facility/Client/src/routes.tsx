@@ -31,6 +31,7 @@ import SetComponentsDetail from "./pages/Components/SetComponentsDetail";
 import SetSystem from "./pages/Systems/SetSystem";
 import StructureAsset from "./pages/StructureAsset/StructureAsset";
 import EditAsset from "./pages/StructureAsset/EditAsset";
+import StructureAssetTable from "./pages/StructureAsset/StructureAssetTable";
 
 // import Main from './pages/Main';
 
@@ -52,7 +53,7 @@ export default function Router() {
         { path: "facilitystructure", element: <SetFacilityStructure /> },
         // { path: "formgenerate", element: <FormGenerate />},
         { path: "contact", element: <Contact /> },
-        { path: "structure-asset", element: <StructureAsset /> },
+        { path: "structure-asset", element: <StructureAssetTable/> },
         { path: "asset-types", element: <SetType /> },
         { path: "asset-components", element: <SetComponent /> },
         { path: "asset-systems", element: <SetSystem /> },
