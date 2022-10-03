@@ -9,46 +9,9 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
   constructor(private readonly neo4jService: Neo4jService) {}
 
   async loadByLabel(label: string, header) {
-    // try {
-    //   const { realm } = header;
-    //   const node = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-    //     [label],
-    //     { realm: 'IFM' },
-    //     [],
-    //     { isDeleted: false },
-    //     RelationName.PARENT_OF,
-    //   );
-    //   if (!node) {
-    //     throw new HttpException(
-    //       { key: I18NEnums.CLASSIFICATION_NOT_FOUND, args: { key: label } },
-    //       HttpStatus.NOT_FOUND,
-    //     );
-    //   }
-
-    //   const firstLevelNodes = node.map((item) => item.get('children'));
-    //   console.log(firstLevelNodes);
-
-    //   for (const item of firstLevelNodes) {
-    //     const firstLevelNodesChildrens = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-    //       [],
-    //       { key: item.properties.key },
-    //       [],
-    //       { isDeleted: false },
-    //       RelationName.PARENT_OF,
-    //     );
-
-    //     if (firstLevelNodesChildrens.map((item) => item.get('children').properties).length > 0) {
-    //       item.properties.leaf = false;
-    //     }
-    //   }
-    //   const x = firstLevelNodes.map((item) => {
-    //     item.get('children');
-    //   });
-
-    //   return { ...node[0].get('parent').properties, firstLevelNodes };
-    // } catch (error) {}
+    const { realm } = header;
     try {
-      const node = await this.neo4jService.findByLabelAndFilters([label], { realm: 'IFM' });
+      const node = await this.neo4jService.findByLabelAndFilters([label], { realm });
 
       if (!node) {
         throw new HttpException(
@@ -59,7 +22,7 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
 
       const firstLevelChildren = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
         [label],
-        { isDeleted: false, realm: 'IFM', isActive: true },
+        { isDeleted: false, realm, isActive: true },
         [],
         { canDisplay: true },
         'PARENT_OF',
@@ -67,18 +30,6 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
 
       const root_id = node[0].get('n').identity.low;
 
-      // const children = firstLevelChildren.map((item) => item.get('children'));
-
-      // for (const item of children) {
-      //   const childrenOfItem = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-      //     [],
-      //     { isDeleted: false, key: item.properties.key, isActive: true },
-      //     [],
-      //     { canDisplay: true },
-      //     'PARENT_OF',
-      //   );
-      //   item.leaf = childrenOfItem.map((item) => item.get('children')).length <= 0 || item.labels.includes(leafType);
-      // }
       const children = await Promise.all(
         firstLevelChildren.map(async (item) => {
           const firstLevelChildrensChildren = await this.neo4jService.findChildrensByIdOneLevel(
@@ -125,18 +76,6 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
 
       const root_id = node[0].get('n').identity.low;
 
-      // const children = firstLevelChildren.map((item) => item.get('children'));
-
-      // for (const item of children) {
-      //   const childrenOfItem = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-      //     [],
-      //     { isDeleted: false, key: item.properties.key, isActive: true },
-      //     [],
-      //     { canDisplay: true },
-      //     'PARENT_OF',
-      //   );
-      //   item.leaf = childrenOfItem.map((item) => item.get('children')).length <= 0 || item.labels.includes(leafType);
-      // }
       const children = await Promise.all(
         firstLevelChildren.map(async (item) => {
           const firstLevelChildrensChildren = await this.neo4jService.findChildrensByIdOneLevel(
