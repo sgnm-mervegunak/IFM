@@ -50,10 +50,7 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
       );
 
       return {
-        ...node[0].get('n').properties,
-        id: root_id,
-        leaf: children.length <= 0,
-        children,
+        root: { ...node[0].get('n').properties, id: root_id, leaf: children.length <= 0, children },
       };
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -100,10 +97,7 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
       );
 
       return {
-        ...node[0].get('n').properties,
-        id: root_id,
-        leaf: children.length <= 0,
-        children,
+        root: { ...node[0].get('n').properties, id: root_id, leaf: children.length <= 0, children },
       };
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
