@@ -25,7 +25,9 @@ export class NodeRelationHandler {
   }
   
   async  getNewCategories(realm: string, code: string)   {
-  
+    if (code == undefined || realm == undefined) {
+      return [];
+    }
     const newCategories = await this.neo4jService.findChildrensByLabelsAndFilters(
       ['Classification'],
       { isDeleted: false, realm: realm },
