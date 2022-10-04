@@ -479,22 +479,45 @@ const SetFacilityStructure = () => {
     }
   };
 
-  const rollBack = () => {
+  const rollBack = async (key?: any, dragingNode?: any) => {
+    setLoading(true);
+    console.log(loadedNode);
+    console.log(key);
+    
+    const temp = key
+      ? loadedNode[key]
+        ? [...loadedNode[key], key]
+        : [key]
+      : loadedNode[selectedNodeKey];
+    console.log(temp);
 
+    FacilityStructureService.loadStructureWithPath(temp)
+      .then((res) => {
+        setData([res.data]);
+        if (key) {
+          setLoadedNode((prev: any) => ({ ...prev, [dragingNode]: temp }));
+        }
+        setExpandedKeys((prev: any) => {
+          prev = {
+            [res.data.key]: true,
+          };
+          for (let item of temp) {
+            prev[item] = true;
+          }
+          return prev;
+        });
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
 
-    FacilityStructureService.getOneByKey(lastNodeKey).then((res) => {
-
-      console.log(res.data);
-
-      // res.data.children.forEach((child: any) => {
-      //   child.properties.children = [];
-      //   child.properties.leaf = child.leaf;
-      //   event.node.children.push(child.properties);
-      // });
-
-
-    });
-
+        toast.current.show({
+          severity: "error",
+          summary: t("Error"),
+          detail: err.response ? err.response.data.message : err.message,
+          life: 4000,
+        });
+      });
   };
 
 
@@ -535,7 +558,9 @@ const SetFacilityStructure = () => {
               detail: err.response ? err.response.data.message : err.message,
               life: 4000,
             });
+            rollBack();
           });
+        rollBack();
       })
       .catch((err) => {
         toast.current.show({
@@ -547,11 +572,16 @@ const SetFacilityStructure = () => {
       });
   };
 
-  const dragDropUpdate = (dragId: string, dropId: string) => {
+  const dragDropUpdate = (
+    dragId: string,
+    dropId: string,
+    key: string,
+    dragingNode: string) => {
     FacilityStructureService.relation(dragId, dropId)
       .then((res) => {
         showSuccess("Structure Updated");
-        getFacilityStructure();
+        // getFacilityStructure();
+        rollBack(key, dragingNode);
       })
       .catch((err) => {
         toast.current.show({
@@ -560,22 +590,25 @@ const SetFacilityStructure = () => {
           detail: err.response ? err.response.data.message : err.message,
           life: 4000,
         });
-        getFacilityStructure();
       });
   };
 
-  const dragConfirm = (dragId: string, dropId: string) => {
+  const dragConfirm = (
+    dragId: string,
+    dropId: string,
+    key: string,
+    dragingnode: string) => {
     confirmDialog({
       message: t("Are you sure you want to move?"),
       header: t("Move Confirmation"),
       icon: "pi pi-exclamation-triangle",
       accept: () => {
         setLoading(true);
-        dragDropUpdate(dragId, dropId);
+        dragDropUpdate(dragId, dropId, key, dragingnode);
       },
       reject: () => {
-        setLoading(true);
-        getFacilityStructure();
+        // setLoading(true);
+        // getFacilityStructure();
       },
     });
   };
@@ -815,7 +848,7 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={getFacilityStructure}
+            getFacilityStructure={rollBack}
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -830,7 +863,7 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={getFacilityStructure}
+            getFacilityStructure={rollBack}
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -845,7 +878,7 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={getFacilityStructure}
+            getFacilityStructure={rollBack}
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -860,7 +893,7 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={getFacilityStructure}
+            getFacilityStructure={rollBack}
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -963,7 +996,7 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={getFacilityStructure}
+            getFacilityStructure={rollBack}
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -978,7 +1011,7 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={getFacilityStructure}
+            getFacilityStructure={rollBack}
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -993,7 +1026,7 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={getFacilityStructure}
+            getFacilityStructure={rollBack}
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -1008,7 +1041,7 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={getFacilityStructure}
+            getFacilityStructure={rollBack}
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -1164,7 +1197,9 @@ const SetFacilityStructure = () => {
           }}
           onContextMenu={(event: any) => {
             setCanDelete(event.node.canDelete); // for use import building control on context menu
-            setSelectedFacilityType(event.node._type);
+            setSelectedFacilityType(event.node.nodeType);
+            console.log(event.node);
+            
             cm.current.show(event.originalEvent);
           }}
           onDragDrop={(event: any) => {
@@ -1178,7 +1213,13 @@ const SetFacilityStructure = () => {
               });
               return;
             }
-            dragConfirm(event.dragNode._id.low, event.dropNode._id.low);
+            // dragConfirm(event.dragNode._id.low, event.dropNode._id.low);
+            dragConfirm(
+              event.dragNode.id,
+              event.dropNode.id,
+              event.dropNode.key,
+              event.dragNode.key
+            );
           }}
           filter
           filterBy="label,name,description,tag,key"
