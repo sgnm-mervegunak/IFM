@@ -227,7 +227,7 @@ const SetTypes = ({ selectedNodeKeySpace }: Params) => {
 
         <div className="flex justify-content-between">
           <h5 className="m-0">Space Name : {spaceName}</h5>
-          <MultiSelect value={selectedColumns} options={columns} optionLabel="header" onChange={onColumnToggle} style={{ width: '20em' }} />
+          <MultiSelect value={selectedColumns} options={columns} optionLabel="header" onChange={onColumnToggle} placeholder="Select Column" style={{ width: '20em' }} />
           <span className="p-input-icon-left">
             <i className="pi pi-search" />
             <InputText value={globalFilter} onChange={(e) => { setGlobalFilter(e.target.value) }} placeholder="Search" />
