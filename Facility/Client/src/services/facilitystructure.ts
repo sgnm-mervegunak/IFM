@@ -107,6 +107,10 @@ const lazyLoadByKey = (key: string) => {
     return axios.get(url + "/lazyloading" + "/" + key + '/Space')
 }
 
+const getFirstLevelByLabel = (label: string) => {
+    return axios.get(url + "/structuretypes/"+label)
+}
+
 const service = {
     findAll,
     findAssets,
@@ -123,7 +127,8 @@ const service = {
     findStuctureFirstLevel,
     getOneByLabel,
     getOneByKey,
-    lazyLoadByKey
+    lazyLoadByKey,
+    getFirstLevelByLabel
 };
 
 export default service;
