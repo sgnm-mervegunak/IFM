@@ -60,32 +60,6 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     private readonly lazyLoadingDealer: LazyLoadingRepository,
   ) {}
 
-  //REVISED FOR NEW NEO4J
-  async findOneByRealm(realm: string, language: string) {
-    const tree = await this.lazyLoadingDealer.loadByLabel(
-      'FacilityStructure',
-      { realm, isDeleted: false },
-      { isDeleted: false },
-      { isDeleted: false, canDisplay: true },
-    );
-    return tree;
-  }
-
-  async getPath(lazyLoadingPathDto: LazyLoadingPathDto, header) {
-    try {
-      const { realm, language } = header;
-      const { path } = lazyLoadingPathDto;
-
-      const tree = await this.lazyLoadingDealer.loadByPath(
-        path,
-        'FacilityStructure',
-        { realm, isDeleted: false },
-        { isDeleted: false },
-        { isDeleted: false, canDisplay: true },
-      );
-      return tree;
-    } catch (error) {}
-  }
 
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
   async update(key: string, structureData: Object, realm: string, language: string) {
