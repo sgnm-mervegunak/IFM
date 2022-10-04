@@ -920,7 +920,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       const tree = await this.lazyLoadingDealer.loadByKey(
         key,
         leafType,
-        { isDeleted: false },
+        { isDeleted: false, canDisplay: true  },
         { isDeleted: false, canDisplay: true },
       );
       return tree;
