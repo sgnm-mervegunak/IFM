@@ -84,6 +84,7 @@ const SetFacilityStructure = () => {
   const [selectedNode, setSelectedNode] = useState<Node>({} as Node);
   const [expandedKeys, setExpandedKeys] = useState({});
   const [expandedKey, setExpandedKey] = useState({});
+  const [loadedNode, setLoadedNode] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
   const [formTypeId, setFormTypeId] = useState<any>(undefined);
@@ -434,68 +435,65 @@ const SetFacilityStructure = () => {
   ];
 
   const getFacilityStructure = () => {
-    FacilityStructureService.getOneByLabel().then((res) => {
-      console.log(res.data);
-
-      let _expandedKey: { [key: string]: boolean } = {};
-      let rootKey: string = res.data.properties.key;
-      console.log("rootKey", rootKey);
-      _expandedKey[rootKey] = true;
-      Object.assign(_expandedKey, expandedKey);
-      setExpandedKeys(_expandedKey);
+    setLoadedNode({});
+    FacilityStructureService.findAll().then((res) => {
+      setData([res.data]);
+      setExpandedKeys({ [res.data.key]: true });
       setLoading(false);
-
-      let tempRoot = [];
-      res.data.properties.children = [];
-      res.data.properties.leaf = false;
-      tempRoot.push(res.data.properties);
-
-      let temp: any = [];
-      res.data.children.forEach((child: any) => {
-        child.properties.children = [];
-        child.properties.leaf = child.leaf;
-        temp.push(child.properties);
-      });
-
-      tempRoot[0].children = temp;
-      setData(tempRoot);
-      
     });
   };
 
   const loadOnExpand = (event: any) => {
-    if (event.node.children.length === 0) {
+    if (!event.node.children) {
       setLoading(true);
 
-      FacilityStructureService.getOneByKey(event.node.key).then((res) => {
-        res.data.children.forEach((child: any) => {
-          child.properties.children = [];
-          child.properties.leaf = child.leaf;
-          event.node.children.push(child.properties);
+      FacilityStructureService.lazyLoadByKey(event.node.key)
+        .then((res) => {
+          setLoadedNode((prev: any) => {
+            for (const item of res.data.children) {
+              prev[item.key] = prev[event.node.key]
+                ? [...prev[event.node.key], event.node.key]
+                : [event.node.key];
+            }
+
+            return prev;
+          });
+
+          event.node.children = res.data.children.map((child: any) => ({
+            ...child,
+            id: child.id,
+            leaf: child.leaf,
+          }));
+          setData([...data]);
+          setExpandedKeys((prev) => ({ ...prev, [event.node.key]: true }));
+          setLoading(false);
+        })
+        .catch((err) => {
+          toast.current.show({
+            severity: "error",
+            summary: t("Error"),
+            detail: err.response ? err.response.data.message : err.message,
+            life: 4000,
+          });
         });
-
-        setLoading(false);
-      });
-
-      return;
     }
   };
 
   const rollBack = () => {
 
 
-      FacilityStructureService.getOneByKey(lastNodeKey).then((res) => {
+    FacilityStructureService.getOneByKey(lastNodeKey).then((res) => {
 
-        console.log(res.data);
-        
-        // res.data.children.forEach((child: any) => {
-        //   child.properties.children = [];
-        //   child.properties.leaf = child.leaf;
-        //   event.node.children.push(child.properties);
-        // });
+      console.log(res.data);
+
+      // res.data.children.forEach((child: any) => {
+      //   child.properties.children = [];
+      //   child.properties.leaf = child.leaf;
+      //   event.node.children.push(child.properties);
+      // });
 
 
-      });
+    });
 
   };
 
@@ -1153,17 +1151,12 @@ const SetFacilityStructure = () => {
       <div className="field">
         <Tree
           loading={loading}
+          value={data}
           onExpand={loadOnExpand}
           expandedKeys={expandedKeys}
           onToggle={(e) => {
-
-            setLastNodeKey(Object.keys(e.value)[Object.keys(e.value).length - 1]);
-            
             setExpandedKeys(e.value);
-            setExpandedKey(e.value);
-            
           }}
-          value={data}
           dragdropScope="-"
           contextMenuSelectionKey={selectedNodeKey ? selectedNodeKey : ""}
           onContextMenuSelectionChange={(event: any) => {

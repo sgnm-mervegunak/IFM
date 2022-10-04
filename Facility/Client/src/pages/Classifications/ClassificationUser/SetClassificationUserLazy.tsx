@@ -38,7 +38,8 @@ interface Node {
 
 const SetClassificationUser = () => {
   const [selectedNodeKey, setSelectedNodeKey] = useState("");
-  const [loadedNode, setLoadedNode] = useState<any[]>([]);
+  const [loadedNode, setLoadedNode] = useState<any>({});
+  const [expandedKeys, setExpandedKeys] = useState({});
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
   const [code, setCode] = useState("");
@@ -130,7 +131,7 @@ const SetClassificationUser = () => {
       });
   };
   const getClassificationRootAndChildren = () => {
-    setLoadedNode([]);
+    setLoadedNode({});
     LazyLoadingService.getActiveClassificationRootAndChildrenByLanguageAndRealm()
       .then((res) => {
         // res.data.children = res.data.children.map((item: any) => {
@@ -140,6 +141,7 @@ const SetClassificationUser = () => {
         // });
         // setData([{ ...res.data, leaf: res.data.children.length === 0 }]);
         setData([res.data]);
+        setExpandedKeys({ [res.data.key]: true });
         setLoading(false);
       })
       .catch((err) => {
@@ -158,16 +160,24 @@ const SetClassificationUser = () => {
 
       LazyLoadingService.loadActiveClassification(event.node.key)
         .then((res) => {
-          console.log(res.data);
+          setLoadedNode((prev: any) => {
+            for (const item of res.data.children) {
+              prev[item.properties.key] = prev[event.node.key]
+                ? [...prev[event.node.key], event.node.key]
+                : [event.node.key];
+            }
 
-          setLoadedNode((prev: any) => [...prev, res.data.properties.key]);
+            return prev;
+          });
+
           event.node.children = res.data.children.map((child: any) => ({
             ...child.properties,
             id: child.identity.low,
             leaf: child.leaf,
           }));
-          setLoading(false);
           setData([...data]);
+          setExpandedKeys((prev) => ({ ...prev, [event.node.key]: true }));
+          setLoading(false);
         })
         .catch((err) => {
           toast.current.show({
@@ -180,12 +190,29 @@ const SetClassificationUser = () => {
     }
   };
 
-  const RollBack = async () => {
+  const RollBack = async (key?: any, dragingNode?: any) => {
     setLoading(true);
-    LazyLoadingService.loadActiveClassificationWithPath(loadedNode)
+    const temp = key
+      ? loadedNode[key]
+        ? [...loadedNode[key], key]
+        : [key]
+      : loadedNode[selectedNodeKey];
+
+    LazyLoadingService.loadActiveClassificationWithPath(temp)
       .then((res) => {
-        console.log(res.data);
         setData([res.data]);
+        if (key) {
+          setLoadedNode((prev: any) => ({ ...prev, [dragingNode]: temp }));
+        }
+        setExpandedKeys((prev: any) => {
+          prev = {
+            [res.data.key]: true,
+          };
+          for (let item of temp) {
+            prev[item] = true;
+          }
+          return prev;
+        });
         setLoading(false);
       })
       .catch((err) => {
@@ -248,7 +275,7 @@ const SetClassificationUser = () => {
               life: 3000,
             });
             // getClassification();
-            RollBack()
+            RollBack();
           })
           .catch((err) => {
             toast.current.show({
@@ -308,7 +335,7 @@ const SetClassificationUser = () => {
               life: 3000,
             });
             // getClassification();
-            RollBack()
+            RollBack();
           })
           .catch((err) => {
             toast.current.show({
@@ -346,7 +373,7 @@ const SetClassificationUser = () => {
               life: 2000,
             });
             // getClassification();
-            RollBack()
+            RollBack();
           })
           .catch((err) => {
             toast.current.show({
@@ -367,12 +394,17 @@ const SetClassificationUser = () => {
       });
   };
 
-  const dragDropUpdate = (dragId: string, dropId: string) => {
+  const dragDropUpdate = (
+    dragId: string,
+    dropId: string,
+    key: string,
+    dragingNode: string
+  ) => {
     ClassificationsService.relation(dragId, dropId)
       .then((res) => {
         showSuccess("Updated");
         // getClassification();
-        RollBack()
+        RollBack(key, dragingNode);
       })
       .catch((err) => {
         toast.current.show({
@@ -384,19 +416,24 @@ const SetClassificationUser = () => {
       });
   };
 
-  const dragConfirm = (dragId: string, dropId: string) => {
+  const dragConfirm = (
+    dragId: string,
+    dropId: string,
+    key: string,
+    dragingnode: string
+  ) => {
     confirmDialog({
       message: "Are you sure you want to move?",
       header: "Confirmation",
       icon: "pi pi-exclamation-triangle",
       accept: () => {
         setLoading(true);
-        dragDropUpdate(dragId, dropId);
+        dragDropUpdate(dragId, dropId, key, dragingnode);
       },
       reject: () => {
-        setLoading(true);
+        // setLoading(true);
         // getClassification();
-        RollBack()
+        // RollBack();
       },
     });
   };
@@ -549,6 +586,10 @@ const SetClassificationUser = () => {
           loading={loading}
           value={data}
           dragdropScope="-"
+          expandedKeys={expandedKeys}
+          onToggle={(e) => {
+            setExpandedKeys(e.value);
+          }}
           onExpand={loadOnExpand}
           contextMenuSelectionKey={selectedNodeKey ? selectedNodeKey : ""}
           onContextMenuSelectionChange={(event: any) =>
@@ -565,7 +606,12 @@ const SetClassificationUser = () => {
               });
               return;
             }
-            dragConfirm(event.dragNode._id.low, event.dropNode._id.low);
+            dragConfirm(
+              event.dragNode.id,
+              event.dropNode.id,
+              event.dropNode.key,
+              event.dragNode.key
+            );
           }}
           filter
           filterBy="name,code,tag"

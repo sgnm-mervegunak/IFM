@@ -1,11 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 import { RepositoryEnums } from 'src/common/const/repository.enum';
+import { LazyLoadingPathDto } from 'src/common/dto/lazy.loading.path.dto';
 import { FacilityInterface } from 'src/common/interface/facility.interface';
-import { GeciciInterface } from 'src/common/interface/gecici.interface';
 
-import { CreateFacilityStructureDto } from '../dto/create-facility-structure.dto';
-import { UpdateFacilityStructureDto } from '../dto/update-facility-structure.dto';
 
 @Injectable()
 export class StructureService {
@@ -15,6 +12,10 @@ export class StructureService {
   ) {}
   async create(key: string, createFacilityStructureDto: Object, realm: string, language: string) {
     return await this.facilityStructureRepository.create(key, createFacilityStructureDto, realm, language);
+  }
+
+  async getPath(lazyLoadingPathDto: LazyLoadingPathDto, header) {
+    return await this.facilityStructureRepository.getPath(lazyLoadingPathDto, header);
   }
 
   update(key: string, updateFacilityStructureDto: Object, realm: string, language: string) {

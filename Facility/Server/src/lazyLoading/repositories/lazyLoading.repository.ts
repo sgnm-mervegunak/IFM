@@ -7,6 +7,9 @@ import { RelationName } from 'src/common/const/relation.name.enum';
 @Injectable()
 export class LazyLoadingRepository implements LazyLoadingInterface {
   constructor(private readonly neo4jService: Neo4jService) {}
+  loadByPath(path: string[], header: any) {
+    throw new Error('Method not implemented.');
+  }
 
   async loadByLabel(label: string, header) {
     const { realm } = header;

@@ -43,6 +43,8 @@ interface Node {
   className?: string;
   code?: string;
   nodeType?: string;
+  selectable?: boolean;
+  leaf?: boolean;
 }
 
 interface FormNode {
@@ -76,6 +78,8 @@ const StructureAsset = () => {
   const [selectedNode, setSelectedNode] = useState<Node>({} as Node);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
+  const [loadedNode, setLoadedNode] = useState<any>({});
+  const [expandedKeys, setExpandedKeys] = useState({});
   const [formTypeId, setFormTypeId] = useState<any>(undefined);
   const [labels, setLabels] = useState<string[]>([]);
   const [canDelete, setCanDelete] = useState<boolean>(true);
@@ -133,49 +137,58 @@ const StructureAsset = () => {
   };
 
   const getFacilityStructure = () => {
-    FacilityStructureService.findAll()
-      .then((res) => {
-        if (!res.data.root.children) {
-          setData([res.data.root.properties] || []);
+    setLoadedNode({});
+    FacilityStructureService.findAll().then((res) => {
+      let temp = JSON.parse(
+        JSON.stringify([res.data] || [])
+      );
+      fixNodes(temp);
+      setData(temp);
+      // setData([res.data]);
+      setExpandedKeys({ [res.data.key]: true });
+      setLoading(false);
+    });
+  };
+
+  const loadOnExpand = (event: any) => {
+    if (!event.node.children) {
+      setLoading(true);
+
+      FacilityStructureService.lazyLoadByKey(event.node.key)
+        .then((res) => {
+          setLoadedNode((prev: any) => {
+            for (const item of res.data.children) {
+              prev[item.key] = prev[event.node.key]
+                ? [...prev[event.node.key], event.node.key]
+                : [event.node.key];
+            }
+
+            return prev;
+          });
+
+          event.node.children = res.data.children.map((child: any) => ({
+            ...child,
+            id: child.id,
+            leaf: child.leaf,
+          }));
           let temp = JSON.parse(
-            JSON.stringify([res.data.root.properties] || [])
+            JSON.stringify([...data] || [])
           );
           fixNodes(temp);
           setData(temp);
-        } else if (res.data.root.children) {
-          setData([res.data.root] || []);
-          let temp = JSON.parse(JSON.stringify([res.data.root] || []));
-          fixNodes(temp);
-          setData(temp);
-        }
-
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        
-        if (err.response?.status === 404) {
-          toast.current.show({
-            severity: "error",
-            summary: t("Error"),
-            detail: t("Facility Structure not found"),
-            life: 4000,
-          });
-          setTimeout(() => {
-            navigate("/");
-          }, 3000);
-        } else{
+          // setData([...data]);
+          setExpandedKeys((prev) => ({ ...prev, [event.node.key]: true }));
+          setLoading(false);
+        })
+        .catch((err) => {
           toast.current.show({
             severity: "error",
             summary: t("Error"),
             detail: err.response ? err.response.data.message : err.message,
             life: 4000,
           });
-          setTimeout(() => {
-            navigate("/");
-          }, 3000);
-        }
-      });
+        });
+    }
   };
 
   useEffect(() => {
@@ -188,8 +201,16 @@ const StructureAsset = () => {
     }
     for (let i of nodes) {
       fixNodes(i.children);
-      i.icon = "pi pi-fw pi-building";
-      i.label = i.name;
+      if (i.nodeType === "Building") {
+        i.icon = "pi pi-building"
+      }
+
+      if (i.nodeType === "Space") {
+        i.selectable = true;
+      } else {
+        i.selectable = false;
+      }
+     
     }
   };
 
@@ -205,12 +226,18 @@ const StructureAsset = () => {
 
                   <Tree
                     selectionMode="single"
+
                     onSelectionChange={(e) => {
                       setSelectedNodeKey(e.value)
                     }}
                     loading={loading}
-                    style={{height: '700px' }}
+                    style={{ height: '700px' }}
                     value={data}
+                    onExpand={loadOnExpand}
+                    expandedKeys={expandedKeys}
+                    onToggle={(e) => {
+                      setExpandedKeys(e.value);
+                    }}
                     dragdropScope="-"
                     contextMenuSelectionKey={selectedNodeKey ? selectedNodeKey : ""}
                     onContextMenuSelectionChange={(event: any) => {
@@ -234,12 +261,12 @@ const StructureAsset = () => {
                     nodeTemplate={(data: Node, options) => (
                       <span className="flex align-items-center font-bold">
                         {data.code ? data.code + " / " : ""}
-                        {data.label}{" "}
+                        {data.label}{data.name}{" "}
                         {
                           <>
                             <span className="ml-4 ">
 
-                              {
+                              {/* {
                                 data.nodeType === "Space" && (
                                   <>
                                     <Button
@@ -254,10 +281,9 @@ const StructureAsset = () => {
                                       title={t("Show Components")}
                                     />
 
-
                                   </>
                                 )
-                              }
+                              } */}
 
                             </span>
                           </>
