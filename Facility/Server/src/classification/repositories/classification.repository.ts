@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
-import { CustomNeo4jError, Neo4jService } from 'sgnm-neo4j';
-//import { CustomNeo4jError, Neo4jService } from 'src/sgnm-neo4j/src';
+// import { CustomNeo4jError, Neo4jService } from 'sgnm-neo4j';
 
 import { CreateClassificationDto } from '../dto/create-classification.dto';
 import { UpdateClassificationDto } from '../dto/update-classification.dto';
@@ -39,7 +38,13 @@ import { WrongClassificationParentExceptions } from 'src/common/badRequestExcept
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
 import { has_children_error, wrong_parent_error } from 'src/common/const/custom.error.object';
 import { RelationName } from 'src/common/const/relation.name.enum';
-import { classification_already_exist, classification_already_exist_object, classification_import_error, classification_import_error_object, default_error } from 'src/common/const/custom.classification.error';
+import {
+  classification_already_exist,
+  classification_already_exist_object,
+  classification_import_error,
+  classification_import_error_object,
+  default_error,
+} from 'src/common/const/custom.classification.error';
 
 const exceljs = require('exceljs');
 const { v4: uuidv4 } = require('uuid');
