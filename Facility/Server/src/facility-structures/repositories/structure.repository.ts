@@ -85,7 +85,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     const tree = await this.lazyLoadingDealer.loadByLabel(
       'FacilityStructure',
       { realm, isDeleted: false },
-      { isDeleted: false, canDisplay: true },
+      { isDeleted: false },
       { isDeleted: false, canDisplay: true },
     );
     return tree;
@@ -920,8 +920,9 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       const tree = await this.lazyLoadingDealer.loadByKey(
         key,
         leafType,
-        { isDeleted: false, canDisplay: true  },
         { isDeleted: false, canDisplay: true },
+        { isDeleted: false, canDisplay: true },
+        { isDeleted: false },
       );
       return tree;
     } catch (error) {

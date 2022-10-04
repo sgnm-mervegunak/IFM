@@ -5,7 +5,7 @@ import { LazyLoadingInterface } from 'src/common/interface/lazyLoading.interface
 
 @Injectable()
 export class LazyLoadingRepository implements LazyLoadingInterface {
-  constructor(private readonly neo4jService: Neo4jService) { }
+  constructor(private readonly neo4jService: Neo4jService) {}
 
   async loadByLabel(label: string, rootFilters: object, childerenFilters: object, childrensChildFilter: object) {
     try {
@@ -26,20 +26,22 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
         'PARENT_OF',
       );
       if (!firstLevelChildren.length) {
-        return {};
+        return { ...node[0].get('n').properties };
       }
 
       const root_id = node[0].get('n').identity.low;
 
+      console.log(childrensChildFilter);
       const children = await Promise.all(
         firstLevelChildren.map(async (item) => {
-          const firstLevelChildrensChildren = await this.neo4jService.findChildrensByIdOneLevel(
-            item.get('children').identity.low,
-            { isDeleted: false },
+          const firstLevelChildrensChildren = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+            [],
+            { key: item.get('children').properties.key },
             [],
             childrensChildFilter,
             'PARENT_OF',
           );
+
           return {
             labels: item.get('children').labels,
             ...item.get('children').properties,
@@ -50,7 +52,10 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
       );
 
       return {
-        ...node[0].get('n').properties, id: root_id, leaf: children.length <= 0, children,
+        ...node[0].get('n').properties,
+        id: root_id,
+        leaf: children.length <= 0,
+        children,
       };
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -86,9 +91,9 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
 
       const children = await Promise.all(
         firstLevelChildren.map(async (item) => {
-          const firstLevelChildrensChildren = await this.neo4jService.findChildrensByIdOneLevel(
-            item.get('children').identity.low,
-            { isDeleted: false },
+          const firstLevelChildrensChildren = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+            [],
+            { key: item.get('children').properties.key },
             [],
             childrensChildFilter,
             'PARENT_OF',
@@ -103,7 +108,10 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
       );
 
       return {
-        ...node[0].get('n').properties, id: root_id, leaf: children.length <= 0, children,
+        ...node[0].get('n').properties,
+        id: root_id,
+        leaf: children.length <= 0,
+        children,
       };
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);

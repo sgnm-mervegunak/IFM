@@ -69,17 +69,17 @@ export class LazyLoadingController {
     );
   }
 
-  @Roles({ roles: [UserRoles.ADMIN, UserRoles.USER] })
-  @Get('/:key/:leafType')
-  @NoCache()
-  loadByKey(@Param('key') key: string, @Param('leafType') leafType: string, @Headers() header) {
-    return this.lazyLoadingService.loadByKey(key, leafType);
-  }
+  // @Roles({ roles: [UserRoles.ADMIN, UserRoles.USER] })
+  // @Get('/:key/:leafType')
+  // @NoCache()
+  // loadByKey(@Param('key') key: string, @Param('leafType') leafType: string, @Headers() header) {
+  //   return this.lazyLoadingService.loadByKey(key, leafType);
+  // }
 
-  @Roles({ roles: [UserRoles.ADMIN, UserRoles.USER] })
-  @Get('/:label')
-  @NoCache()
-  loadByLabel(@Param('label') label: string, @Headers() header) {
-    return this.lazyLoadingService.loadByLabel(label);
-  }
+  // @Roles({ roles: [UserRoles.ADMIN, UserRoles.USER] })
+  // @Get('/:label')
+  // @NoCache()
+  // loadByLabel(@Param('label') label: string, @Headers() header) {
+  //   return this.lazyLoadingService.loadByLabel(label);
+  // }
 }
