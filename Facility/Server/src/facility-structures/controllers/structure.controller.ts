@@ -25,16 +25,6 @@ export class StructureController {
     return this.facilityStructuresService.create(key, createFacilityStructureDto, realm, language);
   }
 
-  @Roles({ roles: [UserRoles.ADMIN] })
-  @ApiBody({
-    type: object,
-    description: 'create  facility structure',
-  })
-  @Post('lazyloading/path')
-  getPath(@Body() lazyLoadingPathDto:LazyLoadingPathDto, @Headers() header) {
-    console.log(lazyLoadingPathDto)
-    return this.facilityStructuresService.getPath(lazyLoadingPathDto, header);
-  }
 
   @ApiBody({
     type: Object,
@@ -47,19 +37,14 @@ export class StructureController {
     const { language, realm } = header;
     return this.facilityStructuresService.update(key, updateFacilityStructureDto, realm, language);
   }
-  @Get('')
-  @Roles({ roles: [UserRoles.ADMIN] })
-  @NoCache()
-  findOne(@Headers() header) {
-    const { language, realm } = header;
-    return this.facilityStructuresService.findOne(realm, language);
-  }
+
 
   @Roles({ roles: [UserRoles.ADMIN] })
   //@Unprotected()
   @Get('/:key')
   @NoCache()
   findOneNode(@Param('key') key: string, @Headers() header) {
+    console.log(key);
     const { language, realm } = header;
     return this.facilityStructuresService.findOneNode(key, realm, language);
   }
@@ -73,14 +58,6 @@ export class StructureController {
     return this.facilityStructuresService.findOneFirstLevel(label, realm, language);
   }
 
-  @Get('/lazyloading/:key/:leafType')
-  @Roles({ roles: [UserRoles.ADMIN] })
-  //@Unprotected()
-  @NoCache()
-  findStructureFirstLevelNodes(@Param('key') key: string, @Param('leafType') leafType: string, @Headers() header) {
-    const { language, realm } = header;
-    return this.facilityStructuresService.findStructureFirstLevelNodes(key, leafType, realm, language);
-  }
 
   @Get('/structuretypes/properties/all/:typename')
   @Roles({ roles: [UserRoles.ADMIN] })

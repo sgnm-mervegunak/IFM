@@ -60,32 +60,6 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     private readonly lazyLoadingDealer: LazyLoadingRepository,
   ) {}
 
-  //REVISED FOR NEW NEO4J
-  async findOneByRealm(realm: string, language: string) {
-    const tree = await this.lazyLoadingDealer.loadByLabel(
-      'FacilityStructure',
-      { realm, isDeleted: false },
-      { isDeleted: false },
-      { isDeleted: false, canDisplay: true },
-    );
-    return tree;
-  }
-
-  async getPath(lazyLoadingPathDto: LazyLoadingPathDto, header) {
-    try {
-      const { realm, language } = header;
-      const { path } = lazyLoadingPathDto;
-
-      const tree = await this.lazyLoadingDealer.loadByPath(
-        path,
-        'FacilityStructure',
-        { realm, isDeleted: false },
-        { isDeleted: false },
-        { isDeleted: false, canDisplay: true },
-      );
-      return tree;
-    } catch (error) {}
-  }
 
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
   async update(key: string, structureData: Object, realm: string, language: string) {
@@ -891,50 +865,6 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
         if (error.response?.code == CustomTreeError.NOT_UNIQUE) {
           throw new NotUniqueException(error.response?.params['val']);
         }
-      } else {
-        throw new HttpException('', 500);
-      }
-    }
-  }
-
-  //REVISED FOR NEW NEO4J
-  async findStructureFirstLevelNodes(key: string, leafType, realm: string, language: string) {
-    try {
-      // let node = await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructureOneLevel(
-      //   [label],
-      //   ['Virtual'],
-      //   { isDeleted: false, realm: realm },
-      //   [],
-      //   ['Virtual'],
-      //   { isDeleted: false, canDisplay: true },
-      // );
-
-      // node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
-
-      // return node['root']['children'];
-
-      const tree = await this.lazyLoadingDealer.loadByKey(
-        key,
-        leafType,
-        { isDeleted: false, canDisplay: true },
-        { isDeleted: false, canDisplay: true },
-        { isDeleted: false },
-      );
-      return tree;
-    } catch (error) {
-      const code = error.response?.code;
-      if (code >= 1000 && code <= 1999) {
-        if (error.response?.code == CustomIfmCommonError.EXAMPLE1) {
-        }
-      } else if (code >= 5000 && code <= 5999) {
-        if (
-          error.response?.code == CustomNeo4jError.FIND_BY_REALM_WITH_TREE_STRUCTURE_ERROR ||
-          error.response?.code == CustomNeo4jError.FIND_WITH_CHILDREN_BY_REALM_AS_TREE_ERROR ||
-          error.response?.code == CustomNeo4jError.FIND_WITH_CHILDREN_BY_REALM_AS_TREE__FIND_BY_REALM_ERROR
-        ) {
-          throw new FindWithChildrenByRealmAsTreeException(realm, 'label');
-        }
-      } else if (code >= 9000 && code <= 9999) {
       } else {
         throw new HttpException('', 500);
       }

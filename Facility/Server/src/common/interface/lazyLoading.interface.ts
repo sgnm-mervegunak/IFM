@@ -11,6 +11,7 @@ export interface LazyLoadingInterface {
   loadByPath(
     path: string[],
     label: string,
+    leafType: string,
     rootFilters: object,
     childerenFilters: object,
     childrensChildFilter: object,
