@@ -488,7 +488,7 @@ const SetFacilityStructure = () => {
       ? loadedNode[key]
         ? [...loadedNode[key], key]
         : [key]
-      : loadedNode[selectedNodeKey];
+      : [selectedNodeKey];
     console.log(temp);
 
     FacilityStructureService.loadStructureWithPath(temp)
@@ -590,6 +590,7 @@ const SetFacilityStructure = () => {
           detail: err.response ? err.response.data.message : err.message,
           life: 4000,
         });
+        rollBack(key, dragingNode);
       });
   };
 
@@ -1198,8 +1199,6 @@ const SetFacilityStructure = () => {
           onContextMenu={(event: any) => {
             setCanDelete(event.node.canDelete); // for use import building control on context menu
             setSelectedFacilityType(event.node.nodeType);
-            console.log(event.node);
-            
             cm.current.show(event.originalEvent);
           }}
           onDragDrop={(event: any) => {
