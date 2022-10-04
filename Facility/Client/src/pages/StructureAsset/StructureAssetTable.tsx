@@ -44,6 +44,7 @@ interface Node {
   code?: string;
   nodeType?: string;
   selectable?: boolean;
+  leaf?: boolean;
 }
 
 interface FormNode {
@@ -209,6 +210,7 @@ const StructureAsset = () => {
       } else {
         i.selectable = false;
       }
+     
     }
   };
 
@@ -264,7 +266,7 @@ const StructureAsset = () => {
                           <>
                             <span className="ml-4 ">
 
-                              {
+                              {/* {
                                 data.nodeType === "Space" && (
                                   <>
                                     <Button
@@ -279,10 +281,9 @@ const StructureAsset = () => {
                                       title={t("Show Components")}
                                     />
 
-
                                   </>
                                 )
-                              }
+                              } */}
 
                             </span>
                           </>
