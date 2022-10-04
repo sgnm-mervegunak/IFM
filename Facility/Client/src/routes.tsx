@@ -32,6 +32,7 @@ import SetSystem from "./pages/Systems/SetSystem";
 import StructureAsset from "./pages/StructureAsset/StructureAsset";
 import EditAsset from "./pages/StructureAsset/EditAsset";
 import StructureAssetTable from "./pages/StructureAsset/StructureAssetTable";
+import SetFacilityStructureLazy from "./pages/FacilityStructure/SetFacilityStructureLazy";
 
 // import Main from './pages/Main';
 
@@ -50,7 +51,7 @@ export default function Router() {
         { path: "classifications", element: auth.auth.type === "facility_client_role_admin" ? <SetClassificationAdminLazy /> : <SetClassificationUserLazy /> },
         { path: "jointspace", element: <JointSpace /> },
         { path: "zone", element: <Zone /> },
-        { path: "facilitystructure", element: <SetFacilityStructure /> },
+        { path: "facilitystructure", element: <SetFacilityStructureLazy /> },
         // { path: "formgenerate", element: <FormGenerate />},
         { path: "contact", element: <Contact /> },
         { path: "structure-asset", element: <StructureAssetTable/> },
