@@ -435,15 +435,10 @@ const SetFacilityStructure = () => {
   ];
 
   const getFacilityStructure = () => {
+    setLoadedNode({});
     FacilityStructureService.findAll().then((res) => {
-      console.log(res.data);
-
       setData([res.data]);
-      let _expandedKey: { [key: string]: boolean } = {};
-      let rootKey: string = res.data.key;
-      _expandedKey[rootKey] = true;
-      Object.assign(_expandedKey, expandedKey);
-      setExpandedKeys(_expandedKey);
+      setExpandedKeys({ [res.data.key]: true });
       setLoading(false);
     });
   };
@@ -454,12 +449,8 @@ const SetFacilityStructure = () => {
 
       FacilityStructureService.lazyLoadByKey(event.node.key)
         .then((res) => {
-          console.log(res.data);
-          
           setLoadedNode((prev: any) => {
             for (const item of res.data.children) {
-              console.log(item);
-              
               prev[item.key] = prev[event.node.key]
                 ? [...prev[event.node.key], event.node.key]
                 : [event.node.key];
@@ -469,18 +460,13 @@ const SetFacilityStructure = () => {
           });
 
           event.node.children = res.data.children.map((child: any) => ({
-            
-            
             ...child,
             id: child.id,
             leaf: child.leaf,
           }));
-          setLoading(false);
           setData([...data]);
-          let rootKey: string = event.node.key;
-          let _expandedKeys: any = expandedKeys;
-          _expandedKeys[rootKey] = true;
-          setExpandedKeys({ ..._expandedKeys });
+          setExpandedKeys((prev) => ({ ...prev, [event.node.key]: true }));
+          setLoading(false);
         })
         .catch((err) => {
           toast.current.show({
@@ -1165,17 +1151,12 @@ const SetFacilityStructure = () => {
       <div className="field">
         <Tree
           loading={loading}
+          value={data}
           onExpand={loadOnExpand}
           expandedKeys={expandedKeys}
           onToggle={(e) => {
-
-            setLastNodeKey(Object.keys(e.value)[Object.keys(e.value).length - 1]);
-
             setExpandedKeys(e.value);
-            setExpandedKey(e.value);
-
           }}
-          value={data}
           dragdropScope="-"
           contextMenuSelectionKey={selectedNodeKey ? selectedNodeKey : ""}
           onContextMenuSelectionChange={(event: any) => {

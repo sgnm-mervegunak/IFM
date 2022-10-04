@@ -68,17 +68,33 @@ const Zone = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    console.log("dataaaaaa:", data)
+  },data)
   const loadLazyData = () => {
-    FacilityStructureService.findStuctureFirstLevel(realm)
+    // FacilityStructureService.findStuctureFirstLevel(realm)
+    //   .then((response) => {
+    //     console.log("-----------------------",response.data);
+    //     setData(response.data);
+    //   })
+    //   .catch((err) => {
+    //     toast.current.show({
+    //       severity: "error",
+    //       summary: "Error",
+    //       // detail: err?.response ? err?.response?.data?.message : err.message,
+    //       life: 2000,
+    //     });
+    //   });
+    FacilityStructureService.findAll()
       .then((response) => {
-        console.log(response.data);
-        setData(response.data);
+        console.log("-----------------------", response.data);
+        setData(response.data?.children);
       })
       .catch((err) => {
         toast.current.show({
           severity: "error",
           summary: "Error",
-          detail: err.response ? err.response.data.message : err.message,
+          detail: err?.response ? err?.response?.data?.message : err.message,
           life: 2000,
         });
       });
