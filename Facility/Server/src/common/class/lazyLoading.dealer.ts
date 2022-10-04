@@ -7,7 +7,7 @@ import { LazyLoadingInterface } from 'src/common/interface/lazyLoading.interface
 export class LazyLoadingRepository implements LazyLoadingInterface {
   constructor(private readonly neo4jService: Neo4jService) {}
 
-  async loadByLabel(label: string, rootFilters: object, childFilters: object) {
+  async loadByLabel(label: string, rootFilters: object, childerenFilters: object, childrensChildFilter: object) {
     try {
       const node = await this.neo4jService.findByLabelAndFilters([label], rootFilters);
 
@@ -22,7 +22,7 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
         [label],
         rootFilters,
         [],
-        childFilters,
+        childerenFilters,
         'PARENT_OF',
       );
       if (!firstLevelChildren.length) {
@@ -37,7 +37,7 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
             item.get('children').identity.low,
             { isDeleted: false },
             [],
-            { isDeleted: false },
+            childrensChildFilter,
             'PARENT_OF',
           );
           return {
@@ -57,7 +57,13 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
     }
   }
 
-  async loadByKey(key: string, leafType = '', rootFilters: object, childFilters: object) {
+  async loadByKey(
+    key: string,
+    leafType = '',
+    rootFilters: object,
+    childerenFilters: object,
+    childrensChildFilter: object,
+  ) {
     try {
       const node = await this.neo4jService.findByLabelAndFilters([], { key, ...rootFilters });
 
@@ -69,7 +75,7 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
         [],
         { key, ...rootFilters },
         [],
-        childFilters,
+        childerenFilters,
         'PARENT_OF',
       );
       if (!firstLevelChildren.length) {
@@ -84,7 +90,7 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
             item.get('children').identity.low,
             { isDeleted: false },
             [],
-            { isDeleted: false },
+            childrensChildFilter,
             'PARENT_OF',
           );
           return {

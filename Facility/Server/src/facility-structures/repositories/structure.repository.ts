@@ -86,6 +86,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       'FacilityStructure',
       { realm, isDeleted: false },
       { isDeleted: false, canDisplay: true },
+      { isDeleted: false, canDisplay: true },
     );
     return tree;
   }
