@@ -66,10 +66,10 @@ const JointSpace = () => {
   }, []);
 
   const loadLazyData = () => {
-    FacilityStructureService.findAll()
+    FacilityStructureService.findStuctureFirstLevel(realm)
       .then((response) => {
         console.log(response.data);
-        setData(response.data.children);
+        setData(response.data);
       })
       .catch((err) => {
         toast.current.show({
