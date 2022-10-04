@@ -50,38 +50,18 @@ import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.en
 import { BaseFacilitySpaceObject } from 'src/common/baseobject/base.facility.space.object';
 import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
 import { LazyLoadingRepository } from 'src/common/class/lazyLoading.dealer';
+import { LazyLoadingPathDto } from 'src/common/dto/lazy.loading.path.dto';
 
 @Injectable()
 export class FacilityStructureRepository implements FacilityInterface<any> {
   constructor(
     private readonly neo4jService: Neo4jService,
     private readonly kafkaService: NestKafkaService,
-    private readonly nodeRelationHandler: NodeRelationHandler,
     private readonly lazyLoadingDealer: LazyLoadingRepository,
   ) {}
 
   //REVISED FOR NEW NEO4J
   async findOneByRealm(realm: string, language: string) {
-    // let node = await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructure(
-    //   ['FacilityStructure'],
-    //   [],
-    //   { realm: realm, isDeleted: false },
-    //   [],
-    //   ['Zone', 'JointSpace'],
-    //   { isDeleted: false, canDisplay: true },
-    // );
-
-    // // let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
-    // //   ['FacilityStructure'],
-    // //   { realm: realm, isDeleted: false },
-    // //   [],
-    // //   { isDeleted: false, canDisplay: true },
-    // // );
-    // if (!node) {
-    //   throw new FacilityStructureNotFountException(realm);
-    // }
-    // node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
-
     const tree = await this.lazyLoadingDealer.loadByLabel(
       'FacilityStructure',
       { realm, isDeleted: false },
@@ -89,6 +69,22 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       { isDeleted: false, canDisplay: true },
     );
     return tree;
+  }
+
+  async getPath(lazyLoadingPathDto: LazyLoadingPathDto, header) {
+    try {
+      const { realm, language } = header;
+      const { path } = lazyLoadingPathDto;
+
+      const tree = await this.lazyLoadingDealer.loadByPath(
+        path,
+        'FacilityStructure',
+        { realm, isDeleted: false },
+        { isDeleted: false },
+        { isDeleted: false, canDisplay: true },
+      );
+      return tree;
+    } catch (error) {}
   }
 
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////

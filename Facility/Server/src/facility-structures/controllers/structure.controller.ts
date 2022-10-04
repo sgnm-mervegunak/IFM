@@ -5,6 +5,8 @@ import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { NoCache } from 'ifmcommon';
 
 import { UserRoles } from 'src/common/const/keycloak.role.enum';
+import { object } from 'joi';
+import { LazyLoadingPathDto } from 'src/common/dto/lazy.loading.path.dto';
 
 @ApiTags('structure')
 @ApiBearerAuth('JWT-auth')
@@ -21,6 +23,17 @@ export class StructureController {
   create(@Param('parent_key') key: string, @Body() createFacilityStructureDto: object, @Headers() header) {
     const { language, realm } = header;
     return this.facilityStructuresService.create(key, createFacilityStructureDto, realm, language);
+  }
+
+  @Roles({ roles: [UserRoles.ADMIN] })
+  @ApiBody({
+    type: object,
+    description: 'create  facility structure',
+  })
+  @Post('lazyloading/path')
+  getPath(@Body() lazyLoadingPathDto:LazyLoadingPathDto, @Headers() header) {
+    console.log(lazyLoadingPathDto)
+    return this.facilityStructuresService.getPath(lazyLoadingPathDto, header);
   }
 
   @ApiBody({
