@@ -18,6 +18,22 @@ import { useTranslation } from "react-i18next";
 import Export, { ExportType } from "../FacilityStructure/Export/Export";
 import ImportZone from "./ImportZone";
 
+import Paper from "@mui/material/Paper";
+import {
+  Grid,
+  Table,
+  TableHeaderRow,
+} from "@devexpress/dx-react-grid-material-ui";
+
+const columns = [
+  { name: "name", title: "Name" },
+  { name: "description", title: "Description" },
+  { name: "siteName", title: "SiteName" },
+];
+const rows = [
+  { id: 0, product: "DevExtreme", owner: "DevExpress" },
+  { id: 1, product: "DevExtreme Reactive", owner: "DevExpress" },
+];
 interface Node {
   cantDeleted: boolean;
   children: Node[];
@@ -54,6 +70,8 @@ const Zone = () => {
   const [exportDia, setExportDia] = useState(false);
   const [importDia, setImportDia] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [row, setRow] = useState<any>();
+  const [column, setColumn] = useState<any>();
 
   const dt = useRef<any>();
   const { toast } = useAppSelector((state) => state.toast);
@@ -69,8 +87,8 @@ const Zone = () => {
   }, []);
 
   useEffect(() => {
-    console.log("dataaaaaa:", data)
-  },data)
+    console.log("dataaaaaa:", data);
+  }, data);
   const loadLazyData = () => {
     // FacilityStructureService.findStuctureFirstLevel(realm)
     //   .then((response) => {
@@ -87,8 +105,9 @@ const Zone = () => {
     //   });
     FacilityStructureService.findAll()
       .then((response) => {
-        console.log("-----------------------", response.data);
+        console.log("-----------------------", response.data.children);
         setData(response.data?.children);
+
       })
       .catch((err) => {
         toast.current.show({
@@ -99,6 +118,8 @@ const Zone = () => {
         });
       });
   };
+
+
 
   // const addItem = () => {
   //   // const _classification: Node = {
@@ -172,97 +193,12 @@ const Zone = () => {
   // };
 
   return (
-    <div className="card">
-      <Toolbar
-        className="mb-4"
-        right={() => (
-          <React.Fragment>
-            <Button
-              label={t("Import Zones")}
-              icon="pi pi-upload"
-              className="p-button"
-              onClick={() => setImportDia(true)}
-            />
-            <Button
-              label={t("Export Zones")}
-              icon="pi pi-download"
-              className="p-button ml-2"
-              onClick={() => setExportDia(true)}
-            />
-          </React.Fragment>
-        )}
-      ></Toolbar>
-
-      <Dialog
-        header={t("Import")}
-        visible={importDia}
-        style={{ width: "40vw" }}
-        onHide={() => {
-          setImportDia(false);
-        }}
-      >
-        <ImportZone
-          setImportDia={setImportDia}
-        />
-      </Dialog>
-
-      <Dialog
-        header={t("Export")}
-        visible={exportDia}
-        style={{ width: "40vw" }}
-        footer={() => (
-          <div>
-            <Button
-              label={t("Cancel")}
-              icon="pi pi-times"
-              onClick={() => {
-                setExportDia(false);
-              }}
-              className="p-button-text"
-            />
-            <Button
-              label={t("Export")}
-              icon="pi pi-check"
-              onClick={() => setSubmitted(true)}
-              autoFocus
-            />
-          </div>
-        )}
-        onHide={() => {
-          setExportDia(false);
-        }}
-      >
-        <Export
-          submitted={submitted}
-          setSubmitted={setSubmitted}
-          setExportDia={setExportDia}
-          exportType={ExportType.Zone}
-        />
-      </Dialog>
-
-      <DataTable
-        ref={dt}
-        value={data}
-        dataKey="key"
-        // rows={lazyParams.rows}
-        loading={loading}
-        className="datatable-responsive"
-        // totalRecords={countClassifications}
-        globalFilter={globalFilter}
-        emptyMessage="Zone not found"
-        header={header}
-        style={{ fontWeight: "bold" }}
-        selectionMode="single"
-        onSelectionChange={(e) => {
-          navigate("/zone/" + e.value.key);
-          console.log(e.value);
-        }}
-        responsiveLayout="scroll"
-      >
-        <Column field="name" header="Name" sortable></Column>
-        <Column field="nodeType" header="Facility Type" sortable></Column>
-      </DataTable>
-    </div>
+    <Paper>
+      <Grid rows={rows} columns={columns}>
+        <Table />
+        <TableHeaderRow />
+      </Grid>
+    </Paper>
   );
 };
 
