@@ -18,8 +18,9 @@ import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
 import { StructureLazyLoadingService } from './services/structure.lazyloading.service';
 import { StructureLazyLoadingController } from './controllers/structure.lazyloading.controller';
 import { FacilityStructureLazyLoadingRepository } from './repositories/structure.lazyloading.repository';
-import { LazyLoadingRepository } from 'ifmcommon';
+
 import { Neo4jModule } from 'sgnm-neo4j/dist';
+import { LazyLoadingRepository } from 'src/common/class/lazyLoading.dealer';
 
 @Module({
   imports: [HttpModule, Neo4jModule],

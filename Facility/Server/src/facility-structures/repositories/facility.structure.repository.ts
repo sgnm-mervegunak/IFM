@@ -640,7 +640,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
   //REVISED FOR NEW NEO4J
   async findChildrenByFacilityTypeNode(typename: string, realm: string, language: string) {
     let parent_node = await this.neo4jService.findByLabelAndFilters(
-      ['FacilityTypes_en'],
+      ['FacilityTypes_'+language],
       { isDeleted: false, realm: realm },
       [],
     );
