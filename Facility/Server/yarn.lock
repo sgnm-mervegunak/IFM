@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"-@^0.0.1":
+  "integrity" "sha512-3HfneK3DGAm05fpyj20sT3apkNcvPpCuccOThOPdzz8sY7GgQGe0l93XH9bt+YzibcTIgUAIMoyVJI740RtgyQ=="
+  "resolved" "https://registry.npmjs.org/-/-/--0.0.1.tgz"
+  "version" "0.0.1"
+
 "@aduh95/viz.js@^3.1.0":
   "integrity" "sha512-ahLdpRAoGsdgEfy2SGV2wnnHrBSLDHuwA32v+BoNGnz1gqajr8VMzF8y6mIQt28hHi4LQ272wqSi78DK4YdT2g=="
   "resolved" "https://registry.npmjs.org/@aduh95/viz.js/-/viz.js-3.5.0.tgz"
@@ -4862,6 +4867,11 @@
     "yauzl" "^2.10.0"
   optionalDependencies:
     "@types/yauzl" "^2.9.1"
+
+"f@^1.4.0":
+  "integrity" "sha512-THMsoTpFuIFoQ538jpbW7x/9pVaE0jdKN2O+nd7xpeUT17lECGX8M+QOaZ186ipc3XSzSFOytaXFidItHix44Q=="
+  "resolved" "https://registry.npmjs.org/f/-/f-1.4.0.tgz"
+  "version" "1.4.0"
 
 "fancy-log@^1.3.3":
   "integrity" "sha512-k9oEhlyc0FrVh25qYuSELjr8oxsCoc4/LEZfg2iJJrfEk/tZL9bCoJE47gqAvI2m/AUjluCS4+3I0eTx8n3AEw=="

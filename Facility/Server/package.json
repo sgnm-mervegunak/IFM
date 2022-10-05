@@ -24,6 +24,7 @@
     "documentation:serve": "npx @compodoc/compodoc -p tsconfig.json --serve"
   },
   "dependencies": {
+    "-": "^0.0.1",
     "@compodoc/compodoc": "^1.1.19",
     "@nestjs/axios": "^0.0.8",
     "@nestjs/common": "^8.0.0",
@@ -49,6 +50,7 @@
     "class-validator": "^0.13.2",
     "csv-parser": "^3.0.0",
     "exceljs": "^4.3.0",
+    "f": "^1.4.0",
     "ifmcommon": "^0.0.56",
     "joi": "^17.6.0",
     "kafkajs": "^1.16.0",
