@@ -739,6 +739,7 @@ export class InfraRepository implements InfraInterface {
           name: 'Building',
           isActive: true,
           canDisplay: true,
+          nodeType: 'Building'
         },
         ['FacilityType'],
       );
@@ -749,6 +750,7 @@ export class InfraRepository implements InfraInterface {
           name: 'Floor',
           isActive: true,
           canDisplay: true,
+          nodeType: 'Floor'
         },
         ['FacilityType'],
       );
@@ -759,6 +761,7 @@ export class InfraRepository implements InfraInterface {
           name: 'Block',
           isActive: true,
           canDisplay: true,
+          nodeType: 'Block'
         },
         ['FacilityType'],
       );
@@ -769,6 +772,7 @@ export class InfraRepository implements InfraInterface {
           name: 'FacilityStructure',
           isActive: true,
           canDisplay: false,
+          nodeType: 'FacilityStructure'
         },
         ['FacilityType'],
       );
@@ -780,72 +784,78 @@ export class InfraRepository implements InfraInterface {
           name: 'Space',
           isActive: true,
           canDisplay: true,
+          nodeType: 'Space'
         },
         ['FacilityType'],
       );
 
-      // const facilityTypesNodeTR1 = await this.neo4jService.createNode(
-      //   {
-      //     canDelete: true,
-      //     isDeleted: false,
-      //     name: 'Bina',
-      //     isActive: true,
-      //     canDisplay: true,
-      //   },
-      //   ['FacilityType'],
-      // );
-      // const facilityTypesNodeTR2 = await this.neo4jService.createNode(
-      //   {
-      //     canDelete: true,
-      //     isDeleted: false,
-      //     name: 'Kat',
-      //     isActive: true,
-      //     canDisplay: true,
-      //   },
-      //   ['FacilityType'],
-      // );
-      // const facilityTypesNodeTR3 = await this.neo4jService.createNode(
-      //   {
-      //     canDelete: true,
-      //     isDeleted: false,
-      //     name: 'Blok',
-      //     isActive: true,
-      //     canDisplay: true,
-      //   },
-      //   ['FacilityType'],
-      // );
-      // const facilityTypesNodeTR4 = await this.neo4jService.createNode(
-      //   {
-      //     canDelete: true,
-      //     isDeleted: false,
-      //     name: 'Tesis Yapısı',
-      //     isActive: true,
-      //     canDisplay: false,
-      //   },
-      //   ['FacilityType'],
-      // );
-      // const facilityTypesNodeTR5 = await this.neo4jService.createNode(
-      //   {
-      //     canDelete: true,
-      //     isDeleted: false,
-      //     isBlocked: false,
-      //     name: 'Alan',
-      //     isActive: true,
-      //     canDisplay: true,
-      //   },
-      //   ['FacilityType'],
-      // );
+      const facilityTypesNodeTR1 = await this.neo4jService.createNode(
+        {
+          canDelete: true,
+          isDeleted: false,
+          name: 'Bina',
+          isActive: true,
+          canDisplay: true,
+          deType: 'Building'
+        },
+        ['FacilityType'],
+      );
+      const facilityTypesNodeTR2 = await this.neo4jService.createNode(
+        {
+          canDelete: true,
+          isDeleted: false,
+          name: 'Kat',
+          isActive: true,
+          canDisplay: true,
+          deType: 'Floor'
+        },
+        ['FacilityType'],
+      );
+      const facilityTypesNodeTR3 = await this.neo4jService.createNode(
+        {
+          canDelete: true,
+          isDeleted: false,
+          name: 'Blok',
+          isActive: true,
+          canDisplay: true,
+          deType: 'Block'
+        },
+        ['FacilityType'],
+      );
+      const facilityTypesNodeTR4 = await this.neo4jService.createNode(
+        {
+          canDelete: true,
+          isDeleted: false,
+          name: 'Tesis Yapısı',
+          isActive: true,
+          canDisplay: false,
+          deType: 'FacilityStructure'
+        },
+        ['FacilityType'],
+      );
+      const facilityTypesNodeTR5 = await this.neo4jService.createNode(
+        {
+          canDelete: true,
+          isDeleted: false,
+          isBlocked: false,
+          name: 'Alan',
+          isActive: true,
+          canDisplay: true,
+          deType: 'Space'
+        },
+        ['FacilityType'],
+      );
       await this.neo4jService.addRelations(facilityTypesNode1.identity.low, facilityTypesNode.identity.low);
       await this.neo4jService.addRelations(facilityTypesNode2.identity.low, facilityTypesNode.identity.low);
       await this.neo4jService.addRelations(facilityTypesNode3.identity.low, facilityTypesNode.identity.low);
       await this.neo4jService.addRelations(facilityTypesNode4.identity.low, facilityTypesNode.identity.low);
       await this.neo4jService.addRelations(facilityTypesNode5.identity.low, facilityTypesNode.identity.low);
 
-      // await this.neo4jService.addRelations(facilityTypesNodeTR1.identity.low, facilityTypesNodeTR.identity.low);
-      // await this.neo4jService.addRelations(facilityTypesNodeTR2.identity.low, facilityTypesNodeTR.identity.low);
-      // await this.neo4jService.addRelations(facilityTypesNodeTR3.identity.low, facilityTypesNodeTR.identity.low);
-      // await this.neo4jService.addRelations(facilityTypesNodeTR4.identity.low, facilityTypesNodeTR.identity.low);
-      // await this.neo4jService.addRelations(facilityTypesNodeTR5.identity.low, facilityTypesNodeTR.identity.low);
+      await this.neo4jService.addRelations(facilityTypesNodeTR1.identity.low, facilityTypesNodeTR.identity.low);
+      await this.neo4jService.addRelations(facilityTypesNodeTR2.identity.low, facilityTypesNodeTR.identity.low);
+      await this.neo4jService.addRelations(facilityTypesNodeTR3.identity.low, facilityTypesNodeTR.identity.low);
+      await this.neo4jService.addRelations(facilityTypesNodeTR4.identity.low, facilityTypesNodeTR.identity.low);
+      await this.neo4jService.addRelations(facilityTypesNodeTR5.identity.low, facilityTypesNodeTR.identity.low);
 
       const allowedForFacilityStructureBuilding = await this.neo4jService.createNode(
         {
