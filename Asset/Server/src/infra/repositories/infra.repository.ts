@@ -58,19 +58,19 @@ export class InfraRepository implements InfraInterface {
         throw new HttpException('realm must bu uniqe for Root node', 400);
       }
       const infraNode = await this.neo4jService.createNode(
-        { canDelete: false, isDeleted: false, name: 'Infra', realm: 'Signum' },
+        { canDelete: false, isDeleted: false, name: 'Infra', realm: 'Signum', nodeType: 'Infra' },
         ['Infra'],
       );
       const classificationNode = await this.neo4jService.createNode(
-        { canDelete: false, isDeleted: false, name: 'Classification', realm: 'Signum' },
+        { canDelete: false, isDeleted: false, name: 'Classification', realm: 'Signum', nodeType: 'Classification' },
         ['Classification'],
       );
       const assetNode = await this.neo4jService.createNode(
-        { canDelete: false, isDeleted: false, name: 'Asset', realm: 'Signum' },
+        { canDelete: false, isDeleted: false, name: 'Asset', realm: 'Signum', nodeType: 'Asset' },
         ['Asset'],
       );
       const configNode = await this.neo4jService.createNode(
-        { canDelete: false, isDeleted: false, name: 'System Config', realm: 'Signum' },
+        { canDelete: false, isDeleted: false, name: 'System Config', realm: 'Signum', nodeType: 'Config' },
         ['System_Config'],
       );
       await this.neo4jService.addParentRelationByIdAndFilters(
