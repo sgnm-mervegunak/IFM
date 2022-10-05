@@ -1,18 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import {
   FacilityStructureNotFountException,
-  FindWithChildrenByRealmAsTreeException,
   ParentFacilityStructureNotFountException,
 } from '../../common/notFoundExceptions/not.found.exception';
-//import { CustomNeo4jError, Neo4jService } from 'sgnm-neo4j';
 import { NestKafkaService } from 'ifmcommon';
-import {
-  Neo4jService,
-  assignDtoPropToEntity,
-  createDynamicCyperObject,
-  CustomNeo4jError,
-  
-} from 'sgnm-neo4j/dist';
+import { Neo4jService, assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError } from 'sgnm-neo4j/dist';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 import { RelationName } from 'src/common/const/relation.name.enum';
 
@@ -42,30 +34,14 @@ import { CustomTreeError } from 'src/common/const/custom.error.enum';
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
 import { BaseFacilitySpaceObject } from 'src/common/baseobject/base.facility.space.object';
 import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
-import { LazyLoadingRepository } from 'src/common/class/lazyLoading.dealer';
-import { LazyLoadingPathDto } from 'src/common/dto/lazy.loading.path.dto';
 
 @Injectable()
 export class FacilityStructureRepository implements FacilityInterface<any> {
   constructor(
     private readonly neo4jService: Neo4jService,
     private readonly kafkaService: NestKafkaService,
-    private readonly lazyLoadingDealer: LazyLoadingRepository,
-    private readonly nodeRelationHandler: NodeRelationHandler
+    private readonly nodeRelationHandler: NodeRelationHandler,
   ) {}
-
-  //REVISED FOR NEW NEO4J
-  async findOneByRealm(realm: string, language: string) {
-    
-
-    const tree = await this.lazyLoadingDealer.loadByLabel(
-      'FacilityStructure',
-      { realm, isDeleted: false },
-      { isDeleted: false },
-      { isDeleted: false, canDisplay: true },
-    );
-    return tree;
-  }
 
   //////////////////////////  Dynamic DTO  /////////////////////////////////////////////////////////////////////////////////////////
   async update(key: string, structureData: Object, realm: string, language: string) {
@@ -98,7 +74,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
           { isDeleted: false },
           RelationName.PARENT_OF,
         );
-     
+
         let sameNameNode = await this.neo4jService.findChildrensByIdAndFilters(
           building[0]['_fields'][0].identity.low,
           { isDeleted: false },
@@ -176,62 +152,70 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
         dynamicObject,
       );
 
+      const category = structureData['category'];
+      const usage = structureData['usage'];
+      const status = structureData['status'];
 
-    const category = structureData['category'];
-    const usage = structureData['usage'];
-    const status = structureData['status']; 
+      //////////////////////////////////// update CLASSIFIED_BY //////////////////
+      if (structureData['nodeType'] != 'Block') {
+        const newCategories = await this.nodeRelationHandler.getNewCategories(realm, category);
+        const oldCategories = await this.nodeRelationHandler.getOldCategories(
+          updatedNode.properties.key,
+          RelationName.CLASSIFIED_BY,
+        );
+        let categoriesArr = [];
+        let newCategoriesArr = [];
+        let relationArr = [];
+        let _root_idArr = [];
 
-    //////////////////////////////////// update CLASSIFIED_BY //////////////////  
-   if (structureData['nodeType'] != 'Block') {
-    const newCategories = await this.nodeRelationHandler.getNewCategories(realm, category);
-    const oldCategories = await this.nodeRelationHandler.getOldCategories(updatedNode.properties.key, RelationName.CLASSIFIED_BY); 
-    let categoriesArr = [];
-    let newCategoriesArr = [];
-    let relationArr = [];
-    let _root_idArr = [];
+        categoriesArr.push(oldCategories);
+        newCategoriesArr.push(newCategories);
+        relationArr.push(RelationName.CLASSIFIED_BY);
+        _root_idArr.push(updatedNode.identity.low);
 
-      categoriesArr.push(oldCategories);
-      newCategoriesArr.push(newCategories); 
-    relationArr.push(RelationName.CLASSIFIED_BY);
-    _root_idArr.push(updatedNode.identity.low);
-
-    await this.nodeRelationHandler.manageNodesRelations(categoriesArr, newCategoriesArr,relationArr,_root_idArr);
-   }
-     //////////////////////////////////// update STATUS_BY //////////////////  
-     if (structureData['nodeType'] == 'Space' || structureData['nodeType'] == 'Building' ) {
+        await this.nodeRelationHandler.manageNodesRelations(categoriesArr, newCategoriesArr, relationArr, _root_idArr);
+      }
+      //////////////////////////////////// update STATUS_BY //////////////////
+      if (structureData['nodeType'] == 'Space' || structureData['nodeType'] == 'Building') {
         const newStatus = await this.nodeRelationHandler.getNewCategories(realm, status);
-        const oldStatus = await this.nodeRelationHandler.getOldCategories(updatedNode.properties.key, RelationName.STATUS_BY); 
-    
-     let categoriesArr = [];
-     let newCategoriesArr = [];
-     let relationArr = [];
-     let _root_idArr = [];
+        const oldStatus = await this.nodeRelationHandler.getOldCategories(
+          updatedNode.properties.key,
+          RelationName.STATUS_BY,
+        );
 
-     categoriesArr.push(oldStatus);
-     newCategoriesArr.push(newStatus); 
-     relationArr.push(RelationName.STATUS_BY);
-     _root_idArr.push(updatedNode.identity.low);
- 
-     await this.nodeRelationHandler.manageNodesRelations(categoriesArr, newCategoriesArr,relationArr,_root_idArr);
-    }
+        let categoriesArr = [];
+        let newCategoriesArr = [];
+        let relationArr = [];
+        let _root_idArr = [];
 
-    //////////////////////////////////// update USAGE_BY ///////////////////////////////////  
-    if (structureData['nodeType'] == 'Space') {
-     const newUsages = await this.nodeRelationHandler.getNewCategories(realm, usage);
-     const oldUsages = await this.nodeRelationHandler.getOldCategories(updatedNode.properties.key, RelationName.USAGE_BY); 
- 
-     let categoriesArr = [];
-     let newCategoriesArr = [];
-     let relationArr = [];
-     let _root_idArr = [];
+        categoriesArr.push(oldStatus);
+        newCategoriesArr.push(newStatus);
+        relationArr.push(RelationName.STATUS_BY);
+        _root_idArr.push(updatedNode.identity.low);
 
-     categoriesArr.push(oldUsages);
-     newCategoriesArr.push(newUsages); 
-     relationArr.push(RelationName.USAGE_BY);
-     _root_idArr.push(updatedNode.identity.low);
-     await this.nodeRelationHandler.manageNodesRelations(categoriesArr, newCategoriesArr,relationArr,_root_idArr);
-    }
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+        await this.nodeRelationHandler.manageNodesRelations(categoriesArr, newCategoriesArr, relationArr, _root_idArr);
+      }
+
+      //////////////////////////////////// update USAGE_BY ///////////////////////////////////
+      if (structureData['nodeType'] == 'Space') {
+        const newUsages = await this.nodeRelationHandler.getNewCategories(realm, usage);
+        const oldUsages = await this.nodeRelationHandler.getOldCategories(
+          updatedNode.properties.key,
+          RelationName.USAGE_BY,
+        );
+
+        let categoriesArr = [];
+        let newCategoriesArr = [];
+        let relationArr = [];
+        let _root_idArr = [];
+
+        categoriesArr.push(oldUsages);
+        newCategoriesArr.push(newUsages);
+        relationArr.push(RelationName.USAGE_BY);
+        _root_idArr.push(updatedNode.identity.low);
+        await this.nodeRelationHandler.manageNodesRelations(categoriesArr, newCategoriesArr, relationArr, _root_idArr);
+      }
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       const response = {
         id: updatedNode['identity'].low,
@@ -303,48 +287,55 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       if (!canDelete) {
         throw new HttpException(has_children_error({ node1: node['properties']['name'], node2: '' }), 400);
       } else {
-      
-      //delete CLASSIFIED_BY , CREATED_BY /////////////////////////////////////////////////////
-      if (!node.labels.includes('Block')) {
-        let categoriesArr = [];
-        let relationArr = [];
-        let _root_idArr = [];
-  
-        const oldCategories = await this.nodeRelationHandler.getOldCategories(node.properties.key, RelationName.CLASSIFIED_BY); 
-        const oldCreatedBy = await this.nodeRelationHandler.getOldCategories(node.properties.key, RelationName.CREATED_BY); 
-        
-        categoriesArr.push(oldCategories,oldCreatedBy);
-        relationArr.push(RelationName.CLASSIFIED_BY, RelationName.CREATED_BY);
-        _root_idArr.push(node.identity.low, node.identity.low);
-        await this.nodeRelationHandler.deleteNodesRelations(categoriesArr, relationArr, _root_idArr) 
-      }
-      //delete STATUS_BY relations in this database /////////////////////////////////////////////////////
-      if (node.labels.includes('Space') || node.labels.includes('Building')) {
-        let categoriesArr = [];
-        let relationArr = [];
-        let _root_idArr = [];
-        const oldStatus = await this.nodeRelationHandler.getOldCategories(node.properties.key, RelationName.STATUS_BY); 
-        categoriesArr.push(oldStatus);
-        relationArr.push(RelationName.STATUS_BY);
-        _root_idArr.push(node.identity.low);
-        await this.nodeRelationHandler.deleteNodesRelations(categoriesArr, relationArr, _root_idArr) 
-      }
-      //delete USAGE_BY relations in this database /////////////////////////////////////////////////////
-      if (node.labels.includes('Space')) {
-        let categoriesArr = [];
-        let relationArr = [];
-        let _root_idArr = [];
-  
-        const oldUsages = await this.nodeRelationHandler.getOldCategories(node.properties.key, RelationName.USAGE_BY); 
-       
-        categoriesArr.push(oldUsages);
-        relationArr.push(RelationName.USAGE_BY);
-        _root_idArr.push(node.identity.low);
-        await this.nodeRelationHandler.deleteNodesRelations(categoriesArr, relationArr, _root_idArr) 
-      }
-      
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //delete CLASSIFIED_BY , CREATED_BY /////////////////////////////////////////////////////
+        if (!node.labels.includes('Block')) {
+          let categoriesArr = [];
+          let relationArr = [];
+          let _root_idArr = [];
 
+          const oldCategories = await this.nodeRelationHandler.getOldCategories(
+            node.properties.key,
+            RelationName.CLASSIFIED_BY,
+          );
+          const oldCreatedBy = await this.nodeRelationHandler.getOldCategories(
+            node.properties.key,
+            RelationName.CREATED_BY,
+          );
+
+          categoriesArr.push(oldCategories, oldCreatedBy);
+          relationArr.push(RelationName.CLASSIFIED_BY, RelationName.CREATED_BY);
+          _root_idArr.push(node.identity.low, node.identity.low);
+          await this.nodeRelationHandler.deleteNodesRelations(categoriesArr, relationArr, _root_idArr);
+        }
+        //delete STATUS_BY relations in this database /////////////////////////////////////////////////////
+        if (node.labels.includes('Space') || node.labels.includes('Building')) {
+          let categoriesArr = [];
+          let relationArr = [];
+          let _root_idArr = [];
+          const oldStatus = await this.nodeRelationHandler.getOldCategories(
+            node.properties.key,
+            RelationName.STATUS_BY,
+          );
+          categoriesArr.push(oldStatus);
+          relationArr.push(RelationName.STATUS_BY);
+          _root_idArr.push(node.identity.low);
+          await this.nodeRelationHandler.deleteNodesRelations(categoriesArr, relationArr, _root_idArr);
+        }
+        //delete USAGE_BY relations in this database /////////////////////////////////////////////////////
+        if (node.labels.includes('Space')) {
+          let categoriesArr = [];
+          let relationArr = [];
+          let _root_idArr = [];
+
+          const oldUsages = await this.nodeRelationHandler.getOldCategories(node.properties.key, RelationName.USAGE_BY);
+
+          categoriesArr.push(oldUsages);
+          relationArr.push(RelationName.USAGE_BY);
+          _root_idArr.push(node.identity.low);
+          await this.nodeRelationHandler.deleteNodesRelations(categoriesArr, relationArr, _root_idArr);
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         let deletedNode = await this.neo4jService.updateByIdAndFilter(+_id, { isDeleted: false, canDelete: true }, [], {
           isDeleted: true,
@@ -534,7 +525,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       if (classNode && classNode.length) {
         node['properties']['category'] = classNode[0]['_fields'][1]['properties'].code;
       }
-       
+
       const usageNode = await this.neo4jService.findChildrensByIdOneLevel(
         node['identity'].low,
         { isDeleted: false },
@@ -811,55 +802,55 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       delete baseFacilityObject['status'];
 
       const createNode = await this.neo4jService.createNode(baseFacilityObject, [structureData['nodeType']]);
-      
+
       //////////////////////////////////////////////  CREATED_BY,CLASSIFIED_BY relations  ///////////////////////////////////////
       if (structureData['nodeType'] != 'Block') {
-      let newCategoriesArr = [];
-      let relationArr = [];
-      let _root_idArr = [];   
-      const newCategories = await this.nodeRelationHandler.getNewCategories(realm, structureData['category']);
-      const contactNode = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-        ['Contact'],
-        {"isDeleted": false, "realm": realm},
-        [],
-        {"isDeleted": false, "email":  createdBy},
-        "PARENT_OF"
+        let newCategoriesArr = [];
+        let relationArr = [];
+        let _root_idArr = [];
+        const newCategories = await this.nodeRelationHandler.getNewCategories(realm, structureData['category']);
+        const contactNode = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+          ['Contact'],
+          { isDeleted: false, realm: realm },
+          [],
+          { isDeleted: false, email: createdBy },
+          'PARENT_OF',
         );
-        newCategoriesArr.push(newCategories); 
+        newCategoriesArr.push(newCategories);
         relationArr.push(RelationName.CLASSIFIED_BY);
         _root_idArr.push(createNode.identity.low);
-     
-        newCategoriesArr.push(contactNode); 
+
+        newCategoriesArr.push(contactNode);
         relationArr.push(RelationName.CREATED_BY);
         _root_idArr.push(createNode.identity.low);
-      
-      await this.nodeRelationHandler.manageNodesRelations([], newCategoriesArr,relationArr,_root_idArr);
-      } 
-  //////////////////////////////////////////////  STATUS_BY relations  ///////////////////////////////////////
-  if (structureData['nodeType'] == 'Space' || structureData['nodeType'] == 'Building') {
-      let newCategoriesArr = [];
-      let relationArr = [];
-      let _root_idArr = [];   
 
-      const newStatus= await this.nodeRelationHandler.getNewCategories(realm, structureData['status']);
-         newCategoriesArr.push(newStatus); 
-         relationArr.push(RelationName.STATUS_BY);
-         _root_idArr.push(createNode.identity.low);
-      await this.nodeRelationHandler.manageNodesRelations([], newCategoriesArr,relationArr,_root_idArr);
-  }
- //////////////////////////////////////////////  STATUS_BY relations  ///////////////////////////////////////
-  if (structureData['nodeType'] == 'Space') {
-    let newCategoriesArr = [];
-    let relationArr = [];
-    let _root_idArr = [];   
+        await this.nodeRelationHandler.manageNodesRelations([], newCategoriesArr, relationArr, _root_idArr);
+      }
+      //////////////////////////////////////////////  STATUS_BY relations  ///////////////////////////////////////
+      if (structureData['nodeType'] == 'Space' || structureData['nodeType'] == 'Building') {
+        let newCategoriesArr = [];
+        let relationArr = [];
+        let _root_idArr = [];
 
-    const newUsages = await this.nodeRelationHandler.getNewCategories(realm, structureData['usage']);
-       newCategoriesArr.push(newUsages); 
-       relationArr.push(RelationName.USAGE_BY);
-      _root_idArr.push(createNode.identity.low); 
-    await this.nodeRelationHandler.manageNodesRelations([], newCategoriesArr,relationArr,_root_idArr);
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        const newStatus = await this.nodeRelationHandler.getNewCategories(realm, structureData['status']);
+        newCategoriesArr.push(newStatus);
+        relationArr.push(RelationName.STATUS_BY);
+        _root_idArr.push(createNode.identity.low);
+        await this.nodeRelationHandler.manageNodesRelations([], newCategoriesArr, relationArr, _root_idArr);
+      }
+      //////////////////////////////////////////////  STATUS_BY relations  ///////////////////////////////////////
+      if (structureData['nodeType'] == 'Space') {
+        let newCategoriesArr = [];
+        let relationArr = [];
+        let _root_idArr = [];
+
+        const newUsages = await this.nodeRelationHandler.getNewCategories(realm, structureData['usage']);
+        newCategoriesArr.push(newUsages);
+        relationArr.push(RelationName.USAGE_BY);
+        _root_idArr.push(createNode.identity.low);
+        await this.nodeRelationHandler.manageNodesRelations([], newCategoriesArr, relationArr, _root_idArr);
+      }
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       ///////create PARENT_OF relation between parent facility structure node and child facility structure node.  //////
       await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
@@ -921,38 +912,6 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
         if (error.response?.code == CustomTreeError.NOT_UNIQUE) {
           throw new NotUniqueException(error.response?.params['val']);
         }
-      } else {
-        throw new HttpException('', 500);
-      }
-    }
-  }
-
-  //REVISED FOR NEW NEO4J
-  async findStructureFirstLevelNodes(key: string, leafType, realm: string, language: string) {
-    try {
-     
-      const tree = await this.lazyLoadingDealer.loadByKey(
-        key,
-        leafType,
-        { isDeleted: false, canDisplay: true },
-        { isDeleted: false, canDisplay: true },
-        { isDeleted: false },
-      );
-      return tree;
-    } catch (error) {
-      const code = error.response?.code;
-      if (code >= 1000 && code <= 1999) {
-        if (error.response?.code == CustomIfmCommonError.EXAMPLE1) {
-        }
-      } else if (code >= 5000 && code <= 5999) {
-        if (
-          error.response?.code == CustomNeo4jError.FIND_BY_REALM_WITH_TREE_STRUCTURE_ERROR ||
-          error.response?.code == CustomNeo4jError.FIND_WITH_CHILDREN_BY_REALM_AS_TREE_ERROR ||
-          error.response?.code == CustomNeo4jError.FIND_WITH_CHILDREN_BY_REALM_AS_TREE__FIND_BY_REALM_ERROR
-        ) {
-          throw new FindWithChildrenByRealmAsTreeException(realm, 'label');
-        }
-      } else if (code >= 9000 && code <= 9999) {
       } else {
         throw new HttpException('', 500);
       }

@@ -15,13 +15,14 @@ import { WinformDataOperationController } from './controllers/winform.data_opera
 import { WinformDataOperationService } from './services/winform.data_operation.service';
 import { WinformDataOperationRepository } from './repositories/winform.data_opreation.repository';
 import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
-import { LazyLoadingRepository } from 'src/common/class/lazyLoading.dealer';
 import { StructureLazyLoadingService } from './services/structure.lazyloading.service';
 import { StructureLazyLoadingController } from './controllers/structure.lazyloading.controller';
 import { FacilityStructureLazyLoadingRepository } from './repositories/structure.lazyloading.repository';
+import { LazyLoadingRepository } from 'ifmcommon';
+import { Neo4jModule } from 'sgnm-neo4j/dist';
 
 @Module({
-  imports: [HttpModule],
+  imports: [HttpModule, Neo4jModule],
   controllers: [
     StructureController,
     AssetRelationController,

@@ -154,42 +154,6 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-  async loadByPathWithKey(
-    path: string[],
-    label: string,
-    leafType: string,
-    rootFilters: object,
-    childerenFilters: object,
-    childrensChildFilter: object,
-  ) {
-    try {
-      const rootWithChildren: any = await this.loadByLabel(label, rootFilters, childerenFilters, childrensChildFilter);
-
-      // referans tutucu
-      const temp: any = new Map();
-
-      for (const item of rootWithChildren.children) {
-        temp[item.key] = item;
-      }
-      delete rootFilters['realm'];
-      for (const item of path) {
-        let loadedChildren = await this.loadByKey(item, leafType, rootFilters, childerenFilters, childrensChildFilter);
-        if (loadedChildren.children) {
-          temp[item].children = loadedChildren.children.map((child: any) => ({
-            ...child,
-            id: child.id,
-            leaf: child.leaf,
-          }));
-          for (const it of temp[item].children) {
-            temp[it.key] = it;
-          }
-        }
-      }
-      return rootWithChildren;
-    } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
 
   async loadClassificationWithPath(path: string[], realm: string, language: string) {
     try {

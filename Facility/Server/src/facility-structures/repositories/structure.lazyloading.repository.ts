@@ -1,6 +1,6 @@
 import { HttpException, Injectable } from '@nestjs/common';
+import { LazyLoadingRepository } from 'ifmcommon';
 import { Neo4jService } from 'sgnm-neo4j/dist';
-import { LazyLoadingRepository } from 'src/common/class/lazyLoading.dealer';
 import { node_not_found } from 'src/common/const/custom.error.object';
 import { LazyLoadingPathDto } from 'src/common/dto/lazy.loading.path.dto';
 import { LazyLoadingPathByKeyDto } from 'src/common/dto/lazy.loading.path.key.dto ';
