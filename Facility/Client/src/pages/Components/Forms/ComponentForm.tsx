@@ -173,7 +173,7 @@ const TypeForm = ({
 
       FacilityStructureLazyService.lazyLoadByKey(event.node.key)
         .then((res) => {
-          console.log(res.data);
+          // console.log(res.data);
           
           // setLoadedNode((prev: any) => {
           //   for (const item of res.data.children) {
@@ -186,6 +186,8 @@ const TypeForm = ({
 
           //   return prev;
           // });
+          console.log(event.node);
+          
 
           event.node.children = res.data.children.map((child: any) => ({
             ...child,
@@ -194,15 +196,15 @@ const TypeForm = ({
           }));
           console.log(event.node);
           
-          console.log([...spaces]);
+          // console.log([...spaces]);
           
-          let temp = JSON.parse(
-            JSON.stringify([...spaces] || [])
-          );
-          fixNodesSpaces(temp);
-          setSpaces(temp);
+          // let temp = JSON.parse(
+          //   JSON.stringify([...spaces] || [])
+          // );
+          // fixNodesSpaces(temp);
+          // setSpaces(temp);
           // setExpandedKeys((prev) => ({ ...prev, [event.node.key]: true }));
-          // setSpaces([...spaces]);
+          setSpaces([...spaces]);
           setLoading(false);
         })
         .catch((err) => {
@@ -519,6 +521,7 @@ const TypeForm = ({
                     value={field.value}
                     options={spaces}
                     onNodeExpand={loadOnExpand}
+                    
                     onShow={() => {console.log('show')}}
                     onHide={() => {console.log('hide')}}
                     onChange={(e) => {
