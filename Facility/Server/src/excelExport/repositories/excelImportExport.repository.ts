@@ -39,7 +39,7 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
       
       console.log(data.value.parent_of[0]?.nodeType)   
       console.log(typeof data.value.parent_of[0].parent_of)                                                                                           
-      if(data.value.parent_of[0] ==undefined || (data.value.parent_of[0]?.nodeType=="Floor" && typeof data.value.parent_of[0].parent_of=="undefined") ||(data.value.parent_of[0]?.nodeType=="Block" && (typeof data.value.parent_of[0].parent_of=="undefined" ||typeof data.value.parent_of[0].parent_of[0].parent_of=="undefined"))){
+      if(data.value.parent_of==undefined || (data.value.parent_of[0]?.nodeType=="Floor" && typeof data.value.parent_of[0].parent_of=="undefined") ||(data.value.parent_of[0]?.nodeType=="Block" && (typeof data.value.parent_of[0].parent_of=="undefined" ||typeof data.value.parent_of[0].parent_of[0].parent_of=="undefined"))){
         throw new HttpException(there_are_no_spaces_object(),404);
       }
       else {

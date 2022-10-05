@@ -83,12 +83,12 @@ export class InfraRepository implements InfraInterface {
       await this.neo4jService.addParentRelationByIdAndFilters(configNode.identity.low, {}, infraNode.identity.low, {});
 
       const assetTypesNodeEN = await this.neo4jService.createNode(
-        { canDelete: false, isDeleted: false, canCopied: true, isActive: true, isRoot: true, name: 'Asset Types', realm: 'Signum' },
-        ['AssetTypes_en'],
+        { canDelete: false, isDeleted: false, canCopied: true, isActive: true, isRoot: true, name: 'Asset Type', realm: 'Signum' },
+        ['AssetType_en'],
       );
       const assetTypesNodeTR = await this.neo4jService.createNode(
-        { canDelete: false, isDeleted: false, canCopied: true, isActive: true, isRoot: true, name: 'Asset Types', realm: 'Signum' },
-        ['AssetTypes_tr'],
+        { canDelete: false, isDeleted: false, canCopied: true, isActive: true, isRoot: true, name: 'Asset Type', realm: 'Signum' },
+        ['AssetType_tr'],
       );
 
       await this.neo4jService.addParentRelationByIdAndFilters(
