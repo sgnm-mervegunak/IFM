@@ -84,7 +84,7 @@ const Zone = () => {
   const { t } = useTranslation(["common"]);
   const language = useAppSelector((state) => state.language.language);
 
-  const [pageSizes] = React.useState<number[]>([10, 20]);
+  const [pageSizes] = React.useState<number[]>([10, 20,40,80,100]);
 
 
   const [columns] = useState<Column[]>([
