@@ -1,5 +1,5 @@
 import { Button } from "primereact/button";
-import { Column } from "primereact/column";
+// import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
 import { v4 as uuidv4 } from "uuid";
@@ -26,21 +26,17 @@ import {
   TableHeaderRow, TableSelection, Toolbar,
 } from '@devexpress/dx-react-grid-material-ui';
 import {
-  FilteringState, GroupingState,
-  IntegratedFiltering, IntegratedGrouping, IntegratedPaging, IntegratedSelection, IntegratedSorting,
-  PagingState, SelectionState, SortingState, DataTypeProvider, DataTypeProviderProps,
+  DataTypeProvider,
+  Column,
+  TreeDataState, SortingState, SelectionState, FilteringState, PagingState,
+  CustomTreeData, IntegratedFiltering, IntegratedPaging, IntegratedSorting, IntegratedSelection, GroupingState, IntegratedGrouping
 } from '@devexpress/dx-react-grid';
 import ZoneService from "../../services/zone";
 
-const columns = [
-  { name: "name", title: "Name" },
-  { name: "description", title: "Description" },
-  { name: "tag", title: "Tag" },
-  {name:"buildingName", title:"Building"}
-];
-const rows: any = [
 
-];
+// const rows: any = [
+
+// ];
 interface Node {
   cantDeleted: boolean;
   children: Node[];
@@ -90,6 +86,14 @@ const Zone = () => {
 
   const [pageSizes] = React.useState<number[]>([10, 20]);
 
+
+  const [columns] = useState<Column[]>([
+    { name: "name", title: "Name" },
+    { name: "description", title: "Description" },
+    { name: "tag", title: "Tag" },
+    { name: "buildingName", title: "Building" }
+  ]);
+  
   useEffect(() => {
     loadLazyData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -252,17 +256,26 @@ const Zone = () => {
   //   );
   // };
 
+ 
+
+
   return (
     <Paper>
       <Grid rows={row} columns={columns}>
         <GroupingState
           defaultGrouping={[{ columnName: "buildingName" }]}
         />
-        {/* <IntegratedGrouping/> */}
+        <IntegratedGrouping/>
+        <TreeDataState />
         <PagingState />
+
+        {/* <CustomTreeData
+          getChildRows={getChildRows}
+        /> */}
         <IntegratedPaging />
         <Table />
         <TableHeaderRow />
+        <TableGroupRow/>
         <PagingPanel pageSizes={pageSizes} />
       </Grid>
     </Paper>
@@ -270,3 +283,10 @@ const Zone = () => {
 };
 
 export default Zone;
+
+
+const getChildRows = (row:any, rows:any) => {
+  const childRows = rows.filter((r: any) => r?.nodeType === (row ? row.ID : 0));
+  console.log("rows:-----", row);
+  return childRows.length ? childRows : null;
+};
