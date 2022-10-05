@@ -444,7 +444,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
         );
       }
       const allowedStructureTypeNode = await this.neo4jService.findChildrensByLabelsOneLevel(
-        ['FacilityTypes_EN'],
+        ['FacilityTypes_en'],
         { isDeleted: false, realm: structureRootNode[0]['_fields'][0].properties.realm },
         [],
         { isDeleted: false, name: new_parent.labels[0] },
