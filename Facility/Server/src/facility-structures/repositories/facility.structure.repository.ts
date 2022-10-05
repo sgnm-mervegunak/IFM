@@ -4,7 +4,6 @@ import {
   FindWithChildrenByRealmAsTreeException,
   ParentFacilityStructureNotFountException,
 } from '../../common/notFoundExceptions/not.found.exception';
-//import { CustomNeo4jError, Neo4jService } from 'sgnm-neo4j';
 import { NestKafkaService } from 'ifmcommon';
 import { Neo4jService, assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError } from 'sgnm-neo4j/dist';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
