@@ -21,8 +21,7 @@ export class FacilityStructureLazyLoadingRepository implements FacilityLazyLoadi
       const parents = await (
         await this.neo4jService.findChildrensByLabelsAndFiltersWithNotLabels([], {}, [], { key }, [
           'Root',
-          'Classification',
-          label,
+          'FacilityStructure',
         ])
       )
         .map((item) => item.get('parent').properties.key)
@@ -30,11 +29,11 @@ export class FacilityStructureLazyLoadingRepository implements FacilityLazyLoadi
 
       const tree = await this.lazyLoadingDealer.loadByPath(
         parents,
-        label,
+        'FacilityStructure',
         leafType,
         { realm, isDeleted: false },
-        { isDeleted: false },
-        { isDeleted: false },
+        { isDeleted: false, canDisplay: true },
+        { isDeleted: false, canDisplay: true },
       );
       return tree;
     } catch (error) {}
