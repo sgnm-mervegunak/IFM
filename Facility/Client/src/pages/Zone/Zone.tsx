@@ -36,9 +36,10 @@ const columns = [
   { name: "name", title: "Name" },
   { name: "description", title: "Description" },
   { name: "tag", title: "Tag" },
+  {name:"buildingName", title:"Building"}
 ];
-const rows :any = [
-  
+const rows: any = [
+
 ];
 interface Node {
   cantDeleted: boolean;
@@ -116,18 +117,37 @@ const Zone = () => {
         console.log("-----------------------", response.data.children);
         setData(response.data?.children);
         let arr = response.data?.children;
-        arr.map((index:any, key:any) => {
+        arr.map((index: any, key: any) => {
           console.log("index", index);
           console.log("key", key)
 
-          setRow([...row, row.push({ "name": index?.name, "description": index?.description, "tag": index?.tag })])
-        
+          // setRow([...row, row.push({ "name": index?.name, "description": index?.description, "tag": index?.tag })])
 
-        
+          ZoneService.findBuildingWithKey(index?.key)
+            .then((res) => {
+              console.log("resssss:", res?.data?.root)
+              let building = res?.data?.root?.name;
+              let arr2 = res?.data?.root?.children
+              arr2.map((index: any, key: any) => {
+                console.log("index2", index)
+
+                let arr3 = index?.children;
+                arr3.map((index2: any, key2: any) => {
+                  console.log("22222222", index2)
+
+                  setRow([...row, row.push({ "name": index2?.name, "description": index2?.description, "tag": index2?.tag, "buildingName": building })])
+                  
+                })
+              })
+
+
+
+            })
+
         })
 
-    
-     })
+
+      })
       .catch((err) => {
         toast.current.show({
           severity: "error",
@@ -144,20 +164,20 @@ const Zone = () => {
     //   { name: 0, description: "DevExtreme", siteName: "DevExpress" },
     //   { name: 1, description: "DevExtreme Reactive", siteName: "DevExpress" },
     // ])
-    console.log("????",data)
+    console.log("????", data)
     data.map((index, key) => {
       console.log("index", index);
       console.log("key", key)
-      
+
       setRow([...row, { "name": index?.name, "description": index?.description, "tag": index?.tag }])
     })
-  },data)
+  }, data)
 
   useEffect(
     () => {
-      console.log("roooow",row)
+      console.log("roooow", row)
     }
-    ,[row]
+    , [row]
   )
 
 
@@ -235,6 +255,10 @@ const Zone = () => {
   return (
     <Paper>
       <Grid rows={row} columns={columns}>
+        <GroupingState
+          defaultGrouping={[{ columnName: "buildingName" }]}
+        />
+        {/* <IntegratedGrouping/> */}
         <PagingState />
         <IntegratedPaging />
         <Table />
