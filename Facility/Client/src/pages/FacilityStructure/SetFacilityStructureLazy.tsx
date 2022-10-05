@@ -484,18 +484,18 @@ const SetFacilityStructure = () => {
     setLoading(true);
     console.log(loadedNode);
     console.log(key);
-    
+
     const temp = key
       ? loadedNode[key]
         ? [...loadedNode[key], key]
         : [key]
-      : [selectedNodeKey];
+      : loadedNode[selectedNodeKey];
     console.log(temp);
 
     FacilityStructureLazyService.loadStructureWithPath(temp)
       .then((res) => {
         setData([res.data]);
-        if (key) {
+        if (key && dragingNode) {
           setLoadedNode((prev: any) => ({ ...prev, [dragingNode]: temp }));
         }
         setExpandedKeys((prev: any) => {
@@ -850,7 +850,9 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={rollBack}
+            getFacilityStructure={(nodeKey: string) =>
+              rollBack(selectedNodeKey, nodeKey)
+            }
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -865,7 +867,9 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={rollBack}
+            getFacilityStructure={(nodeKey: string) =>
+              rollBack(selectedNodeKey, nodeKey)
+            }
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -880,7 +884,9 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={rollBack}
+            getFacilityStructure={(nodeKey: string) =>
+              rollBack(selectedNodeKey, nodeKey)
+            }
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -895,7 +901,9 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={rollBack}
+            getFacilityStructure={(nodeKey: string) =>
+              rollBack(selectedNodeKey, nodeKey)
+            }
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}

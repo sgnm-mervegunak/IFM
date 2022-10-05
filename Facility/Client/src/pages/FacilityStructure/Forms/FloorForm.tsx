@@ -17,7 +17,7 @@ interface Params {
     setSubmitted: any;
     selectedNodeKey: string;
     editDia: boolean;
-    getFacilityStructure: () => void;
+    getFacilityStructure: any;
     setAddDia: React.Dispatch<React.SetStateAction<boolean>>;
     setEditDia: React.Dispatch<React.SetStateAction<boolean>>;
     isUpdate: boolean;
@@ -185,7 +185,7 @@ const FloorForm = ({
                     // StructureWinformService.createForm(res.data.properties.key, newForm)
                     //     .then((res) => {
                     //     })
-                    getFacilityStructure();
+                    getFacilityStructure(res.data.properties.key);
 
                 })
                 .catch((err) => {
