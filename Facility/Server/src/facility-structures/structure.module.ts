@@ -15,25 +15,36 @@ import { WinformDataOperationController } from './controllers/winform.data_opera
 import { WinformDataOperationService } from './services/winform.data_operation.service';
 import { WinformDataOperationRepository } from './repositories/winform.data_opreation.repository';
 import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
+import { StructureLazyLoadingService } from './services/structure.lazyloading.service';
+import { StructureLazyLoadingController } from './controllers/structure.lazyloading.controller';
+import { FacilityStructureLazyLoadingRepository } from './repositories/structure.lazyloading.repository';
+
+import { Neo4jModule } from 'sgnm-neo4j/dist';
 import { LazyLoadingRepository } from 'src/common/class/lazyLoading.dealer';
 
 @Module({
-  imports: [HttpModule],
+  imports: [HttpModule, Neo4jModule],
   controllers: [
     StructureController,
     AssetRelationController,
     StructureListenerController,
     WinformRelationController,
     WinformDataOperationController,
+    StructureLazyLoadingController,
   ],
   providers: [
     StructureService,
     AssetRelationService,
     WinformRelationService,
     WinformDataOperationService,
+    StructureLazyLoadingService,
     {
       provide: RepositoryEnums.FACILITY_STRUCTURE,
       useClass: FacilityStructureRepository,
+    },
+    {
+      provide: RepositoryEnums.FACILITY_STRUCTURE_LAZY_LOADING,
+      useClass: FacilityStructureLazyLoadingRepository,
     },
     {
       provide: RepositoryEnums.ASSET_STRUCTURE_RELATION,

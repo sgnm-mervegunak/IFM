@@ -95,13 +95,25 @@ const getFacilityTypeProperties = async (
     return axios.get(url + "/structuretypes/" + "properties/" + "all" + "/" + second_child_node_name);
 };
 
-const getOneByLabel = ()=>{
+const getOneByLabel = () => {
     return axios.get("http://localhost:3010/lazyLoading/FacilityStructure")
 }
 
-const getOneByKey = (key:string)=>{
-    return axios.get("http://localhost:3010/lazyLoading/"+key+'/Space')
+const getOneByKey = (key: string) => {
+    return axios.get("http://localhost:3010/lazyLoading/" + key + '/Space')
 }
+
+const lazyLoadByKey = (key: string) => {
+    return axios.get(url + "/lazyloading" + "/" + key + '/Space')
+}
+
+const getFirstLevelByLabel = (label: string) => {
+    return axios.get(url + "/structuretypes/"+label)
+}
+
+const loadStructureWithPath = async (path: string[]) => {
+    return axios.post(url + "/lazyloading/path", { path });
+  };
 
 const service = {
     findAll,
@@ -118,7 +130,10 @@ const service = {
     createStructure,
     findStuctureFirstLevel,
     getOneByLabel,
-    getOneByKey
+    getOneByKey,
+    lazyLoadByKey,
+    getFirstLevelByLabel,
+    loadStructureWithPath
 };
 
 export default service;

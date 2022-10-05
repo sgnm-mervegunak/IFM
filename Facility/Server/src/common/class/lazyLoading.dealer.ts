@@ -7,7 +7,7 @@ import { LazyLoadingInterface } from 'src/common/interface/lazyLoading.interface
 export class LazyLoadingRepository implements LazyLoadingInterface {
   constructor(private readonly neo4jService: Neo4jService) {}
 
-  async loadByLabel(label: string, rootFilters: object, childFilters: object) {
+  async loadByLabel(label: string, rootFilters: object, childerenFilters: object, childrensChildFilter: object) {
     try {
       const node = await this.neo4jService.findByLabelAndFilters([label], rootFilters);
 
@@ -22,24 +22,25 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
         [label],
         rootFilters,
         [],
-        childFilters,
+        childerenFilters,
         'PARENT_OF',
       );
       if (!firstLevelChildren.length) {
-        return {};
+        return { ...node[0].get('n').properties };
       }
 
       const root_id = node[0].get('n').identity.low;
 
       const children = await Promise.all(
         firstLevelChildren.map(async (item) => {
-          const firstLevelChildrensChildren = await this.neo4jService.findChildrensByIdOneLevel(
-            item.get('children').identity.low,
-            { isDeleted: false },
+          const firstLevelChildrensChildren = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
             [],
-            { isDeleted: false },
+            { key: item.get('children').properties.key },
+            [],
+            childrensChildFilter,
             'PARENT_OF',
           );
+
           return {
             labels: item.get('children').labels,
             ...item.get('children').properties,
@@ -60,34 +61,40 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
     }
   }
 
-  async loadByKey(key: string, leafType = '', rootFilters: object, childFilters: object) {
+  async loadByKey(
+    key: string,
+    leafType = '',
+    rootFilters: object,
+    childerenFilters: object,
+    childrensChildFilter: object,
+  ) {
     try {
       const node = await this.neo4jService.findByLabelAndFilters([], { key, ...rootFilters });
 
       if (!node.length) {
         throw new HttpException({ key: I18NEnums.CLASSIFICATION_NOT_FOUND, args: { key } }, HttpStatus.NOT_FOUND);
       }
-      console.log({ key, ...rootFilters });
+
       const firstLevelChildren = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
         [],
         { key, ...rootFilters },
         [],
-        childFilters,
+        childerenFilters,
         'PARENT_OF',
       );
       if (!firstLevelChildren.length) {
-        return {};
+        return { ...node[0].get('n').properties };
       }
 
       const root_id = node[0].get('n').identity.low;
 
       const children = await Promise.all(
         firstLevelChildren.map(async (item) => {
-          const firstLevelChildrensChildren = await this.neo4jService.findChildrensByIdOneLevel(
-            item.get('children').identity.low,
-            { isDeleted: false },
+          const firstLevelChildrensChildren = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
             [],
-            { isDeleted: false },
+            { key: item.get('children').properties.key },
+            [],
+            childrensChildFilter,
             'PARENT_OF',
           );
           return {
@@ -105,6 +112,71 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
         leaf: children.length <= 0,
         children,
       };
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  async loadByPath(
+    path: string[],
+    label: string,
+    leafType: string,
+    rootFilters: object,
+    childerenFilters: object,
+    childrensChildFilter: object,
+  ) {
+    try {
+      const rootWithChildren: any = await this.loadByLabel(label, rootFilters, childerenFilters, childrensChildFilter);
+
+      // referans tutucu
+      const temp: any = new Map();
+
+      for (const item of rootWithChildren.children) {
+        temp[item.key] = item;
+      }
+      delete rootFilters['realm'];
+      for (const item of path) {
+        let loadedChildren = await this.loadByKey(item, leafType, rootFilters, childerenFilters, childrensChildFilter);
+
+        if (loadedChildren.children) {
+          temp[item].children = loadedChildren.children.map((child: any) => ({
+            ...child,
+            id: child.id,
+            leaf: child.leaf,
+          }));
+          for (const it of temp[item].children) {
+            temp[it.key] = it;
+          }
+        }
+      }
+      console.log(rootWithChildren);
+      return rootWithChildren;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async loadClassificationWithPath(path: string[], realm: string, language: string) {
+    try {
+      const rootWithChildren: any = await this.getClassificationRootAndChildrenByLanguageAndRealm(realm, language);
+
+      // referans tutucu
+      const temp: any = new Map();
+
+      for (const item of rootWithChildren.children) {
+        temp[item.key] = item;
+      }
+      for (const item of path) {
+        const loadedChildren = await this.loadClassification(item, null);
+        temp[item].children = loadedChildren.children.map((child: any) => ({
+          ...child.properties,
+          id: child.identity.low,
+          leaf: child.leaf,
+        }));
+        for (const it of temp[item].children) {
+          temp[it.key] = it;
+        }
+      }
+      return rootWithChildren;
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -183,32 +255,6 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
         item.leaf = childrenOfItem.map((item) => item.get('children')).length <= 0;
       }
       return { ...node[0].get('n'), children };
-    } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
-  async loadClassificationWithPath(path: string[], realm: string, language: string) {
-    try {
-      const rootWithChildren: any = await this.getClassificationRootAndChildrenByLanguageAndRealm(realm, language);
-
-      // referans tutucu
-      const temp: any = new Map();
-
-      for (const item of rootWithChildren.children) {
-        temp[item.key] = item;
-      }
-      for (const item of path) {
-        const loadedChildren = await this.loadClassification(item, null);
-        temp[item].children = loadedChildren.children.map((child: any) => ({
-          ...child.properties,
-          id: child.identity.low,
-          leaf: child.leaf,
-        }));
-        for (const it of temp[item].children) {
-          temp[it.key] = it;
-        }
-      }
-      return rootWithChildren;
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }

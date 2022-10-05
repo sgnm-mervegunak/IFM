@@ -4,9 +4,9 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Chips } from "primereact/chips";
 import { TreeSelect } from "primereact/treeselect";
-import { TabView, TabPanel } from 'primereact/tabview';
+import { TabView, TabPanel } from "primereact/tabview";
 import axios from "axios";
-import { yupResolver } from '@hookform/resolvers/yup';
+import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useTranslation } from "react-i18next";
 
@@ -21,12 +21,14 @@ interface Params {
   setSubmitted: any;
   selectedNodeKey: string;
   editDia: boolean;
-  getFacilityStructure: () => void;
+  getFacilityStructure: any;
   setAddDia: React.Dispatch<React.SetStateAction<boolean>>;
   setEditDia: React.Dispatch<React.SetStateAction<boolean>>;
   isUpdate: boolean;
   setIsUpdate: React.Dispatch<React.SetStateAction<boolean>>;
-  setSelectedFacilityType: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setSelectedFacilityType: React.Dispatch<
+    React.SetStateAction<string | undefined>
+  >;
 }
 
 interface Node {
@@ -64,8 +66,8 @@ const SpaceForm = ({
   setIsUpdate,
   setSelectedFacilityType,
 }: Params) => {
-
-  const [classificationSpaceCategory, setClassificationSpaceCategory] = useState<Node[]>([]);
+  const [classificationSpaceCategory, setClassificationSpaceCategory] =
+    useState<Node[]>([]);
   const [classificationStatus, setclassificationStatus] = useState<Node[]>([]);
   const [codeCategory, setCodeCategory] = useState("");
   const [codeStatus, setCodeStatus] = useState("");
@@ -73,15 +75,25 @@ const SpaceForm = ({
   const auth = useAppSelector((state) => state.auth);
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
   const [uploadFiles, setUploadFiles] = useState<any>({});
-  const { toast } = useAppSelector(state => state.toast);
+  const { toast } = useAppSelector((state) => state.toast);
   const [data, setData] = useState<any>();
   const { t } = useTranslation(["common"]);
 
   const schema = yup.object({
-    name: yup.string().required("This area is required.").max(50, "This area accepts max 50 characters."),
-    code: yup.string().required("This area is required.").max(50, "This area accepts max 50 characters."),
-    architecturalCode: yup.string().max(50, "This area accepts max 50 characters."),
-    architecturalName: yup.string().max(50, "This area accepts max 50 characters."),
+    name: yup
+      .string()
+      .required("This area is required.")
+      .max(50, "This area accepts max 50 characters."),
+    code: yup
+      .string()
+      .required("This area is required.")
+      .max(50, "This area accepts max 50 characters."),
+    architecturalCode: yup
+      .string()
+      .max(50, "This area accepts max 50 characters."),
+    architecturalName: yup
+      .string()
+      .max(50, "This area accepts max 50 characters."),
     operatorCode: yup.string().max(50, "This area accepts max 50 characters."),
     operatorName: yup.string().max(50, "This area accepts max 50 characters."),
     description: yup.string().max(255, "This area accepts max 255 characters."),
@@ -91,27 +103,35 @@ const SpaceForm = ({
     status: yup.string().required("This area is required."),
     usableHeight: yup
       .number()
-      .typeError(t('Usable Height must be a number'))
-      .nullable().moreThan(-1, t("Usable Height can not be negative"))
+      .typeError(t("Usable Height must be a number"))
+      .nullable()
+      .moreThan(-1, t("Usable Height can not be negative"))
       .transform((_, val) => (val !== "" ? Number(val) : null)),
     grossArea: yup
       .number()
-      .typeError(t('Gross Area must be a number'))
-      .nullable().moreThan(-1, t("Gross Area can not be negative"))
+      .typeError(t("Gross Area must be a number"))
+      .nullable()
+      .moreThan(-1, t("Gross Area can not be negative"))
       .transform((_, val) => (val !== "" ? Number(val) : null)),
     netArea: yup
       .number()
-      .typeError(t('Net Area must be a number'))
+      .typeError(t("Net Area must be a number"))
       .nullable()
       .moreThan(-1, t("Net Area can not be negative"))
       .transform((_, val) => (val !== "" ? Number(val) : null)),
   });
 
-  const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+    control,
+  } = useForm({
     defaultValues: {
-      ...data
+      ...data,
     },
-    resolver: yupResolver(schema)
+    resolver: yupResolver(schema),
   });
 
   const fixNodes = (nodes: Node[]) => {
@@ -126,7 +146,7 @@ const SpaceForm = ({
 
   const getClassificationSpaceCategory = async () => {
     await ClassificationsService.findAllActiveByLabel({
-      label: "OmniClass13"
+      label: "OmniClass13",
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodes(temp);
@@ -136,11 +156,11 @@ const SpaceForm = ({
 
   const getClassificationStatus = async () => {
     await ClassificationsService.findAllActiveByLabel({
-      label: "FacilityStatus"
+      label: "FacilityStatus",
     }).then((res) => {
       let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
       fixNodes(temp);
-      temp[0].selectable = false
+      temp[0].selectable = false;
       setclassificationStatus(temp);
     });
   };
@@ -168,35 +188,47 @@ const SpaceForm = ({
     FacilityStructureService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
         let temp = {};
-        await ClassificationsService.findClassificationByCodeAndLanguage("OmniClass13", res.data.properties.category).then(async clsf1 => {
-          setCodeCategory(res.data.properties.category);
-          res.data.properties.category = await clsf1.data.key
-          temp = res.data.properties;
-          // setData(res.data.properties);
-        })
+        await ClassificationsService.findClassificationByCodeAndLanguage(
+          "OmniClass13",
+          res.data.properties.category
+        )
+          .then(async (clsf1) => {
+            setCodeCategory(res.data.properties.category);
+            res.data.properties.category = await clsf1.data.key;
+            temp = res.data.properties;
+            // setData(res.data.properties);
+          })
           .catch((err) => {
             setData(res.data.properties);
-          })
+          });
 
-        await ClassificationsService.findClassificationByCodeAndLanguage("FacilityStatus", res.data.properties.status).then(async clsf2 => {
-          setCodeStatus(res.data.properties.status);
-          res.data.properties.status = await clsf2.data.key
-          temp = res.data.properties;
-          // setData(res.data.properties);
-        })
+        await ClassificationsService.findClassificationByCodeAndLanguage(
+          "FacilityStatus",
+          res.data.properties.status
+        )
+          .then(async (clsf2) => {
+            setCodeStatus(res.data.properties.status);
+            res.data.properties.status = await clsf2.data.key;
+            temp = res.data.properties;
+            // setData(res.data.properties);
+          })
           .catch((err) => {
             setData(res.data.properties);
-          })
+          });
 
-        await ClassificationsService.findClassificationByCodeAndLanguage("OmniClass13", res.data.properties.usage).then(async clsf3 => {
-          setCodeUsage(res.data.properties.usage);
-          res.data.properties.usage = await clsf3.data.key
-          temp = res.data.properties;
-          // setData(res.data.properties);
-        })
+        await ClassificationsService.findClassificationByCodeAndLanguage(
+          "OmniClass13",
+          res.data.properties.usage
+        )
+          .then(async (clsf3) => {
+            setCodeUsage(res.data.properties.usage);
+            res.data.properties.usage = await clsf3.data.key;
+            temp = res.data.properties;
+            // setData(res.data.properties);
+          })
           .catch((err) => {
             setData(res.data.properties);
-          })
+          });
 
         setData(temp);
       })
@@ -290,12 +322,12 @@ const SpaceForm = ({
           for (let item in temp) {
             temp[item] = JSON.stringify(temp[item]);
           }
-          FacilityStructureService.update(res.data.properties.key, {
+          await FacilityStructureService.update(res.data.properties.key, {
             ...newNode,
             ...temp,
           });
           setUploadFiles({});
-          getFacilityStructure();
+          getFacilityStructure(res.data.properties.key);
         })
         .catch((err) => {
           toast.current.show({
@@ -309,7 +341,6 @@ const SpaceForm = ({
       setAddDia(false);
       setSelectedFacilityType(undefined);
       setUploadFiles({});
-
     } else {
       let updateNode: any = {};
       updateNode = {
@@ -365,29 +396,30 @@ const SpaceForm = ({
           }
           for (let item in temp) {
             try {
-              temp[item] = [...JSON.parse(updateNode[item]), ...temp[item]]
-            }
-            catch (err) {
-            }
-            temp[item] = JSON.stringify(temp[item])
+              temp[item] = [...JSON.parse(updateNode[item]), ...temp[item]];
+            } catch (err) {}
+            temp[item] = JSON.stringify(temp[item]);
           }
 
           // delete files
           for (let item of deleteFiles) {
-            let temp = item.image_url.split("/")
+            let temp = item.image_url.split("/");
             // let urlIndex = temp.findIndex((item: any) => item === "172.30.99.120:9000")
-            let urlIndex = temp.findIndex((item: any) => item === "ifm")
-            let temp2 = temp.slice(urlIndex + 1)
+            let urlIndex = temp.findIndex((item: any) => item === "ifm");
+            let temp2 = temp.slice(urlIndex + 1);
 
-            await DeleteAnyFile("ifm", temp2.join("/"))
+            await DeleteAnyFile("ifm", temp2.join("/"));
             // await DeleteAnyFile(temp2[0], temp2.slice(1).join("/"))
           }
 
           // update node
-          FacilityStructureService.update(res.data.properties.key, { ...updateNode, ...temp })
+          FacilityStructureService.update(res.data.properties.key, {
+            ...updateNode,
+            ...temp,
+          });
           getFacilityStructure();
-          setUploadFiles({})
-          setDeleteFiles([])
+          setUploadFiles({});
+          setDeleteFiles([]);
         })
         .catch((err) => {
           toast.current.show({
@@ -400,7 +432,7 @@ const SpaceForm = ({
       setTimeout(() => {
         setEditDia(false);
         setUploadFiles({});
-        setDeleteFiles([])
+        setDeleteFiles([]);
       }, 1000);
     }
   };
@@ -409,19 +441,17 @@ const SpaceForm = ({
     return null;
   }
 
-
   return (
     <form>
       <TabView>
         <TabPanel header={t("Form")}>
           <div className="formgrid grid">
-
             <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("name")}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
                 defaultValue={data?.name || ""}
               />
               <p style={{ color: "red" }}>{errors.name?.message}</p>
@@ -432,32 +462,40 @@ const SpaceForm = ({
               <InputText
                 autoComplete="off"
                 {...register("code")}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
                 defaultValue={data?.code || ""}
               />
               <p style={{ color: "red" }}>{errors.code?.message}</p>
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Architectural Name")}</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>
+                {t("Architectural Name")}
+              </h5>
               <InputText
                 autoComplete="off"
                 {...register("architecturalName")}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
                 defaultValue={data?.architecturalName || ""}
               />
-              <p style={{ color: "red" }}>{errors.architecturalName?.message}</p>
+              <p style={{ color: "red" }}>
+                {errors.architecturalName?.message}
+              </p>
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Architectural Code")}</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>
+                {t("Architectural Code")}
+              </h5>
               <InputText
                 autoComplete="off"
                 {...register("architecturalCode")}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
                 defaultValue={data?.architecturalCode || ""}
               />
-              <p style={{ color: "red" }}>{errors.architecturalCode?.message}</p>
+              <p style={{ color: "red" }}>
+                {errors.architecturalCode?.message}
+              </p>
             </div>
 
             <div className="field col-12 md:col-3">
@@ -465,7 +503,7 @@ const SpaceForm = ({
               <InputText
                 autoComplete="off"
                 {...register("operatorName")}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
                 defaultValue={data?.operatorName || ""}
               />
               <p style={{ color: "red" }}>{errors.operatorName?.message}</p>
@@ -476,7 +514,7 @@ const SpaceForm = ({
               <InputText
                 autoComplete="off"
                 {...register("operatorCode")}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
                 defaultValue={data?.operatorCode || ""}
               />
               <p style={{ color: "red" }}>{errors.operatorCode?.message}</p>
@@ -485,7 +523,6 @@ const SpaceForm = ({
             <div className="field col-12 md:col-6 structureChips">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
               <Controller
-
                 defaultValue={data?.tag || []}
                 name="tag"
                 control={control}
@@ -493,7 +530,7 @@ const SpaceForm = ({
                   <Chips
                     value={field.value}
                     onChange={(e) => {
-                      field.onChange(e.value)
+                      field.onChange(e.value);
                     }}
                     style={{ width: "100%" }}
                   />
@@ -513,11 +550,12 @@ const SpaceForm = ({
                     value={field.value}
                     options={classificationSpaceCategory}
                     onChange={(e) => {
-                      ClassificationsService.nodeInfo(e.value as string)
-                        .then((res) => {
-                          field.onChange(e.value)
+                      ClassificationsService.nodeInfo(e.value as string).then(
+                        (res) => {
+                          field.onChange(e.value);
                           setCodeCategory(res.data.properties.code || "");
-                        })
+                        }
+                      );
                     }}
                     filter
                     placeholder="Select Type"
@@ -537,13 +575,14 @@ const SpaceForm = ({
                 render={({ field }) => (
                   <TreeSelect
                     value={field.value}
-                    options={classificationSpaceCategory}                  // Düzeltilecek
+                    options={classificationSpaceCategory} // Düzeltilecek
                     onChange={(e) => {
-                      ClassificationsService.nodeInfo(e.value as string)
-                        .then((res) => {
-                          field.onChange(e.value)
+                      ClassificationsService.nodeInfo(e.value as string).then(
+                        (res) => {
+                          field.onChange(e.value);
                           setCodeUsage(res.data.properties.code || "");
-                        })
+                        }
+                      );
                     }}
                     filter
                     placeholder="Select Type"
@@ -565,11 +604,12 @@ const SpaceForm = ({
                     value={field.value}
                     options={classificationStatus}
                     onChange={(e) => {
-                      ClassificationsService.nodeInfo(e.value as string)
-                        .then((res) => {
-                          field.onChange(e.value)
-                          setCodeStatus(res.data.properties.code || "");   //Düzeltilecek
-                        })
+                      ClassificationsService.nodeInfo(e.value as string).then(
+                        (res) => {
+                          field.onChange(e.value);
+                          setCodeStatus(res.data.properties.code || ""); //Düzeltilecek
+                        }
+                      );
                     }}
                     filter
                     placeholder="Select Status"
@@ -585,7 +625,7 @@ const SpaceForm = ({
               <InputText
                 autoComplete="off"
                 {...register("description")}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
                 defaultValue={data?.description || ""}
               />
               <p style={{ color: "red" }}>{errors.description?.message}</p>
@@ -594,7 +634,6 @@ const SpaceForm = ({
             <div className="field col-12 md:col-6 structureChips">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Room Tag")}</h5>
               <Controller
-
                 defaultValue={data?.roomTag || []}
                 name="roomTag"
                 control={control}
@@ -602,7 +641,7 @@ const SpaceForm = ({
                   <Chips
                     value={field.value}
                     onChange={(e) => {
-                      field.onChange(e.value)
+                      field.onChange(e.value);
                     }}
                     style={{ width: "100%" }}
                   />
@@ -616,7 +655,7 @@ const SpaceForm = ({
               <InputText
                 autoComplete="off"
                 {...register("usableHeight")}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
                 defaultValue={data?.usableHeight || ""}
               />
               <p style={{ color: "red" }}>{errors.usableHeight?.message}</p>
@@ -627,7 +666,7 @@ const SpaceForm = ({
               <InputText
                 autoComplete="off"
                 {...register("grossArea")}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
                 defaultValue={data?.grossArea || ""}
               />
               <p style={{ color: "red" }}>{errors.grossArea?.message}</p>
@@ -638,14 +677,12 @@ const SpaceForm = ({
               <InputText
                 autoComplete="off"
                 {...register("netArea")}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
                 defaultValue={data?.netArea || ""}
               />
               <p style={{ color: "red" }}>{errors.netArea?.message}</p>
             </div>
-
           </div>
-
         </TabPanel>
         <TabPanel header={t("Images")}>
           <div className="formgrid grid">
@@ -660,7 +697,7 @@ const SpaceForm = ({
                     label={"images"}
                     value={field.value}
                     onChange={(e: any) => {
-                      field.onChange(e)
+                      field.onChange(e);
                     }}
                     deleteFiles={deleteFiles}
                     setDeleteFiles={setDeleteFiles}
@@ -674,7 +711,6 @@ const SpaceForm = ({
           </div>
         </TabPanel>
       </TabView>
-
     </form>
   );
 };

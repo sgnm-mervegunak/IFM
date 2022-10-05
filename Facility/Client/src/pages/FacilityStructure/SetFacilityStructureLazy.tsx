@@ -10,6 +10,7 @@ import { useParams, useNavigate, useLocation, useSearchParams, } from "react-rou
 import { useTranslation } from "react-i18next";
 
 import FacilityStructureService from "../../services/facilitystructure";
+import FacilityStructureLazyService from "../../services/facilitystructurelazy";
 import ClassificationsService from "../../services/classifications";
 import FormTypeService from "../../services/formType";
 import StructureWinformService from "../../services/structureWinform";
@@ -84,6 +85,7 @@ const SetFacilityStructure = () => {
   const [selectedNode, setSelectedNode] = useState<Node>({} as Node);
   const [expandedKeys, setExpandedKeys] = useState({});
   const [expandedKey, setExpandedKey] = useState({});
+  const [loadedNode, setLoadedNode] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
   const [formTypeId, setFormTypeId] = useState<any>(undefined);
@@ -434,69 +436,89 @@ const SetFacilityStructure = () => {
   ];
 
   const getFacilityStructure = () => {
-    FacilityStructureService.getOneByLabel().then((res) => {
-      console.log(res.data);
-
-      let _expandedKey: { [key: string]: boolean } = {};
-      let rootKey: string = res.data.properties.key;
-      console.log("rootKey", rootKey);
-      _expandedKey[rootKey] = true;
-      Object.assign(_expandedKey, expandedKey);
-      setExpandedKeys(_expandedKey);
+    setLoadedNode({});
+    FacilityStructureLazyService.findAll().then((res) => {
+      setData([res.data]);
+      setExpandedKeys({ [res.data.key]: true });
       setLoading(false);
-
-      let tempRoot = [];
-      res.data.properties.children = [];
-      res.data.properties.leaf = false;
-      tempRoot.push(res.data.properties);
-
-      let temp: any = [];
-      res.data.children.forEach((child: any) => {
-        child.properties.children = [];
-        child.properties.leaf = child.leaf;
-        temp.push(child.properties);
-      });
-
-      tempRoot[0].children = temp;
-      setData(tempRoot);
-      
     });
   };
 
   const loadOnExpand = (event: any) => {
-    if (event.node.children.length === 0) {
+    if (!event.node.children) {
       setLoading(true);
 
-      FacilityStructureService.getOneByKey(event.node.key).then((res) => {
-        res.data.children.forEach((child: any) => {
-          child.properties.children = [];
-          child.properties.leaf = child.leaf;
-          event.node.children.push(child.properties);
+      FacilityStructureLazyService.lazyLoadByKey(event.node.key)
+        .then((res) => {
+          setLoadedNode((prev: any) => {
+            for (const item of res.data.children) {
+              prev[item.key] = prev[event.node.key]
+                ? [...prev[event.node.key], event.node.key]
+                : [event.node.key];
+            }
+
+            return prev;
+          });
+
+          event.node.children = res.data.children.map((child: any) => ({
+            ...child,
+            id: child.id,
+            leaf: child.leaf,
+          }));
+          setData([...data]);
+          setExpandedKeys((prev) => ({ ...prev, [event.node.key]: true }));
+          setLoading(false);
+        })
+        .catch((err) => {
+          toast.current.show({
+            severity: "error",
+            summary: t("Error"),
+            detail: err.response ? err.response.data.message : err.message,
+            life: 4000,
+          });
         });
-
-        setLoading(false);
-      });
-
-      return;
     }
   };
 
-  const rollBack = () => {
+  const rollBack = async (key?: any, dragingNode?: any) => {
+    setLoading(true);
+    console.log(loadedNode);
+    console.log(key);
 
+    const temp = key
+      ? loadedNode[key]
+        ? [...loadedNode[key], key]
+        : [key]
+      : loadedNode[selectedNodeKey];
+    console.log(temp);
 
-      FacilityStructureService.getOneByKey(lastNodeKey).then((res) => {
+    FacilityStructureLazyService.loadStructureWithPath(temp)
+      .then((res) => {
+        setData([res.data]);
+        if (key && dragingNode) {
+          setLoadedNode((prev: any) => ({ ...prev, [dragingNode]: temp }));
+        }
+        setExpandedKeys((prev: any) => {
+          prev = {
+            [res.data.key]: true,
+          };
+          for (let item of temp) {
+            prev[item] = true;
+          }
+          return prev;
+        });
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
 
-        console.log(res.data);
-        
-        // res.data.children.forEach((child: any) => {
-        //   child.properties.children = [];
-        //   child.properties.leaf = child.leaf;
-        //   event.node.children.push(child.properties);
-        // });
-
-
+        toast.current.show({
+          severity: "error",
+          summary: t("Error"),
+          detail: err.response ? err.response.data.message : err.message,
+          life: 4000,
+        });
       });
-
   };
 
 
@@ -537,7 +559,9 @@ const SetFacilityStructure = () => {
               detail: err.response ? err.response.data.message : err.message,
               life: 4000,
             });
+            rollBack();
           });
+        rollBack();
       })
       .catch((err) => {
         toast.current.show({
@@ -549,11 +573,16 @@ const SetFacilityStructure = () => {
       });
   };
 
-  const dragDropUpdate = (dragId: string, dropId: string) => {
+  const dragDropUpdate = (
+    dragId: string,
+    dropId: string,
+    key: string,
+    dragingNode: string) => {
     FacilityStructureService.relation(dragId, dropId)
       .then((res) => {
         showSuccess("Structure Updated");
-        getFacilityStructure();
+        // getFacilityStructure();
+        rollBack(key, dragingNode);
       })
       .catch((err) => {
         toast.current.show({
@@ -562,22 +591,26 @@ const SetFacilityStructure = () => {
           detail: err.response ? err.response.data.message : err.message,
           life: 4000,
         });
-        getFacilityStructure();
       });
   };
 
-  const dragConfirm = (dragId: string, dropId: string) => {
+  const dragConfirm = (
+    dragId: string,
+    dropId: string,
+    key: string,
+    dragingnode: string) => {
     confirmDialog({
       message: t("Are you sure you want to move?"),
       header: t("Move Confirmation"),
       icon: "pi pi-exclamation-triangle",
       accept: () => {
         setLoading(true);
-        dragDropUpdate(dragId, dropId);
+        dragDropUpdate(dragId, dropId, key, dragingnode);
+        setLoading(false);
       },
       reject: () => {
-        setLoading(true);
-        getFacilityStructure();
+        // setLoading(true);
+        // getFacilityStructure();
       },
     });
   };
@@ -817,7 +850,9 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={getFacilityStructure}
+            getFacilityStructure={(nodeKey: string) =>
+              rollBack(selectedNodeKey, nodeKey)
+            }
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -832,7 +867,9 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={getFacilityStructure}
+            getFacilityStructure={(nodeKey: string) =>
+              rollBack(selectedNodeKey, nodeKey)
+            }
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -847,7 +884,9 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={getFacilityStructure}
+            getFacilityStructure={(nodeKey: string) =>
+              rollBack(selectedNodeKey, nodeKey)
+            }
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -862,7 +901,9 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={getFacilityStructure}
+            getFacilityStructure={(nodeKey: string) =>
+              rollBack(selectedNodeKey, nodeKey)
+            }
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -965,7 +1006,7 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={getFacilityStructure}
+            getFacilityStructure={rollBack}
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -980,7 +1021,7 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={getFacilityStructure}
+            getFacilityStructure={rollBack}
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -995,7 +1036,7 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={getFacilityStructure}
+            getFacilityStructure={rollBack}
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -1010,7 +1051,7 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={getFacilityStructure}
+            getFacilityStructure={rollBack}
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -1153,17 +1194,12 @@ const SetFacilityStructure = () => {
       <div className="field">
         <Tree
           loading={loading}
+          value={data}
           onExpand={loadOnExpand}
           expandedKeys={expandedKeys}
           onToggle={(e) => {
-
-            setLastNodeKey(Object.keys(e.value)[Object.keys(e.value).length - 1]);
-            
             setExpandedKeys(e.value);
-            setExpandedKey(e.value);
-            
           }}
-          value={data}
           dragdropScope="-"
           contextMenuSelectionKey={selectedNodeKey ? selectedNodeKey : ""}
           onContextMenuSelectionChange={(event: any) => {
@@ -1171,7 +1207,7 @@ const SetFacilityStructure = () => {
           }}
           onContextMenu={(event: any) => {
             setCanDelete(event.node.canDelete); // for use import building control on context menu
-            setSelectedFacilityType(event.node._type);
+            setSelectedFacilityType(event.node.nodeType);
             cm.current.show(event.originalEvent);
           }}
           onDragDrop={(event: any) => {
@@ -1185,7 +1221,13 @@ const SetFacilityStructure = () => {
               });
               return;
             }
-            dragConfirm(event.dragNode._id.low, event.dropNode._id.low);
+            // dragConfirm(event.dragNode._id.low, event.dropNode._id.low);
+            dragConfirm(
+              event.dragNode.id,
+              event.dropNode.id,
+              event.dropNode.key,
+              event.dragNode.key
+            );
           }}
           filter
           filterBy="label,name,description,tag,key"

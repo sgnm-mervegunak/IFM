@@ -36,28 +36,34 @@ export class OrganizationRepository {
 
       const organizationInfo = {
         name: realm,
-        canDelete:false
+        canDelete:false,
+        nodeType: 'Organization'
       };
       const classificationInfo = {
         name: realm + 'Classification',
-        canDelete:false
+        canDelete:false,
+        nodeType: 'Classification'
       };
       const structureInfo = {
         name: realm + 'Structure',
-        canDelete:false
+        canDelete:false,
+        nodeType: 'FacilityStructure'
       };
       const typeInfo = {
         name: realm+'Type',
-        canDelete:false
+        canDelete:false,
+        nodeType: 'Type'
       };
 
       const contactInfo = {
         name: realm+'Contact',
-        canDelete:false
+        canDelete:false,
+        nodeType: 'Contact'
       };
       const configInfo = {
         name: realm+'Config',
-        canDelete:false
+        canDelete:false,
+        nodeType: 'Config'
       };
 
       const finalOrganizationObject = assignDtoPropToEntity(facility, organizationInfo);

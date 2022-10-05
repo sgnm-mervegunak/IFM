@@ -11,6 +11,7 @@ import { useParams, useNavigate, useLocation, useSearchParams, } from "react-rou
 import { useTranslation } from "react-i18next";
 
 import FacilityStructureService from "../../services/facilitystructure";
+import FacilityStructureLazyService from "../../services/facilitystructurelazy";
 import ClassificationsService from "../../services/classifications";
 import FormTypeService from "../../services/formType";
 import StructureWinformService from "../../services/structureWinform";
@@ -43,6 +44,8 @@ interface Node {
   className?: string;
   code?: string;
   nodeType?: string;
+  selectable?: boolean;
+  leaf?: boolean;
 }
 
 interface FormNode {
@@ -76,6 +79,8 @@ const StructureAsset = () => {
   const [selectedNode, setSelectedNode] = useState<Node>({} as Node);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
+  const [loadedNode, setLoadedNode] = useState<any>({});
+  const [expandedKeys, setExpandedKeys] = useState({});
   const [formTypeId, setFormTypeId] = useState<any>(undefined);
   const [labels, setLabels] = useState<string[]>([]);
   const [canDelete, setCanDelete] = useState<boolean>(true);
@@ -133,49 +138,58 @@ const StructureAsset = () => {
   };
 
   const getFacilityStructure = () => {
-    FacilityStructureService.findAll()
-      .then((res) => {
-        if (!res.data.root.children) {
-          setData([res.data.root.properties] || []);
+    setLoadedNode({});
+    FacilityStructureLazyService.findAll().then((res) => {
+      let temp = JSON.parse(
+        JSON.stringify([res.data] || [])
+      );
+      fixNodes(temp);
+      setData(temp);
+      // setData([res.data]);
+      setExpandedKeys({ [res.data.key]: true });
+      setLoading(false);
+    });
+  };
+
+  const loadOnExpand = (event: any) => {
+    if (!event.node.children) {
+      setLoading(true);
+
+      FacilityStructureLazyService.lazyLoadByKey(event.node.key)
+        .then((res) => {
+          setLoadedNode((prev: any) => {
+            for (const item of res.data.children) {
+              prev[item.key] = prev[event.node.key]
+                ? [...prev[event.node.key], event.node.key]
+                : [event.node.key];
+            }
+
+            return prev;
+          });
+
+          event.node.children = res.data.children.map((child: any) => ({
+            ...child,
+            id: child.id,
+            leaf: child.leaf,
+          }));
           let temp = JSON.parse(
-            JSON.stringify([res.data.root.properties] || [])
+            JSON.stringify([...data] || [])
           );
           fixNodes(temp);
           setData(temp);
-        } else if (res.data.root.children) {
-          setData([res.data.root] || []);
-          let temp = JSON.parse(JSON.stringify([res.data.root] || []));
-          fixNodes(temp);
-          setData(temp);
-        }
-
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        
-        if (err.response?.status === 404) {
-          toast.current.show({
-            severity: "error",
-            summary: t("Error"),
-            detail: t("Facility Structure not found"),
-            life: 4000,
-          });
-          setTimeout(() => {
-            navigate("/");
-          }, 3000);
-        } else{
+          // setData([...data]);
+          setExpandedKeys((prev) => ({ ...prev, [event.node.key]: true }));
+          setLoading(false);
+        })
+        .catch((err) => {
           toast.current.show({
             severity: "error",
             summary: t("Error"),
             detail: err.response ? err.response.data.message : err.message,
             life: 4000,
           });
-          setTimeout(() => {
-            navigate("/");
-          }, 3000);
-        }
-      });
+        });
+    }
   };
 
   useEffect(() => {
@@ -188,29 +202,42 @@ const StructureAsset = () => {
     }
     for (let i of nodes) {
       fixNodes(i.children);
-      i.icon = "pi pi-fw pi-building";
-      i.label = i.name;
+      if (i.nodeType === "Building") {
+        i.icon = "pi pi-building"
+      }
+
+      if (i.nodeType === "Space") {
+        i.selectable = true;
+      } else {
+        i.selectable = false;
+      }
+     
     }
   };
 
   return (
     <>
       <h1>{t("Structure Asset Management")}</h1>
-      <div className="container">
+      <div className="container" >
         <div className="formgrid grid">
           <div className="col-12 md:col-4" >
             <div className="scrollpanel-demo">
-              <ScrollPanel style={{ width: '100%', height: '700px' }} className="custombar1">
+              <ScrollPanel style={{ width: '100%', height: '666px'}} className="custombar1">
                 <div style={{ padding: '1em', lineHeight: '1.5' }}>
 
                   <Tree
                     selectionMode="single"
+
                     onSelectionChange={(e) => {
                       setSelectedNodeKey(e.value)
                     }}
                     loading={loading}
-                    style={{height: '700px' }}
                     value={data}
+                    onExpand={loadOnExpand}
+                    expandedKeys={expandedKeys}
+                    onToggle={(e) => {
+                      setExpandedKeys(e.value);
+                    }}
                     dragdropScope="-"
                     contextMenuSelectionKey={selectedNodeKey ? selectedNodeKey : ""}
                     onContextMenuSelectionChange={(event: any) => {
@@ -234,12 +261,12 @@ const StructureAsset = () => {
                     nodeTemplate={(data: Node, options) => (
                       <span className="flex align-items-center font-bold">
                         {data.code ? data.code + " / " : ""}
-                        {data.label}{" "}
+                        {data.label}{data.name}{" "}
                         {
                           <>
                             <span className="ml-4 ">
 
-                              {
+                              {/* {
                                 data.nodeType === "Space" && (
                                   <>
                                     <Button
@@ -254,10 +281,9 @@ const StructureAsset = () => {
                                       title={t("Show Components")}
                                     />
 
-
                                   </>
                                 )
-                              }
+                              } */}
 
                             </span>
                           </>

@@ -44,9 +44,8 @@ interface Node {
 const SetClassificationAdmin = () => {
   const [selectedNodeKey, setSelectedNodeKey] = useState("");
   const [expandedKeys, setExpandedKeys] = useState({});
-  const [expandedKey, setExpandedKey] = useState({});
 
-  const [loadedNode, setLoadedNode] = useState<any[]>([]);
+  const [loadedNode, setLoadedNode] = useState<any>({});
 
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
@@ -129,7 +128,6 @@ const SetClassificationAdmin = () => {
           let _expandedKey: { [key: string]: boolean } = {};
           let rootKey: string = res.data.root.key;
           _expandedKey[rootKey] = true;
-          Object.assign(_expandedKey, expandedKey);
           setExpandedKeys(_expandedKey);
 
           setData([res.data.root] || []);
@@ -161,7 +159,7 @@ const SetClassificationAdmin = () => {
   }, [language]);
 
   const getClassificationRootAndChildren = () => {
-    setLoadedNode([]);
+    setLoadedNode({});
     LazyLoadingService.getClassificationRootAndChildrenByLanguageAndRealm()
       .then((res) => {
         // res.data.children = res.data.children.map((item: any) => {
@@ -171,11 +169,7 @@ const SetClassificationAdmin = () => {
         // });
         // setData([{ ...res.data, leaf: res.data.children.length === 0 }]);
         setData([res.data]);
-        let _expandedKey: { [key: string]: boolean } = {};
-        let rootKey: string = res.data.key;
-        _expandedKey[rootKey] = true;
-        Object.assign(_expandedKey, expandedKey);
-        setExpandedKeys(_expandedKey);
+        setExpandedKeys({ [res.data.key]: true });
         setLoading(false);
       })
       .catch((err) => {
@@ -194,20 +188,24 @@ const SetClassificationAdmin = () => {
 
       LazyLoadingService.loadClassification(event.node.key)
         .then((res) => {
-          console.log(res.data);
+          setLoadedNode((prev: any) => {
+            for (const item of res.data.children) {
+              prev[item.properties.key] = prev[event.node.key]
+                ? [...prev[event.node.key], event.node.key]
+                : [event.node.key];
+            }
 
-          setLoadedNode((prev: any) => [...prev, res.data.properties.key]);
+            return prev;
+          });
+
           event.node.children = res.data.children.map((child: any) => ({
             ...child.properties,
             id: child.identity.low,
             leaf: child.leaf,
           }));
-          setLoading(false);
           setData([...data]);
-          let rootKey: string = event.node.key;
-          let _expandedKeys: any = expandedKeys;
-          _expandedKeys[rootKey] = true;
-          setExpandedKeys({ ..._expandedKeys });
+          setExpandedKeys((prev) => ({ ...prev, [event.node.key]: true }));
+          setLoading(false);
         })
         .catch((err) => {
           toast.current.show({
@@ -220,12 +218,32 @@ const SetClassificationAdmin = () => {
     }
   };
 
-  const RollBack = async () => {
+  const RollBack = async (key?: any, dragingNode?: any) => {
     setLoading(true);
-    LazyLoadingService.loadClassificationWithPath(loadedNode)
+    const temp = key
+      ? loadedNode[key]
+        ? [...loadedNode[key], key]
+        : [key]
+      : loadedNode[selectedNodeKey];
+    console.log(loadedNode[selectedNodeKey]);
+
+    console.log(temp);
+
+    LazyLoadingService.loadClassificationWithPath(temp)
       .then((res) => {
-        console.log(res.data);
         setData([res.data]);
+        if (key && dragingNode) {
+          setLoadedNode((prev: any) => ({ ...prev, [dragingNode]: temp }));
+        }
+        setExpandedKeys((prev: any) => {
+          prev = {
+            [res.data.key]: true,
+          };
+          for (let item of temp) {
+            prev[item] = true;
+          }
+          return prev;
+        });
         setLoading(false);
       })
       .catch((err) => {
@@ -403,41 +421,46 @@ const SetClassificationAdmin = () => {
       });
   };
 
-  const dragDropUpdate = (dragId: string, dropId: string) => {
+  const dragDropUpdate = (
+    dragId: string,
+    dropId: string,
+    key: string,
+    dragingNode: string
+  ) => {
     ClassificationsService.relation(dragId, dropId)
       .then((res) => {
-        showSuccess(t("Classification Updated"));
+        showSuccess("Updated");
         // getClassification();
-        RollBack();
+        RollBack(key, dragingNode);
       })
       .catch((err) => {
         toast.current.show({
           severity: "error",
-          summary: t("Error"),
+          summary: "Error",
           detail: err.response ? err.response.data.message : err.message,
-          life: 4000,
+          life: 2000,
         });
-        // getClassification();
-        RollBack();
-        setLoading(false);
       });
   };
 
-  const dragConfirm = (dragId: string, dropId: string) => {
+  const dragConfirm = (
+    dragId: string,
+    dropId: string,
+    key: string,
+    dragingnode: string
+  ) => {
     confirmDialog({
-      message: t("Are you sure you want to move?"),
-      header: t("Move Confirmation"),
+      message: "Are you sure you want to move?",
+      header: "Confirmation",
       icon: "pi pi-exclamation-triangle",
-      acceptLabel: t("Yes"),
-      rejectLabel: t("No"),
       accept: () => {
         setLoading(true);
-        dragDropUpdate(dragId, dropId);
+        dragDropUpdate(dragId, dropId, key, dragingnode);
       },
       reject: () => {
-        setLoading(true);
+        // setLoading(true);
         // getClassification();
-        RollBack();
+        // RollBack();
       },
     });
   };
@@ -567,7 +590,9 @@ const SetClassificationAdmin = () => {
           setSubmitted={setSubmitted}
           selectedNodeKey={selectedNodeKey}
           editDia={editDia}
-          getClassification={RollBack}
+          getClassification={(nodeKey: string) =>
+            RollBack(selectedNodeKey, nodeKey)
+          }
           setAddDia={setAddDia}
           setEditDia={setEditDia}
           isUpdate={isUpdate}
@@ -610,7 +635,6 @@ const SetClassificationAdmin = () => {
           expandedKeys={expandedKeys}
           onToggle={(e) => {
             setExpandedKeys(e.value);
-            setExpandedKey(e.value);
           }}
           dragdropScope="-"
           contextMenuSelectionKey={selectedNodeKey ? selectedNodeKey : ""}
@@ -628,9 +652,13 @@ const SetClassificationAdmin = () => {
               });
               return;
             }
-            console.log(event);
 
-            dragConfirm(event.dragNode.id, event.dropNode.id);
+            dragConfirm(
+              event.dragNode.id,
+              event.dropNode.id,
+              event.dropNode.key,
+              event.dragNode.key
+            );
             // dragConfirm(event.dragNode._id.low, event.dropNode._id.low);
           }}
           filter

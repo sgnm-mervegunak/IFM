@@ -15,6 +15,7 @@ import ClassificationsService from "../../../services/classifications";
 import AssetClassificationsService from "../../../services/assetclassifications";
 import ContactService from "../../../services/contact";
 import FacilityStructureService from "../../../services/facilitystructure";
+import FacilityStructureLazyService from "../../../services/facilitystructurelazy";
 import { useAppSelector } from "../../../app/hook";
 import ImageUploadComponent from "./FileUpload/ImageUpload/ImageUpload";
 import DocumentUploadComponent from "./FileUpload/DocumentUpload/DocumentUpload";
@@ -80,6 +81,9 @@ const TypeForm = ({
   const { toast } = useAppSelector((state) => state.toast);
   const { t } = useTranslation(["common"]);
   const [codeWarrantyDurationUnit, setCodeWarrantyCodeDurationUnit] = useState("");
+  const [loadedNode, setLoadedNode] = useState<any>({});
+  const [expandedKeys, setExpandedKeys] = useState({});
+  const [loading, setLoading] = useState(true);
 
   const [data, setData] = useState<any>();
 
@@ -152,20 +156,66 @@ const TypeForm = ({
   };
 
   const getSpaces = () => {
-    FacilityStructureService.findAll()
-      .then((res) => {
-        if (!res.data.root.children) {
-          let temp = JSON.parse(
-            JSON.stringify([res.data.root.properties] || [])
-          );
-          fixNodesSpaces(temp);
-          setSpaces(temp);
-        } else if (res.data.root.children) {
-          let temp = JSON.parse(JSON.stringify([res.data.root] || []));
-          fixNodesSpaces(temp);
-          setSpaces(temp);
-        }
-      })
+    FacilityStructureLazyService.findAll().then((res) => {
+      let temp = JSON.parse(
+        JSON.stringify([res.data] || [])
+      );
+      fixNodesSpaces(temp);
+      setSpaces(temp);
+    });
+  };
+
+  const loadOnExpand = (event: any) => {
+    if (!event.node.children) {
+      setLoading(true);
+      console.log(event);
+      
+
+      FacilityStructureLazyService.lazyLoadByKey(event.node.key)
+        .then((res) => {
+          // console.log(res.data);
+          
+          // setLoadedNode((prev: any) => {
+          //   for (const item of res.data.children) {
+          //     console.log(item);
+              
+          //     prev[item.key] = prev[event.node.key]
+          //       ? [...prev[event.node.key], event.node.key]
+          //       : [event.node.key];
+          //   }
+
+          //   return prev;
+          // });
+          console.log(event.node);
+          
+
+          event.node.children = res.data.children.map((child: any) => ({
+            ...child,
+            id: child.id,
+            leaf: child.leaf,
+          }));
+          console.log(event.node);
+          
+          // console.log([...spaces]);
+          
+          // let temp = JSON.parse(
+          //   JSON.stringify([...spaces] || [])
+          // );
+          // fixNodesSpaces(temp);
+          // setSpaces(temp);
+          // setExpandedKeys((prev) => ({ ...prev, [event.node.key]: true }));
+          setSpaces([...spaces]);
+          setLoading(false);
+        })
+        .catch((err) => {
+          toast.current.show({
+            severity: "error",
+            summary: t("Error"),
+            detail: err.response ? err.response.data.message : err.message,
+            life: 4000,
+          });
+        });
+    }
   };
 
   const getContact = async () => {
@@ -470,6 +520,10 @@ const TypeForm = ({
                   <TreeSelect
                     value={field.value}
                     options={spaces}
+                    onNodeExpand={loadOnExpand}
+                    
+                    onShow={() => {console.log('show')}}
+                    onHide={() => {console.log('hide')}}
                     onChange={(e) => {
                       FacilityStructureService.nodeInfo(e.value as string)
                         .then((res) => {

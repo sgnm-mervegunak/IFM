@@ -1,16 +1,53 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
-import { CustomNeo4jError, Neo4jService } from 'sgnm-neo4j';
-//import { CustomNeo4jError, Neo4jService } from 'src/sgnm-neo4j/src';
+// import { CustomNeo4jError, Neo4jService } from 'sgnm-neo4j';
 
 import { CreateClassificationDto } from '../dto/create-classification.dto';
 import { UpdateClassificationDto } from '../dto/update-classification.dto';
 import { Classification } from '../entities/classification.entity';
-import { BaseGraphDatabaseInterfaceRepository, nodeHasChildException } from 'ifmcommon';
-import { ClassificationNotFountException } from 'src/common/notFoundExceptions/not.found.exception';
-import { assignDtoPropToEntity, createDynamicCyperObject } from 'src/common/func/neo4js.func';
-import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
-import { CustomNeo4jError, Neo4jService } from 'src/sgnm-neo4j/src';
+import {
+  ClassificationNotFountException,
+  FacilityStructureNotFountException,
+} from 'src/common/notFoundExceptions/not.found.exception';
+import { CustomTreeError } from 'src/common/const/custom.error.enum';
+import {
+  createDynamicCyperObject,
+  Neo4jService,
+  dynamicLabelAdder,
+  dynamicFilterPropertiesAdder,
+  dynamicNotLabelAdder,
+  dynamicUpdatePropertyAdder,
+  node_not_found,
+  create_node__must_entered_error,
+  createDynamicCyperCreateQuery,
+  create_node__node_not_created_error,
+  filterArrayForEmptyString,
+  find_with_children_by_realm_as_tree__find_by_realm_error,
+  find_with_children_by_realm_as_tree_error,
+  library_server_error,
+  tree_structure_not_found_by_realm_name_error,
+  CustomNeo4jError,
+  required_fields_must_entered,
+} from 'sgnm-neo4j/dist';
+import { classificationInterface } from 'src/common/interface/classification.interface';
+
+import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
+import { QueryResult } from 'neo4j-driver-core';
+import { I18NEnums } from 'src/common/const/i18n.enum';
+import { WrongClassificationParentExceptions } from 'src/common/badRequestExceptions/bad.request.exception';
+import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
+import { has_children_error, wrong_parent_error } from 'src/common/const/custom.error.object';
+import { RelationName } from 'src/common/const/relation.name.enum';
+import {
+  classification_already_exist,
+  classification_already_exist_object,
+  classification_import_error,
+  classification_import_error_object,
+  default_error,
+} from 'src/common/const/custom.classification.error';
+
+const exceljs = require('exceljs');
+const { v4: uuidv4 } = require('uuid');
 
 @Injectable()
 export class ClassificationRepository implements classificationInterface<Classification> {
@@ -42,7 +79,7 @@ export class ClassificationRepository implements classificationInterface<Classif
     const classification = new Classification();
     const classificationObject = assignDtoPropToEntity(classification, createClassificationDto);
     let value;
- //let checkClassification = await this.neo4jService.findChildrensByLabelsAndFilters([`${classificationObject.labels[0]}_${language}`],{realm},[`${classificationObject.labels[0]}`],{code:classificationObject.code});
+    //let checkClassification = await this.neo4jService.findChildrensByLabelsAndFilters([`${classificationObject.labels[0]}_${language}`],{realm},[`${classificationObject.labels[0]}`],{code:classificationObject.code});
     if (classificationObject['labels']) {
       value = await this.neo4jService.createNode(classificationObject, classificationObject['labels']);
       if (createClassificationDto['parentId']) {
@@ -87,62 +124,41 @@ export class ClassificationRepository implements classificationInterface<Classif
     id: number,
     filter_properties: object = {},
     update_labels: Array<string> = [],
-    update_properties: object = {}
+    update_properties: object = {},
     // ,
     // databaseOrTransaction?: string | Transaction
   ) {
     try {
-      const updateLabelsWithoutEmptyString =
-        filterArrayForEmptyString(update_labels);
+      const updateLabelsWithoutEmptyString = filterArrayForEmptyString(update_labels);
       const isNodeExist = await this.neo4jService.findByIdAndFilters(id, filter_properties);
 
       if (!isNodeExist) {
         throw new HttpException(node_not_found, 404);
       }
-      let query =
-        "match (n) " +
-        ` where id(n)=${id} set ` +
-        dynamicUpdatePropertyAdder("n", update_properties);
+      let query = 'match (n) ' + ` where id(n)=${id} set ` + dynamicUpdatePropertyAdder('n', update_properties);
 
-      if (
-        updateLabelsWithoutEmptyString &&
-        updateLabelsWithoutEmptyString.length > 0
-      ) {
+      if (updateLabelsWithoutEmptyString && updateLabelsWithoutEmptyString.length > 0) {
         if (!update_properties || Object.keys(update_properties).length === 0) {
-          query =
-            query +
-            "  n" +
-            dynamicLabelAdder(updateLabelsWithoutEmptyString) +
-            " return n";
+          query = query + '  n' + dynamicLabelAdder(updateLabelsWithoutEmptyString) + ' return n';
         } else {
-          query =
-            query +
-            ", n" +
-            dynamicLabelAdder(updateLabelsWithoutEmptyString) +
-            " return n";
+          query = query + ', n' + dynamicLabelAdder(updateLabelsWithoutEmptyString) + ' return n';
         }
       } else {
-        query = query + " return n";
+        query = query + ' return n';
       }
-      update_properties["id"] = id;
+      update_properties['id'] = id;
       const parameters = update_properties;
       const node = await this.neo4jService.write(query, parameters); //, databaseOrTransaction);
       if (node.records.length === 0) {
         return null;
       } else {
-        return node.records[0]["_fields"][0];
+        return node.records[0]['_fields'][0];
       }
     } catch (error) {
       if (error.response?.code) {
-        throw new HttpException(
-          { message: error.response?.message, code: error.response?.code },
-          error.status
-        );
+        throw new HttpException({ message: error.response?.message, code: error.response?.code }, error.status);
       } else {
-        throw new HttpException(
-          library_server_error,
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
+        throw new HttpException(library_server_error, HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
   }
@@ -156,14 +172,14 @@ export class ClassificationRepository implements classificationInterface<Classif
         updateClassificationDtoWithoutLabelsAndParentId[element] = updateClassificationto[element];
       }
     });
-      // eğer label lar güncellenecekse
-      
+    // eğer label lar güncellenecekse
+
     // let labelsWithoutSpace = [];
     // updateClassificationto.labels.forEach((label)=> {
     //    let lbs = label.split(' ');
     //    let finalLabel = "";
     //    lbs.forEach((lb)=> {
-    //       finalLabel = finalLabel + lb; 
+    //       finalLabel = finalLabel + lb;
     //    });
     //    labelsWithoutSpace.push(finalLabel);
     // });
@@ -220,7 +236,7 @@ export class ClassificationRepository implements classificationInterface<Classif
           wrong_parent_error({ node1: node['properties'].name, node2: new_parent['properties'].name }),
           400,
         );
-    }
+      }
       const nodeChilds = await this.neo4jService.findChildrensByIdAndFilters(
         +_id,
         { isDeleted: false },
@@ -496,96 +512,96 @@ export class ClassificationRepository implements classificationInterface<Classif
 
   //REVISED FOR NEW NEO4J
   async addAClassificationFromExcel(file: Express.Multer.File, realm: string, language: string) {
-      try {
-        let data;
+    try {
+      let data;
 
-    let buffer = new Uint8Array(file.buffer);
-    const workbook = new exceljs.Workbook();
+      let buffer = new Uint8Array(file.buffer);
+      const workbook = new exceljs.Workbook();
 
-    await workbook.xlsx.load(buffer).then(function async(book) {
-      const firstSheet = book.getWorksheet(1);
-      data = firstSheet.getColumn(1).values.filter((e) => e != null);
-    });
-   let label= await data[0].replaceAll(' ', '_');
+      await workbook.xlsx.load(buffer).then(function async(book) {
+        const firstSheet = book.getWorksheet(1);
+        data = firstSheet.getColumn(1).values.filter((e) => e != null);
+      });
+      let label = await data[0].replaceAll(' ', '_');
 
-    let checkClassification = await this.neo4jService.findByLabelAndFilters([`${label}_${language}`],{realm,isDeleted:false})
-  if(checkClassification.length==0){
-    function key() {
-      return uuidv4();
-    }
-    let params = {
-      isRoot: true,
-      isActive: true,
-      name: label,
-      isDeleted: false,
-      key: key(),
-      canDelete: true,
-      realm: realm,
-      canDisplay: true,
-      language: language,
-    };
-    let labels = [label + '_' + language];
-    let node = await this.neo4jService.createNode(params, labels);
-
-    let parent = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-      ['Root'],
-      { isDeleted: false, realm: realm },
-      ['Classification'],
-      { isDeleted: false, realm: realm },
-      'PARENT_OF',
-      RelationDirection.RIGHT,
-    );
-    await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
-      parent[0]['_fields'][1]['identity'].low,
-      node['identity'].low,
-      'PARENT_OF',
-      RelationDirection.RIGHT,
-    );
-
-    for (let i = 1; i < data.length; i++) {
-      function key2() {
-        return uuidv4();
-      }
-
-      let params = {
-        name: data[i],
-        key: key2(),
-        isActive: true,
+      let checkClassification = await this.neo4jService.findByLabelAndFilters([`${label}_${language}`], {
+        realm,
         isDeleted: false,
-        canDelete: true,
-        canDisplay: true,
-        language: language,
-        code: data[0] + i,
-      };
-      let labels = [data[0]];
-      let node = await this.neo4jService.createNode(params, labels);
-      let parent = await this.neo4jService.findByLabelAndFilters([data[0] + '_' + language], { isDeleted: false }, []);
-      await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
-        parent[0]['_fields'][0]['identity'].low,
-        node['identity'].low,
-        'PARENT_OF',
-        RelationDirection.RIGHT,
-      );
-    }
-  }else{
-    throw new HttpException(classification_already_exist_object(),400)
-  }
-   
-      } catch (error) {
-        if(error?.response?.code ===10001){
-          throw new classification_already_exist()
-          
+      });
+      if (checkClassification.length == 0) {
+        function key() {
+          return uuidv4();
         }
-        else if(error?.response?.code ===10002){
-          throw new classification_import_error();
-        }
+        let params = {
+          isRoot: true,
+          isActive: true,
+          name: label,
+          isDeleted: false,
+          key: key(),
+          canDelete: true,
+          realm: realm,
+          canDisplay: true,
+          language: language,
+        };
+        let labels = [label + '_' + language];
+        let node = await this.neo4jService.createNode(params, labels);
 
-        else {
-          default_error()
+        let parent = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+          ['Root'],
+          { isDeleted: false, realm: realm },
+          ['Classification'],
+          { isDeleted: false, realm: realm },
+          'PARENT_OF',
+          RelationDirection.RIGHT,
+        );
+        await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
+          parent[0]['_fields'][1]['identity'].low,
+          node['identity'].low,
+          'PARENT_OF',
+          RelationDirection.RIGHT,
+        );
+
+        for (let i = 1; i < data.length; i++) {
+          function key2() {
+            return uuidv4();
+          }
+
+          let params = {
+            name: data[i],
+            key: key2(),
+            isActive: true,
+            isDeleted: false,
+            canDelete: true,
+            canDisplay: true,
+            language: language,
+            code: data[0] + i,
+          };
+          let labels = [data[0]];
+          let node = await this.neo4jService.createNode(params, labels);
+          let parent = await this.neo4jService.findByLabelAndFilters(
+            [data[0] + '_' + language],
+            { isDeleted: false },
+            [],
+          );
+          await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
+            parent[0]['_fields'][0]['identity'].low,
+            node['identity'].low,
+            'PARENT_OF',
+            RelationDirection.RIGHT,
+          );
         }
+      } else {
+        throw new HttpException(classification_already_exist_object(), 400);
       }
-    
-    
+    } catch (error) {
+      if (error?.response?.code === 10001) {
+        throw new classification_already_exist();
+      } else if (error?.response?.code === 10002) {
+        throw new classification_import_error();
+      } else {
+        default_error();
+      }
+    }
   }
 
   //REVISED FOR NEW NEO4J
@@ -595,234 +611,228 @@ export class ClassificationRepository implements classificationInterface<Classif
       let columnName;
       let buffer = new Uint8Array(file.buffer);
       const workbook = new exceljs.Workbook();
-  
+
       await workbook.xlsx.load(buffer).then(function async(book) {
         const firstSheet = book.getWorksheet(1);
         data = firstSheet?.getColumn(1).values.filter((e) => e != null);
       });
-      columnName=data.shift()
-     
+      columnName = data.shift();
+
       let label = await columnName.replaceAll(' ', '_');
 
-      let checkClassification = await this.neo4jService.findByLabelAndFilters([`${label}_${language}`],{realm,isDeleted: false});
+      let checkClassification = await this.neo4jService.findByLabelAndFilters([`${label}_${language}`], {
+        realm,
+        isDeleted: false,
+      });
 
-    if(checkClassification.length==0){
+      if (checkClassification.length == 0) {
         let deneme = [];
-    
-      for (let i = 0; i < data.length; i++) {
 
-        const [first,...rest] = data[i].split(new RegExp(/:\s{1}/g));
-        let arr= [first,rest.join(": ")];
+        for (let i = 0; i < data.length; i++) {
+          const [first, ...rest] = data[i].split(new RegExp(/:\s{1}/g));
+          let arr = [first, rest.join(': ')];
 
-        deneme.push(arr);
-      }
-   
-    for (let i = 0; i < deneme.length; i++) {
-      deneme[i][0] = deneme[i][0].replace(/ /g, '-');
-    }
-    let collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
-
-    deneme.sort(collator.compare[0]);
-    let newClassification = [];
-    let codearray = [];
-    function uuidReturn() {
-      return uuidv4();
-    }
-    for (let q = 0; q < deneme.length; q++) {
-      let parentcode = '';
-      var z = 0;
-      codearray = await deneme[q][0].split('-');
-      for (let j = 0; j < codearray.length; j++) {
-        if (codearray[j] == '00') {
-          z = z + 1;
+          deneme.push(arr);
         }
-      }
-      if (z == 0) {
-        for (let i = 0; i < codearray.length - 1; i++) {
-          if (parentcode == '') {
-            parentcode = codearray[i];
-          } else {
-            parentcode = parentcode + '-' + codearray[i];
+
+        for (let i = 0; i < deneme.length; i++) {
+          deneme[i][0] = deneme[i][0].replace(/ /g, '-');
+        }
+        let collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+
+        deneme.sort(collator.compare[0]);
+        let newClassification = [];
+        let codearray = [];
+        function uuidReturn() {
+          return uuidv4();
+        }
+        for (let q = 0; q < deneme.length; q++) {
+          let parentcode = '';
+          var z = 0;
+          codearray = await deneme[q][0].split('-');
+          for (let j = 0; j < codearray.length; j++) {
+            if (codearray[j] == '00') {
+              z = z + 1;
+            }
           }
+          if (z == 0) {
+            for (let i = 0; i < codearray.length - 1; i++) {
+              if (parentcode == '') {
+                parentcode = codearray[i];
+              } else {
+                parentcode = parentcode + '-' + codearray[i];
+              }
+            }
+            if (codearray.length == 4) {
+              parentcode = parentcode + '-' + '00';
+            }
+          } else {
+            if (z == 1) {
+              for (let i = 0; i < codearray.length - 2; i++) {
+                if (parentcode == '') {
+                  parentcode = codearray[i];
+                } else {
+                  parentcode = parentcode + '-' + codearray[i];
+                }
+              }
+              parentcode = parentcode + '-' + '00-00';
+            } else if (z == 2) {
+              for (let i = 0; i < codearray.length - 3; i++) {
+                if (parentcode == '') {
+                  parentcode = codearray[i];
+                } else {
+                  parentcode = parentcode + '-' + codearray[i];
+                }
+              }
+              parentcode = parentcode + '-' + '00-00-00';
+            } else if (z == 3) {
+              for (let i = 0; i < codearray.length - 4; i++) {
+                if (parentcode == '') {
+                  parentcode = codearray[i];
+                } else {
+                  parentcode = parentcode + '-' + codearray[i];
+                }
+              }
+              if (parentcode == '') {
+                parentcode = '00-00-00-00';
+              } else {
+                parentcode = parentcode + '-' + '00-00-00-00';
+              }
+            } else if (z == 4) {
+              for (let i = 0; i < codearray.length - 5; i++) {
+                if (parentcode == '') {
+                  parentcode = codearray[i];
+                } else {
+                  parentcode = parentcode + '-' + codearray[i];
+                }
+              }
+              if (parentcode == '') {
+                parentcode = '00-00-00-00-00';
+              } else {
+                parentcode = parentcode + '-' + '00-00-00-00-00';
+              }
+            } else if (z == 5) {
+              for (let i = 0; i < codearray.length - 6; i++) {
+                if (parentcode == '') {
+                  parentcode = codearray[i];
+                } else {
+                  parentcode = parentcode + '-' + codearray[i];
+                }
+              }
+              if (parentcode == '') {
+                parentcode = '00-00-00-00-00-00';
+              } else {
+                parentcode = parentcode + '-' + '00-00-00-00-00-00';
+              }
+            } else if (z == 6) {
+              for (let i = 0; i < codearray.length - 7; i++) {
+                if (parentcode == '') {
+                  parentcode = codearray[i];
+                } else {
+                  parentcode = parentcode + '-' + codearray[i];
+                }
+              }
+              if (parentcode == '') {
+                parentcode = '00-00-00-00-00-00-00';
+              } else {
+                parentcode = parentcode + '-' + '00-00-00-00-00-00-00';
+              }
+            }
+          }
+          var codestr = '';
+          for (let t = 0; t < codearray.length; t++) {
+            if (codestr == '') {
+              codestr = codearray[t];
+            } else {
+              codestr = codestr + '-' + codearray[t];
+            }
+          }
+          let dto = {
+            code: codestr,
+            parentCode: parentcode.length < codestr.length ? parentcode + '-00' : parentcode,
+            name: deneme[q][1],
+            key: uuidReturn(),
+            isDeleted: false,
+            isActive: true,
+            canDelete: true,
+            canDisplay: true,
+          };
+          newClassification.push(dto);
         }
-        if (codearray.length == 4) {
-          parentcode = parentcode + '-' + '00';
+        ///// the process start here
+        function uuidReturn3() {
+          return uuidv4();
+        }
+
+        let params = {
+          code: newClassification[0].parentCode,
+          name: columnName,
+          isDeleted: false,
+          canCopied: true,
+          canDelete: false,
+          realm: realm,
+          isRoot: true,
+          canDisplay: true,
+          key: uuidReturn3(),
+          isActive: true,
+          language: language,
+        };
+        let lbls = [label + '_' + language];
+        let node = await this.neo4jService.createNode(params, lbls);
+        let parent = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+          ['Root'],
+          { isDeleted: false, realm: realm },
+          ['Classification'],
+          { isDeleted: false, realm: realm },
+          'PARENT_OF',
+          RelationDirection.RIGHT,
+        );
+        await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
+          parent[0]['_fields'][1]['identity'].low,
+          node['identity'].low,
+          'PARENT_OF',
+          RelationDirection.RIGHT,
+        );
+        for (let i = 0; i < newClassification.length; i++) {
+          let params = {
+            code: newClassification[i].code,
+            parentCode: newClassification[i].parentCode,
+            name: newClassification[i].name,
+            isDeleted: newClassification[i].isDeleted,
+            isActive: newClassification[i].isActive,
+            canDelete: newClassification[i].canDelete,
+            key: uuidReturn3(),
+            canDisplay: newClassification[i].canDisplay,
+            language: language,
+          };
+
+          let labels = [label];
+          let node = await this.neo4jService.createNode(params, labels);
+          let parent = await this.neo4jService.findByLabelAndFilters(
+            [],
+            { isDeleted: false, code: newClassification[i].parentCode, language: language },
+            [],
+          );
+
+          await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
+            parent[0]['_fields'][0]['identity'].low,
+            node['identity'].low,
+            'PARENT_OF',
+            RelationDirection.RIGHT,
+          );
         }
       } else {
-        if (z == 1) {
-          for (let i = 0; i < codearray.length - 2; i++) {
-            if (parentcode == '') {
-              parentcode = codearray[i];
-            } else {
-              parentcode = parentcode + '-' + codearray[i];
-            }
-          }
-          parentcode = parentcode + '-' + '00-00';
-        } else if (z == 2) {
-          for (let i = 0; i < codearray.length - 3; i++) {
-            if (parentcode == '') {
-              parentcode = codearray[i];
-            } else {
-              parentcode = parentcode + '-' + codearray[i];
-            }
-          }
-          parentcode = parentcode + '-' + '00-00-00';
-        } else if (z == 3) {
-          for (let i = 0; i < codearray.length - 4; i++) {
-            if (parentcode == '') {
-              parentcode = codearray[i];
-            } else {
-              parentcode = parentcode + '-' + codearray[i];
-            }
-          }
-          if (parentcode == '') {
-            parentcode = '00-00-00-00';
-          } else {
-            parentcode = parentcode + '-' + '00-00-00-00';
-          }
-        } else if (z == 4) {
-          for (let i = 0; i < codearray.length - 5; i++) {
-            if (parentcode == '') {
-              parentcode = codearray[i];
-            } else {
-              parentcode = parentcode + '-' + codearray[i];
-            }
-          }
-          if (parentcode == '') {
-            parentcode = '00-00-00-00-00';
-          } else {
-            parentcode = parentcode + '-' + '00-00-00-00-00';
-          }
-        }
-        else if (z == 5) {
-          for (let i = 0; i < codearray.length - 6; i++) {
-            if (parentcode == '') {
-              parentcode = codearray[i];
-            } else {
-              parentcode = parentcode + '-' + codearray[i];
-            }
-          }
-          if (parentcode == '') {
-            parentcode = '00-00-00-00-00-00';
-          } else {
-            parentcode = parentcode + '-' + '00-00-00-00-00-00';
-          }
-        }
-        else if (z == 6) {
-          for (let i = 0; i < codearray.length - 7; i++) {
-            if (parentcode == '') {
-              parentcode = codearray[i];
-            } else {
-              parentcode = parentcode + '-' + codearray[i];
-            }
-          }
-          if (parentcode == '') {
-            parentcode = '00-00-00-00-00-00-00';
-          } else {
-            parentcode = parentcode + '-' + '00-00-00-00-00-00-00';
-          }
-        }
+        throw new HttpException(classification_already_exist_object(), 400);
       }
-      var codestr = '';
-      for (let t = 0; t < codearray.length; t++) {
-        if (codestr == '') {
-          codestr = codearray[t];
-        } else {
-          codestr = codestr + '-' + codearray[t];
-        }
-      }
-      let dto = {
-        code: codestr,
-        parentCode: parentcode.length < codestr.length ? parentcode + '-00' : parentcode,
-        name: deneme[q][1],
-        key: uuidReturn(),
-        isDeleted: false,
-        isActive: true,
-        canDelete: true,
-        canDisplay: true,
-      };
-      newClassification.push(dto);
-    }
-    ///// the process start here
-    function uuidReturn3() {
-      return uuidv4();
-    }
-
-    let params = {
-      code: newClassification[0].parentCode,
-      name: columnName,
-      isDeleted: false,
-      canCopied: true,
-      canDelete: false,
-      realm: realm,
-      isRoot: true,
-      canDisplay: true,
-      key: uuidReturn3(),
-      isActive: true,
-      language: language,
-    };
-    let lbls = [label + '_' + language];
-    let node = await this.neo4jService.createNode(params, lbls);
-    let parent = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
-      ['Root'],
-      { isDeleted: false, realm: realm },
-      ['Classification'],
-      { isDeleted: false, realm: realm },
-      'PARENT_OF',
-      RelationDirection.RIGHT,
-    );
-    await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
-      parent[0]['_fields'][1]['identity'].low,
-      node['identity'].low,
-      'PARENT_OF',
-      RelationDirection.RIGHT,
-    );
-    for (let i = 0; i < newClassification.length; i++) {
-      let params = {
-        code: newClassification[i].code,
-        parentCode: newClassification[i].parentCode,
-        name: newClassification[i].name,
-        isDeleted: newClassification[i].isDeleted,
-        isActive: newClassification[i].isActive,
-        canDelete: newClassification[i].canDelete,
-        key: uuidReturn3(),
-        canDisplay: newClassification[i].canDisplay,
-        language: language,
-      };
-
-      let labels = [label];
-      let node = await this.neo4jService.createNode(params, labels);
-      let parent = await this.neo4jService.findByLabelAndFilters(
-        [],
-        { isDeleted: false, code: newClassification[i].parentCode, language: language },
-        [],
-      );
-
-      await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
-        parent[0]['_fields'][0]['identity'].low,
-        node['identity'].low,
-        'PARENT_OF',
-        RelationDirection.RIGHT,
-      );
-    }
-  }else  {
-    throw new HttpException(classification_already_exist_object(),400)
-  }
-     
     } catch (error) {
-      if(error?.response?.code ===10001){
-        throw new classification_already_exist()
-        
-      }
-      else if(error?.response?.code ===10002){
+      if (error?.response?.code === 10001) {
+        throw new classification_already_exist();
+      } else if (error?.response?.code === 10002) {
         throw new classification_import_error();
-      }
-
-      else {
-        default_error()
+      } else {
+        default_error();
       }
     }
-   
   }
 
   async getNodeByClassificationLanguageRealmAndCode(
@@ -846,7 +856,7 @@ export class ClassificationRepository implements classificationInterface<Classif
     const deneme = await this.neo4jService.findByLabelAndFilters([], {
       isDeleted: false,
       code,
-      language
+      language,
     });
     return deneme;
   }
@@ -857,28 +867,25 @@ export class ClassificationRepository implements classificationInterface<Classif
       let columnName;
       let buffer = new Uint8Array(file.buffer);
       const workbook = new exceljs.Workbook();
-  
+
       await workbook.xlsx.load(buffer).then(function async(book) {
         const firstSheet = book.getWorksheet(1);
         data = firstSheet?.getColumn(1).values.filter((e) => e != null);
       });
-      columnName=data.shift()
-      console.log(data)
+      columnName = data.shift();
+      console.log(data);
       for (let i = 1; i < data.length; i++) {
-        if(!data[i].match(/[0-9a-zA-Z#-]{1,}(: )[a-zA-Z\s\(\)İĞÜŞÖÇığüşöç:]*/)){
-          throw new HttpException(classification_import_error_object(), 400)
+        if (!data[i].match(/[0-9a-zA-Z#-]{1,}(: )[a-zA-Z\s\(\)İĞÜŞÖÇığüşöç:]*/)) {
+          throw new HttpException(classification_import_error_object(), 400);
         }
-        
       }
 
-      return {statusCode:200}
+      return { statusCode: 200 };
     } catch (error) {
-      if(error?.response?.code ===10002){
+      if (error?.response?.code === 10002) {
         throw new classification_import_error();
-        
-      }
-      else {
-        default_error()
+      } else {
+        default_error();
       }
     }
   }
