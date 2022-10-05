@@ -34,12 +34,7 @@ import { CustomTreeError } from 'src/common/const/custom.error.enum';
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
 import { BaseFacilitySpaceObject } from 'src/common/baseobject/base.facility.space.object';
 import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
-<<<<<<< HEAD
-=======
-import { LazyLoadingRepository } from 'src/common/class/lazyLoading.dealer';
-import { LazyLoadingPathDto } from 'src/common/dto/lazy.loading.path.dto';
 import { Translation } from '../const/translation.enum';
->>>>>>> 13f8c8a41afe09490a43a3b15210c68f30db94d9
 
 @Injectable()
 export class FacilityStructureRepository implements FacilityInterface<any> {
