@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { Neo4jService } from 'sgnm-neo4j/dist';
 import { LazyLoadingRepository } from 'src/common/class/lazyLoading.dealer';
+import { node_not_found } from 'src/common/const/custom.error.object';
 import { LazyLoadingPathDto } from 'src/common/dto/lazy.loading.path.dto';
 import { LazyLoadingPathByKeyDto } from 'src/common/dto/lazy.loading.path.key.dto ';
 import { FacilityLazyLoadingInterface } from 'src/common/interface/facility.lazyloading.interface';
@@ -10,14 +11,18 @@ export class FacilityStructureLazyLoadingRepository implements FacilityLazyLoadi
   constructor(private readonly lazyLoadingDealer: LazyLoadingRepository, private readonly neo4jService: Neo4jService) {}
   async getPathByKey(lazyLoadingPathByKeyDto: LazyLoadingPathByKeyDto, header: any) {
     try {
-      const { key, leafType } = lazyLoadingPathByKeyDto;
+      const { key, leafType, label } = lazyLoadingPathByKeyDto;
       const { realm } = header;
       const node = await this.neo4jService.findByLabelAndFilters([], { key });
+      if (!node.length) {
+        throw new HttpException(node_not_found({ key }), 400);
+      }
 
       const parents = await (
         await this.neo4jService.findChildrensByLabelsAndFiltersWithNotLabels([], {}, [], { key }, [
           'Root',
-          'FacilityStructure',
+          'Classification',
+          label,
         ])
       )
         .map((item) => item.get('parent').properties.key)
@@ -25,11 +30,11 @@ export class FacilityStructureLazyLoadingRepository implements FacilityLazyLoadi
 
       const tree = await this.lazyLoadingDealer.loadByPath(
         parents,
-        'FacilityStructure',
+        label,
         leafType,
         { realm, isDeleted: false },
-        { isDeleted: false, canDisplay: true },
-        { isDeleted: false, canDisplay: true },
+        { isDeleted: false },
+        { isDeleted: false },
       );
       return tree;
     } catch (error) {}

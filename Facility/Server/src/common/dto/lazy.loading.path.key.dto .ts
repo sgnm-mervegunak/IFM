@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsNotEmpty, isNotEmpty } from 'class-validator';
+import { IsArray, IsNotEmpty, isNotEmpty, IsOptional } from 'class-validator';
 
 export class LazyLoadingPathByKeyDto {
   @ApiProperty()
@@ -8,5 +8,9 @@ export class LazyLoadingPathByKeyDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  leafType: string;
+  label: string;
+
+  @ApiProperty()
+  @IsOptional()
+  leafType: string = '';
 }
