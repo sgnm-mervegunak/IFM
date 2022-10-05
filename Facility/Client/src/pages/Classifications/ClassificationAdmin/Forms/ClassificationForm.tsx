@@ -3,10 +3,10 @@ import { InputText } from "primereact/inputtext";
 import { Calendar } from "primereact/calendar";
 import { Chips } from "primereact/chips";
 import { TreeSelect } from "primereact/treeselect";
-import { TabView, TabPanel } from 'primereact/tabview';
+import { TabView, TabPanel } from "primereact/tabview";
 import { Checkbox } from "primereact/checkbox";
 import { useForm, Controller } from "react-hook-form";
-import { yupResolver } from '@hookform/resolvers/yup';
+import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useTranslation } from "react-i18next";
 
@@ -18,7 +18,7 @@ interface Params {
   setSubmitted: any;
   selectedNodeKey: string;
   editDia: boolean;
-  getClassification: () => void;
+  getClassification: any;
   setAddDia: React.Dispatch<React.SetStateAction<boolean>>;
   setEditDia: React.Dispatch<React.SetStateAction<boolean>>;
   isUpdate: boolean;
@@ -60,8 +60,9 @@ const ClassificationForm = ({
   setIsUpdate,
   contactData,
 }: Params) => {
-
-  const [classificationCategory, setClassificationCategory] = useState<Node[]>([]);
+  const [classificationCategory, setClassificationCategory] = useState<Node[]>(
+    []
+  );
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
   const { toast } = useAppSelector((state) => state.toast);
@@ -76,22 +77,27 @@ const ClassificationForm = ({
   const [data, setData] = useState<any>();
 
   const schema = yup.object({
-    code: yup.string().when( {
+    code: yup.string().when({
       is: () => codeShow,
       then: yup.string().required(t("This area is required.")),
-      otherwise: yup.string().notRequired()
+      otherwise: yup.string().notRequired(),
     }),
     name: yup.string().required(t("This area is required.")),
   });
 
-  const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+    control,
+  } = useForm({
     defaultValues: {
       siteName: realm,
-      ...data
+      ...data,
     },
-    resolver: yupResolver(schema)
+    resolver: yupResolver(schema),
   });
-
 
   useEffect(() => {
     if (submitted) {
@@ -129,7 +135,6 @@ const ClassificationForm = ({
       });
   };
 
-
   const onSubmit = (data: any) => {
     if (editDia === false) {
       let newNode: any = {};
@@ -146,7 +151,7 @@ const ClassificationForm = ({
               labels: [`${data?.name}_${language}`],
               realm: realm,
               isRoot: true,
-            }
+            };
           } else {
             newNode = {
               parentId: res.data.id,
@@ -154,8 +159,8 @@ const ClassificationForm = ({
               code: data?.code,
               tag: data?.tag,
               description: data?.description,
-              labels: [res.data.labels[0]]
-            }
+              labels: [res.data.labels[0]],
+            };
           }
 
           ClassificationsService.create(newNode)
@@ -166,7 +171,8 @@ const ClassificationForm = ({
                 detail: t("Classification Created"),
                 life: 3000,
               });
-              getClassification();
+
+              getClassification(res.data.properties.key);
             })
             .catch((err) => {
               toast.current.show({
@@ -186,22 +192,21 @@ const ClassificationForm = ({
           });
         });
       setAddDia(false);
-
     } else {
       let updateNode: any = {};
       ClassificationsService.nodeInfo(selectedNodeKey)
-        .then((res) => {          
-          if (res.data.properties.isRoot===true) {
+        .then((res) => {
+          if (res.data.properties.isRoot === true) {
             updateNode = {
               name: data?.name,
-              code: data?.code || data?.name+"0",
+              code: data?.code || data?.name + "0",
               tag: data?.tag,
               description: data?.description,
               labels: [`${data?.name}_${language}`],
               realm: realm,
               isRoot: true,
               isActive: isActive,
-            }
+            };
           } else {
             updateNode = {
               name: data?.name,
@@ -210,7 +215,7 @@ const ClassificationForm = ({
               description: data?.description,
               labels: [res.data.labels[0]],
               isActive: isActive,
-            }
+            };
           }
 
           ClassificationsService.update(res.data.id, updateNode)
@@ -222,9 +227,9 @@ const ClassificationForm = ({
                 life: 3000,
               });
               if (res.data.properties.isActive === true) {
-                await ClassificationsService.setActive(res.data.id)
+                await ClassificationsService.setActive(res.data.id);
               } else {
-                await ClassificationsService.setPassive(res.data.id)
+                await ClassificationsService.setPassive(res.data.id);
               }
               getClassification();
             })
@@ -255,27 +260,25 @@ const ClassificationForm = ({
 
   return (
     <form>
-
       <div className="formgrid grid">
-
         {/* {
           codeShow && (
             
           )
         } */}
 
-        {codeShow===true ? (
+        {codeShow === true ? (
           <div className="field col-12 md:col-12">
-          <h5 style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
-          <InputText
-            autoComplete="off"
-            {...register("code")}
-            style={{ width: '100%' }}
-            defaultValue={data?.code || ""}
-          />
-          <p style={{ color: "red" }}>{errors.code?.message}</p>
-        </div>
-        ): null}
+            <h5 style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
+            <InputText
+              autoComplete="off"
+              {...register("code")}
+              style={{ width: "100%" }}
+              defaultValue={data?.code || ""}
+            />
+            <p style={{ color: "red" }}>{errors.code?.message}</p>
+          </div>
+        ) : null}
 
         {/* <div className="field col-12 md:col-12">
           <h5 style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
@@ -293,7 +296,7 @@ const ClassificationForm = ({
           <InputText
             autoComplete="off"
             {...register("name")}
-            style={{ width: '100%' }}
+            style={{ width: "100%" }}
             defaultValue={data?.name || ""}
           />
           <p style={{ color: "red" }}>{errors.name?.message}</p>
@@ -304,7 +307,7 @@ const ClassificationForm = ({
           <InputText
             autoComplete="off"
             {...register("description")}
-            style={{ width: '100%' }}
+            style={{ width: "100%" }}
             defaultValue={data?.description || ""}
           />
           <p style={{ color: "red" }}>{errors.description?.message}</p>
@@ -313,7 +316,6 @@ const ClassificationForm = ({
         <div className="field col-12 md:col-12 structureChips">
           <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
           <Controller
-
             defaultValue={data?.tag || []}
             name="tag"
             control={control}
@@ -321,7 +323,7 @@ const ClassificationForm = ({
               <Chips
                 value={field.value}
                 onChange={(e) => {
-                  field.onChange(e.value)
+                  field.onChange(e.value);
                 }}
                 style={{ width: "100%" }}
               />
@@ -330,22 +332,19 @@ const ClassificationForm = ({
           <p style={{ color: "red" }}>{errors.tag?.message}</p>
         </div>
 
-        {
-          editDia === true &&
+        {editDia === true && (
           <div className="field col-12 md:col-12">
             <h5 style={{ marginBottom: "0.5em" }}>{t("Is Active")}</h5>
             <Checkbox
               {...register("isActive")}
-              style={{ width: '100%' }}
+              style={{ width: "100%" }}
               checked={isActive}
               onChange={(e: any) => setIsActive(e.checked)}
             />
             <p style={{ color: "red" }}>{errors.isActive?.message}</p>
           </div>
-        }
-
+        )}
       </div>
-
     </form>
   );
 };

@@ -10,6 +10,7 @@ import { useParams, useNavigate, useLocation, useSearchParams, } from "react-rou
 import { useTranslation } from "react-i18next";
 
 import FacilityStructureService from "../../services/facilitystructure";
+import FacilityStructureLazyService from "../../services/facilitystructurelazy";
 import ClassificationsService from "../../services/classifications";
 import FormTypeService from "../../services/formType";
 import StructureWinformService from "../../services/structureWinform";
@@ -436,7 +437,7 @@ const SetFacilityStructure = () => {
 
   const getFacilityStructure = () => {
     setLoadedNode({});
-    FacilityStructureService.findAll().then((res) => {
+    FacilityStructureLazyService.findAll().then((res) => {
       setData([res.data]);
       setExpandedKeys({ [res.data.key]: true });
       setLoading(false);
@@ -447,7 +448,7 @@ const SetFacilityStructure = () => {
     if (!event.node.children) {
       setLoading(true);
 
-      FacilityStructureService.lazyLoadByKey(event.node.key)
+      FacilityStructureLazyService.lazyLoadByKey(event.node.key)
         .then((res) => {
           setLoadedNode((prev: any) => {
             for (const item of res.data.children) {
@@ -488,10 +489,10 @@ const SetFacilityStructure = () => {
       ? loadedNode[key]
         ? [...loadedNode[key], key]
         : [key]
-      : loadedNode[selectedNodeKey];
+      : [selectedNodeKey];
     console.log(temp);
 
-    FacilityStructureService.loadStructureWithPath(temp)
+    FacilityStructureLazyService.loadStructureWithPath(temp)
       .then((res) => {
         setData([res.data]);
         if (key) {
@@ -590,6 +591,7 @@ const SetFacilityStructure = () => {
           detail: err.response ? err.response.data.message : err.message,
           life: 4000,
         });
+        rollBack(key, dragingNode);
       });
   };
 
@@ -1198,8 +1200,6 @@ const SetFacilityStructure = () => {
           onContextMenu={(event: any) => {
             setCanDelete(event.node.canDelete); // for use import building control on context menu
             setSelectedFacilityType(event.node.nodeType);
-            console.log(event.node);
-            
             cm.current.show(event.originalEvent);
           }}
           onDragDrop={(event: any) => {

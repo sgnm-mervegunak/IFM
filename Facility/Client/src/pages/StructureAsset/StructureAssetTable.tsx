@@ -11,6 +11,7 @@ import { useParams, useNavigate, useLocation, useSearchParams, } from "react-rou
 import { useTranslation } from "react-i18next";
 
 import FacilityStructureService from "../../services/facilitystructure";
+import FacilityStructureLazyService from "../../services/facilitystructurelazy";
 import ClassificationsService from "../../services/classifications";
 import FormTypeService from "../../services/formType";
 import StructureWinformService from "../../services/structureWinform";
@@ -138,7 +139,7 @@ const StructureAsset = () => {
 
   const getFacilityStructure = () => {
     setLoadedNode({});
-    FacilityStructureService.findAll().then((res) => {
+    FacilityStructureLazyService.findAll().then((res) => {
       let temp = JSON.parse(
         JSON.stringify([res.data] || [])
       );
@@ -154,7 +155,7 @@ const StructureAsset = () => {
     if (!event.node.children) {
       setLoading(true);
 
-      FacilityStructureService.lazyLoadByKey(event.node.key)
+      FacilityStructureLazyService.lazyLoadByKey(event.node.key)
         .then((res) => {
           setLoadedNode((prev: any) => {
             for (const item of res.data.children) {
@@ -217,11 +218,11 @@ const StructureAsset = () => {
   return (
     <>
       <h1>{t("Structure Asset Management")}</h1>
-      <div className="container">
+      <div className="container" >
         <div className="formgrid grid">
           <div className="col-12 md:col-4" >
             <div className="scrollpanel-demo">
-              <ScrollPanel style={{ width: '100%', height: '700px' }} className="custombar1">
+              <ScrollPanel style={{ width: '100%', height: '666px'}} className="custombar1">
                 <div style={{ padding: '1em', lineHeight: '1.5' }}>
 
                   <Tree
@@ -231,7 +232,6 @@ const StructureAsset = () => {
                       setSelectedNodeKey(e.value)
                     }}
                     loading={loading}
-                    style={{ height: '700px' }}
                     value={data}
                     onExpand={loadOnExpand}
                     expandedKeys={expandedKeys}

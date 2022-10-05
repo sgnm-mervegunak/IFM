@@ -201,7 +201,7 @@ const SetClassificationUser = () => {
     LazyLoadingService.loadActiveClassificationWithPath(temp)
       .then((res) => {
         setData([res.data]);
-        if (key) {
+        if (key && dragingNode) {
           setLoadedNode((prev: any) => ({ ...prev, [dragingNode]: temp }));
         }
         setExpandedKeys((prev: any) => {
@@ -275,7 +275,7 @@ const SetClassificationUser = () => {
               life: 3000,
             });
             // getClassification();
-            RollBack();
+            RollBack(key, res.data.properties.key);
           })
           .catch((err) => {
             toast.current.show({
