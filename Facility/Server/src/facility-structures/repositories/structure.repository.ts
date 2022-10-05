@@ -44,6 +44,7 @@ import { BaseFacilitySpaceObject } from 'src/common/baseobject/base.facility.spa
 import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
 import { LazyLoadingRepository } from 'src/common/class/lazyLoading.dealer';
 import { LazyLoadingPathDto } from 'src/common/dto/lazy.loading.path.dto';
+import { Translation } from '../const/translation.enum';
 
 @Injectable()
 export class FacilityStructureRepository implements FacilityInterface<any> {
@@ -405,8 +406,14 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       );
 
       if (parent_of_new_parent && parent_of_new_parent['_fields'][0]['identity'].low == _id) {
+        if (language == "tr") {
+          node.properties.nodeType = Translation[node.properties.nodeType];
+          new_parent['properties'].nodeType  =  Translation[new_parent['properties'].nodeType];
+        }
+
         throw new HttpException(
-          wrong_parent_error({ node1: node['properties'].name, node2: new_parent['properties'].name }),
+          
+          wrong_parent_error({ node1: node['properties'].nodeType, node2: new_parent['properties'].nodeType }),
           400,
         );
       }
@@ -415,8 +422,14 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
           parent_of_new_parent &&
           parent_of_new_parent['_fields'][0]['identity'].low == nodeChilds[i]['_fields'][1]['identity'].low
         ) {
+          if (language == "tr") {
+            node.properties.nodeType = Translation[node.properties.nodeType];
+            new_parent['properties'].nodeType  =  Translation[new_parent['properties'].nodeType];
+          }
+  
           throw new HttpException(
-            wrong_parent_error({ node1: node['properties'].name, node2: new_parent['properties'].name }),
+            
+            wrong_parent_error({ node1: node['properties'].nodeType, node2: new_parent['properties'].nodeType }),
             400,
           );
         }
@@ -424,8 +437,14 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
 
       if (new_parent['labels'] && new_parent['labels'][0] == 'FacilityStructure') {
         if (!node['labels'] || node['labels'].length == 0 || node['labels'][0] != 'Building') {
+          if (language == "tr") {
+            node.properties.nodeType = Translation[node.properties.nodeType];
+            new_parent['properties'].nodeType  =  Translation[new_parent['properties'].nodeType];
+          }
+  
           throw new HttpException(
-            wrong_parent_error({ node1: node['properties'].name, node2: new_parent['properties'].name }),
+            
+            wrong_parent_error({ node1: node['properties'].nodeType, node2: new_parent['properties'].nodeType }),
             400,
           );
         }
@@ -463,6 +482,10 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
         }
       });
       if (!isExist.length) {
+        if (language == "tr") {
+          node.properties.nodeType = Translation[node.properties.nodeType];
+          new_parent.properties.nodeType  =  Translation[new_parent.properties.nodeType];
+        }
         throw new HttpException(
           wrong_parent_error({ node1: node.properties.nodeType, node2: new_parent.properties.nodeType }),
           400,
