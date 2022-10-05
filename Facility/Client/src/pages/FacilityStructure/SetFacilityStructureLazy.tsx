@@ -591,7 +591,6 @@ const SetFacilityStructure = () => {
           detail: err.response ? err.response.data.message : err.message,
           life: 4000,
         });
-        rollBack(key, dragingNode);
       });
   };
 
@@ -607,6 +606,7 @@ const SetFacilityStructure = () => {
       accept: () => {
         setLoading(true);
         dragDropUpdate(dragId, dropId, key, dragingnode);
+        setLoading(false);
       },
       reject: () => {
         // setLoading(true);
