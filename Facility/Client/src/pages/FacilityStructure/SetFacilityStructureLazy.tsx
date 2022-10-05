@@ -867,7 +867,9 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={rollBack}
+            getFacilityStructure={(nodeKey: string) =>
+              rollBack(selectedNodeKey, nodeKey)
+            }
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -882,7 +884,9 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={rollBack}
+            getFacilityStructure={(nodeKey: string) =>
+              rollBack(selectedNodeKey, nodeKey)
+            }
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
@@ -897,7 +901,9 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={rollBack}
+            getFacilityStructure={(nodeKey: string) =>
+              rollBack(selectedNodeKey, nodeKey)
+            }
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
