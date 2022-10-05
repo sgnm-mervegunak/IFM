@@ -7,7 +7,7 @@ import { InputText } from "primereact/inputtext";
 import React, { useEffect, useState, useRef } from "react";
 // import { useAppDispatch, useAppSelector } from "../../app/hook";
 // import { save } from "../../features/tree/treeSlice";
-import { Toolbar } from "primereact/toolbar";
+// import { Toolbar } from "primereact/toolbar";
 import { useNavigate } from "react-router-dom";
 import { Menu } from "primereact/menu";
 import { Chips } from "primereact/chips";
@@ -20,19 +20,25 @@ import ImportZone from "./ImportZone";
 
 import Paper from "@mui/material/Paper";
 import {
-  Grid,
-  Table,
-  TableHeaderRow,
-} from "@devexpress/dx-react-grid-material-ui";
+  DragDropProvider,
+  Grid, GroupingPanel, PagingPanel,
+  Table, TableFilterRow, TableGroupRow,
+  TableHeaderRow, TableSelection, Toolbar,
+} from '@devexpress/dx-react-grid-material-ui';
+import {
+  FilteringState, GroupingState,
+  IntegratedFiltering, IntegratedGrouping, IntegratedPaging, IntegratedSelection, IntegratedSorting,
+  PagingState, SelectionState, SortingState, DataTypeProvider, DataTypeProviderProps,
+} from '@devexpress/dx-react-grid';
+import ZoneService from "../../services/zone";
 
 const columns = [
   { name: "name", title: "Name" },
   { name: "description", title: "Description" },
-  { name: "siteName", title: "SiteName" },
+  { name: "tag", title: "Tag" },
 ];
-const rows = [
-  { id: 0, product: "DevExtreme", owner: "DevExpress" },
-  { id: 1, product: "DevExtreme Reactive", owner: "DevExpress" },
+const rows :any = [
+  
 ];
 interface Node {
   cantDeleted: boolean;
@@ -70,7 +76,7 @@ const Zone = () => {
   const [exportDia, setExportDia] = useState(false);
   const [importDia, setImportDia] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [row, setRow] = useState<any>();
+  const [row, setRow] = useState<Object[]>([]);
   const [column, setColumn] = useState<any>();
 
   const dt = useRef<any>();
@@ -80,6 +86,8 @@ const Zone = () => {
   const [realm, setRealm] = useState(auth.auth.realm);
   const { t } = useTranslation(["common"]);
   const language = useAppSelector((state) => state.language.language);
+
+  const [pageSizes] = React.useState<number[]>([10, 20]);
 
   useEffect(() => {
     loadLazyData();
@@ -107,8 +115,19 @@ const Zone = () => {
       .then((response) => {
         console.log("-----------------------", response.data.children);
         setData(response.data?.children);
+        let arr = response.data?.children;
+        arr.map((index:any, key:any) => {
+          console.log("index", index);
+          console.log("key", key)
 
-      })
+          setRow([...row, row.push({ "name": index?.name, "description": index?.description, "tag": index?.tag })])
+        
+
+        
+        })
+
+    
+     })
       .catch((err) => {
         toast.current.show({
           severity: "error",
@@ -119,6 +138,27 @@ const Zone = () => {
       });
   };
 
+
+  useEffect(() => {
+    //  setRow([
+    //   { name: 0, description: "DevExtreme", siteName: "DevExpress" },
+    //   { name: 1, description: "DevExtreme Reactive", siteName: "DevExpress" },
+    // ])
+    console.log("????",data)
+    data.map((index, key) => {
+      console.log("index", index);
+      console.log("key", key)
+      
+      setRow([...row, { "name": index?.name, "description": index?.description, "tag": index?.tag }])
+    })
+  },data)
+
+  useEffect(
+    () => {
+      console.log("roooow",row)
+    }
+    ,[row]
+  )
 
 
   // const addItem = () => {
@@ -194,9 +234,12 @@ const Zone = () => {
 
   return (
     <Paper>
-      <Grid rows={rows} columns={columns}>
+      <Grid rows={row} columns={columns}>
+        <PagingState />
+        <IntegratedPaging />
         <Table />
         <TableHeaderRow />
+        <PagingPanel pageSizes={pageSizes} />
       </Grid>
     </Paper>
   );
