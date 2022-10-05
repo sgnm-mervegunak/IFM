@@ -231,7 +231,6 @@ const StructureAsset = () => {
                       setSelectedNodeKey(e.value)
                     }}
                     loading={loading}
-                    style={{ height: '700px' }}
                     value={data}
                     onExpand={loadOnExpand}
                     expandedKeys={expandedKeys}
