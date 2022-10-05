@@ -23,7 +23,7 @@ interface Params {
   setSubmitted: any;
   selectedNodeKey: string;
   editDia: boolean;
-  getFacilityStructure: () => void;
+  getFacilityStructure: any;
   setAddDia: React.Dispatch<React.SetStateAction<boolean>>;
   setEditDia: React.Dispatch<React.SetStateAction<boolean>>;
   isUpdate: boolean;
@@ -290,7 +290,9 @@ const BuildingForm = ({
             ...temp,
           });
           setUploadFiles({});
-          getFacilityStructure();
+          console.log(res.data);
+          
+          getFacilityStructure(res.data.properties.key);
         })
         .catch((err) => {
           toast.current.show({

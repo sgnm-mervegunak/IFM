@@ -119,6 +119,7 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
   async loadByPath(
     path: string[],
     label: string,
+    leafType: string,
     rootFilters: object,
     childerenFilters: object,
     childrensChildFilter: object,
@@ -134,7 +135,8 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
       }
       delete rootFilters['realm'];
       for (const item of path) {
-        let loadedChildren = await this.loadByKey(item, 'Space', rootFilters, childerenFilters, childrensChildFilter);
+        let loadedChildren = await this.loadByKey(item, leafType, rootFilters, childerenFilters, childrensChildFilter);
+
         if (loadedChildren.children) {
           temp[item].children = loadedChildren.children.map((child: any) => ({
             ...child,
@@ -146,6 +148,7 @@ export class LazyLoadingRepository implements LazyLoadingInterface {
           }
         }
       }
+      console.log(rootWithChildren);
       return rootWithChildren;
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);

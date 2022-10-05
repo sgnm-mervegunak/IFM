@@ -58,19 +58,19 @@ export class InfraRepository implements InfraInterface {
         throw new HttpException('realm must bu uniqe for Root node', 400);
       }
       const infraNode = await this.neo4jService.createNode(
-        { canDelete: false, isDeleted: false, name: 'Infra', realm: 'Signum' },
+        { canDelete: false, isDeleted: false, name: 'Infra', realm: 'Signum', nodeType: 'Infra' },
         ['Infra'],
       );
       const classificationNode = await this.neo4jService.createNode(
-        { canDelete: false, isDeleted: false, name: 'Classification', realm: 'Signum' },
+        { canDelete: false, isDeleted: false, name: 'Classification', realm: 'Signum', nodeType: 'Classification' },
         ['Classification'],
       );
       const assetNode = await this.neo4jService.createNode(
-        { canDelete: false, isDeleted: false, name: 'Asset', realm: 'Signum' },
+        { canDelete: false, isDeleted: false, name: 'Asset', realm: 'Signum', nodeType: 'Asset' },
         ['Asset'],
       );
       const configNode = await this.neo4jService.createNode(
-        { canDelete: false, isDeleted: false, name: 'System Config', realm: 'Signum' },
+        { canDelete: false, isDeleted: false, name: 'System Config', realm: 'Signum', nodeType: 'Config' },
         ['System_Config'],
       );
       await this.neo4jService.addParentRelationByIdAndFilters(
@@ -83,12 +83,12 @@ export class InfraRepository implements InfraInterface {
       await this.neo4jService.addParentRelationByIdAndFilters(configNode.identity.low, {}, infraNode.identity.low, {});
 
       const assetTypesNodeEN = await this.neo4jService.createNode(
-        { canDelete: false, isDeleted: false, canCopied: true, isActive: true, isRoot: true, name: 'Asset Types', realm: 'Signum' },
-        ['AssetTypes_en'],
+        { canDelete: false, isDeleted: false, canCopied: true, isActive: true, isRoot: true, name: 'Asset Type', realm: 'Signum' },
+        ['AssetType_en'],
       );
       const assetTypesNodeTR = await this.neo4jService.createNode(
-        { canDelete: false, isDeleted: false, canCopied: true, isActive: true, isRoot: true, name: 'Asset Types', realm: 'Signum' },
-        ['AssetTypes_tr'],
+        { canDelete: false, isDeleted: false, canCopied: true, isActive: true, isRoot: true, name: 'Asset Type', realm: 'Signum' },
+        ['AssetType_tr'],
       );
 
       await this.neo4jService.addParentRelationByIdAndFilters(

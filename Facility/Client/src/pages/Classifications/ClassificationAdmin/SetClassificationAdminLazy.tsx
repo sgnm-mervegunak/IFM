@@ -225,12 +225,14 @@ const SetClassificationAdmin = () => {
         ? [...loadedNode[key], key]
         : [key]
       : loadedNode[selectedNodeKey];
+    console.log(loadedNode[selectedNodeKey]);
+
     console.log(temp);
 
     LazyLoadingService.loadClassificationWithPath(temp)
       .then((res) => {
         setData([res.data]);
-        if (key) {
+        if (key && dragingNode) {
           setLoadedNode((prev: any) => ({ ...prev, [dragingNode]: temp }));
         }
         setExpandedKeys((prev: any) => {
@@ -588,7 +590,9 @@ const SetClassificationAdmin = () => {
           setSubmitted={setSubmitted}
           selectedNodeKey={selectedNodeKey}
           editDia={editDia}
-          getClassification={RollBack}
+          getClassification={(nodeKey: string) =>
+            RollBack(selectedNodeKey, nodeKey)
+          }
           setAddDia={setAddDia}
           setEditDia={setEditDia}
           isUpdate={isUpdate}
