@@ -550,7 +550,11 @@ const SetFacilityStructure = () => {
               detail: t(`${res.data.properties.nodeType} Deleted`),
               life: 4000,
             });
-            rollBack();
+            if(res.data.properties.nodeType === "Building"){
+              getFacilityStructure();
+            } else{
+              rollBack();
+            }
           })
           .catch((err) => {
             toast.current.show({
@@ -561,7 +565,6 @@ const SetFacilityStructure = () => {
             });
             rollBack();
           });
-        rollBack();
       })
       .catch((err) => {
         toast.current.show({
@@ -850,9 +853,7 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={(nodeKey: string) =>
-              rollBack(selectedNodeKey, nodeKey)
-            }
+            getFacilityStructure={getFacilityStructure}
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
