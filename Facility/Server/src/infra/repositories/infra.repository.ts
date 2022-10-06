@@ -796,7 +796,7 @@ export class InfraRepository implements InfraInterface {
           name: 'Bina',
           isActive: true,
           canDisplay: true,
-          deType: 'Building'
+          nodeType: 'Building'
         },
         ['FacilityType'],
       );
@@ -807,7 +807,7 @@ export class InfraRepository implements InfraInterface {
           name: 'Kat',
           isActive: true,
           canDisplay: true,
-          deType: 'Floor'
+          nodeType: 'Floor'
         },
         ['FacilityType'],
       );
@@ -818,7 +818,7 @@ export class InfraRepository implements InfraInterface {
           name: 'Blok',
           isActive: true,
           canDisplay: true,
-          deType: 'Block'
+          nodeType: 'Block'
         },
         ['FacilityType'],
       );
@@ -829,7 +829,7 @@ export class InfraRepository implements InfraInterface {
           name: 'Tesis Yapısı',
           isActive: true,
           canDisplay: false,
-          deType: 'FacilityStructure'
+          nodeType: 'FacilityStructure'
         },
         ['FacilityType'],
       );
@@ -841,7 +841,7 @@ export class InfraRepository implements InfraInterface {
           name: 'Alan',
           isActive: true,
           canDisplay: true,
-          deType: 'Space'
+          nodeType: 'Space'
         },
         ['FacilityType'],
       );
