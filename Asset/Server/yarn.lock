@@ -8435,10 +8435,10 @@
   "resolved" "https://registry.npmjs.org/setprototypeof/-/setprototypeof-1.2.0.tgz"
   "version" "1.2.0"
 
-"sgnm-neo4j@^0.0.213":
-  "integrity" "sha512-zQ4SmyyasMJRz4s8ZbERIO/P3PSDeVsgGpSN2i+oZt8sl97rTmkbh+JSNirvRPuX69WnzMl9haJWeLgeTgp3Wg=="
-  "resolved" "https://registry.npmjs.org/sgnm-neo4j/-/sgnm-neo4j-0.0.213.tgz"
-  "version" "0.0.213"
+"sgnm-neo4j@^0.0.216":
+  "integrity" "sha512-ewasM0dFkXwqapEhSouWmiOQ/idoepN4+vFVOWn8KeBJOhyr2jqX+7Mb20ukl74nOOrVO3S9qsWcKXwl8aPZxw=="
+  "resolved" "https://registry.npmjs.org/sgnm-neo4j/-/sgnm-neo4j-0.0.216.tgz"
+  "version" "0.0.216"
   dependencies:
     "@nestjs/common" "^8.4.5"
     "@nestjs/config" "^2.0.0"
