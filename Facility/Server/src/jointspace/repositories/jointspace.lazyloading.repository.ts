@@ -8,7 +8,7 @@ import { LazyLoadingPathByKeyDto } from 'src/common/dto/lazy.loading.path.key.dt
 import { FacilityLazyLoadingInterface } from 'src/common/interface/facility.lazyloading.interface';
 
 @Injectable()
-export class FacilityStructureLazyLoadingRepository implements FacilityLazyLoadingInterface {
+export class JointSpaceLazyLoadingRepository implements FacilityLazyLoadingInterface {
   constructor(private readonly lazyLoadingDealer: LazyLoadingRepository, private readonly neo4jService: Neo4jService) {}
   async getPathByKey(lazyLoadingPathByKeyDto: LazyLoadingPathByKeyDto, header: any) {
     try {
@@ -43,15 +43,14 @@ export class FacilityStructureLazyLoadingRepository implements FacilityLazyLoadi
   async findRootByRealm(header) {
     try {
       const { realm } = header;
-      console.log(realm);
       const tree = await this.lazyLoadingDealer.loadByLabel(
         'FacilityStructure',
-        'Space',
+        'Building',
         { realm, isDeleted: false },
-        { isDeleted: false, canDisplay: true },
-        { isDeleted: false, canDisplay: true },
-        [''],
-        header,
+        { isDeleted: false },
+        { isDeleted: false },
+        ['Zones'],
+        { header },
       );
       return tree;
     } catch (error) {}
@@ -80,9 +79,10 @@ export class FacilityStructureLazyLoadingRepository implements FacilityLazyLoadi
       const tree = await this.lazyLoadingDealer.loadByKey(
         key,
         leafType,
-        { isDeleted: false, canDisplay: true },
-        { isDeleted: false, canDisplay: true },
         { isDeleted: false },
+        { isDeleted: false },
+        { isDeleted: false },
+        ['Zones']
       );
       return tree;
     } catch (error) {}

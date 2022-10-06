@@ -4,6 +4,8 @@ export enum RepositoryEnums {
   CLASSIFICATION = 'classification',
   FACILITY_STRUCTURE = 'facility_structure',
   FACILITY_STRUCTURE_LAZY_LOADING= 'FACILITY_STRUCTURE_LAZY_LOADING',
+  JOINT_SPACE_LAZY_LOADING= 'JOINT_SPACE_LAZY_LOADING',
+  ZONE_LAZY_LOADING= 'ZONE_LAZY_LOADING',
   FACILITY_HISTORY = 'facility_history',
   CLASSIFICATION_HISTORY = 'classification_history',
   FACILITY_STRUCTURE_HISTORY = 'facility_structure_history',

@@ -52,9 +52,12 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
   async findOneByRealm(realm: string, language: string) {
     const tree = await this.lazyLoadingDealer.loadByLabel(
       'FacilityStructure',
+      'Space',
       { realm, isDeleted: false },
       { isDeleted: false },
       { isDeleted: false, canDisplay: true },
+      [''],
+      {},
     );
     return tree;
   }
@@ -640,7 +643,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
   //REVISED FOR NEW NEO4J
   async findChildrenByFacilityTypeNode(typename: string, realm: string, language: string) {
     let parent_node = await this.neo4jService.findByLabelAndFilters(
-      ['FacilityTypes_'+language],
+      ['FacilityTypes_' + language],
       { isDeleted: false, realm: realm },
       [],
     );
