@@ -108,6 +108,7 @@ export class InfraRepository implements InfraInterface {
         {
           canDelete: true,
           isDeleted: false,
+          canDisplay: true,
           name: 'Fixed',
           code: 'AssetType1',
           isActive: true,
@@ -119,6 +120,7 @@ export class InfraRepository implements InfraInterface {
         {
           canDelete: true,
           isDeleted: false,
+          canDisplay: true,
           name: 'Moveable',
           code: 'AssetType2',
           isActive: true,
@@ -143,6 +145,7 @@ export class InfraRepository implements InfraInterface {
         {
           canDelete: true,
           isDeleted: false,
+          canDisplay: true,
           name: 'Sabit',
           code: 'AssetType1',
           isActive: true,
@@ -154,6 +157,7 @@ export class InfraRepository implements InfraInterface {
         {
           canDelete: true,
           isDeleted: false,
+          canDisplay: true,
           name: 'Hareketli',
           code: 'AssetType2',
           isActive: true,
