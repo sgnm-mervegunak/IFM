@@ -292,7 +292,7 @@ const BuildingForm = ({
           setUploadFiles({});
           console.log(res.data);
           
-          getFacilityStructure(res.data.properties.key);
+          getFacilityStructure();
         })
         .catch((err) => {
           toast.current.show({
