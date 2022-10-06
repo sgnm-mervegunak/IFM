@@ -13,7 +13,7 @@ import { Menu } from "primereact/menu";
 import { Chips } from "primereact/chips";
 import { useTranslation } from "react-i18next";
 
-import FacilityStructureService from "../../services/facilitystructure";
+import FacilityStructureLazyService from "../../services/facilitystructurelazy";
 import { useAppSelector } from "../../app/hook";
 import Export, { ExportType } from "../FacilityStructure/Export/Export";
 
@@ -66,7 +66,7 @@ const JointSpace = () => {
   }, []);
 
   const loadLazyData = () => {
-    FacilityStructureService.findAll()
+    FacilityStructureLazyService.findAll()
       .then((response) => {
         console.log(response.data);
         setData(response.data?.children);

@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { Menu } from "primereact/menu";
 import { Chips } from "primereact/chips";
 
-import FacilityStructureService from "../../services/facilitystructure";
+import FacilityStructureLazyService from "../../services/facilitystructurelazy";
 import { useAppSelector } from "../../app/hook";
 import { useTranslation } from "react-i18next";
 import Export, { ExportType } from "../FacilityStructure/Export/Export";
@@ -85,7 +85,7 @@ const Zone = () => {
     //       life: 2000,
     //     });
     //   });
-    FacilityStructureService.findAll()
+    FacilityStructureLazyService.findAll()
       .then((response) => {
         console.log("-----------------------", response.data);
         setData(response.data?.children);
