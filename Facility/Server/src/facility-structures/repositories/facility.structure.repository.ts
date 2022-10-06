@@ -617,9 +617,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
 
   //REVISED FOR NEW NEO4J
   async findOneFirstLevelByRealm(label: string, realm: string, language: string) {
-    if (label == 'FacilityTypes') {
-      language = 'en';
-    }
+    
     let node = await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructureOneLevel(
       [label + '_' + language],
       ['Virtual'],
