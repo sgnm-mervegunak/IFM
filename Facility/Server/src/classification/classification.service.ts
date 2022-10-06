@@ -114,5 +114,8 @@ export class ClassificationService {
     return await this.classificationRepository.checkExcelFile(file);
   }
 
+  findOneFirstLevel(label: string, realm: string, language: string) {
+    return this.classificationRepository.findOneFirstLevelByRealm(label, realm, language);
+  }
   
 }

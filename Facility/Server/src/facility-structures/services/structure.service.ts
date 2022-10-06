@@ -32,10 +32,6 @@ export class StructureService {
     return await this.facilityStructureRepository.changeNodeBranch(id, target_parent_id, realm, language);
   }
 
-  findOneFirstLevel(label: string, realm: string, language: string) {
-    return this.facilityStructureRepository.findOneFirstLevelByRealm(label, realm, language);
-  }
-
   findChildrenByFacilityTypeNode(typename: string, realm: string, language: string) {
     return this.facilityStructureRepository.findChildrenByFacilityTypeNode(typename, realm, language);
   }

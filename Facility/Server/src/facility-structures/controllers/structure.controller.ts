@@ -49,16 +49,7 @@ export class StructureController {
     return this.facilityStructuresService.findOneNode(key, realm, language);
   }
 
-  @Get('/structuretypes/:label')
-  @Roles({ roles: [UserRoles.ADMIN] })
-  //@Unprotected()
-  @NoCache()
-  findOneFirstLevel(@Param('label') label: string, @Headers() header) {
-    const { language, realm } = header;
-    return this.facilityStructuresService.findOneFirstLevel(label, realm, language);
-  }
-
-
+  
   @Get('/structuretypes/properties/all/:typename')
   @Roles({ roles: [UserRoles.ADMIN] })
   //@Unprotected()

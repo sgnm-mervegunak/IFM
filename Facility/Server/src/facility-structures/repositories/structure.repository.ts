@@ -605,26 +605,7 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
     }
   }
 
-  //REVISED FOR NEW NEO4J
-  async findOneFirstLevelByRealm(label: string, realm: string, language: string) {
-    
-    let node = await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructureOneLevel(
-      [label + '_' + language],
-      ['Virtual'],
-      { isDeleted: false, realm: realm },
-      [],
-      ['Virtual'],
-      { isDeleted: false, canDisplay: true }, //parent ve child filter objelerde aynı
-      //properti ler kullanılırsa değerleri aynı
-      // olmalıdır.
-    );
-    if (!node) {
-      throw new FacilityStructureNotFountException(realm);
-    }
-    node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
-    return node['root']['children'];
-  }
-
+  
   //REVISED FOR NEW NEO4J
   async findChildrenByFacilityTypeNode(typename: string, realm: string, language: string) {
     let parent_node = await this.neo4jService.findByLabelAndFilters(
