@@ -127,8 +127,8 @@ const SetFacilityStructure = () => {
       .then((res) => {
         setFacilityType(
           res.data.map((item: any) => ({
-            name: t(item.name),
-            code: item.name,
+            name: item.name,
+            code: item.nodeType,
           }))
         );
       })

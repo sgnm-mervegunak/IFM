@@ -164,7 +164,7 @@ const TypeForm = ({
 
   const getAssetType = async () => {
     await AssetClassificationsService.findAllActiveByLabel({
-      label: "AssetTypes"
+      label: "AssetType"
     }).then((res) => {
 
       let temp = JSON.parse(JSON.stringify([res.data.root] || []));
