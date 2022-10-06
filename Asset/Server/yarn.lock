@@ -1427,6 +1427,13 @@
   dependencies:
     "axios" "0.27.2"
 
+"@nestjs/axios@^0.1.0":
+  "integrity" "sha512-b2TT2X6BFbnNoeteiaxCIiHaFcSbVW+S5yygYqiIq5i6H77yIU3IVuLdpQkHq8/EqOWFwMopLN8jdkUT71Am9w=="
+  "resolved" "https://registry.npmjs.org/@nestjs/axios/-/axios-0.1.0.tgz"
+  "version" "0.1.0"
+  dependencies:
+    "axios" "0.27.2"
+
 "@nestjs/cli@^8.0.0":
   "integrity" "sha512-b5DzZ08q/6iWvLz+n2DhEyZ3rsOurN1ec1jYQaWC5DCVQoZCwyOew48bVf01kevTK4eZyQxPwuErf7HnFAc0oQ=="
   "resolved" "https://registry.npmjs.org/@nestjs/cli/-/cli-8.2.5.tgz"
@@ -5560,11 +5567,12 @@
   "resolved" "https://registry.npmjs.org/ieee754/-/ieee754-1.2.1.tgz"
   "version" "1.2.1"
 
-"ifmcommon@^0.0.49":
-  "integrity" "sha512-NHJ/TFxQhkxj/oV8ZnqhC7CznjtjDlinvUE5Az6NWG7kuEK6SYs06nvTdnJtfpB2YfSiCM91G4sHBaqYIgViGw=="
-  "resolved" "https://registry.npmjs.org/ifmcommon/-/ifmcommon-0.0.49.tgz"
-  "version" "0.0.49"
+"ifmcommon@^0.0.57":
+  "integrity" "sha512-jn/3vLurfkY3k4BNpJzzpx8hrikp62YF8qQZNZkIo1E41CtqUo8cOchZdDnpK2owR7mik3Sbf1uxiSAa/EkkGg=="
+  "resolved" "https://registry.npmjs.org/ifmcommon/-/ifmcommon-0.0.57.tgz"
+  "version" "0.0.57"
   dependencies:
+    "@nestjs/axios" "^0.1.0"
     "@nestjs/common" "^8.0.0"
     "@nestjs/config" "^2.2.0"
     "@nestjs/core" "^8.0.0"
@@ -5573,6 +5581,7 @@
     "@nestjs/platform-express" "^8.0.0"
     "class-transformer" "^0.5.1"
     "kafkajs" "^1.16.0"
+    "moment" "^2.29.4"
     "mongoose" "^6.3.1"
     "nest-keycloak-connect" "^1.8.3"
     "nestjs-i18n" "^9.0.10"
@@ -5580,6 +5589,7 @@
     "reflect-metadata" "^0.1.13"
     "rimraf" "^3.0.2"
     "rxjs" "^7.2.0"
+    "sgnm-neo4j" "^0.0.216"
 
 "ignore@^4.0.6":
   "integrity" "sha512-cyFDKrqc/YdcWFniJhzI42+AzS+gNwmUzOSFcRCQYwySuBBBy/KjuxWLZ/FHEH6Moq1NizMOBWyTcv8O4OZIMg=="
@@ -6895,7 +6905,7 @@
   "resolved" "https://registry.npmjs.org/module-details-from-path/-/module-details-from-path-1.0.3.tgz"
   "version" "1.0.3"
 
-"moment@^2.29.2":
+"moment@^2.29.2", "moment@^2.29.4":
   "integrity" "sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w=="
   "resolved" "https://registry.npmjs.org/moment/-/moment-2.29.4.tgz"
   "version" "2.29.4"
