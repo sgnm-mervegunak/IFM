@@ -31,26 +31,49 @@ import { ContactInterface } from 'src/common/interface/modules.with.pagination.i
 export class ContactRepository implements ContactInterface<any> {
   constructor(private readonly neo4jService: Neo4jService) { }
 
-  //REVISED FOR NEW NEO4J
-  async findOneByRealm(realm: string, language: string, neo4jQuery: PaginationParams) {
-    const contactNode = await this.neo4jService.findByLabelAndFilters(['Contact'], { realm, isDeleted: false })
-    if (!contactNode.length) {
-      throw new FacilityStructureNotFountException(realm);
+
+ 
+    //REVISED FOR NEW NEO4J
+
+   /////////////////////////////////////////////     ESKİSİ  //////////////////////////////////////////////// 
+  async findOneByRealm(realm: string, language: string): Promise<{ root: any; }> {
+    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
+      ['Contact'],
+      { realm: realm, isDeleted: false },
+      [],
+      { isDeleted: false, canDisplay: true },
+    );
+    if (!node) {
+      //throw new FacilityStructureNotFountException(realm);
     }
-    let children = await this.neo4jService.findChildrensByIdAndFiltersWithPagination(contactNode[0].get('n').identity.low, {}, [], { isDeleted: false }, 'PARENT_OF', neo4jQuery)
-    let totalCount = children.length
+    node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
+    return node;
+    }
+
+    ////////////////////////////              YENİSİ                   ///////////////////////////////////
+      //REVISED FOR NEW NEO4J
+    // async findOneByRealm(realm: string, language: string, neo4jQuery: PaginationParams) {
+    // const contactNode = await this.neo4jService.findByLabelAndFilters(['Contact'], { realm, isDeleted: false })
+    // if (!contactNode.length) {
+    //   throw new FacilityStructureNotFountException(realm);
+    // }
+    // let children = await this.neo4jService.findChildrensByIdAndFiltersWithPagination(contactNode[0].get('n').identity.low, {}, [], { isDeleted: false }, 'PARENT_OF', neo4jQuery)
+    // let totalCount = children.length
 
 
-    children = children.map((item) => {
-      return item.get('children').properties
-    })
+    // children = children.map((item) => {
+    //   return item.get('children').properties
+    // })
 
-    const finalResponse = { ...contactNode[0].get('n').properties, totalCount, children }
+    // const finalResponse = { ...contactNode[0].get('n').properties, totalCount, children }
 
 
-    return finalResponse;
-  }
+    // return finalResponse;
+    //}
 
+
+
+    
   //REVISED FOR NEW NEO4J
   async create(createContactDto: CreateContactDto, realm: string, language: string) {
     try {
