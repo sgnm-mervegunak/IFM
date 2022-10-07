@@ -1,6 +1,7 @@
-import { IsNumber, Min, IsOptional, IsString } from 'class-validator';
-import { Type } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {  IsOptional, IsString } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { AscendingEnum } from 'sgnm-neo4j/dist/constant/pagination.enum';
+
 
 /**
  * Common Pagination DTO for all  APIs
@@ -11,18 +12,18 @@ export class PaginationParams {
    */
   @ApiPropertyOptional()
   @IsOptional()
-  page?: number = 0;
+  page: number = 1;
 
   @ApiPropertyOptional()
   @IsOptional()
-  skip?: number = 0;
+  skip:number=0 ;
 
   /**
    * Limit number(how many items per page)
    */
   @ApiPropertyOptional()
   @IsOptional()
-  limit?: number = 20;
+  limit:number=100;
 
   /**
    * Order by(asc or desc)
@@ -30,7 +31,7 @@ export class PaginationParams {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  orderBy?: string;
+  orderBy: AscendingEnum;
 
   /**
    * Order by Column(for example: createdAt)

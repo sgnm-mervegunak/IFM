@@ -28,7 +28,7 @@ import { PaginationParams } from 'src/common/commonDto/pagination.query';
 import { ContactInterface } from 'src/common/interface/modules.with.pagination.interface';
 
 @Injectable()
-export class ContactRepository implements ContactInterface<Contact> {
+export class ContactRepository implements ContactInterface<any> {
   constructor(private readonly neo4jService: Neo4jService) { }
 
   //REVISED FOR NEW NEO4J
@@ -37,16 +37,16 @@ export class ContactRepository implements ContactInterface<Contact> {
     if (!contactNode.length) {
       throw new FacilityStructureNotFountException(realm);
     }
-    let children = await this.neo4jService.findChildrensByIdAndFilters(contactNode[0].get('n').identity.low, {}, [], { isDeleted: false },'PARENT_OF')
-    let totalCount=children.length
+    let children = await this.neo4jService.findChildrensByIdAndFiltersWithPagination(contactNode[0].get('n').identity.low, {}, [], { isDeleted: false }, 'PARENT_OF', neo4jQuery)
+    let totalCount = children.length
 
 
-    children=children.map((item)=>{
+    children = children.map((item) => {
       return item.get('children').properties
     })
-   
-    const finalResponse={...contactNode[0].get('n').properties,totalCount,children}
- 
+
+    const finalResponse = { ...contactNode[0].get('n').properties, totalCount, children }
+
 
     return finalResponse;
   }
@@ -383,4 +383,9 @@ export class ContactRepository implements ContactInterface<Contact> {
   async findOneFirstLevelByRealm(label: string, realm: string, language: string) { }
 
   async findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) { }
+
+ 
 }
+
+
+
