@@ -1,5 +1,6 @@
 import { IsNumber, Min, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /**
  * Common Pagination DTO for all  APIs
@@ -8,34 +9,34 @@ export class PaginationParams {
   /**
    * Page number
    */
+  @ApiPropertyOptional()
   @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  page?: number;
+  page?: number = 0;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  skip?: number = 0;
 
   /**
    * Limit number(how many items per page)
    */
+  @ApiPropertyOptional()
   @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(1)
-  limit?: number;
+  limit?: number = 20;
 
   /**
    * Order by(asc or desc)
    */
+  @ApiPropertyOptional()
   @IsOptional()
-  @Type(() => String)
   @IsString()
   orderBy?: string;
 
   /**
    * Order by Column(for example: createdAt)
    */
+  @ApiPropertyOptional()
   @IsOptional()
-  @Type(() => String)
   @IsString()
   orderByColumn?: string;
 }

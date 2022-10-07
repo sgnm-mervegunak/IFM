@@ -6,7 +6,7 @@ import { CustomTreeError } from 'src/common/const/custom.error.enum';
 import { Contact } from '../entities/contact.entity';
 import { CreateContactDto } from '../dto/create-contact.dto';
 import { UpdateContactDto } from '../dto/update-contact.dto';
-import { ContactNotFoundException } from 'src/common/notFoundExceptions/not.found.exception';
+import { ContactNotFoundException, FacilityStructureNotFountException } from 'src/common/notFoundExceptions/not.found.exception';
 import {
   assignDtoPropToEntity,
   createDynamicCyperObject,
@@ -24,25 +24,31 @@ import { has_children_error, node_not_found } from 'src/common/const/custom.erro
 import { RelationName } from 'src/common/const/relation.name.enum';
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
 import { ContactHasChildrenException } from 'src/common/badRequestExceptions/bad.request.exception';
+import { PaginationParams } from 'src/common/commonDto/pagination.query';
+import { ContactInterface } from 'src/common/interface/modules.with.pagination.interface';
 
 @Injectable()
-export class ContactRepository implements GeciciInterface<Contact> {
-  constructor(private readonly neo4jService: Neo4jService) {}
+export class ContactRepository implements ContactInterface<Contact> {
+  constructor(private readonly neo4jService: Neo4jService) { }
 
   //REVISED FOR NEW NEO4J
-  async findOneByRealm(realm: string, language: string) {
-    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
-      ['Contact'],
-      { realm: realm, isDeleted: false },
-      [],
-      { isDeleted: false, canDisplay: true },
-    );
-    if (!node) {
-      //throw new FacilityStructureNotFountException(realm);
+  async findOneByRealm(realm: string, language: string, neo4jQuery: PaginationParams) {
+    const contactNode = await this.neo4jService.findByLabelAndFilters(['Contact'], { realm, isDeleted: false })
+    if (!contactNode.length) {
+      throw new FacilityStructureNotFountException(realm);
     }
-    node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
+    let children = await this.neo4jService.findChildrensByIdAndFilters(contactNode[0].get('n').identity.low, {}, [], { isDeleted: false },'PARENT_OF')
+    let totalCount=children.length
 
-    return node;
+
+    children=children.map((item)=>{
+      return item.get('children').properties
+    })
+   
+    const finalResponse={...contactNode[0].get('n').properties,totalCount,children}
+ 
+
+    return finalResponse;
   }
 
   //REVISED FOR NEW NEO4J
@@ -374,7 +380,7 @@ export class ContactRepository implements GeciciInterface<Contact> {
   //   }
   // }
 
-  async findOneFirstLevelByRealm(label: string, realm: string, language: string) {}
+  async findOneFirstLevelByRealm(label: string, realm: string, language: string) { }
 
-  async findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) {}
+  async findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) { }
 }

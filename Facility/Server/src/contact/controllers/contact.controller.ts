@@ -6,6 +6,7 @@ import { NoCache } from 'ifmcommon';
 import { CreateContactDto } from '../dto/create-contact.dto';
 import { UpdateContactDto } from '../dto/update-contact.dto';
 import { UserRoles } from 'src/common/const/keycloak.role.enum';
+import { PaginationParams } from 'src/common/commonDto/pagination.query';
 @ApiTags('contact')
 @ApiBearerAuth('JWT-auth')
 @Controller('contact')
@@ -20,7 +21,6 @@ export class ContactController {
   })
   @Post()
   create(@Body() createContactDto: CreateContactDto, @Headers() header) {
-    console.log(header);
     const { language, realm } = header;
     return this.contactService.create(createContactDto, realm, language);
   }
@@ -29,9 +29,9 @@ export class ContactController {
   //@Unprotected()
   @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
-  findOne(@Headers() header) {
+  findOne(@Headers() header,@Query() neo4jQuery:PaginationParams) {
     const { language, realm } = header;
-    return this.contactService.findOne(realm, language);
+    return this.contactService.findOne(realm, language,neo4jQuery);
   }
 
   @Patch(':id')
