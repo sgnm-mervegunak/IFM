@@ -198,13 +198,13 @@ const TypeForm = ({
           
           // console.log([...spaces]);
           
-          // let temp = JSON.parse(
-          //   JSON.stringify([...spaces] || [])
-          // );
-          // fixNodesSpaces(temp);
-          // setSpaces(temp);
+          let temp = JSON.parse(
+            JSON.stringify([...spaces] || [])
+          );
+          fixNodesSpaces(temp);
+          setSpaces(temp);
           // setExpandedKeys((prev) => ({ ...prev, [event.node.key]: true }));
-          setSpaces([...spaces]);
+          // setSpaces([...spaces]);
           setLoading(false);
         })
         .catch((err) => {
