@@ -22,7 +22,7 @@ export class SystemLazyLoadingRepository implements SystemLazyLoadingInterface {
       const parents = await (
         await this.neo4jService.findChildrensByLabelsAndFiltersWithNotLabels([], {}, [], { key }, [
           'Root',
-          'FacilityStructure',
+          'Systems',
         ])
       )
         .map((item) => item.get('parent').properties.key)
@@ -43,7 +43,7 @@ export class SystemLazyLoadingRepository implements SystemLazyLoadingInterface {
   async findRootByRealm(header) {
     try {
       let { realm } = header;
-      realm = 'IFM';
+      //realm = 'IFM';
       console.log(realm);
       const tree = await this.lazyLoadingDealer.loadByLabel(
         'Systems',
@@ -65,8 +65,8 @@ export class SystemLazyLoadingRepository implements SystemLazyLoadingInterface {
 
       const tree = await this.lazyLoadingDealer.loadByPath(
         path,
-        'FacilityStructure',
-        'Space',
+        'Systems',
+        'Component',
         { realm, isDeleted: false },
         { isDeleted: false, canDisplay: true },
         { isDeleted: false, canDisplay: true },
