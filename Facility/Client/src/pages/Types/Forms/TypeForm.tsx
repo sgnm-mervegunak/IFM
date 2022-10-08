@@ -206,6 +206,8 @@ const TypeForm = ({
   const getNodeInfoForUpdate = (selectedNodeKey: string) => {
     TypesService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
+        console.log(res.data);
+        
         let temp = {};
         await AssetClassificationsService.findClassificationByCodeAndLanguage("OmniClass23", res.data.properties.category).then(clsf1 => {
           setCodeCategory(res.data.properties.category);
@@ -215,7 +217,7 @@ const TypeForm = ({
           .catch((err) => {
             setData(res.data.properties);
           })
-        await AssetClassificationsService.findClassificationByCodeAndLanguage("AssetTypes", res.data.properties.assetType).then(clsf2 => {
+        await AssetClassificationsService.findClassificationByCodeAndLanguage("AssetType", res.data.properties.assetType).then(clsf2 => {
           setCodeAssetType(res.data.properties.assetType);
           res.data.properties.assetType = clsf2.data.key
           temp = res.data.properties;
