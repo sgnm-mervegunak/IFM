@@ -14,8 +14,9 @@ const loadStructureWithPath = async (path: string[]) => {
     return axios.post(url + "/lazyloading/path", { path });
 };
 
-const loadStructureWithPathByKey = async (path: string[]) => {
-    return axios.post(url + "/lazyloading/pathByKey", { path,label:"" });
+const loadStructureWithPathByKey = async (key: string) => {
+    
+    return axios.post(url + "/lazyloading/pathByKey", { key,label:"FacilityStructure" });
 };
 
 const service = {
