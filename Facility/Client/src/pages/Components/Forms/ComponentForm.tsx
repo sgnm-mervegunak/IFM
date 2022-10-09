@@ -163,22 +163,23 @@ const TypeForm = ({
       fixNodesSpaces(temp);
       setSpaces(temp);
     });
+
   };
 
   const loadOnExpand = (event: any) => {
     if (!event.node.children) {
       setLoading(true);
       console.log(event);
-      
+
 
       FacilityStructureLazyService.lazyLoadByKey(event.node.key)
         .then((res) => {
           // console.log(res.data);
-          
+
           // setLoadedNode((prev: any) => {
           //   for (const item of res.data.children) {
           //     console.log(item);
-              
+
           //     prev[item.key] = prev[event.node.key]
           //       ? [...prev[event.node.key], event.node.key]
           //       : [event.node.key];
@@ -187,7 +188,7 @@ const TypeForm = ({
           //   return prev;
           // });
           console.log(event.node);
-          
+
 
           event.node.children = res.data.children.map((child: any) => ({
             ...child,
@@ -195,9 +196,9 @@ const TypeForm = ({
             leaf: child.leaf,
           }));
           console.log(event.node);
-          
+
           // console.log([...spaces]);
-          
+
           let temp = JSON.parse(
             JSON.stringify([...spaces] || [])
           );
@@ -272,6 +273,16 @@ const TypeForm = ({
         await FacilityStructureService.nodeInfo(res.data.properties.space)
           .then((res2) => {
             setSpaceType(res2.data.properties.nodeType);
+          })
+
+        await FacilityStructureLazyService.loadStructureWithPathByKey(res.data.properties.space)
+          .then((res3) => {
+            let temp = JSON.parse(
+              JSON.stringify([res3.data] || [])
+            );
+            fixNodesSpaces(temp);
+            setSpaces(temp);
+
           })
 
         // setData(temp);
@@ -521,9 +532,9 @@ const TypeForm = ({
                     value={field.value}
                     options={spaces}
                     onNodeExpand={loadOnExpand}
-                    
-                    onShow={() => {console.log('show')}}
-                    onHide={() => {console.log('hide')}}
+
+                    onShow={() => { console.log('show') }}
+                    onHide={() => { console.log('hide') }}
                     onChange={(e) => {
                       FacilityStructureService.nodeInfo(e.value as string)
                         .then((res) => {
