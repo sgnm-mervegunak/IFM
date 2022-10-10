@@ -5,9 +5,8 @@ const url = process.env.REACT_APP_API_FACILITY + "contact";
 interface PaginationParams {
     page?: number;
     limit?: number;
-    sortField?: string;
-    sortKind?: string;
-    class_name?: string;
+    orderBy?: string;
+    orderByColumn?: string|undefined|null;
 }
 
 interface StructureInterface {
@@ -27,9 +26,13 @@ interface StructureInterface {
 //     );
 // };
 
-const findAll = async () => {
-    return axios.get(url);
-};
+// const findAll = async () => {
+//     return axios.get(url);
+// };
+
+const findAll = async (query: PaginationParams) => {
+    return axios.get(url + `?page=${query.page}&limit=${query.limit}&orderBy=${query.orderBy}&orderByColumn=${query.orderByColumn}`);
+  };
 
 const create = async (structure: StructureInterface) => {
     return axios.post(url, structure);

@@ -34,6 +34,7 @@ import StructureAsset from "./pages/StructureAsset/StructureAsset";
 import EditAsset from "./pages/StructureAsset/EditAsset";
 import StructureAssetTable from "./pages/StructureAsset/StructureAssetTable";
 import SetFacilityStructureLazy from "./pages/FacilityStructure/SetFacilityStructureLazy";
+import SetContactTable from "./pages/Contact/SetContactTable";
 
 // import Main from './pages/Main';
 
@@ -62,7 +63,7 @@ export default function Router() {
         { path: "zone", element: <Zone /> },
         { path: "facilitystructure", element: <SetFacilityStructureLazy /> },
         // { path: "formgenerate", element: <FormGenerate />},
-        { path: "contact", element: <Contact /> },
+        { path: "contact", element: <SetContactTable/> },
         { path: "structure-asset", element: <StructureAssetTable /> },
         { path: "asset-types", element: <SetType /> },
         { path: "asset-components", element: <SetComponent /> },

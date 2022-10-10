@@ -8,7 +8,7 @@ import { Toolbar } from "primereact/toolbar";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Menu } from "primereact/menu";
-import { useNavigate, useParams} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import ContactService from "../../services/contact";
@@ -66,10 +66,12 @@ const SetContactTable = () => {
   const [selectedNodeId, setSelectedNodeId] = useState<any>("");
   const [loading, setLoading] = useState(false);
   const [lazyParams, setLazyParams] = useState({
-    first: 0,
-    rows: 10,
-    page: 0,
-    sortField: null,
+    first: 1,
+    rows: 5,
+    page: 1,
+    orderBy: "ASC",
+    orderByColumn: "email",
+    sortField: null || undefined,
     sortOrder: null,
   });
   const [deleteTypeDialog, setDeleteTypeDialog] = useState(false);
@@ -94,19 +96,28 @@ const SetContactTable = () => {
   const nodeKey: any = params.id;
 
   const getContact = () => {
-    ContactService.findAll()
-      .then((res) => {
-        console.log(res.data);
+    setLoading(true);
+    ContactService.findAll({
+      page: lazyParams.page,
+      limit: lazyParams.rows,
+      orderBy: lazyParams.sortOrder === 1 ? "ASC" : "DESC",
+      orderByColumn: lazyParams.sortField
+    })
+      .then((response) => {
+        console.log(response.data);
         
-        setData(res.data.root.children);
+        setData(response.data.children);
+        setCountFacilities(response.data.totalCount);
+        setLoading(false);
       })
       .catch((err) => {
         toast.current.show({
           severity: "error",
-          summary: t("Error"),
+          summary: "Error",
           detail: err.response ? err.response.data.message : err.message,
-          life: 3000,
+          life: 2000,
         });
+        setLoading(false);
       });
   };
 
@@ -114,11 +125,15 @@ const SetContactTable = () => {
     getContact();
   }, []);
 
+  const onPage = (event:any) => {
+    if (globalFilter === "") setLazyParams(event);
+  };
+
   const leftToolbarTemplate = () => {
     return (
       <React.Fragment>
         <Button
-          label="Add Component"
+          label="Add Contact"
           icon="pi pi-plus"
           className="p-button-success mr-2"
           onClick={() => setAddDia(true)}
@@ -131,7 +146,7 @@ const SetContactTable = () => {
     return (
       <React.Fragment>
         <div className="flex justify-content-between">
-          <h5 className="m-0">Manage Components</h5>
+          <h5 className="m-0">Manage Contacts</h5>
           <span className="p-input-icon-left">
             <i className="pi pi-search" />
             <InputText value={globalFilter} onChange={(e) => { setGlobalFilter(e.target.value) }} placeholder="Search" />
@@ -189,7 +204,7 @@ const SetContactTable = () => {
         toast.current.show({
           severity: "success",
           summary: "Successful",
-          detail: "Component Deleted",
+          detail: "Contact Deleted",
           life: 3000,
         });
         setDelDia(false);
@@ -255,36 +270,42 @@ const SetContactTable = () => {
             value={data}
             dataKey="id"
             paginator
+            onPage={onPage}
+            first={lazyParams.first}
             responsiveLayout="scroll"
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Components"
-            rows={10}
-            rowsPerPageOptions={[10, 25, 50]}
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Contacts"
+            rows={lazyParams.rows}
+            rowsPerPageOptions={[5, 25, 50]}
+            lazy
+            totalRecords={countFacilities}
             header={header}
-            emptyMessage="Component not found"
+            emptyMessage="Contact not found"
             globalFilter={globalFilter}
+            sortField={lazyParams.sortField}
+            sortOrder={lazyParams.sortOrder}
           >
             <Column
-              field="name"
+              field="email"
+              header="Email"
+              sortable
+              style={{ width: "20%" }}
+            />
+            <Column
+              field="givenName"
               header="Name"
               sortable
               style={{ width: "20%" }}
             />
             <Column
-              field="assetIdentifier"
-              header="Asset Identifier"
+              field="familyName"
+              header="Surname"
               sortable
               style={{ width: "20%" }}
             />
             <Column
-              field="serialNo"
-              header="Serial No"
-              sortable
-              style={{ width: "20%" }}
-            />
-            <Column
-              field="barCode"
-              header="Barcode"
+              field="phone"
+              header="Phone"
               sortable
               style={{ width: "20%" }}
             />
