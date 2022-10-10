@@ -31,7 +31,7 @@ export class PaginationParams {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  orderBy: AscendingEnum;
+  orderBy: AscendingEnum.ASCENDING;
 
   /**
    * Order by Column(for example: createdAt)
