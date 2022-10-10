@@ -148,10 +148,8 @@ const ContactForm = ({
   const onSubmit = (data: any) => {
     if (editDia === false) {
       let newNode: any = {};
-      ContactService.nodeInfo(selectedNodeKey)
-        .then((res) => {
+     
           newNode = {
-            parentId: res.data.id,
             name: data?.email,
             email: data?.email,
             category: codeCategory,
@@ -174,6 +172,9 @@ const ContactForm = ({
             classificationId: categoryNodeId,
           };
 
+          console.log(newNode);
+          
+
           ContactService.create(newNode)
             .then((res) => {
               toast.current.show({
@@ -192,15 +193,8 @@ const ContactForm = ({
                 life: 2000,
               });
             });
-        })
-        .catch((err) => {
-          toast.current.show({
-            severity: "error",
-            summary: t("Error"),
-            detail: err.response ? err.response.data.message : err.message,
-            life: 2000,
-          });
-        });
+        
+      
       setAddDia(false);
 
     } else {
@@ -208,7 +202,6 @@ const ContactForm = ({
       ContactService.nodeInfo(selectedNodeKey)
         .then((res) => {
           updateNode = {
-            parentId: res.data.id,
             name: data?.email,
             email: data?.email,
             category: codeCategory,
