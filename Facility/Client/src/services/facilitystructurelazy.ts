@@ -15,15 +15,21 @@ const loadStructureWithPath = async (path: string[]) => {
 };
 
 const loadStructureWithPathByKey = async (key: string) => {
-    
-    return axios.post(url + "/lazyloading/pathByKey", { key,label:"FacilityStructure" });
+
+    return axios.post(url + "/lazyloading/pathByKey", { key, label: "FacilityStructure" });
 };
+
+const loadStructureWithKeyAndLeaf = async (key: string, leaf: string) => {
+    return axios.get(url + "/lazyloading/"+key+"/"+leaf);
+};
+
 
 const service = {
     findAll,
     lazyLoadByKey,
     loadStructureWithPath,
-    loadStructureWithPathByKey
+    loadStructureWithPathByKey,
+    loadStructureWithKeyAndLeaf
 };
 
 export default service;

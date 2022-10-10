@@ -136,7 +136,6 @@ const SetJointSpace = () => {
 
   const getJointSpace = () => {
     const key = params.id || "";
-    console.log("keeett", key)
     JointSpaceService.findBuildingWithKey(key)
       .then((res) => {
         if (!res.data.root.children) {
