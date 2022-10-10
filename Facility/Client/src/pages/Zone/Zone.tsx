@@ -7,6 +7,7 @@ import { InputText } from "primereact/inputtext";
 import React, { useEffect, useState, useRef } from "react";
 // import { useAppDispatch, useAppSelector } from "../../app/hook";
 // import { save } from "../../features/tree/treeSlice";
+import { Tree } from "primereact/tree";
 import { Toolbar } from "primereact/toolbar";
 import { useNavigate } from "react-router-dom";
 import { Menu } from "primereact/menu";
@@ -17,6 +18,7 @@ import { useAppSelector } from "../../app/hook";
 import { useTranslation } from "react-i18next";
 import Export, { ExportType } from "../FacilityStructure/Export/Export";
 import ImportZone from "./ImportZone";
+import SetZoneComponent from "./SetZoneComponent";
 
 interface Node {
   cantDeleted: boolean;
@@ -39,6 +41,8 @@ interface Node {
   parentId?: string;
   className?: string;
   Name?: string;
+  nodeType: string;
+  leaf: boolean;
 }
 
 const Zone = () => {
@@ -54,6 +58,7 @@ const Zone = () => {
   const [exportDia, setExportDia] = useState(false);
   const [importDia, setImportDia] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [selectedBuildingKey, setSelectedBuildingKey] = useState<any>();
 
   const dt = useRef<any>();
   const { toast } = useAppSelector((state) => state.toast);
@@ -69,26 +74,49 @@ const Zone = () => {
   }, []);
 
   useEffect(() => {
-    console.log("dataaaaaa:", data)
-  },data)
+    console.log("data:", data)
+  }, data)
+
+  const fixNodes = (nodes: Node[]) => {
+    if (!nodes || nodes.length === 0) {
+      return;
+    }
+    for (let i of nodes) {
+      fixNodes(i?.children);
+      i.icon = "pi pi-fw pi-building";
+      i.label = i.name || i.Name;
+      if (i.nodeType === "Building") {
+        i.leaf = true;
+      }
+    }
+  };
+
+
   const loadLazyData = () => {
-    // FacilityStructureService.findStuctureFirstLevel(realm)
-    //   .then((response) => {
-    //     console.log("-----------------------",response.data);
-    //     setData(response.data);
-    //   })
-    //   .catch((err) => {
-    //     toast.current.show({
-    //       severity: "error",
-    //       summary: "Error",
-    //       // detail: err?.response ? err?.response?.data?.message : err.message,
-    //       life: 2000,
-    //     });
-    //   });
     FacilityStructureLazyService.findAll()
-      .then((response) => {
-        console.log("-----------------------", response.data);
-        setData(response.data?.children);
+      .then((res) => {
+        console.log("resssss", res.data.key)
+        FacilityStructureLazyService.loadStructureWithKeyAndLeaf(res.data.key, "Building")
+          .then((as) => {
+            console.log("asssss", as.data)
+            let temp = JSON.parse(
+              JSON.stringify([res.data] || [])
+            );
+            fixNodes(temp);
+            setData(temp);
+            // setData([res.data]);
+            setLoading(false);
+          })
+          .catch((err) => {
+            toast.current.show({
+              severity: "error",
+              summary: "Error",
+              detail: err?.response ? err?.response?.data?.message : err.message,
+              life: 2000,
+            });
+          });
+
+
       })
       .catch((err) => {
         toast.current.show({
@@ -100,44 +128,11 @@ const Zone = () => {
       });
   };
 
-  // const addItem = () => {
-  //   // const _classification: Node = {
-  //   //   name: name,
-  //   //   key: uuidv4(),
-  //   //   tag: tag,
-  //   //   description:"",
-  //   //   labels: [],
-  //   // };
 
-  //   // FacilityStructureService.create(_classification)
-  //   //   .then((res) => {
-  //   //     toast.current.show({
-  //   //       severity: "success",
-  //   //       summary: "Successful",
-  //   //       detail: "Classification Created",
-  //   //       life: 3000,
-  //   //     });
-  //   //     loadLazyData();
-  //   //   })
-  //   //   .catch((err) => {
-  //   //     toast.current.show({
-  //   //       severity: "error",
-  //   //       summary: "Error",
-  //   //       detail: err.response ? err.response.data.message : err.message,
-  //   //       life: 20000,
-  //   //     });
-  //   //   });
-
-  //   setAddDia(false);
-  //   setName("");
-  //   setCode("");
-  //   setLabelClass("");
-  //   setTag([]);
-  // };
 
   const header = (
     <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-      <h3 className="m-0">{/*Zone*/}</h3>
+      {/* <h3 className="m-0">Zone</h3> */}
       <span className="block mt-2 md:mt-0">
         <InputText
           type="search"
@@ -172,7 +167,10 @@ const Zone = () => {
   // };
 
   return (
-    <div className="card">
+    // <div className="card">
+    <div className="container">
+
+
       <Toolbar
         className="mb-4"
         right={() => (
@@ -191,6 +189,12 @@ const Zone = () => {
             />
           </React.Fragment>
         )}
+        left={
+          () => (
+
+            <h3>{t("Zone")}</h3>
+          )
+        }
       ></Toolbar>
 
       <Dialog
@@ -240,28 +244,46 @@ const Zone = () => {
         />
       </Dialog>
 
-      <DataTable
-        ref={dt}
-        value={data}
-        dataKey="key"
-        // rows={lazyParams.rows}
-        loading={loading}
-        className="datatable-responsive"
-        // totalRecords={countClassifications}
-        globalFilter={globalFilter}
-        emptyMessage="Zone not found"
-        header={header}
-        style={{ fontWeight: "bold" }}
-        selectionMode="single"
-        onSelectionChange={(e) => {
-          navigate("/zone/" + e.value.key);
-          console.log(e.value);
-        }}
-        responsiveLayout="scroll"
-      >
-        <Column field="name" header="Name" sortable></Column>
-        <Column field="nodeType" header="Facility Type" sortable></Column>
-      </DataTable>
+      <div className="formgrid grid">
+
+        <div className="col-12 md:col-4 mt-4">
+          <h4>Building List</h4>       {/* <h3>{t("Zone")}</h3> */}
+          <span></span>
+          <div className="card  ">
+
+            <Tree
+              selectionMode="single"
+              selectionKeys={selectedBuildingKey?.key}
+              onSelect={(e) => {
+                setSelectedBuildingKey(e.node?.key);
+              }}
+              loading={loading}
+              value={data}
+              filter
+              filterBy="name,code"
+              filterPlaceholder={t("Search")}
+              nodeTemplate={(data: Node, options) => (
+                <span className="flex align-items-center font-bold">
+                  {data.name}{" "}
+                </span>
+              )}
+            />
+
+
+          </div>
+        </div>
+
+        <div className="col-12 md:col-8 mt-4">
+          {selectedBuildingKey &&
+            <SetZoneComponent
+              selectedBuildingKey={selectedBuildingKey}
+              setSelectedBuildingKey={setSelectedBuildingKey}
+            />}
+        </div>
+      </div>
+
+
+
     </div>
   );
 };

@@ -12,11 +12,13 @@ import { useNavigate } from "react-router-dom";
 import { Menu } from "primereact/menu";
 import { Chips } from "primereact/chips";
 import { useTranslation } from "react-i18next";
+import { Tree } from "primereact/tree";
 
 import FacilityStructureLazyService from "../../services/facilitystructurelazy";
 import { useAppSelector } from "../../app/hook";
 import Export, { ExportType } from "../FacilityStructure/Export/Export";
 import SetJointSpaceComponent from "./SetJointSpaceComponent";
+
 
 interface Node {
   cantDeleted: boolean;
@@ -39,6 +41,8 @@ interface Node {
   parentId?: string;
   className?: string;
   Name?: string;
+  nodeType: string;
+  leaf: boolean;
 }
 
 const JointSpace = () => {
@@ -54,6 +58,7 @@ const JointSpace = () => {
   const [exportDia, setExportDia] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [selectedBuilding, setSelectedBuilding] = useState();
+  const [selectedBuildingKey, setSelectedBuildingKey] = useState<any>();
 
   const dt = useRef<any>();
   const { toast } = useAppSelector((state) => state.toast);
@@ -67,29 +72,58 @@ const JointSpace = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    console.log("selected building:", selectedBuilding)
-  },[selectedBuilding])
+ 
 
   const loadLazyData = () => {
     FacilityStructureLazyService.findAll()
-      .then((response) => {
-        console.log("response data", response.data);
-        setData(response.data?.children);
+      .then((res) => {
+        FacilityStructureLazyService.loadStructureWithKeyAndLeaf(res.data.key, "Building")
+          .then((as) => {
+            let temp = JSON.parse(
+              JSON.stringify([res.data] || [])
+            );
+            fixNodes(temp);
+            setData(temp);
+            setLoading(false);
+          })
+          .catch((err) => {
+            toast.current.show({
+              severity: "error",
+              summary: "Error",
+              // detail: err?.response ? err?.response?.data?.message : err.message,
+              life: 2000,
+            });
+          });
+
+
       })
       .catch((err) => {
         toast.current.show({
           severity: "error",
           summary: "Error",
-          detail: err.response ? err.response.data.message : err.message,
+          detail: err?.response ? err?.response?.data?.message : err.message,
           life: 2000,
         });
       });
   };
 
+  const fixNodes = (nodes: Node[]) => {
+    if (!nodes || nodes.length === 0) {
+      return;
+    }
+    for (let i of nodes) {
+      fixNodes(i?.children);
+      i.icon = "pi pi-fw pi-building";
+      i.label = i.name || i.Name;
+      if (i.nodeType === "Building") {
+        i.leaf = true;
+      }
+    }
+  };
+
   const header = (
     <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-      <h3 className="m-0">{/*t("Joint Space")*/}</h3>
+      {/* <h3 className="m-0">t("Joint Space")</h3> */}
       <span className="block mt-2 md:mt-0">
         <InputText
           type="search"
@@ -102,7 +136,7 @@ const JointSpace = () => {
   );
 
   return (
-    <div>
+    <div className="container">
       <Toolbar
         className="mb-4"
         right={() => (
@@ -115,6 +149,13 @@ const JointSpace = () => {
             />
           </React.Fragment>
         )}
+
+        left={
+          () => (
+
+            <h3>{t("Joint Space")}</h3>
+          )
+        }
       ></Toolbar>
 
       <Dialog
@@ -156,41 +197,35 @@ const JointSpace = () => {
         <div className="col-12 md:col-4" >
 
           <h3>{t("Joint Space")}</h3>
-<br/>          <div className="card  ">
+          <br />
+          <div className="card  ">
 
-
-            <DataTable
-              ref={dt}
-              value={data}
-              dataKey="key"
-              // rows={lazyParams.rows}
-              loading={loading}
-              className="datatable-responsive"
-              // totalRecords={countClassifications}
-              globalFilter={globalFilter}
-              emptyMessage="Joint Space not found"
-              header={header}
-              style={{ fontWeight: "bold" }}
+            <Tree
               selectionMode="single"
-              onSelectionChange={(e) => {
-                // navigate("/jointspace/" + e.value.key);
-                console.log("e value", e.value); //building key is here
-                setSelectedBuilding(e.value);
+              selectionKeys={selectedBuildingKey?.key}
+              onSelect={(e) => {
+                setSelectedBuildingKey(e.node?.key);
               }}
-              responsiveLayout="scroll"
-            >
-              <Column field="name" header={t("Name")} sortable></Column>
-              <Column field="nodeType" header={t("Facility Type")} sortable></Column>
-            </DataTable>
+              loading={loading}
+              value={data}
+              filter
+              filterBy="name,code"
+              filterPlaceholder={t("Search")}
+              nodeTemplate={(data: Node, options) => (
+                <span className="flex align-items-center font-bold">
+                  {data.name}{" "}
+                </span>
+              )}
+            />
 
           </div>
           </div>
 
           <div className="col-12 md:col-8 mt-4">
-            {selectedBuilding &&
+            {selectedBuildingKey &&
               <SetJointSpaceComponent
-            selectedBuilding={selectedBuilding}
-            setSelectedBuilding={setSelectedBuilding}
+            selectedBuildingKey={selectedBuildingKey}
+            setSelectedBuildingKey={setSelectedBuilding}
               />}
           </div>
         </div>
