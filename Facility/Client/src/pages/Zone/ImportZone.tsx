@@ -8,10 +8,11 @@ import DownloadExcel from "../../utils/download-excel";
 import { Dropdown } from "primereact/dropdown";
 import { FileUpload } from "primereact/fileupload";
 import { ProgressSpinner } from "primereact/progressspinner";
+import useToast from "../../hooks/useToast";
 
 const ImportZone = ({ setImportDia }: { setImportDia: any }) => {
   const auth = useAppSelector((state) => state.auth);
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const [buildings, setBuildings] = React.useState([]);
   const refUpload = React.useRef<any>(null);
   const [selectedBuilding, setSelectedBuilding] = React.useState<any>(null);

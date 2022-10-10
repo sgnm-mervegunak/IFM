@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import Export, { ExportType } from "../FacilityStructure/Export/Export";
 import ImportZone from "./ImportZone";
 import SetZoneComponent from "./SetZoneComponent";
+import useToast from "../../hooks/useToast";
 
 interface Node {
   cantDeleted: boolean;
@@ -61,7 +62,7 @@ const Zone = () => {
   const [selectedBuildingKey, setSelectedBuildingKey] = useState<any>();
 
   const dt = useRef<any>();
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const menu = useRef<any>(null);
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);

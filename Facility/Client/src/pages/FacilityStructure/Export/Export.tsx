@@ -6,6 +6,7 @@ import { useAppSelector } from "../../../app/hook";
 import FacilityStructureService from "../../../services/facilitystructure";
 import ExportService from "../../../services/export";
 import DownloadExcel from "../../../utils/download-excel";
+import useToast from "../../../hooks/useToast";
 
 export enum ExportType {
   Space,
@@ -25,7 +26,7 @@ const Export = ({
   exportType: ExportType
 }) => {
   const auth = useAppSelector((state) => state.auth);
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const [buildings, setBuildings] = React.useState([]);
   const [selectedBuildings, setSelectedBuildings] = React.useState<any>([]);
   const { t } = useTranslation(["common"]);

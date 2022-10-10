@@ -14,6 +14,7 @@ import DocumentUploadComponent from "../FacilityStructure/Forms/FileUpload/Docum
 import ImageUploadComponent from "../FacilityStructure/Forms/FileUpload/ImageUpload/ImageUpload";
 import ZoneForm from "./Forms/ZoneForm";
 import ClassificationsService from "../../services/classifications"
+import useToast from "../../hooks/useToast";
 
 
 interface Node {
@@ -92,7 +93,7 @@ const SetZoneComponent = ({ selectedBuildingKey, setSelectedBuildingKey }: Param
   const [formData, setFormData] = useState<FormNode[]>([]);
   const [classification, setClassification] = useState<Node[]>([]);
   const auth = useAppSelector((state) => state.auth);
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const [realm, setRealm] = useState(auth.auth.realm);
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);

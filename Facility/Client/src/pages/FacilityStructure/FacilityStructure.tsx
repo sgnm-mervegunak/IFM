@@ -8,11 +8,11 @@ import React, { useEffect, useState, useRef } from "react";
 // import { useAppDispatch, useAppSelector } from "../../app/hook";
 // import { save } from "../../features/tree/treeSlice";
 import FacilityStructureService from "../../services/facilitystructure";
-import { Toast } from "primereact/toast";
 import { Toolbar } from "primereact/toolbar";
 import { useNavigate } from "react-router-dom";
 import { Menu } from 'primereact/menu';
 import { Chips } from 'primereact/chips';
+import useToast from "../../hooks/useToast";
 
 interface StructureInterface {
   _id?: {
@@ -50,7 +50,7 @@ const FacilityStructure = () => {
     sortOrder: undefined,
   });
   const dt = useRef<any>();
-  const toast = useRef<any>();
+  const {toast} = useToast()
   const menu = useRef<any>(null);
 
   // useEffect(() => {
@@ -205,7 +205,6 @@ const FacilityStructure = () => {
 
   return (
     <div className="card">
-      <Toast ref={toast} />
       <Toolbar className="mb-4"
         left={leftToolbarTemplate}
         right={rightToolbarTemplate}

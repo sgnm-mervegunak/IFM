@@ -17,6 +17,7 @@ import FacilityStructureService from "../../../services/facilitystructure";
 import { useAppSelector } from "../../../app/hook";
 import ImageUploadComponent from "./FileUpload/ImageUpload/ImageUpload";
 import DocumentUploadComponent from "./FileUpload/DocumentUpload/DocumentUpload";
+import useToast from "../../../hooks/useToast";
 
 interface Params {
   submitted: boolean;
@@ -75,7 +76,7 @@ const ComponentForm = ({
   const [contact, setContact] = useState<any>([]);
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
   const [uploadFiles, setUploadFiles] = useState<any>({});
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const { t } = useTranslation(["common"]);
   const [codeDurationUnit, setCodeDurationUnit] = useState("");
 

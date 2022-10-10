@@ -6,6 +6,7 @@ import { useAppSelector } from "../../../../../app/hook";
 import { Button } from "primereact/button";
 import ClassificationsService from "../../../../../services/classifications";
 import { TreeSelect } from "primereact/treeselect";
+import useToast from "../../../../../hooks/useToast";
 
 const DocumentUploadComponent = ({
   value,
@@ -17,7 +18,7 @@ const DocumentUploadComponent = ({
   setUploadFiles,
 }) => {
   const uploadRef = useRef(null);
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
 
   const auth = useAppSelector((state) => state.auth);
   const [docTypes, setDocTypes] = React.useState([]);

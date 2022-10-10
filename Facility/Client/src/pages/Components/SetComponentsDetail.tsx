@@ -16,6 +16,7 @@ import FacilityService from "../../services/facility";
 import DefineFacility from "../../components/Facility/DefineFacility";
 import { useAppSelector } from "../../app/hook";
 import ComponentForm from "./Forms/ComponentForm";
+import useToast from "../../hooks/useToast";
 
 interface IComponents {
   name: string;
@@ -86,7 +87,7 @@ const SetTypes = () => {
   const [isUpload, setIsUpload] = useState(false);
   const [count, setCount] = useState(0);
   const { t } = useTranslation(["common"]);
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const dt = useRef(null);
   const navigate = useNavigate();
   const menu = useRef(null);

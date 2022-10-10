@@ -16,6 +16,7 @@ import { useAppSelector } from "../../../app/hook";
 import DocumentUploadComponent from "../../FacilityStructure/Forms/FileUpload/DocumentUpload/DocumentUpload";
 import ImageUploadComponent from "../../FacilityStructure/Forms/FileUpload/ImageUpload/ImageUpload";
 import { clearScreenDown } from "readline";
+import useToast from "../../../hooks/useToast";
 
 interface Params {
     submitted: boolean;
@@ -85,7 +86,7 @@ const ZoneForm = ({
     const [classificationStatus, setclassificationStatus] = useState<Node[]>([]);
     const auth = useAppSelector((state) => state.auth);
     const [realm, setRealm] = useState(auth.auth.realm);
-    const { toast } = useAppSelector((state) => state.toast);
+    const { toast } = useToast()
     const { t } = useTranslation(["common"]);
     const [codeCategory, setCodeCategory] = useState("");
     const [createdByNodeId, setCreatedByNodeId] = useState<string>("");

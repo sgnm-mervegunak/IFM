@@ -18,6 +18,7 @@ import LazyLoadingService from "../../../services/lazyLoading";
 import { useAppSelector } from "../../../app/hook";
 import ClassificationForm from "./Forms/ClassificationForm";
 import axios from "axios";
+import useToast from "../../../hooks/useToast";
 
 interface Node {
   cantDeleted: boolean;
@@ -56,7 +57,7 @@ const SetClassificationAdmin = () => {
   const [addDia, setAddDia] = useState(false);
   const [editDia, setEditDia] = useState(false);
   const [delDia, setDelDia] = useState<boolean>(false);
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const cm: any = React.useRef(null);
   const navigate = useNavigate();
   const auth = useAppSelector((state) => state.auth);

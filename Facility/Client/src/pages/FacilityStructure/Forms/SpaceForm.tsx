@@ -14,6 +14,7 @@ import ClassificationsService from "../../../services/classifications";
 import FacilityStructureService from "../../../services/facilitystructure";
 import ImageUploadComponent from "./FileUpload/ImageUpload/ImageUpload";
 import { useAppSelector } from "../../../app/hook";
+import useToast from "../../../hooks/useToast";
 
 interface Params {
   selectedFacilityType: string | undefined;
@@ -75,7 +76,7 @@ const SpaceForm = ({
   const auth = useAppSelector((state) => state.auth);
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
   const [uploadFiles, setUploadFiles] = useState<any>({});
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const [data, setData] = useState<any>();
   const { t } = useTranslation(["common"]);
 

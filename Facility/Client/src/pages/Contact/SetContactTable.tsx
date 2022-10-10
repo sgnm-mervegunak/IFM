@@ -10,11 +10,11 @@ import { InputText } from "primereact/inputtext";
 import { Menu } from "primereact/menu";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-
 import ContactService from "../../services/contact";
 import ContactForm from "./Forms/ContactForm";
 import ImportContact from "./ImportContact"
 import { useAppSelector } from "../../app/hook";
+import useToast from "../../hooks/useToast";
 
 interface Node {
   cantDeleted: boolean;
@@ -87,7 +87,7 @@ const SetContactTable = () => {
   const [isUpload, setIsUpload] = useState(false);
   const [count, setCount] = useState(0);
   const { t } = useTranslation(["common"]);
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const dt = useRef(null);
   const navigate = useNavigate();
   const menu = useRef(null);

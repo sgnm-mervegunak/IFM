@@ -19,6 +19,7 @@ import { useAppSelector } from "../../app/hook";
 import FormGenerate from "../FormGenerate/FormGenerate";
 import "./StructureAssetTable.css"
 import EditAssetTable from "./EditAssetTable";
+import useToast from "../../hooks/useToast";
 
 
 interface Node {
@@ -111,7 +112,7 @@ const StructureAsset = () => {
   const [docTypes, setDocTypes] = React.useState([]);
   const [search, setSearch] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const { t } = useTranslation(["common"]);
   const language = useAppSelector((state) => state.language.language);
 

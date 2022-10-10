@@ -19,6 +19,7 @@ import FacilityStructureLazyService from "../../../services/facilitystructurelaz
 import { useAppSelector } from "../../../app/hook";
 import ImageUploadComponent from "./FileUpload/ImageUpload/ImageUpload";
 import DocumentUploadComponent from "./FileUpload/DocumentUpload/DocumentUpload";
+import useToast from "../../../hooks/useToast";
 
 interface Params {
   submitted: boolean;
@@ -78,7 +79,7 @@ const TypeForm = ({
   const [contact, setContact] = useState<any>([]);
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
   const [uploadFiles, setUploadFiles] = useState<any>({});
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const { t } = useTranslation(["common"]);
   const [codeWarrantyDurationUnit, setCodeWarrantyCodeDurationUnit] = useState("");
   const [expandedKeys, setExpandedKeys] = useState({});

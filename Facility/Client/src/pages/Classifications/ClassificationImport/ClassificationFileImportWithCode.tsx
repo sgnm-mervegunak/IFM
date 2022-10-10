@@ -8,9 +8,10 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 import { useAppSelector } from "../../../app/hook";
+import useToast from '../../../hooks/useToast';
 
 const ClassificationFileImportWithCode: React.FC = () => {
-    const { toast } = useAppSelector((state) => state.toast);
+    const { toast } = useToast()
     const refUpload = useRef<any>(null);
     const auth = useAppSelector((state) => state.auth);
     const [token, setToken] = useState(auth.auth.token);

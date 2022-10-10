@@ -16,6 +16,7 @@ import ClassificationsService from "../../../services/classifications";
 import JointSpaceService from "../../../services/jointSpace";
 import { useAppSelector } from "../../../app/hook";
 import ImageUploadComponent from ".././FileUpload/ImageUpload/ImageUpload";
+import useToast from "../../../hooks/useToast";
 
 interface Node {
   cantDeleted: boolean;
@@ -122,7 +123,7 @@ const JointSpaceForm = ({
   const [categoryKey, setCategoryKey] = useState<any>();
   //   const [delDia, setDelDia] = useState<boolean>(false);
   //   const [formDia, setFormDia] = useState<boolean>(false);
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const cm: any = React.useRef(null);
   const navigate = useNavigate();
   //const [formData, setFormData] = useState<FormNode[]>([]);

@@ -15,6 +15,7 @@ import JointSpaceServices from "../../services/jointSpaces";
 import { useAppSelector } from "../../app/hook";
 import DisplayNode from "../FacilityStructure/Display/DisplayNode";
 import JointSpaceForm from "./Forms/JointSpaceForm";
+import useToast from "../../hooks/useToast";
 
 interface Node {
   cantDeleted: boolean;
@@ -87,7 +88,7 @@ const SetJointSpaceComponent = ({ selectedBuildingKey, setSelectedBuildingKey }:
   const [editDia, setEditDia] = useState(false);
   const [delDia, setDelDia] = useState<boolean>(false);
   const [formDia, setFormDia] = useState<boolean>(false);
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const cm: any = React.useRef(null);
   const navigate = useNavigate();
   const [formData, setFormData] = useState<FormNode[]>([]);

@@ -3,6 +3,7 @@ import { FileUpload } from "primereact/fileupload";
 import FileItem from "./FileItem";
 import { confirmDialog } from "primereact/confirmdialog";
 import { useAppSelector } from "../../../../app/hook";
+import useToast from "../../../../hooks/useToast";
 
 const FileUploadComponent = ({
   value,
@@ -16,7 +17,7 @@ const FileUploadComponent = ({
   isImage = false,
 }) => {
   const uploadRef = useRef(null);
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
 
   const accept = (index) => {
     setDeleteFiles((prev) => [...prev, JSON.parse(value)[index]]);

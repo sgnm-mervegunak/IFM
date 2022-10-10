@@ -16,6 +16,7 @@ import { useAppSelector } from "../../../app/hook";
 import FileUploadComponent from "./FileUpload/FileUpload";
 import ImageUploadComponent from "./FileUpload/ImageUpload/ImageUpload";
 import DocumentUploadComponent from "./FileUpload/DocumentUpload/DocumentUpload";
+import useToast from "../../../hooks/useToast";
 
 interface Params {
   selectedFacilityType: string | undefined;
@@ -73,7 +74,7 @@ const BuildingForm = ({
   const [realm, setRealm] = useState(auth.auth.realm);
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
   const [uploadFiles, setUploadFiles] = useState<any>({});
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const { t } = useTranslation(["common"]);
   const [codeCategory, setCodeCategory] = useState("");
   const [codeStatus, setCodeStatus] = useState("");

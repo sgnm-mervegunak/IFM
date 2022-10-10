@@ -13,6 +13,7 @@ import { useTranslation } from "react-i18next";
 import ClassificationsService from "../../../services/classifications";
 import ContactService from "../../../services/contact";
 import { useAppSelector } from "../../../app/hook";
+import useToast from "../../../hooks/useToast";
 
 interface Params {
   submitted: boolean;
@@ -65,7 +66,7 @@ const ContactForm = ({
   const [classificationCategory, setClassificationCategory] = useState<Node[]>([]);
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const { t } = useTranslation(["common"]);
   const [codeCategory, setCodeCategory] = useState("");
   const [createdByNodeId, setCreatedByNodeId] = useState<string>("");

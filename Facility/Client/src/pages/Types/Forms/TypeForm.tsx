@@ -16,6 +16,7 @@ import ContactService from "../../../services/contact";
 import { useAppSelector } from "../../../app/hook";
 import ImageUploadComponent from "./FileUpload/ImageUpload/ImageUpload";
 import DocumentUploadComponent from "./FileUpload/DocumentUpload/DocumentUpload";
+import useToast from "../../../hooks/useToast";
 
 interface Params {
   submitted: boolean;
@@ -72,7 +73,7 @@ const TypeForm = ({
   const [contact, setContact] = useState<any>([]);
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
   const [uploadFiles, setUploadFiles] = useState<any>({});
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const { t } = useTranslation(["common"]);
   const [codeCategory, setCodeCategory] = useState("");
   const [codeAssetType, setCodeAssetType] = useState("");

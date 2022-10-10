@@ -15,6 +15,7 @@ import FacilityStructureService from "../../services/facilitystructure";
 import StructureAssetService from "../../services/structureAsset";
 import FormTypeService from "../../services/formType";
 import { useAppSelector } from "../../app/hook";
+import useToast from "../../hooks/useToast";
 
 interface Node {
   cantDeleted: boolean;
@@ -51,7 +52,7 @@ const StructureAsset2 = () => {
   const [addDia, setAddDia] = useState(false);
   const [editDia, setEditDia] = useState(false);
   const [delDia, setDelDia] = useState<boolean>(false);
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const cm: any = React.useRef(null);
   const navigate = useNavigate()
   const [assetData, setAssetData] = useState<Node[]>([]);

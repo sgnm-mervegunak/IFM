@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import FacilityStructureService from "../../../services/facilitystructure";
 import JointSpaceService from "../../../services/jointSpace";
 import { useAppSelector } from "../../../app/hook";
+import useToast from "../../../hooks/useToast";
 
 let data2 = [33, 33, 34];
 
@@ -37,7 +38,7 @@ const Dashboard = () => {
   const [buildingKeys, setBuildingKeys] = useState([]);
   const [counts, setCounts] = useState([]);
   const auth = useAppSelector((state) => state.auth);
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const [realm, setRealm] = useState(auth.auth.realm);
   const { t } = useTranslation(["common"]);
 

@@ -8,6 +8,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import StructureAssetService from "../../services/structureAsset";
 import FacilityStructureService from "../../services/facilitystructure";
 import { useAppSelector } from "../../app/hook";
+import useToast from "../../hooks/useToast";
 
 interface Node {
   id: string;
@@ -29,7 +30,7 @@ const ShowAsset = () => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Node[]>([]);
   const [nodeName, setNodeName] = useState("");
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const cm: any = React.useRef(null);
   const navigate = useNavigate()
   const [assetData, setAssetData] = useState<Node[]>([]);

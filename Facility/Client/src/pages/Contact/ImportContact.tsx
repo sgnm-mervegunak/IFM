@@ -3,8 +3,8 @@ import { FileUpload } from 'primereact/fileupload';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import axios from 'axios';
 import { useTranslation } from "react-i18next";
-
 import { useAppSelector } from "../../app/hook";
+import useToast from '../../hooks/useToast';
 
 interface Params {
     selectedNodeKey: string;
@@ -13,7 +13,7 @@ interface Params {
 }
 
 const ImportContact = ({ setImportDia, getContact }: Params) => {
-    const { toast } = useAppSelector((state) => state.toast);
+    const { toast } = useToast()
     const refUpload = useRef<any>(null);
     const auth = useAppSelector((state) => state.auth);
     const [token, setToken] = useState(auth.auth.token);

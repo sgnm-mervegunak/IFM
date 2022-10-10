@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from "react-i18next";
 
 import { useAppSelector } from "../../../app/hook";
+import useToast from '../../../hooks/useToast';
 
 interface Params {
     selectedNodeKey: string;
@@ -15,7 +16,7 @@ interface Params {
 }
 
 const SpaceFileImport = ({ selectedNodeKey, setSpaceImportDia, getFacilityStructure }: Params) => {
-    const { toast } = useAppSelector((state) => state.toast);
+    const { toast } = useToast()
     const refUpload = useRef<any>(null);
     const auth = useAppSelector((state) => state.auth);
     const [token, setToken] = useState(auth.auth.token);

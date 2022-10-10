@@ -4,6 +4,7 @@ import ImageItem from "./ImageItem";
 import { confirmDialog } from "primereact/confirmdialog";
 import { useAppSelector } from "../../../../app/hook";
 import { Button } from "primereact/button";
+import useToast from "../../../../hooks/useToast";
 
 const ImageUploadComponent = ({
   value,
@@ -15,7 +16,7 @@ const ImageUploadComponent = ({
   setUploadFiles,
 }) => {
   const uploadRef = useRef(null);
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
 
   React.useEffect(() => {
     if (uploadRef.current) {

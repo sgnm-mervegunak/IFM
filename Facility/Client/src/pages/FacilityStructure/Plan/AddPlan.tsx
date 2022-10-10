@@ -5,6 +5,7 @@ import { Message } from "primereact/message";
 
 import { useAppSelector } from "../../../app/hook";
 import axios from "axios";
+import useToast from "../../../hooks/useToast";
 
 const AddPlan = ({
   submitted,
@@ -19,7 +20,7 @@ const AddPlan = ({
   selectedNodeKey: string;
   getFacilityStructure: any;
 }) => {
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const { t } = useTranslation(["common"]);
   const emptyPlan = "empty";
   const [options, setOptions] = React.useState<any>([

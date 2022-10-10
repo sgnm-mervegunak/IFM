@@ -15,6 +15,7 @@ import FormTypeService from "../../services/formType";
 import StructureWinformService from "../../services/structureWinform";
 import { useAppSelector } from "../../app/hook";
 import FormGenerate from "../FormGenerate/FormGenerate";
+import useToast from "../../hooks/useToast";
 
 interface Node {
   cantDeleted: boolean;
@@ -102,7 +103,7 @@ const StructureAsset = () => {
   const [docTypes, setDocTypes] = React.useState([]);
   const [search, setSearch] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const { t } = useTranslation(["common"]);
   const language = useAppSelector((state) => state.language.language);
 

@@ -11,6 +11,7 @@ import { Toolbar } from "primereact/toolbar";
 import TypesService from "../../services/types";
 import { useAppSelector } from "../../app/hook";
 import TypeForm from "./Forms/TypeForm";
+import useToast from "../../hooks/useToast";
 
 interface Node {
   cantDeleted: boolean;
@@ -46,7 +47,7 @@ const SetType = () => {
   const [delDia, setDelDia] = useState<boolean>(false);
   const cm: any = React.useRef(null);
   const navigate = useNavigate();
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const [canDelete, setCanDelete] = useState<boolean>(false);

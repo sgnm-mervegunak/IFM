@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 
 import FacilityStructureService from "../../../services/facilitystructure";
 import { useAppSelector } from '../../../app/hook';
+import useToast from "../../../hooks/useToast";
 
 interface Params {
     selectedFacilityType: string | undefined;
@@ -63,7 +64,7 @@ const BlockForm = ({
 
     const [data, setData] = useState<any>();
     const { t } = useTranslation(["common"]);
-    const { toast } = useAppSelector(state => state.toast);
+    const { toast } = useToast()
 
     const schema = yup.object({
         name: yup.string().required(t("This area is required.")).max(50, t("This area accepts max 50 characters.")),

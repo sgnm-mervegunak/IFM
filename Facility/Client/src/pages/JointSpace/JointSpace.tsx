@@ -18,6 +18,7 @@ import FacilityStructureLazyService from "../../services/facilitystructurelazy";
 import { useAppSelector } from "../../app/hook";
 import Export, { ExportType } from "../FacilityStructure/Export/Export";
 import SetJointSpaceComponent from "./SetJointSpaceComponent";
+import useToast from "../../hooks/useToast";
 
 
 interface Node {
@@ -61,7 +62,7 @@ const JointSpace = () => {
   const [selectedBuildingKey, setSelectedBuildingKey] = useState<any>();
 
   const dt = useRef<any>();
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
   const menu = useRef<any>(null);
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
