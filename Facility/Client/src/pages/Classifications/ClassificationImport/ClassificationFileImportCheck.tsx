@@ -22,7 +22,7 @@ const ClassificationFileImportCheck: React.FC = () => {
     history("/classifications");
   }
 
-      const uploadCSV = (e: any) => {
+      const checkFile = (e: any) => {
         const file = e.files[0];
         const url: any =
           process.env.REACT_APP_API_FACILITY + "classification/checkExcelFile";
@@ -63,42 +63,6 @@ const ClassificationFileImportCheck: React.FC = () => {
         refUpload.current.clear();
       };
 
-  //   const uploadCSV = (e: any) => {
-  //     console.log("event-------", e)
-  //   const file = e.files[0];
-  //   const url: any =
-  //     process.env.REACT_APP_API_FACILITY +
-  //     "classification/checkExcelFile";
-  //     console.log("aaaaaaaaaaaaa");
-  //   setSpinner(true);
-  //     axios
-  //     .post(url)
-  //     .then((response) => {
-  //       setSpinner(false);
-  //       toast.current.show({
-  //         severity: "success",
-  //           summary: t("Successful"),
-          
-  //         detail: t("File uploaded"),
-  //         life: 4000,
-  //       });
-  //       backToClassification();
-  //     })
-
-  //       .catch((err) => {
-  //             console.log("bbbbbbbbbbbbb")
-  //       toast.current.show({
-  //         severity: "error",
-  //         summary: t("Error"),
-  //         detail: err.response ? err.response.data.message : err.message,
-  //         life: 4000,
-  //       });
-  //       setSpinner(false);
-  //     });
-
-  //   refUpload.current.clear();
-  // };
-
   return (
     <>
       <div className="card">
@@ -106,16 +70,7 @@ const ClassificationFileImportCheck: React.FC = () => {
           <ProgressSpinner />
         ) : (
           <>
-            <h5>{t("Classification File Import With Code")}</h5>
-            <p className="mt-6">
-              <Link
-                to="/documents/classification-sample-data-with-code.xlsx"
-                target="_blank"
-                download
-              >
-                {t("Download to see a sample classification file")}
-              </Link>
-            </p>
+            <h5>{t("Check the file format before upload")}</h5>
 
             <FileUpload
               name="upfile[]"
@@ -126,7 +81,7 @@ const ClassificationFileImportCheck: React.FC = () => {
               uploadLabel={t("Check")}
               cancelLabel={t("Cancel")}
               customUpload={true}
-              uploadHandler={uploadCSV}
+              uploadHandler={checkFile}
               ref={refUpload}
             />
           </>
