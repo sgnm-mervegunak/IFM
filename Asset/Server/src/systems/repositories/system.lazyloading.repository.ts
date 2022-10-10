@@ -5,10 +5,10 @@ import { LazyLoadingRepository } from 'src/common/class/lazyLoading.dealer';
 import { node_not_found } from 'src/common/const/custom.error.object';
 import { LazyLoadingPathDto } from 'src/common/dto/lazy.loading.path.dto';
 import { LazyLoadingPathByKeyDto } from 'src/common/dto/lazy.loading.path.key.dto ';
-import { FacilityLazyLoadingInterface } from 'src/common/interface/facility.lazyloading.interface';
+import { SystemLazyLoadingInterface } from 'src/common/interface/system.lazyloading.interface';
 
 @Injectable()
-export class FacilityStructureLazyLoadingRepository implements FacilityLazyLoadingInterface {
+export class SystemLazyLoadingRepository implements SystemLazyLoadingInterface {
   constructor(private readonly lazyLoadingDealer: LazyLoadingRepository, private readonly neo4jService: Neo4jService) {}
   async getPathByKey(lazyLoadingPathByKeyDto: LazyLoadingPathByKeyDto, header: any) {
     try {
@@ -16,13 +16,13 @@ export class FacilityStructureLazyLoadingRepository implements FacilityLazyLoadi
       const { realm } = header;
       const node = await this.neo4jService.findByLabelAndFilters([], { key });
       if (!node.length) {
-        throw new HttpException(node_not_found({ key }), 400);
+        throw new HttpException(node_not_found(), 400);
       }
 
       const parents = await (
         await this.neo4jService.findChildrensByLabelsAndFiltersWithNotLabels([], {}, [], { key }, [
           'Root',
-          'FacilityStructure',
+          'Systems',
         ])
       )
         .map((item) => item.get('parent').properties.key)
@@ -42,11 +42,12 @@ export class FacilityStructureLazyLoadingRepository implements FacilityLazyLoadi
 
   async findRootByRealm(header) {
     try {
-      const { realm } = header;
+      let { realm } = header;
+      //realm = 'IFM';
       console.log(realm);
       const tree = await this.lazyLoadingDealer.loadByLabel(
-        'FacilityStructure',
-        'Space',
+        'Systems',
+        'Component',
         { realm, isDeleted: false },
         { isDeleted: false, canDisplay: true },
         { isDeleted: false, canDisplay: true },
@@ -64,8 +65,8 @@ export class FacilityStructureLazyLoadingRepository implements FacilityLazyLoadi
 
       const tree = await this.lazyLoadingDealer.loadByPath(
         path,
-        'FacilityStructure',
-        'Space',
+        'Systems',
+        'Component',
         { realm, isDeleted: false },
         { isDeleted: false, canDisplay: true },
         { isDeleted: false, canDisplay: true },

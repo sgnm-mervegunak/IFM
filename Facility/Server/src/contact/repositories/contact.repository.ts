@@ -6,7 +6,7 @@ import { CustomTreeError } from 'src/common/const/custom.error.enum';
 import { Contact } from '../entities/contact.entity';
 import { CreateContactDto } from '../dto/create-contact.dto';
 import { UpdateContactDto } from '../dto/update-contact.dto';
-import { ContactNotFoundException } from 'src/common/notFoundExceptions/not.found.exception';
+import { ContactNotFoundException, FacilityStructureNotFountException } from 'src/common/notFoundExceptions/not.found.exception';
 import {
   assignDtoPropToEntity,
   createDynamicCyperObject,
@@ -24,13 +24,19 @@ import { has_children_error, node_not_found } from 'src/common/const/custom.erro
 import { RelationName } from 'src/common/const/relation.name.enum';
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
 import { ContactHasChildrenException } from 'src/common/badRequestExceptions/bad.request.exception';
+import { PaginationParams } from 'src/common/commonDto/pagination.query';
+import { ContactInterface } from 'src/common/interface/modules.with.pagination.interface';
 
 @Injectable()
-export class ContactRepository implements GeciciInterface<Contact> {
-  constructor(private readonly neo4jService: Neo4jService) {}
+export class ContactRepository implements ContactInterface<any> {
+  constructor(private readonly neo4jService: Neo4jService) { }
 
-  //REVISED FOR NEW NEO4J
-  async findOneByRealm(realm: string, language: string) {
+
+ 
+    //REVISED FOR NEW NEO4J
+
+   /////////////////////////////////////////////     ESKİSİ  //////////////////////////////////////////////// 
+  async findOneByRealm(realm: string, language: string): Promise<{ root: any; }> {
     let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
       ['Contact'],
       { realm: realm, isDeleted: false },
@@ -41,10 +47,33 @@ export class ContactRepository implements GeciciInterface<Contact> {
       //throw new FacilityStructureNotFountException(realm);
     }
     node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
-
     return node;
-  }
+    }
 
+    ////////////////////////////              YENİSİ                   ///////////////////////////////////
+      //REVISED FOR NEW NEO4J
+    // async findOneByRealm(realm: string, language: string, neo4jQuery: PaginationParams) {
+    // const contactNode = await this.neo4jService.findByLabelAndFilters(['Contact'], { realm, isDeleted: false })
+    // if (!contactNode.length) {
+    //   throw new FacilityStructureNotFountException(realm);
+    // }
+    // let children = await this.neo4jService.findChildrensByIdAndFiltersWithPagination(contactNode[0].get('n').identity.low, {}, [], { isDeleted: false }, 'PARENT_OF', neo4jQuery)
+    // let totalCount = children.length
+
+
+    // children = children.map((item) => {
+    //   return item.get('children').properties
+    // })
+
+    // const finalResponse = { ...contactNode[0].get('n').properties, totalCount, children }
+
+
+    // return finalResponse;
+    //}
+
+
+
+    
   //REVISED FOR NEW NEO4J
   async create(createContactDto: CreateContactDto, realm: string, language: string) {
     try {
@@ -374,7 +403,12 @@ export class ContactRepository implements GeciciInterface<Contact> {
   //   }
   // }
 
-  async findOneFirstLevelByRealm(label: string, realm: string, language: string) {}
+  async findOneFirstLevelByRealm(label: string, realm: string, language: string) { }
 
-  async findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) {}
+  async findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) { }
+
+ 
 }
+
+
+

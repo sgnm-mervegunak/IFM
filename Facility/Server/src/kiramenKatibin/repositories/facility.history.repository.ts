@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { PaginationParams } from 'src/common/commonDto/pagination.dto';
+import { PaginationParams } from 'src/common/commonDto/pagination.query';
 import { FacilityNotFountException } from 'src/common/notFoundExceptions/not.found.exception';
 import { BaseHistoryRepositoryInterface } from 'ifmcommon';
 import { CreateFacilityHistoryDto } from '../dtos/create.facility.history.dto';

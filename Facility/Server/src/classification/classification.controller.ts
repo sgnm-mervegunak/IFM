@@ -200,5 +200,12 @@ export class ClassificationController {
     return this.classificationService.checkExcelFile(file);
 
   }
-
+  @Get('/structuretypes/all/list/get/by/:label')
+  @Roles({ roles: [UserRoles.ADMIN] })
+  //@Unprotected()
+  @NoCache()
+  findOneFirstLevel(@Param('label') label: string, @Headers() header) {
+    const { language, realm } = header;
+    return this.classificationService.findOneFirstLevel(label, realm, language);
+  }
 }

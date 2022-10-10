@@ -6,12 +6,17 @@ import { JointSpaceController } from './controllers/jointspace.controller';
 import { HttpModule } from '@nestjs/axios';
 import { StructureModule } from 'src/facility-structures/structure.module';
 import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
+import { JointSpaceLazyLoadingRepository } from './repositories/jointspace.lazyloading.repository';
+import { LazyLoadingRepository } from 'src/common/class/lazyLoading.dealer';
+import { JointSpaceLazyLoadingController } from './controllers/jointspace.lazyloading.controller';
+import { JointSpaceLazyLoadingService } from './services/jointspace.lazyloading.service';
 
 @Module({
   imports: [HttpModule, StructureModule],
-  controllers: [JointSpaceController],
+  controllers: [JointSpaceController, JointSpaceLazyLoadingController],
   providers: [
     JointSpaceService,
+    JointSpaceLazyLoadingService,
 
     {
       provide: RepositoryEnums.JOINT_SPACE,
@@ -20,6 +25,14 @@ import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
     {
       provide: NodeRelationHandler,
       useClass: NodeRelationHandler,
+    },
+    {
+      provide: LazyLoadingRepository,
+      useClass: LazyLoadingRepository,
+    },
+    {
+      provide: RepositoryEnums.JOINT_SPACE_LAZY_LOADING,
+      useClass: JointSpaceLazyLoadingRepository,
     },
   ],
 })

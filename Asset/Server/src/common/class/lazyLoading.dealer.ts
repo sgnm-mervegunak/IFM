@@ -1,3 +1,18 @@
+
+
+
+
+
+
+
+
+/////////////////  HAYDAR , System/Component çalışması için bu dosyayı buraya ben kopyaladım.....atamer ....
+
+
+
+
+
+
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { I18NEnums } from '../const/i18n.enum';
 import { Neo4jService } from 'sgnm-neo4j/dist';

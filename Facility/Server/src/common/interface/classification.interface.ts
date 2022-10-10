@@ -12,5 +12,5 @@ export interface classificationInterface<T> extends GeciciInterface<T> {
   getNodeByClassificationLanguageRealmAndCode( classificationName:string, language:string,realm:string,code:string): any;
   getNodeByLanguageRealmAndCode(language: string, realm: string, code: string): any;
   checkExcelFile(file: Express.Multer.File):any
-
+  findOneFirstLevelByRealm(label: string, realm: string, language: string): any;
 }

@@ -14,6 +14,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 
 import FacilityStructureService from "../../services/facilitystructure";
+import ClassificationsService from "../../services/classifications";
 import FormTypeService from "../../services/formType";
 import StructureWinformService from "../../services/structureWinform";
 import { useAppSelector } from "../../app/hook";
@@ -101,7 +102,7 @@ const SetFacilityStructure2 = () => {
   const language = useAppSelector((state: { language: { language: any; }; }) => state.language.language);
 
   useEffect(() => {
-    FacilityStructureService.getFacilityTypes("FacilityTypes_EN")
+    ClassificationsService.getFacilityTypes("FacilityTypes")
       .then((res) => {
         setFacilityType(res.data.map((item: any) => item.name))
       })

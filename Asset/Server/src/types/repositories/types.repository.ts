@@ -40,7 +40,7 @@ export class TypesRepository implements GeciciInterface<Type> {
   ) {}
   async findByKey(key: string, header) {
     try {
-      const {language} = header;
+      let {language} = header;
       const nodes = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
         [Neo4jLabelEnum.TYPE],
         { key, isDeleted: false },
@@ -158,7 +158,7 @@ export class TypesRepository implements GeciciInterface<Type> {
         throw new HttpException(wrong_parent_error(), 400);
       }
 
-      const assetTypesLabel = 'AssetTypes' + '_' + language;
+      const assetTypesLabel = 'AssetType' + '_' + language;
       const assetTypes = await this.neo4jService.findChildrensByLabelsAndFilters([assetTypesLabel], { realm }, [], {
         code: createTypesDto.assetType,
       });
@@ -283,7 +283,7 @@ export class TypesRepository implements GeciciInterface<Type> {
       }
 
       if (updateTypeDto.assetType) {
-        const assetTypesLabel = 'AssetTypes' + '_' + language;
+        const assetTypesLabel = 'AssetType' + '_' + language;
         const assetTypes = await this.neo4jService.findChildrensByLabelsAndFilters([assetTypesLabel], { realm }, [], {
           code: updateTypeDto.assetType,
         });

@@ -119,6 +119,26 @@ const setPassive = async (id: string) => {
   return axios.patch(url + "/setIsActiveFalseOfClassificationAndItsChild/" + id);
 };
 
-const service = { findOne, findAll, findAllActive, create, update, remove, relation, nodeInfo, setActive, setPassive, findAllActiveByLabel, findClassificationByCodeAndLanguage, findClassificationByCode };
+const getFacilityTypes = async (label: string) => {
+  return axios.get(url + "/structuretypes/all/list/get/by/" + label);
+};
+
+
+const service = {
+  findOne,
+  findAll,
+  findAllActive,
+  create,
+  update,
+  remove,
+  relation,
+  nodeInfo,
+  setActive,
+  setPassive,
+  findAllActiveByLabel,
+  findClassificationByCodeAndLanguage,
+  findClassificationByCode,
+  getFacilityTypes
+};
 
 export default service;

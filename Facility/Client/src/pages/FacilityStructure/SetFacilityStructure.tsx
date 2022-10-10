@@ -118,7 +118,7 @@ const SetFacilityStructure = () => {
   const language = useAppSelector((state) => state.language.language);
 
   useEffect(() => {
-    FacilityStructureService.getFacilityTypes("FacilityTypes")
+    ClassificationsService.getFacilityTypes("FacilityTypes")
       .then((res) => {
         setFacilityType(
           res.data.map((item: any) => ({
