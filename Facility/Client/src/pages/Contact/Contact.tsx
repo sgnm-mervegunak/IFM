@@ -141,36 +141,36 @@ const Contact = () => {
   ];
 
   const getContact = () => {
-    ContactService.findAll()
-      .then((res) => {
-        if (!res.data.root.children) {
-          setData([res.data.root.properties] || []);
-          let temp = JSON.parse(
-            JSON.stringify([res.data.root.properties] || [])
-          );
-          fixNodes(temp);
-          setData(temp);
-        } else if (res.data.root.children) {
-          setData([res.data.root] || []);
-          let temp = JSON.parse(JSON.stringify([res.data.root] || []));
-          fixNodes(temp);
-          setData(temp);
-        }
-        setLoading(false);
-      })
-      .catch((err) => {
-        if (err.response.status === 500) {
-          toast.current.show({
-            severity: "error",
-            summary: t("Error"),
-            detail: t("Contact not found"),
-            life: 3000,
-          });
-          setTimeout(() => {
-            navigate("/");
-          }, 3000);
-        }
-      });
+    // ContactService.findAll()
+    //   .then((res) => {
+    //     if (!res.data.root.children) {
+    //       setData([res.data.root.properties] || []);
+    //       let temp = JSON.parse(
+    //         JSON.stringify([res.data.root.properties] || [])
+    //       );
+    //       fixNodes(temp);
+    //       setData(temp);
+    //     } else if (res.data.root.children) {
+    //       setData([res.data.root] || []);
+    //       let temp = JSON.parse(JSON.stringify([res.data.root] || []));
+    //       fixNodes(temp);
+    //       setData(temp);
+    //     }
+    //     setLoading(false);
+    //   })
+    //   .catch((err) => {
+    //     if (err.response.status === 500) {
+    //       toast.current.show({
+    //         severity: "error",
+    //         summary: t("Error"),
+    //         detail: t("Contact not found"),
+    //         life: 3000,
+    //       });
+    //       setTimeout(() => {
+    //         navigate("/");
+    //       }, 3000);
+    //     }
+    //   });
   };
 
   useEffect(() => {
