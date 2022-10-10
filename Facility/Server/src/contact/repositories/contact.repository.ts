@@ -32,10 +32,10 @@ export class ContactRepository implements ContactInterface<any> {
   constructor(private readonly neo4jService: Neo4jService) { }
 
 
- 
-    //REVISED FOR NEW NEO4J
 
-   /////////////////////////////////////////////     ESKİSİ  //////////////////////////////////////////////// 
+  //REVISED FOR NEW NEO4J
+
+  /////////////////////////////////////////////     ESKİSİ  //////////////////////////////////////////////// 
   // async findOneByRealm(realm: string, language: string): Promise<{ root: any; }> {
   //   let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
   //     ['Contact'],
@@ -50,16 +50,17 @@ export class ContactRepository implements ContactInterface<any> {
   //   return node;
   //   }
 
-    ////////////////////////////              YENİSİ                   ///////////////////////////////////
-      //REVISED FOR NEW NEO4J
-    async findOneByRealm(realm: string, language: string, neo4jQuery: PaginationParams) {
+  ////////////////////////////              YENİSİ                   ///////////////////////////////////
+  //REVISED FOR NEW NEO4J
+  async findOneByRealm(realm: string, language: string, neo4jQuery: PaginationParams) {
     const contactNode = await this.neo4jService.findByLabelAndFilters(['Contact'], { realm, isDeleted: false })
     if (!contactNode.length) {
       throw new FacilityStructureNotFountException(realm);
     }
-    neo4jQuery.skip=Math.abs(neo4jQuery.page-1)*neo4jQuery.limit
+    neo4jQuery.skip = Math.abs(neo4jQuery.page - 1) * neo4jQuery.limit
     let children = await this.neo4jService.findChildrensByIdAndFiltersWithPagination(contactNode[0].get('n').identity.low, {}, [], { isDeleted: false }, 'PARENT_OF', neo4jQuery)
-    let totalCount = children.length
+    let totalCount = await this.neo4jService.findChildrensByIdAndFilters(contactNode[0].get('n').identity.low, {}, [], { isDeleted: false }, 'PARENT_OF')
+    totalCount = totalCount.length
 
 
     children = children.map((item) => {
@@ -70,17 +71,17 @@ export class ContactRepository implements ContactInterface<any> {
 
 
     return finalResponse;
-    }
+  }
 
 
 
-    
+
   //REVISED FOR NEW NEO4J
   async create(createContactDto: CreateContactDto, realm: string, language: string) {
     try {
       const contactRootNode = await this.neo4jService.findByLabelAndFilters(
         ['Contact'],
-        { isDeleted: false,realm },
+        { isDeleted: false, realm },
         [],
       );
       //check if rootNode realm equal to keyclock token realm
@@ -101,14 +102,14 @@ export class ContactRepository implements ContactInterface<any> {
       }
       value['properties']['id'] = value['identity'].low;
       const result = { id: value['identity'].low, labels: value['labels'], properties: value['properties'] };
-     
-        await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
-          contactRootNode[0].get('n').identity.low,
-          result['id'],
-          RelationName.PARENT_OF,
-          RelationDirection.RIGHT,
-        );
-      
+
+      await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
+        contactRootNode[0].get('n').identity.low,
+        result['id'],
+        RelationName.PARENT_OF,
+        RelationDirection.RIGHT,
+      );
+
       // CREATED BY relation create
       if (createContactDto['createdById']) {
         await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
@@ -126,7 +127,7 @@ export class ContactRepository implements ContactInterface<any> {
       );
       const newCategories = await this.neo4jService.findChildrensByLabelsAndFilters(
         ['Classification'],
-        { isDeleted: false, realm:contactRootNode[0].get('n').properties.realm },
+        { isDeleted: false, realm: contactRootNode[0].get('n').properties.realm },
         [],
         { isDeleted: false, code: newClassificationCode['properties'].code },
       );
@@ -408,7 +409,7 @@ export class ContactRepository implements ContactInterface<any> {
 
   async findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) { }
 
- 
+
 }
 
 
