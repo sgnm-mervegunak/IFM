@@ -557,6 +557,13 @@ const SetClassificationAdmin = () => {
         navigate("/classifications/fileimportwithoutcode");
       },
     },
+    {
+      label: t("Check File"),
+      icon: "pi pi-upload",
+      command: () => {
+        navigate("/classifications/fileimportcheck");
+      },
+    },
   ];
 
   return (
