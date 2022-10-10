@@ -164,7 +164,7 @@ const TypeForm = ({
 
   const getAssetType = async () => {
     await AssetClassificationsService.findAllActiveByLabel({
-      label: "AssetTypes"
+      label: "AssetType"
     }).then((res) => {
 
       let temp = JSON.parse(JSON.stringify([res.data.root] || []));
@@ -174,9 +174,11 @@ const TypeForm = ({
   };
 
   const getContact = async () => {
-    ContactService.findAll()
+    ContactService.findAll({page:1,limit:1000,orderBy:"ASC",orderByColumn:"email"})
       .then((res) => {
-        let temp = JSON.parse(JSON.stringify([res.data.root] || []));
+        console.log(res.data);
+        
+        let temp = JSON.parse(JSON.stringify([res.data] || []));
         fixNodes(temp);
         setContact(temp);
       });
@@ -206,6 +208,8 @@ const TypeForm = ({
   const getNodeInfoForUpdate = (selectedNodeKey: string) => {
     TypesService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
+        console.log(res.data);
+        
         let temp = {};
         await AssetClassificationsService.findClassificationByCodeAndLanguage("OmniClass23", res.data.properties.category).then(clsf1 => {
           setCodeCategory(res.data.properties.category);
@@ -215,7 +219,7 @@ const TypeForm = ({
           .catch((err) => {
             setData(res.data.properties);
           })
-        await AssetClassificationsService.findClassificationByCodeAndLanguage("AssetTypes", res.data.properties.assetType).then(clsf2 => {
+        await AssetClassificationsService.findClassificationByCodeAndLanguage("AssetType", res.data.properties.assetType).then(clsf2 => {
           setCodeAssetType(res.data.properties.assetType);
           res.data.properties.assetType = clsf2.data.key
           temp = res.data.properties;

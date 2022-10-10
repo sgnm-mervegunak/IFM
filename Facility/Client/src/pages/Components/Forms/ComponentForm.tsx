@@ -81,9 +81,7 @@ const TypeForm = ({
   const { toast } = useAppSelector((state) => state.toast);
   const { t } = useTranslation(["common"]);
   const [codeWarrantyDurationUnit, setCodeWarrantyCodeDurationUnit] = useState("");
-  const [loadedNode, setLoadedNode] = useState<any>({});
   const [expandedKeys, setExpandedKeys] = useState({});
-  const [loading, setLoading] = useState(true);
 
   const [data, setData] = useState<any>();
 
@@ -163,49 +161,29 @@ const TypeForm = ({
       fixNodesSpaces(temp);
       setSpaces(temp);
     });
+
   };
 
   const loadOnExpand = (event: any) => {
     if (!event.node.children) {
-      setLoading(true);
       console.log(event);
-      
+
 
       FacilityStructureLazyService.lazyLoadByKey(event.node.key)
         .then((res) => {
-          // console.log(res.data);
-          
-          // setLoadedNode((prev: any) => {
-          //   for (const item of res.data.children) {
-          //     console.log(item);
-              
-          //     prev[item.key] = prev[event.node.key]
-          //       ? [...prev[event.node.key], event.node.key]
-          //       : [event.node.key];
-          //   }
-
-          //   return prev;
-          // });
-          console.log(event.node);
-          
 
           event.node.children = res.data.children.map((child: any) => ({
             ...child,
             id: child.id,
             leaf: child.leaf,
           }));
-          console.log(event.node);
-          
-          // console.log([...spaces]);
-          
-          // let temp = JSON.parse(
-          //   JSON.stringify([...spaces] || [])
-          // );
-          // fixNodesSpaces(temp);
-          // setSpaces(temp);
-          // setExpandedKeys((prev) => ({ ...prev, [event.node.key]: true }));
-          setSpaces([...spaces]);
-          setLoading(false);
+
+          let temp = JSON.parse(
+            JSON.stringify([...spaces] || [])
+          );
+          fixNodesSpaces(temp);
+          setSpaces(temp);
+
         })
         .catch((err) => {
           toast.current.show({
@@ -219,9 +197,9 @@ const TypeForm = ({
   };
 
   const getContact = async () => {
-    ContactService.findAll()
+    ContactService.findAll({page:1,limit:1000,orderBy:"ASC",orderByColumn:"email"})
       .then((res) => {
-        let temp = JSON.parse(JSON.stringify([res.data.root] || []));
+        let temp = JSON.parse(JSON.stringify([res.data] || []));
         fixNodes(temp);
         setContact(temp);
       });
@@ -272,6 +250,16 @@ const TypeForm = ({
         await FacilityStructureService.nodeInfo(res.data.properties.space)
           .then((res2) => {
             setSpaceType(res2.data.properties.nodeType);
+          })
+
+        await FacilityStructureLazyService.loadStructureWithPathByKey(res.data.properties.space)
+          .then((res3) => {
+            let temp = JSON.parse(
+              JSON.stringify([res3.data] || [])
+            );
+            fixNodesSpaces(temp);
+            setSpaces(temp);
+
           })
 
         // setData(temp);
@@ -330,6 +318,9 @@ const TypeForm = ({
         documents: data?.documents || "",
         parentKey: selectedNodeKey,
       };
+
+      console.log(newNode);
+      
 
       ComponentService.create(newNode)
         .then(async (res) => {
@@ -415,6 +406,9 @@ const TypeForm = ({
         documents: data?.documents || "",
         parentKey: selectedNodeKey,
       };
+
+      console.log(updateNode);
+      
 
       ComponentService.update(selectedNodeId, updateNode)
         .then(async (res) => {
@@ -521,9 +515,10 @@ const TypeForm = ({
                     value={field.value}
                     options={spaces}
                     onNodeExpand={loadOnExpand}
-                    
-                    onShow={() => {console.log('show')}}
-                    onHide={() => {console.log('hide')}}
+                    // expandedKeys={expandedKeys}
+                    // onToggle={(e) => setExpandedKeys(e.value)}
+                    onShow={() => { console.log('show') }}
+                    onHide={() => { console.log('hide') }}
                     onChange={(e) => {
                       FacilityStructureService.nodeInfo(e.value as string)
                         .then((res) => {

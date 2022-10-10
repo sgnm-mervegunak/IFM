@@ -25,6 +25,7 @@ import SetJointSpace from "./pages/JointSpace/SetJointSpace";
 import SetZone from "./pages/Zone/SetZone";
 import ClassificationFileImportWithoutCode from "./pages/Classifications/ClassificationImport/ClassificationFileImportWithoutCode";
 import ClassificationFileImportWithCode from "./pages/Classifications/ClassificationImport/ClassificationFileImportWithCode";
+import ClassificationFileImportCheck from "./pages/Classifications/ClassificationImport/ClassificationFileImportCheck";
 import SetType from "./pages/Types/SetType";
 import SetComponent from "./pages/Components/SetComponent";
 import SetComponentsDetail from "./pages/Components/SetComponentsDetail";
@@ -33,6 +34,7 @@ import StructureAsset from "./pages/StructureAsset/StructureAsset";
 import EditAsset from "./pages/StructureAsset/EditAsset";
 import StructureAssetTable from "./pages/StructureAsset/StructureAssetTable";
 import SetFacilityStructureLazy from "./pages/FacilityStructure/SetFacilityStructureLazy";
+import SetContactTable from "./pages/Contact/SetContactTable";
 
 // import Main from './pages/Main';
 
@@ -48,13 +50,21 @@ export default function Router() {
         // { path: "facility", element: <Facility /> },
         { path: "facility", element: <Facility2 /> },
         // { path: "classifications", element: <Classifications /> },
-        { path: "classifications", element: auth.auth.type === "facility_client_role_admin" ? <SetClassificationAdminLazy /> : <SetClassificationUserLazy /> },
+        {
+          path: "classifications",
+          element:
+            auth.auth.type === "facility_client_role_admin" ? (
+              <SetClassificationAdminLazy />
+            ) : (
+              <SetClassificationUserLazy />
+            ),
+        },
         { path: "jointspace", element: <JointSpace /> },
         { path: "zone", element: <Zone /> },
         { path: "facilitystructure", element: <SetFacilityStructureLazy /> },
         // { path: "formgenerate", element: <FormGenerate />},
-        { path: "contact", element: <Contact /> },
-        { path: "structure-asset", element: <StructureAssetTable/> },
+        { path: "contact", element: <SetContactTable/> },
+        { path: "structure-asset", element: <StructureAssetTable /> },
         { path: "asset-types", element: <SetType /> },
         { path: "asset-components", element: <SetComponent /> },
         { path: "asset-systems", element: <SetSystem /> },
@@ -73,12 +83,32 @@ export default function Router() {
     {
       path: "/classifications",
       element: <AppLayout />,
-      children: [{ path: "fileimportwithcode", element: <ClassificationFileImportWithCode /> }],
+      children: [
+        {
+          path: "fileimportwithcode",
+          element: <ClassificationFileImportWithCode />,
+        },
+      ],
     },
     {
       path: "/classifications",
       element: <AppLayout />,
-      children: [{ path: "fileimportwithoutcode", element: <ClassificationFileImportWithoutCode /> }],
+      children: [
+        {
+          path: "fileimportwithoutcode",
+          element: <ClassificationFileImportWithoutCode />,
+        },
+      ],
+    },
+    {
+      path: "/classifications",
+      element: <AppLayout />,
+      children: [
+        {
+          path: "fileimportcheck",
+          element: <ClassificationFileImportCheck />,
+        },
+      ],
     },
     // {
     //   path: "/formgenerate",
@@ -88,7 +118,7 @@ export default function Router() {
     {
       path: "/structure-asset",
       element: <AppLayout />,
-      children: [{ path: ":id", element: <EditAsset/> }],
+      children: [{ path: ":id", element: <EditAsset /> }],
     },
     {
       path: "/jointspace",

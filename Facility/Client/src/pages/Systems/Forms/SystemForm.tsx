@@ -148,9 +148,9 @@ const SystemForm = ({
   };
 
   const getContact = async () => {
-    ContactService.findAll()
+    ContactService.findAll({page:1,limit:1000,orderBy:"ASC",orderByColumn:"email"})
       .then((res) => {
-        let temp = JSON.parse(JSON.stringify([res.data.root] || []));
+        let temp = JSON.parse(JSON.stringify([res.data] || []));
         fixNodes(temp);
         setContact(temp);
       });

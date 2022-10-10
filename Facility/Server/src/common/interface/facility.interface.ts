@@ -4,7 +4,7 @@ export interface FacilityInterface<T> {
   findOneNodeByKey(key: string, realm: string, language: string): any;
   delete(id: string, realm: string, language: string): any;
   changeNodeBranch(id: string, target_parent_id: string, realm: string, language: string): any;
-  findOneFirstLevelByRealm(label: string, realm: string, language: string): any;
+  //findOneFirstLevelByRealm(label: string, realm: string, language: string): any;
   findChildrenByFacilityTypeNode(language: string, realm: string, typename: string): any;
   addPlanToFloor(key: string, realm: string, language: string): any;
 }

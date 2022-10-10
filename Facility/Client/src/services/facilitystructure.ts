@@ -85,10 +85,6 @@ const nodeInfo = async (key: string) => {
     return axios.get(`${url}/${key}`);
 };
 
-const getFacilityTypes = async (label: string) => {
-    return axios.get(url + "/structuretypes/" + label);
-};
-
 const getFacilityTypeProperties = async (
     second_child_node_name: string,
 ) => {
@@ -125,7 +121,6 @@ const service = {
     remove,
     relation,
     nodeInfo,
-    getFacilityTypes,
     getFacilityTypeProperties,
     createStructure,
     findStuctureFirstLevel,

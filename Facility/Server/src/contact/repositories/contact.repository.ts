@@ -6,7 +6,7 @@ import { CustomTreeError } from 'src/common/const/custom.error.enum';
 import { Contact } from '../entities/contact.entity';
 import { CreateContactDto } from '../dto/create-contact.dto';
 import { UpdateContactDto } from '../dto/update-contact.dto';
-import { ContactNotFoundException } from 'src/common/notFoundExceptions/not.found.exception';
+import { ContactNotFoundException, FacilityStructureNotFountException } from 'src/common/notFoundExceptions/not.found.exception';
 import {
   assignDtoPropToEntity,
   createDynamicCyperObject,
@@ -24,37 +24,68 @@ import { has_children_error, node_not_found } from 'src/common/const/custom.erro
 import { RelationName } from 'src/common/const/relation.name.enum';
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
 import { ContactHasChildrenException } from 'src/common/badRequestExceptions/bad.request.exception';
+import { PaginationParams } from 'src/common/commonDto/pagination.query';
+import { ContactInterface } from 'src/common/interface/modules.with.pagination.interface';
 
 @Injectable()
-export class ContactRepository implements GeciciInterface<Contact> {
-  constructor(private readonly neo4jService: Neo4jService) {}
+export class ContactRepository implements ContactInterface<any> {
+  constructor(private readonly neo4jService: Neo4jService) { }
+
+
 
   //REVISED FOR NEW NEO4J
-  async findOneByRealm(realm: string, language: string) {
-    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
-      ['Contact'],
-      { realm: realm, isDeleted: false },
-      [],
-      { isDeleted: false, canDisplay: true },
-    );
-    if (!node) {
-      //throw new FacilityStructureNotFountException(realm);
-    }
-    node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
 
-    return node;
+  /////////////////////////////////////////////     ESKİSİ  //////////////////////////////////////////////// 
+  // async findOneByRealm(realm: string, language: string): Promise<{ root: any; }> {
+  //   let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
+  //     ['Contact'],
+  //     { realm: realm, isDeleted: false },
+  //     [],
+  //     { isDeleted: false, canDisplay: true },
+  //   );
+  //   if (!node) {
+  //     //throw new FacilityStructureNotFountException(realm);
+  //   }
+  //   node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
+  //   return node;
+  //   }
+
+  ////////////////////////////              YENİSİ                   ///////////////////////////////////
+  //REVISED FOR NEW NEO4J
+  async findOneByRealm(realm: string, language: string, neo4jQuery: PaginationParams) {
+    const contactNode = await this.neo4jService.findByLabelAndFilters(['Contact'], { realm, isDeleted: false })
+    if (!contactNode.length) {
+      throw new FacilityStructureNotFountException(realm);
+    }
+    neo4jQuery.skip = Math.abs(neo4jQuery.page - 1) * neo4jQuery.limit
+    let children = await this.neo4jService.findChildrensByIdAndFiltersWithPagination(contactNode[0].get('n').identity.low, {}, [], { isDeleted: false }, 'PARENT_OF', neo4jQuery)
+    let totalCount = await this.neo4jService.findChildrensByIdAndFilters(contactNode[0].get('n').identity.low, {}, [], { isDeleted: false }, 'PARENT_OF')
+    totalCount = totalCount.length
+
+
+    children = children.map((item) => {
+      return item.get('children').properties
+    })
+
+    const finalResponse = { ...contactNode[0].get('n').properties, totalCount, children }
+
+
+    return finalResponse;
   }
+
+
+
 
   //REVISED FOR NEW NEO4J
   async create(createContactDto: CreateContactDto, realm: string, language: string) {
     try {
-      const structureRootNode = await this.neo4jService.findByIdAndFilters(
-        +createContactDto.parentId,
-        { isDeleted: false },
+      const contactRootNode = await this.neo4jService.findByLabelAndFilters(
+        ['Contact'],
+        { isDeleted: false, realm },
         [],
       );
       //check if rootNode realm equal to keyclock token realm
-      if (structureRootNode.properties.realm !== realm) {
+      if (contactRootNode[0].get('n').properties.realm !== realm) {
         throw new HttpException({ message: 'You dont have permission' }, 403);
       }
 
@@ -71,14 +102,14 @@ export class ContactRepository implements GeciciInterface<Contact> {
       }
       value['properties']['id'] = value['identity'].low;
       const result = { id: value['identity'].low, labels: value['labels'], properties: value['properties'] };
-      if (createContactDto['parentId']) {
-        await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
-          +createContactDto['parentId'],
-          result['id'],
-          RelationName.PARENT_OF,
-          RelationDirection.RIGHT,
-        );
-      }
+
+      await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
+        contactRootNode[0].get('n').identity.low,
+        result['id'],
+        RelationName.PARENT_OF,
+        RelationDirection.RIGHT,
+      );
+
       // CREATED BY relation create
       if (createContactDto['createdById']) {
         await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
@@ -96,7 +127,7 @@ export class ContactRepository implements GeciciInterface<Contact> {
       );
       const newCategories = await this.neo4jService.findChildrensByLabelsAndFilters(
         ['Classification'],
-        { isDeleted: false, realm: structureRootNode.properties.realm },
+        { isDeleted: false, realm: contactRootNode[0].get('n').properties.realm },
         [],
         { isDeleted: false, code: newClassificationCode['properties'].code },
       );
@@ -374,7 +405,12 @@ export class ContactRepository implements GeciciInterface<Contact> {
   //   }
   // }
 
-  async findOneFirstLevelByRealm(label: string, realm: string, language: string) {}
+  async findOneFirstLevelByRealm(label: string, realm: string, language: string) { }
 
-  async findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) {}
+  async findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) { }
+
+
 }
+
+
+
