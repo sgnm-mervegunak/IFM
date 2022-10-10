@@ -10,6 +10,8 @@ import { useTranslation } from "react-i18next";
 
 import FacilityStructureService from "../../services/facilitystructure";
 import JointSpaceService from "../../services/jointSpace";
+import JointSpaceServices from "../../services/jointSpaces";
+
 import { useAppSelector } from "../../app/hook";
 import DisplayNode from "../FacilityStructure/Display/DisplayNode";
 import JointSpaceForm from "./Forms/JointSpaceForm";
@@ -142,25 +144,28 @@ const SetJointSpaceComponent = ({ selectedBuildingKey, setSelectedBuildingKey }:
     // const key = params.id || "";
     const key =  selectedBuildingKey || "";
 
-    JointSpaceService.findBuildingWithKey(key)
+    JointSpaceServices.findByKeyAndLeaf(key,"space")
       .then((res) => {
-        if (!res.data.root.children) {
-          setData([res.data.root.properties] || []);
+        console.log("-------res", res.data)
+        if (!res.data.children) {
+          setData([res.data ]|| []);
           let temp = JSON.parse(
-            JSON.stringify([res.data.root.properties] || [])
+            JSON.stringify([res.data] || [])
           );
           fixNodes(temp);
           setData(temp);
-        } else if (res.data.root.children) {
-          setData([res.data.root] || []);
-          let temp = JSON.parse(JSON.stringify([res.data.root] || []));
+        } else if (res.data.children) {
+          setData([res.data] || []);
+          let temp = JSON.parse(JSON.stringify([res.data] || []));
           fixNodes(temp);
           setData(temp);
+          
         }
         setLoading(false);
+        console.log("****")
       })
       .catch((err) => {
-        if (err.response.status === 500) {
+        if (err.response?.status === 500) {
           toast.current.show({
             severity: "error",
             summary: t("Error"),
@@ -170,12 +175,17 @@ const SetJointSpaceComponent = ({ selectedBuildingKey, setSelectedBuildingKey }:
           setTimeout(() => {
             navigate("/jointspace");
           }, 3000);
+
+          setLoading(false)
         }
       });
   };
 
   useEffect(() => {
     getJointSpace();
+    setSelectedKeysName([])
+    setSelectedKeys([])
+
   }, [selectedBuildingKey]);
 
 
@@ -313,7 +323,9 @@ const SetJointSpaceComponent = ({ selectedBuildingKey, setSelectedBuildingKey }:
   //     </div>
   //   );
   // };
-
+  useEffect(() => {
+  console.log("dataaaaaaaaaa",data)
+},data)
   return (
     <div className="container">
       <ContextMenu model={menu} ref={cm} />
@@ -452,12 +464,49 @@ const SetJointSpaceComponent = ({ selectedBuildingKey, setSelectedBuildingKey }:
             // console.log("selected node keys: ", selectedNodeKeys);
             // console.log("selected keys: ", selectedKeys);
           }}
+          onExpand={
+            (e) => {
+              console.log("e node-----",e.node)
+              const key = e.node.key?.toString() || ""
+              JointSpaceServices.findByKeyAndLeaf(key, "space")
+                .then((res) => {
+                  console.log("-------res", res.data)
+                  if (!res.data.children) {
+                   return
+                  } else {
+                    let temp = JSON.parse(JSON.stringify([res.data] || []));
+                    fixNodes(temp);
+                    e.node.children = temp[0].children
+                    
+                    setData([...data]);
+
+                  }
+                  setLoading(false);
+                  console.log("****")
+                })
+                .catch((err) => {
+                  if (err.response?.status === 500) {
+                    toast.current.show({
+                      severity: "error",
+                      summary: t("Error"),
+                      detail: "Joint Space not found",
+                      life: 3000,
+                    });
+                    setTimeout(() => {
+                      navigate("/jointspace");
+                    }, 3000);
+
+                    setLoading(false)
+                  }
+                });
+            }
+          }
           selectionKeys={selectedNodeKeys}
           propagateSelectionUp={false}
           className="font-bold"
           nodeTemplate={(data: Node, options) => (
             <span className="flex align-items-center font-bold">
-              {data.label}{" "}
+              {data.name}{" "}
               {
                 <>
                   <span className="ml-4 ">
