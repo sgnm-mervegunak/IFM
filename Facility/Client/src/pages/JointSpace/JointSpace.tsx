@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import FacilityStructureLazyService from "../../services/facilitystructurelazy";
 import { useAppSelector } from "../../app/hook";
 import Export, { ExportType } from "../FacilityStructure/Export/Export";
+import SetJointSpaceComponent from "./SetJointSpaceComponent";
 
 interface Node {
   cantDeleted: boolean;
@@ -52,6 +53,7 @@ const JointSpace = () => {
   const [loading, setLoading] = useState(false);
   const [exportDia, setExportDia] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [selectedBuilding, setSelectedBuilding] = useState();
 
   const dt = useRef<any>();
   const { toast } = useAppSelector((state) => state.toast);
@@ -65,10 +67,14 @@ const JointSpace = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    console.log("selected building:", selectedBuilding)
+  },[selectedBuilding])
+
   const loadLazyData = () => {
     FacilityStructureLazyService.findAll()
       .then((response) => {
-        console.log(response.data);
+        console.log("response data", response.data);
         setData(response.data?.children);
       })
       .catch((err) => {
@@ -96,7 +102,7 @@ const JointSpace = () => {
   );
 
   return (
-    <div className="card">
+    <div>
       <Toolbar
         className="mb-4"
         right={() => (
@@ -145,28 +151,52 @@ const JointSpace = () => {
         />
       </Dialog>
 
-      <DataTable
-        ref={dt}
-        value={data}
-        dataKey="key"
-        // rows={lazyParams.rows}
-        loading={loading}
-        className="datatable-responsive"
-        // totalRecords={countClassifications}
-        globalFilter={globalFilter}
-        emptyMessage="Joint Space not found"
-        header={header}
-        style={{ fontWeight: "bold" }}
-        selectionMode="single"
-        onSelectionChange={(e) => {
-          navigate("/jointspace/" + e.value.key);
-          console.log(e.value);
-        }}
-        responsiveLayout="scroll"
-      >
-        <Column field="name" header={t("Name")} sortable></Column>
-        <Column field="nodeType" header={t("Facility Type")} sortable></Column>
-      </DataTable>
+      <div className="formgrid grid">
+
+        <div className="col-12 md:col-4" >
+
+          <h3>{t("Joint Space")}</h3>
+<br/>          <div className="card  ">
+
+
+            <DataTable
+              ref={dt}
+              value={data}
+              dataKey="key"
+              // rows={lazyParams.rows}
+              loading={loading}
+              className="datatable-responsive"
+              // totalRecords={countClassifications}
+              globalFilter={globalFilter}
+              emptyMessage="Joint Space not found"
+              header={header}
+              style={{ fontWeight: "bold" }}
+              selectionMode="single"
+              onSelectionChange={(e) => {
+                // navigate("/jointspace/" + e.value.key);
+                console.log("e value", e.value); //building key is here
+                setSelectedBuilding(e.value);
+              }}
+              responsiveLayout="scroll"
+            >
+              <Column field="name" header={t("Name")} sortable></Column>
+              <Column field="nodeType" header={t("Facility Type")} sortable></Column>
+            </DataTable>
+
+          </div>
+          </div>
+
+          <div className="col-12 md:col-8 mt-4">
+            {selectedBuilding &&
+              <SetJointSpaceComponent
+            selectedBuilding={selectedBuilding}
+            setSelectedBuilding={setSelectedBuilding}
+              />}
+          </div>
+        </div>
+      
+
+
     </div>
   );
 };

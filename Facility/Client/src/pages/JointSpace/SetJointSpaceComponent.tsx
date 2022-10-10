@@ -66,7 +66,11 @@ interface FormNode {
   icon?: string;
 }
 
-const SetJointSpace = () => {
+interface Params {
+  selectedBuilding: any,
+  setSelectedBuilding: React.Dispatch<React.SetStateAction<any>>
+}
+const SetJointSpaceComponent = ({selectedBuilding, setSelectedBuilding}:Params) => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [selectedKeysName, setSelectedKeysName] = useState<string[]>([]);
   const [selectedNodeKey, setSelectedNodeKey] = useState<any>([]);
@@ -135,8 +139,9 @@ const SetJointSpace = () => {
   ];
 
   const getJointSpace = () => {
-    const key = params.id || "";
-    console.log("keeett", key)
+    // const key = params.id || "";
+    const key =  selectedBuilding?.key || "";
+
     JointSpaceService.findBuildingWithKey(key)
       .then((res) => {
         if (!res.data.root.children) {
@@ -171,7 +176,9 @@ const SetJointSpace = () => {
 
   useEffect(() => {
     getJointSpace();
-  }, []);
+    // setSelectedBuilding({});
+    console.log("selected building------------", selectedBuilding)
+  }, [selectedBuilding]);
 
 
   const fixNodes = (nodes: Node[]) => {
@@ -397,7 +404,7 @@ const SetJointSpace = () => {
         </Dialog>
       </div>
 
-      <h3>{t("Joint Space")}</h3>
+      {/* <h3>{t("Joint Space")}</h3> */}
       <div>
         <span style={{ fontWeight: "bold", fontSize: "16px" }}>
           {t("Selected Spaces")}:
@@ -512,4 +519,4 @@ const SetJointSpace = () => {
   );
 };
 
-export default SetJointSpace;
+export default SetJointSpaceComponent;
