@@ -77,23 +77,16 @@ const JointSpace = () => {
   const loadLazyData = () => {
     FacilityStructureLazyService.findAll()
       .then((res) => {
-        FacilityStructureLazyService.loadStructureWithKeyAndLeaf(res.data.key, "Building")
-          .then((as) => {
             let temp = JSON.parse(
               JSON.stringify([res.data] || [])
             );
-            fixNodes(temp);
+        fixNodes(temp);
+        temp[0].selectable = false
             setData(temp);
             setLoading(false);
-          })
-          .catch((err) => {
-            toast.current.show({
-              severity: "error",
-              summary: "Error",
-              // detail: err?.response ? err?.response?.data?.message : err.message,
-              life: 2000,
-            });
-          });
+        console.log("?????", temp)
+        
+     
 
 
       })
