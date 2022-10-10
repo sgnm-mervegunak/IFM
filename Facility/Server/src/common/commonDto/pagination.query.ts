@@ -14,8 +14,9 @@ export class PaginationParams {
   @IsOptional()
   page: number = 1;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  /**
+   * Skip number(how many items)
+   */
   skip:number=0 ;
 
   /**
@@ -28,7 +29,7 @@ export class PaginationParams {
   /**
    * Order by(asc or desc)
    */
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({enum:AscendingEnum})
   @IsOptional()
   @IsString()
   orderBy: AscendingEnum=AscendingEnum.ASCENDING;
@@ -39,5 +40,5 @@ export class PaginationParams {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  orderByColumn?: string;
+  orderByColumn?: string="name";
 }
