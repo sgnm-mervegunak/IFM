@@ -36,40 +36,41 @@ export class ContactRepository implements ContactInterface<any> {
     //REVISED FOR NEW NEO4J
 
    /////////////////////////////////////////////     ESKİSİ  //////////////////////////////////////////////// 
-  async findOneByRealm(realm: string, language: string): Promise<{ root: any; }> {
-    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
-      ['Contact'],
-      { realm: realm, isDeleted: false },
-      [],
-      { isDeleted: false, canDisplay: true },
-    );
-    if (!node) {
-      //throw new FacilityStructureNotFountException(realm);
-    }
-    node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
-    return node;
-    }
+  // async findOneByRealm(realm: string, language: string): Promise<{ root: any; }> {
+  //   let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
+  //     ['Contact'],
+  //     { realm: realm, isDeleted: false },
+  //     [],
+  //     { isDeleted: false, canDisplay: true },
+  //   );
+  //   if (!node) {
+  //     //throw new FacilityStructureNotFountException(realm);
+  //   }
+  //   node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
+  //   return node;
+  //   }
 
     ////////////////////////////              YENİSİ                   ///////////////////////////////////
       //REVISED FOR NEW NEO4J
-    // async findOneByRealm(realm: string, language: string, neo4jQuery: PaginationParams) {
-    // const contactNode = await this.neo4jService.findByLabelAndFilters(['Contact'], { realm, isDeleted: false })
-    // if (!contactNode.length) {
-    //   throw new FacilityStructureNotFountException(realm);
-    // }
-    // let children = await this.neo4jService.findChildrensByIdAndFiltersWithPagination(contactNode[0].get('n').identity.low, {}, [], { isDeleted: false }, 'PARENT_OF', neo4jQuery)
-    // let totalCount = children.length
+    async findOneByRealm(realm: string, language: string, neo4jQuery: PaginationParams) {
+    const contactNode = await this.neo4jService.findByLabelAndFilters(['Contact'], { realm, isDeleted: false })
+    if (!contactNode.length) {
+      throw new FacilityStructureNotFountException(realm);
+    }
+    neo4jQuery.skip=Math.abs(neo4jQuery.page-1)*neo4jQuery.limit
+    let children = await this.neo4jService.findChildrensByIdAndFiltersWithPagination(contactNode[0].get('n').identity.low, {}, [], { isDeleted: false }, 'PARENT_OF', neo4jQuery)
+    let totalCount = children.length
 
 
-    // children = children.map((item) => {
-    //   return item.get('children').properties
-    // })
+    children = children.map((item) => {
+      return item.get('children').properties
+    })
 
-    // const finalResponse = { ...contactNode[0].get('n').properties, totalCount, children }
+    const finalResponse = { ...contactNode[0].get('n').properties, totalCount, children }
 
 
-    // return finalResponse;
-    //}
+    return finalResponse;
+    }
 
 
 
@@ -77,13 +78,13 @@ export class ContactRepository implements ContactInterface<any> {
   //REVISED FOR NEW NEO4J
   async create(createContactDto: CreateContactDto, realm: string, language: string) {
     try {
-      const structureRootNode = await this.neo4jService.findByIdAndFilters(
-        +createContactDto.parentId,
-        { isDeleted: false },
+      const contactRootNode = await this.neo4jService.findByLabelAndFilters(
+        ['Contact'],
+        { isDeleted: false,realm },
         [],
       );
       //check if rootNode realm equal to keyclock token realm
-      if (structureRootNode.properties.realm !== realm) {
+      if (contactRootNode[0].get('n').properties.realm !== realm) {
         throw new HttpException({ message: 'You dont have permission' }, 403);
       }
 
@@ -100,14 +101,14 @@ export class ContactRepository implements ContactInterface<any> {
       }
       value['properties']['id'] = value['identity'].low;
       const result = { id: value['identity'].low, labels: value['labels'], properties: value['properties'] };
-      if (createContactDto['parentId']) {
+     
         await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
-          +createContactDto['parentId'],
+          contactRootNode[0].get('n').identity.low,
           result['id'],
           RelationName.PARENT_OF,
           RelationDirection.RIGHT,
         );
-      }
+      
       // CREATED BY relation create
       if (createContactDto['createdById']) {
         await this.neo4jService.addRelationByIdAndRelationNameWithoutFilters(
@@ -125,7 +126,7 @@ export class ContactRepository implements ContactInterface<any> {
       );
       const newCategories = await this.neo4jService.findChildrensByLabelsAndFilters(
         ['Classification'],
-        { isDeleted: false, realm: structureRootNode.properties.realm },
+        { isDeleted: false, realm:contactRootNode[0].get('n').properties.realm },
         [],
         { isDeleted: false, code: newClassificationCode['properties'].code },
       );

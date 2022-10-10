@@ -35,10 +35,6 @@ export class CreateContactDto {
   /////////////////// Not in entity and db /////////////// 
   @ApiProperty()
   @IsOptional()
-  parentId?: string;
-
-  @ApiProperty()
-  @IsOptional()
   classificationId?: string;
 
   @ApiProperty()
