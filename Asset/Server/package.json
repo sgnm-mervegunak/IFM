@@ -61,7 +61,7 @@
     "opentelemetry-instrumentation-kafkajs": "^0.27.0",
     "pino": "^7.6.2",
     "pino-http": "^6.5.0",
-    "read-excel-file": "^5.2.28",
+    "read-excel-file": "^5.5.0",
     "redis": "^3.1.2",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
