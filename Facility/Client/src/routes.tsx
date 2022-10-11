@@ -10,6 +10,7 @@ import Classifications from "./pages/Classifications/Classifications";
 import { NotFound } from "./layouts/App/pages/NotFound";
 import SetClassificationAdmin from "./pages/Classifications/ClassificationAdmin/SetClassificationAdmin";
 import SetClassificationAdminLazy from "./pages/Classifications/ClassificationAdmin/SetClassificationAdminLazy";
+import SetAssetClassificationAdminLazy from "./pages/AssetClassifications/AssetClassificationAdmin/setAssetClassificationAdminLazy";
 import FacilityStructure from "./pages/FacilityStructure/FacilityStructure";
 import SetFacilityStructure from "./pages/FacilityStructure/SetFacilityStructure";
 import FormGenerate from "./pages/FormGenerate/FormGenerate";
@@ -34,6 +35,9 @@ import StructureAsset from "./pages/StructureAsset/StructureAsset";
 import EditAsset from "./pages/StructureAsset/EditAsset";
 import StructureAssetTable from "./pages/StructureAsset/StructureAssetTable";
 import SetFacilityStructureLazy from "./pages/FacilityStructure/SetFacilityStructureLazy";
+import AssetClassificationFileImportWithCode from "./pages/AssetClassifications/AssetClassificationImport/AssetClassificationFileImportWithCode";
+import AssetClassificationFileImportCheck from "./pages/AssetClassifications/AssetClassificationImport/AssetClassificationFileImportCheck";
+import AssetClassificationFileImportWithoutCode from "./pages/AssetClassifications/AssetClassificationImport/AssetClassificationFileImportWithoutCode";
 import SetContactTable from "./pages/Contact/SetContactTable";
 
 // import Main from './pages/Main';
@@ -68,6 +72,10 @@ export default function Router() {
         { path: "asset-types", element: <SetType /> },
         { path: "asset-components", element: <SetComponent /> },
         { path: "asset-systems", element: <SetSystem /> },
+        {
+          path: "asset-classifications",
+          element: <SetAssetClassificationAdminLazy />,
+        },
       ],
     },
     {
@@ -107,6 +115,36 @@ export default function Router() {
         {
           path: "fileimportcheck",
           element: <ClassificationFileImportCheck />,
+        },
+      ],
+    },
+    {
+      path: "/asset-classifications",
+      element: <AppLayout />,
+      children: [
+        {
+          path: "fileimportwithcode",
+          element: <AssetClassificationFileImportWithCode />,
+        },
+      ],
+    },
+    {
+      path: "/asset-classifications",
+      element: <AppLayout />,
+      children: [
+        {
+          path: "fileimportwithoutcode",
+          element: <AssetClassificationFileImportWithoutCode />,
+        },
+      ],
+    },
+    {
+      path: "/asset-classifications",
+      element: <AppLayout />,
+      children: [
+        {
+          path: "fileimportcheck",
+          element: <AssetClassificationFileImportCheck />,
         },
       ],
     },

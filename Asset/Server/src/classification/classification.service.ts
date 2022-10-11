@@ -16,90 +16,96 @@ export class ClassificationService {
 
   @Span('create a classification')
   @OtelMethodCounter()
-  async create(createClassificationDto: CreateClassificationDto, header) {
-    return await this.classificationRepository.create(createClassificationDto, header);
+  async create(createClassificationDto: CreateClassificationDto, realm, language) {
+    return await this.classificationRepository.create(createClassificationDto, realm, language);
   }
 
-  
-  @Span('find a classification node by key')
+  @Span('find a classification by id')
   @OtelMethodCounter()
-  async findOneNode(key: string, header) {
+  async findOne(realm: string, language: string) {
     //checkObjectIddİsValid(id);
-    return await this.classificationRepository.findOneNodeByKey(key, header);
+    
+    return await this.classificationRepository.findOneByRealm(realm, language);
   }
 
   @Span('update a classification')
   @OtelMethodCounter()
-  async update(id: string, updateClassificationDto: UpdateClassificationDto, header) {
+  async update(id: string, updateClassificationDto: UpdateClassificationDto, realm:string, language:string) {
     //checkObjectIddİsValid(id);
-    return await this.classificationRepository.update(id, updateClassificationDto, header);
+    return await this.classificationRepository.update(id, updateClassificationDto, realm, language);
   }
 
   @Span('remove a classification')
   @OtelMethodCounter()
-  async remove(id: string, header) {
-    return await this.classificationRepository.delete(id, header);
+  async remove(id: string, realm: string, language: string) {
+    return await this.classificationRepository.delete(id, realm, language);
   }
   @Span('change none branch')
   @OtelMethodCounter()
-  async changeNodeBranch(id: string, target_parent_id: string, header) {
-    return await this.classificationRepository.changeNodeBranch(id, target_parent_id, header);
+  async changeNodeBranch(id: string, target_parent_id: string, realm: string, language: string) {
+    return await this.classificationRepository.changeNodeBranch(id, target_parent_id, realm, language);
+  }
+
+  @Span('find a classification node by key')
+  @OtelMethodCounter()
+  async findOneNode(key: string, realm: string, language: string) {
+    //checkObjectIddİsValid(id);
+    return await this.classificationRepository.findOneNodeByKey(key, realm, language);
+  }
+
+  @Span('change isActive status a node and if its has children change isActive status of children')
+  @OtelMethodCounter()
+  async setIsActiveTrueOfClassificationAndItsChild(id:string, realm: string, language: string){
+    return await this.classificationRepository.setIsActiveTrueOfClassificationAndItsChild(id, realm, language);
   }
 
 
   @Span('change isActive status a node and if its has children change isActive status of children')
   @OtelMethodCounter()
-  async setIsActiveTrueOfClassificationAndItsChild(id:string, header){
-    return await this.classificationRepository.setIsActiveTrueOfClassificationAndItsChild(id, header);
-  }
-
-
-  @Span('change isActive status a node and if its has children change isActive status of children')
-  @OtelMethodCounter()
-  async setIsActiveFalseOfClassificationAndItsChild(id:string, header){
-    return await this.classificationRepository.setIsActiveFalseOfClassificationAndItsChild(id, header);
+  async setIsActiveFalseOfClassificationAndItsChild(id:string, realm: string, language: string){
+    return await this.classificationRepository.setIsActiveFalseOfClassificationAndItsChild(id, realm, language);
   }
    
   @Span('get all classifications by realm, isActive ')
   @OtelMethodCounter()
-  async getClassificationByIsActiveStatus(header){
-    return await this.classificationRepository.getClassificationByIsActiveStatus(header);
+  async getClassificationByIsActiveStatus(realm: string,language: string){
+    return await this.classificationRepository.getClassificationByIsActiveStatus(realm,language);
   }
 
   @Span('get all classifications by realm and language')
   @OtelMethodCounter()
-  async getClassificationsByLanguage(header){
-    return await this.classificationRepository.getClassificationsByLanguage(header);
+  async getClassificationsByLanguage(realm:string, language:string){
+    return await this.classificationRepository.getClassificationsByLanguage(realm, language);
   }
   
   @Span('get a classification by labelName, realm and language')
   @OtelMethodCounter()
-  async getAClassificationByRealmAndLabelNameAndLanguage( labelName: string,header){
-    return await this.classificationRepository.getAClassificationByRealmAndLabelNameAndLanguage(labelName, header);
+  async getAClassificationByRealmAndLabelNameAndLanguage(realm: string, labelName: string,language: string){
+    return await this.classificationRepository.getAClassificationByRealmAndLabelNameAndLanguage(realm,labelName, language);
   }
   
   @Span('add a classification list from a excel file as name')
   @OtelMethodCounter()
-  async addAClassificationFromExcel(file: Express.Multer.File, header){
-    return await this.classificationRepository.addAClassificationFromExcel(file, header);
+  async addAClassificationFromExcel(file: Express.Multer.File, realm: string, language: string){
+    return await this.classificationRepository.addAClassificationFromExcel(file, realm, language);
   }
 
   @Span('add a classification list from a excel file as code-name')
   @OtelMethodCounter()
-  async addAClassificationWithCodeFromExcel(file: Express.Multer.File, header){
-    return await this.classificationRepository.addAClassificationWithCodeFromExcel(file, header);
+  async addAClassificationWithCodeFromExcel(file: Express.Multer.File, realm: string, language: string){
+    return await this.classificationRepository.addAClassificationWithCodeFromExcel(file, realm, language);
   }
 
   @Span('get a classification with these fields')
   @OtelMethodCounter()
-  async getNodeByClassificationLanguageRealmAndCode( classificationName:string, code:string,header){
-    return await this.classificationRepository.getNodeByClassificationLanguageRealmAndCode( classificationName, code,header);
+  async getNodeByClassificationLanguageRealmAndCode( classificationName:string, language:string,realm:string,code:string){
+    return await this.classificationRepository.getNodeByClassificationLanguageRealmAndCode( classificationName, language,realm,code);
   }
 
   @Span('get a classification with language, realm and code')
   @OtelMethodCounter()
-  async getNodeByLanguageRealmAndCode(code: string,header) {
-    return await this.classificationRepository.getNodeByLanguageRealmAndCode( code,header);
+  async getNodeByLanguageRealmAndCode(language: string, realm: string, code: string) {
+    return await this.classificationRepository.getNodeByLanguageRealmAndCode(language, realm, code);
   }
 
   @Span('check excel file for it is valid or not')
@@ -108,4 +114,8 @@ export class ClassificationService {
     return await this.classificationRepository.checkExcelFile(file);
   }
 
+  findOneFirstLevel(label: string, realm: string, language: string) {
+    return this.classificationRepository.findOneFirstLevelByRealm(label, realm, language);
+  }
+  
 }

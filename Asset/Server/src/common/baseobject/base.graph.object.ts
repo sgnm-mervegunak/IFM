@@ -7,8 +7,9 @@ export abstract class BaseGraphObject {
   updatedAt = moment().format('YYYY-MM-DD HH:mm:ss');
   description = '';
   isActive = true;
+  canDisplay: boolean = true;
   isDeleted = false;
-  canDelete=true;
+  canDelete = true;
   name: string;
   tag: string[] = [];
   formTypeId: string;

@@ -1,25 +1,42 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+
 // import { CustomNeo4jError, Neo4jService } from 'sgnm-neo4j';
+
 import { CreateClassificationDto } from '../dto/create-classification.dto';
 import { UpdateClassificationDto } from '../dto/update-classification.dto';
 import { Classification } from '../entities/classification.entity';
 import {
+  ClassificationNotFountException,
+  FacilityStructureNotFountException,
+} from 'src/common/notFoundExceptions/not.found.exception';
+import { CustomTreeError } from 'src/common/const/custom.error.enum';
+import {
+  createDynamicCyperObject,
   Neo4jService,
   dynamicLabelAdder,
+  dynamicFilterPropertiesAdder,
+  dynamicNotLabelAdder,
   dynamicUpdatePropertyAdder,
   node_not_found,
+  create_node__must_entered_error,
+  createDynamicCyperCreateQuery,
+  create_node__node_not_created_error,
   filterArrayForEmptyString,
+  find_with_children_by_realm_as_tree__find_by_realm_error,
+  find_with_children_by_realm_as_tree_error,
   library_server_error,
+  tree_structure_not_found_by_realm_name_error,
   CustomNeo4jError,
+  required_fields_must_entered,
 } from 'sgnm-neo4j/dist';
 import { classificationInterface } from 'src/common/interface/classification.interface';
+
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
+import { QueryResult } from 'neo4j-driver-core';
 import { I18NEnums } from 'src/common/const/i18n.enum';
-import {
-  has_children_error,
-  invalid_classification,
-  wrong_parent_error_with_params,
-} from 'src/common/const/custom.error.object';
+import { WrongClassificationParentExceptions } from 'src/common/badRequestExceptions/bad.request.exception';
+import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
+import { has_children_error, wrong_parent_error } from 'src/common/const/custom.error.object';
 import { RelationName } from 'src/common/const/relation.name.enum';
 import {
   classification_already_exist,
@@ -28,9 +45,6 @@ import {
   classification_import_error_object,
   default_error,
 } from 'src/common/const/custom.classification.error';
-import { CustomAssetError } from 'src/common/const/custom.error.enum';
-import { WrongClassificationParentExceptions } from 'src/common/const/badRequestExceptions/bad.request.exception';
-
 const exceljs = require('exceljs');
 const { v4: uuidv4 } = require('uuid');
 
@@ -38,9 +52,20 @@ const { v4: uuidv4 } = require('uuid');
 export class ClassificationRepository implements classificationInterface<Classification> {
   constructor(private readonly neo4jService: Neo4jService) {}
 
+  async findOneByRealm(realm: string, language: string) {
+    // //let node = await this.neo4jService.findByRealmWithTreeStructure(label, realm);
+    // let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
+    //   ['FacilityStructure'],{"realm":realm, "isDeleted":false},[],{"isDeleted":false, "canDisplay":true}
+    // )
+    // if (!node) {
+    //   throw new ClassificationNotFountException(realm);
+    // }
+    // node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
+    // return node;
+  }
+
   //REVISED FOR NEW NEO4J
-  async create(createClassificationDto: CreateClassificationDto, header) {
-    const { language, realm } = header;
+  async create(createClassificationDto: CreateClassificationDto, realm: string, language: string) {
     function assignDtoPropToEntity(entity, dto) {
       Object.keys(dto).forEach((element) => {
         if (element != 'parentId' && element != 'parentKey') {
@@ -53,7 +78,7 @@ export class ClassificationRepository implements classificationInterface<Classif
     const classification = new Classification();
     const classificationObject = assignDtoPropToEntity(classification, createClassificationDto);
     let value;
-
+    //let checkClassification = await this.neo4jService.findChildrensByLabelsAndFilters([`${classificationObject.labels[0]}_${language}`],{realm},[`${classificationObject.labels[0]}`],{code:classificationObject.code});
     if (classificationObject['labels']) {
       value = await this.neo4jService.createNode(classificationObject, classificationObject['labels']);
       if (createClassificationDto['parentId']) {
@@ -138,8 +163,7 @@ export class ClassificationRepository implements classificationInterface<Classif
   }
   /////////////////////////////////////////////
   //REVISED FOR NEW NEO4J
-  async update(_id: string, updateClassificationto: UpdateClassificationDto, header) {
-    const { language, realm } = header;
+  async update(_id: string, updateClassificationto: UpdateClassificationDto, realm: string, language: string) {
     const updateClassificationDtoWithoutLabelsAndParentId = {};
 
     Object.keys(updateClassificationto).forEach((element) => {
@@ -176,9 +200,8 @@ export class ClassificationRepository implements classificationInterface<Classif
   }
 
   //REVISED FOR NEW NEO4J
-  async delete(_id: string, header) {
+  async delete(_id: string, realm: string, language: string) {
     try {
-      const { language, realm } = header;
       const children = await this.neo4jService.findChildrensByIdOneLevel(
         Number(_id),
         {},
@@ -194,23 +217,22 @@ export class ClassificationRepository implements classificationInterface<Classif
         throw new HttpException(has_children_error, 400);
       }
     } catch (error) {
-      if (error.response?.code == CustomAssetError.HAS_CHILDREN) {
+      if (error.response?.code == CustomTreeError.HAS_CHILDREN) {
         throw new HttpException({ key: I18NEnums.NODE_HAS_CHILD, args: { name: _id } }, HttpStatus.BAD_REQUEST);
       } else {
         throw new HttpException({ key: I18NEnums.NODE_NOT_FOUND, args: { name: _id } }, HttpStatus.BAD_REQUEST);
       }
     }
   }
-
+  s;
   //REVISED FOR NEW NEO4J
-  async changeNodeBranch(_id: string, target_parent_id: string, header) {
+  async changeNodeBranch(_id: string, target_parent_id: string, realm: string, language: string) {
     try {
-      const { language, realm } = header;
       const new_parent = await this.neo4jService.findByIdAndFilters(+target_parent_id, { isDeleted: false }, []);
       const node = await this.neo4jService.findByIdAndFilters(+_id, { isDeleted: false }, []);
       if (new_parent['labels'] && new_parent['labels'].includes('Classification')) {
         throw new HttpException(
-          wrong_parent_error_with_params({ node1: node['properties'].name, node2: new_parent['properties'].name }),
+          wrong_parent_error({ node1: node['properties'].name, node2: new_parent['properties'].name }),
           400,
         );
       }
@@ -229,7 +251,7 @@ export class ClassificationRepository implements classificationInterface<Classif
 
       if (parent_of_new_parent && parent_of_new_parent['_fields'][0]['identity'].low == _id) {
         throw new HttpException(
-          wrong_parent_error_with_params({ node1: node['properties'].name, node2: new_parent['properties'].name }),
+          wrong_parent_error({ node1: node['properties'].name, node2: new_parent['properties'].name }),
           400,
         );
       }
@@ -239,7 +261,7 @@ export class ClassificationRepository implements classificationInterface<Classif
           parent_of_new_parent['_fields'][0]['identity'].low == nodeChilds[i]['_fields'][1]['identity'].low
         ) {
           throw new HttpException(
-            wrong_parent_error_with_params({ node1: node['properties'].name, node2: new_parent['properties'].name }),
+            wrong_parent_error({ node1: node['properties'].name, node2: new_parent['properties'].name }),
             400,
           );
         }
@@ -248,7 +270,7 @@ export class ClassificationRepository implements classificationInterface<Classif
       if (new_parent['labels'] && new_parent['labels'][0] == 'Classification') {
         if (node['labels'] && node['labels'].length == 0) {
           throw new HttpException(
-            wrong_parent_error_with_params({ node1: node['properties'].name, node2: new_parent['properties'].name }),
+            wrong_parent_error({ node1: node['properties'].name, node2: new_parent['properties'].name }),
             400,
           );
         }
@@ -280,13 +302,15 @@ export class ClassificationRepository implements classificationInterface<Classif
     } catch (error) {
       let code = error.response?.code;
       if (code >= 1000 && code <= 1999) {
+        if (error.response?.code == CustomIfmCommonError.EXAMPLE1) {
+        }
       } else if (code >= 5000 && code <= 5999) {
         if (error.response?.code == CustomNeo4jError.ADD_CHILDREN_RELATION_BY_ID_ERROR) {
           // örnek değişecek
           throw new WrongClassificationParentExceptions(_id, target_parent_id);
         }
       } else if (code >= 9000 && code <= 9999) {
-        if (error.response?.code == CustomAssetError.WRONG_PARENT) {
+        if (error.response?.code == CustomTreeError.WRONG_PARENT) {
           throw new WrongClassificationParentExceptions(
             error.response?.params['node1'],
             error.response?.params['node2'],
@@ -298,9 +322,8 @@ export class ClassificationRepository implements classificationInterface<Classif
     }
   }
   //REVISED FOR NEW NEO4J
-  async findOneNodeByKey(key: string, header) {
+  async findOneNodeByKey(key: string, realm: string, language: string) {
     try {
-      const { language, realm } = header;
       const node = await this.neo4jService.findByLabelAndFilters([], { isDeleted: false, key: key }, ['Virtual']);
 
       const result = {
@@ -319,8 +342,7 @@ export class ClassificationRepository implements classificationInterface<Classif
   }
 
   //REVISED FOR NEW NEO4J
-  async getClassificationByIsActiveStatus(header) {
-    const { language, realm } = header;
+  async getClassificationByIsActiveStatus(realm: string, language: string) {
     const root_node = await this.neo4jService.findByLabelAndFilters(
       ['Classification'],
       { isDeleted: false, realm: realm },
@@ -366,8 +388,7 @@ export class ClassificationRepository implements classificationInterface<Classif
     return root;
   }
   //REVISED FOR NEW NEO4J
-  async setIsActiveTrueOfClassificationAndItsChild(id: string, header) {
-    const { language, realm } = header;
+  async setIsActiveTrueOfClassificationAndItsChild(id: string, realm: string, language: string) {
     await this.neo4jService.updateByIdAndFilter(Number(id), { isDeleted: false }, [], { isActive: true });
 
     const children = await this.neo4jService.findChildrensByIdOneLevel(
@@ -391,8 +412,7 @@ export class ClassificationRepository implements classificationInterface<Classif
   }
 
   //REVISED FOR NEW NEO4J
-  async setIsActiveFalseOfClassificationAndItsChild(id: string, header) {
-    const { language, realm } = header;
+  async setIsActiveFalseOfClassificationAndItsChild(id: string, realm: string, language: string) {
     await this.neo4jService.updateByIdAndFilter(Number(id), { isDeleted: false }, [], { isActive: false });
     const children = await this.neo4jService.findChildrensByIdOneLevel(
       Number(id),
@@ -414,13 +434,10 @@ export class ClassificationRepository implements classificationInterface<Classif
     }
   }
 
-  async findOneFirstLevelByRealm(label: string, realm: string, language: string) {
-    return null;
-  }
 
   //REVISED FOR NEW NEO4J
-  async getClassificationsByLanguage(header) {
-    const { language, realm } = header;
+  async getClassificationsByLanguage(realm: string, language: string) {
+    console.log(language);
     const root_node = await this.neo4jService.findByLabelAndFilters(
       ['Classification'],
       { isDeleted: false, realm: realm },
@@ -471,26 +488,27 @@ export class ClassificationRepository implements classificationInterface<Classif
   }
 
   //REVISED FOR NEW NEO4J
-  async getAClassificationByRealmAndLabelNameAndLanguage(labelName: string, header) {
-    try {
-      const { language, realm } = header;
-
-      let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
-        [labelName + '_' + language],
-        { realm: realm, isDeleted: false, isActive: true },
-        [],
-        { isDeleted: false },
-      );
-
-      node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
-      return node;
-    } catch (error) {}
+  async getAClassificationByRealmAndLabelNameAndLanguage(realm: string, labelName: string, language: string) {
+    const root_node = await this.neo4jService.findByLabelAndFilters(
+      ['Classification'],
+      { isDeleted: false, realm: realm },
+      [],
+    );
+    let root = { root: { parent_of: [], ...root_node[0]['_fields'][0].properties } };
+    let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
+      [labelName + '_' + language],
+      { realm: realm, isDeleted: false, isActive: true },
+      [],
+      { isDeleted: false, isActive: true },
+    );
+    root.root.parent_of.push(node['root']);
+    root = await this.neo4jService.changeObjectChildOfPropToChildren(root);
+    return root;
   }
 
   //REVISED FOR NEW NEO4J
-  async addAClassificationFromExcel(file: Express.Multer.File, header) {
+  async addAClassificationFromExcel(file: Express.Multer.File, realm: string, language: string) {
     try {
-      const { language, realm } = header;
       let data;
 
       let buffer = new Uint8Array(file.buffer);
@@ -502,7 +520,10 @@ export class ClassificationRepository implements classificationInterface<Classif
       });
       let label = await data[0].replaceAll(' ', '_');
 
-      let checkClassification = await this.neo4jService.findByLabelAndFilters([`${label}_${language}`], { realm,isDeleted: false});
+      let checkClassification = await this.neo4jService.findByLabelAndFilters([`${label}_${language}`], {
+        realm,
+        isDeleted: false,
+      });
       if (checkClassification.length == 0) {
         function key() {
           return uuidv4();
@@ -566,25 +587,22 @@ export class ClassificationRepository implements classificationInterface<Classif
           );
         }
       } else {
-        throw new classification_already_exist();
+        throw new HttpException(classification_already_exist_object(), 400);
       }
     } catch (error) {
       if (error?.response?.code === 10001) {
         throw new classification_already_exist();
-      } else if(error?.response?.code ===10002){
+      } else if (error?.response?.code === 10002) {
         throw new classification_import_error();
-      }
-
-      else {
-        default_error()
+      } else {
+        default_error();
       }
     }
   }
 
   //REVISED FOR NEW NEO4J
-  async addAClassificationWithCodeFromExcel(file: Express.Multer.File, header) {
+  async addAClassificationWithCodeFromExcel(file: Express.Multer.File, realm: string, language: string) {
     try {
-      const { language, realm } = header;
       let data = [];
       let columnName;
       let buffer = new Uint8Array(file.buffer);
@@ -598,7 +616,10 @@ export class ClassificationRepository implements classificationInterface<Classif
 
       let label = await columnName.replaceAll(' ', '_');
 
-      let checkClassification = await this.neo4jService.findByLabelAndFilters([`${label}_${language}`], { realm,isDeleted:false });
+      let checkClassification = await this.neo4jService.findByLabelAndFilters([`${label}_${language}`], {
+        realm,
+        isDeleted: false,
+      });
 
       if (checkClassification.length == 0) {
         let deneme = [];
@@ -797,50 +818,36 @@ export class ClassificationRepository implements classificationInterface<Classif
           );
         }
       } else {
-        throw new HttpException(classification_already_exist_object(),400)
+        throw new HttpException(classification_already_exist_object(), 400);
       }
     } catch (error) {
       if (error?.response?.code === 10001) {
         throw new classification_already_exist();
-      } else if(error?.response?.code ===10002){
+      } else if (error?.response?.code === 10002) {
         throw new classification_import_error();
-      }
-
-      else {
-        default_error()
-      }
-    }
-  }
-
-  async getNodeByClassificationLanguageRealmAndCode(classificationName: string, code: string, header) {
-    try {
-      const { language, realm } = header;
-
-      const classification = await this.neo4jService.findChildrensByLabelsAndFilters(
-        [classificationName + '_' + language],
-        { realm },
-        [],
-        { code },
-      );
-
-      if (classification.length === 0) {
-        throw new HttpException(invalid_classification(), 400);
-      }
-
-      return classification[0].get('children').properties;
-    } catch (error) {
-      const code = error.response?.code;
-      if (code === CustomAssetError.INVALID_CLASSIFICATION) {
-        throw new HttpException(invalid_classification(), 400);
       } else {
-        throw new HttpException(error, 500);
+        default_error();
       }
     }
   }
 
-  async getNodeByLanguageRealmAndCode(code: string, header) {
-    const { language, realm } = header;
+  async getNodeByClassificationLanguageRealmAndCode(
+    classificationName: string,
+    language: string,
+    realm: string,
+    code: string,
+  ) {
+    const cypher = `match (n:${classificationName}_${language} {realm:"${realm}"})-[:PARENT_OF*]->(m {code:"${code}"}) return m`;
 
+    let data = await this.neo4jService.read(cypher);
+
+    return data.records[0]['_fields'][0].properties;
+  }
+
+  async getNodeByLanguageRealmAndCode(language: string, realm: string, code: string) {
+    console.log(realm);
+    console.log(language);
+    console.log(code);
     // const x=await this.neo4jService.findChildrenNodesByLabelsAndRelationName([],{key},[],{language,isDeleted:false},'classified_by')
     const deneme = await this.neo4jService.findByLabelAndFilters([], {
       isDeleted: false,
@@ -856,29 +863,45 @@ export class ClassificationRepository implements classificationInterface<Classif
       let columnName;
       let buffer = new Uint8Array(file.buffer);
       const workbook = new exceljs.Workbook();
-  
+
       await workbook.xlsx.load(buffer).then(function async(book) {
         const firstSheet = book.getWorksheet(1);
         data = firstSheet?.getColumn(1).values.filter((e) => e != null);
       });
-      columnName=data.shift()
-      console.log(data)
+      columnName = data.shift();
+      console.log(data);
       for (let i = 1; i < data.length; i++) {
-        if(!data[i].match(/[0-9a-zA-Z#-]{1,}(: )[a-zA-Z\s\(\)İĞÜŞÖÇığüşöç:]*/)){
-          throw new HttpException(classification_import_error_object(), 400)
+        if (!data[i].match(/[0-9a-zA-Z#-]{1,}(: )[a-zA-Z\s\(\)İĞÜŞÖÇığüşöç:]*/)) {
+          throw new HttpException(classification_import_error_object(), 400);
         }
-        
       }
 
-      return {statusCode:200}
+      return { statusCode: 200 };
     } catch (error) {
-      if(error?.response?.code ===10002){
+      if (error?.response?.code === 10002) {
         throw new classification_import_error();
-        
-      }
-      else {
-        default_error()
+      } else {
+        default_error();
       }
     }
+  }
+  //REVISED FOR NEW NEO4J
+  async findOneFirstLevelByRealm(label: string, realm: string, language: string) {
+    
+    let node = await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructureOneLevel(
+      [label + '_' + language],
+      ['Virtual'],
+      { isDeleted: false, realm: realm },
+      [],
+      ['Virtual'],
+      { isDeleted: false, canDisplay: true }, //parent ve child filter objelerde aynı
+      //properti ler kullanılırsa değerleri aynı
+      // olmalıdır.
+    );
+    if (!node) {
+      throw new FacilityStructureNotFountException(realm);
+    }
+    node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
+    return node['root']['children'];
   }
 }

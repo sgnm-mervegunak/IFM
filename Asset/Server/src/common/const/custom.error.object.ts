@@ -1,45 +1,48 @@
-import { CustomAssetError } from './custom.error.enum';
+import { CustomTreeError } from './custom.error.enum';
 
 export function has_children_error(params) {
   return {
     message: 'This node has children, you can not delete it..',
-    code: CustomAssetError.HAS_CHILDREN,
+    code: CustomTreeError.HAS_CHILDREN,
     params: params,
   };
 }
 
-export function wrong_parent_error() {
+export function wrong_parent_error(params) {
   return {
     message: 'This node cannot be added below the specified node',
-    code: CustomAssetError.WRONG_PARENT,
-  };
-}
-
-export function wrong_parent_error_with_params(params) {
-  return {
-    message: 'This node cannot be added below the specified node',
-    code: CustomAssetError.WRONG_PARENT,
+    code: CustomTreeError.WRONG_PARENT,
     params: params,
   };
 }
 
-export function node_not_found() {
+export function node_not_found(params) {
   return {
     message: 'Node not found',
-    code: CustomAssetError.NODE_NOT_FOUND,
+    code: CustomTreeError.NODE_NOT_FOUND,
+    params: params,
   };
 }
 
-export function invalid_classification() {
+export function null_value(params) {
   return {
-    message: 'some of classification ur entered is wrong',
-    code: CustomAssetError.INVALID_CLASSIFICATION,
+    message: 'Value can not be null',
+    code: CustomTreeError.NULL_VALUE,
+    params: params,
   };
 }
 
-export function other_microservice_errors(message) {
+export function not_unique(params) {
   return {
-    message,
-    code: CustomAssetError.OTHER_MICROSERVICE_ERROR,
+    message: 'Uniqueness error',
+    code: CustomTreeError.NOT_UNIQUE,
+    params: params,
+  };
+}
+
+export function has_not_reference_key() {
+  return {
+    message: 'not have reference key',
+    code: CustomTreeError.HAS_NOT_REFERENCE_KEY,
   };
 }

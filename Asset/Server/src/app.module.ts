@@ -19,6 +19,7 @@ import { ComponentModule } from './component/component.module';
 import { ExcelImportModule } from './excelImport/excelImport.module';
 import { SystemsModule } from './systems/systems.module';
 import { ClassificationModule } from './classification/classification.module';
+import { LazyLoadingModule } from './lazyLoading/lazyLoading.module';
 
 @Module({
   imports: [
@@ -83,7 +84,8 @@ import { ClassificationModule } from './classification/classification.module';
     TypesModule,
     ExcelImportModule,
     SystemsModule,
-    ClassificationModule
+    ClassificationModule,
+    LazyLoadingModule
   ],
   providers: [
     //to cache all get request
