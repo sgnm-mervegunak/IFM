@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { PaginationParams } from 'src/common/commonDto/pagination.dto';
 import { RepositoryEnums } from 'src/common/const/repository.enum';
 import { SystemsInterface } from 'src/common/interface/systems.interface';
 import { SystemsDto } from '../dto/systems.dto';
@@ -28,5 +29,9 @@ export class SystemsService {
 
   async findOneNode(key: string, header) {
     return await this.systemsRepository.findByKey(key, header);
+  }
+
+  async findTypesIncludedBySystem(key: string, header, neo4jQuery: PaginationParams) {
+    return await this.systemsRepository.findTypesIncludedBySystem(key, header, neo4jQuery);
   }
 }

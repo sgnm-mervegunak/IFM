@@ -5,7 +5,7 @@ import {
 } from '../../common/notFoundExceptions/not.found.exception';
 
 import { NestKafkaService, nodeHasChildException } from 'ifmcommon';
-import { assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError, Neo4jService } from 'sgnm-neo4j/dist';
+import { assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError, dynamicFilterPropertiesAdder, dynamicLabelAdder, find_with_children_by_realm_as_tree__find_by_realm_error, Neo4jService, required_fields_must_entered } from 'sgnm-neo4j/dist';
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
 import {
   has_children_error,
@@ -31,6 +31,13 @@ import {
 import { VirtualNodeHandler } from 'src/common/class/virtual.node.dealer';
 import { ConfigService } from '@nestjs/config';
 import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
+import { queryObjectType } from "src/common/const/dtos";
+import { PaginationParams } from 'src/common/commonDto/pagination.dto';
+
+import  {
+  int
+} from "neo4j-driver";
+
 
 @Injectable()
 export class SystemsRepository implements SystemsInterface<System> {
@@ -336,4 +343,98 @@ export class SystemsRepository implements SystemsInterface<System> {
       }
     }
   }
+  async findTypesIncludedBySystem(key: string, header, neo4jQuery: PaginationParams) {
+    const systemNode = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.SYSTEM],
+      {"isDeleted": false, "key": key}, [Neo4jLabelEnum.VIRTUAL]);
+    if (!systemNode['length']) {
+        throw new HttpException(node_not_found(), 400);
+      }  
+     
+    const types = await this.findChildrensAndParentOfChildrenByRIdAndFilter(systemNode[0].get('n').identity.low,
+     {"isDeleted": false}, ['Component'], {"isDeleted": false}, 'SYSTEM_OF', ['Type'], {"isDeleted": false}, 'PARENT_OF',neo4jQuery);
+     
+     let  id = -1;
+     let uniqueTypes = [];
+     let totalComponent = +0;
+     types.forEach(element => {
+       totalComponent = totalComponent + +element.get('total');
+       if(element.get('parentofchildren').identity.low != id){
+         element.get('parentofchildren').properties['leaf'] = false
+         uniqueTypes.push(element.get('parentofchildren').properties);
+        id = element.get('parentofchildren').identity.low;
+       }
+     });
+     let resultObject =  {"totalCount": totalComponent, "properties": uniqueTypes}
+    
+     return resultObject;     
+  }
+  ////////////////////////////////////////////
+  int(value: number) {
+    return int(value);
+  }
+  async findChildrensAndParentOfChildrenByRIdAndFilter(
+    root_id: number,
+    root_filters: object = {},
+    children_labels: Array<string> = [],
+    children_filters: object = {},
+    relation_name1: string,
+    parentof_children_labels: Array<string> = [],
+    parentof_children_filters: object = {},
+    relation_name2: string,
+    queryObject: queryObjectType,
+    databaseOrTransaction?: string
+  ) {
+    try {
+      if (!relation_name1 || !relation_name2) {
+        throw new HttpException(required_fields_must_entered, 404);
+      }
+      const childrenLabelsWithoutEmptyString =
+        children_labels
+      const parentofChildrenLabelsWithoutEmptyString =
+        parentof_children_labels  
+      const rootNode = await this.neo4jService.findByIdAndFilters(root_id, root_filters);
+      if (!rootNode || rootNode.length == 0) {
+        throw new HttpException(
+          find_with_children_by_realm_as_tree__find_by_realm_error,
+          404
+        );
+      }
+      const rootId = rootNode.identity.low;
+      const parameters = { rootId, ...children_filters, ...parentof_children_filters,  ...queryObject };
+      parameters.skip = this.int(+queryObject.skip) as unknown as number
+      parameters.limit = this.int(+queryObject.limit) as unknown as number
+
+      let cypher;
+      let response;
+
+      cypher =
+        `MATCH p=(n)-[:${relation_name1}*]->(m` + 
+        dynamicLabelAdder(childrenLabelsWithoutEmptyString) + 
+        dynamicFilterPropertiesAdder(children_filters) + `<-[:${relation_name2}*]-(k`+ 
+        dynamicLabelAdder(parentofChildrenLabelsWithoutEmptyString) +
+        dynamicFilterPropertiesAdder(parentof_children_filters) + 
+        `  WHERE  id(n) = $rootId  RETURN n as parent,m as children, k as parentofchildren , count(k) as total `;
+      if (queryObject.orderByColumn && queryObject.orderByColumn.length >= 1) {
+        cypher = cypher + `ORDER BY k.` + `${queryObject.orderByColumn} ${queryObject.orderBy} SKIP $skip LIMIT $limit  `
+      } else {
+        cypher = cypher + `ORDER BY ${queryObject.orderBy} SKIP $skip LIMIT $limit `
+      }
+      console.log(cypher)
+
+      children_filters["rootId"] = rootId;
+      response = await this.neo4jService.write(cypher, parameters, databaseOrTransaction);
+
+      return response["records"];
+    } catch (error) {
+      if (error.response?.code) {
+        throw new HttpException(
+          { message: error.response?.message, code: error.response?.code },
+          error.status
+        );
+      } else {
+        throw new HttpException(error, 500);
+      }
+    }
+  }
+  ////////////////////////////////////////////
 }
