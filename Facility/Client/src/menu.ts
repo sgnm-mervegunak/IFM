@@ -38,6 +38,11 @@ export default [
             icon: "pi pi-fw pi-angle-right",
             to: "/asset-systems",
           },
+          {
+            label: "Classifications",
+            icon: "pi pi-fw pi-angle-right",
+            to: "/asset-classifications",
+          },
         ],
       },
       {
