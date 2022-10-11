@@ -95,7 +95,7 @@ const SetContactTable = () => {
     sortField: null || undefined,
     sortOrder: null,
     filters: {
-      email: { value: "", matchMode: "contains" }
+      company: { value: "", matchMode: "contains" }
     }
   });
   const [deleteTypeDialog, setDeleteTypeDialog] = useState(false);
@@ -164,6 +164,8 @@ const SetContactTable = () => {
   };
 
   const onFilter = (event: any) => {
+    console.log(event);
+    
     setLazyParams(event);
   };
 
@@ -206,7 +208,8 @@ const SetContactTable = () => {
     'email': { value: null, matchMode: FilterMatchMode.STARTS_WITH },
     'givenName': { value: null, matchMode: FilterMatchMode.STARTS_WITH },
     'familyName': { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-    'phone': { value: null, matchMode: FilterMatchMode.STARTS_WITH }
+    'phone': { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+    'country': { value: null, matchMode: FilterMatchMode.STARTS_WITH }
   });
 
   const onGlobalFilterChange = (e: any) => {
@@ -219,7 +222,9 @@ const SetContactTable = () => {
   }
 
   const columnComponents = selectedColumns?.map(col => {
-    return <Column key={col.field} field={col.field} header={col.header} filter />;
+    console.log(col);
+    
+    return <Column key={col.field} field={col.field} header={col.header} filter filterField={col.field} sortable />;
   });
 
   const renderFooterAdd = () => {
@@ -398,6 +403,7 @@ const SetContactTable = () => {
               bodyStyle={{ textAlign: "right", overflow: "visible" }}
               exportable={false}
               style={{ minWidth: '8rem' }}
+              filter={false}
             />
 
           </DataTable>

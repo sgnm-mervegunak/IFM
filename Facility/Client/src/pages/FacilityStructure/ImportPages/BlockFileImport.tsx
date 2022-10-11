@@ -15,6 +15,7 @@ const BlockFileImport = ({ selectedNodeKey }: Params) => {
   const auth = useAppSelector((state) => state.auth);
   const [token, setToken] = useState(auth.auth.token);
   const history = useNavigate();
+  const { toast } = useToast()
 
   const uploadCSV = (e: any) => {
     const file = e.files[0];
@@ -22,7 +23,6 @@ const BlockFileImport = ({ selectedNodeKey }: Params) => {
       process.env.REACT_APP_API_FACILITY +
       "classification/addAClassificationWithCodeFromExcel/IFM/EN";
     const formData = new FormData();
-    const { toast } = useToast()
     formData.append("file", file);
     formData.append("fileName", file.name);
     const config = {
