@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useAppSelector } from "../../app/hook";
 
 import ClassificationsService from "../../services/classifications";
+import useToast from "../../hooks/useToast";
 
 interface ClassificationInterface {
   cantDeleted?: boolean;
@@ -70,7 +71,7 @@ const AssetClassifications = () => {
   });
   const dt = useRef<any>();
   const menu = useRef<any>(null);
-  const { toast } = useAppSelector((state) => state.toast);
+  const { toast } = useToast()
 
   useEffect(() => {
     loadLazyData();

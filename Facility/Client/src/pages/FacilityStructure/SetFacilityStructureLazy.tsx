@@ -1325,6 +1325,7 @@ const SetFacilityStructure = () => {
                             "?key=" +
                             data.key
                           }
+                          target="_blank" rel="noopener noreferrer"
                         >
                           <Button
                             icon="pi pi-map"
