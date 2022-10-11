@@ -49,7 +49,7 @@
     "class-validator": "^0.13.2",
     "csv-parser": "^3.0.0",
     "exceljs": "^4.3.0",
-    "ifmcommon": "^0.0.57",
+    "ifmcommon": "^0.0.59",
     "joi": "^17.6.0",
     "kafkajs": "^1.16.0",
     "keycloak-connect": "^15.1.1",
@@ -68,7 +68,7 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
-    "sgnm-neo4j": "^0.0.216",
+    "sgnm-neo4j": "^0.0.222",
     "swagger-ui-express": "^4.3.0",
     "uuid": "^8.3.2",
     "webpack": "5.74.0"
