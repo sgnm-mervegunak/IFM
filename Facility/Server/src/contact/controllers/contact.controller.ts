@@ -2,11 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Headers } fro
 import { ContactService } from '../services/contact.service';
 import { Roles, Unprotected } from 'nest-keycloak-connect';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
-import { NoCache } from 'ifmcommon';
+import { NoCache, PaginationParams } from 'ifmcommon';
 import { CreateContactDto } from '../dto/create-contact.dto';
 import { UpdateContactDto } from '../dto/update-contact.dto';
 import { UserRoles } from 'src/common/const/keycloak.role.enum';
-import { PaginationParams } from 'src/common/commonDto/pagination.query';
+
 @ApiTags('contact')
 @ApiBearerAuth('JWT-auth')
 @Controller('contact')

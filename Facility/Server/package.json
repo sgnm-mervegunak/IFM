@@ -51,7 +51,7 @@
     "csv-parser": "^3.0.0",
     "exceljs": "^4.3.0",
     "f": "^1.4.0",
-    "ifmcommon": "^0.0.57",
+    "ifmcommon": "^0.0.59",
     "joi": "^17.6.0",
     "kafkajs": "^1.16.0",
     "keycloak-connect": "^15.1.1",

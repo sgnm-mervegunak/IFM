@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile, Headers } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles, Unprotected } from 'nest-keycloak-connect';
-import { PaginationNeo4jParams } from 'src/common/commonDto/pagination.neo4j.dto';
 import { NoCache } from 'ifmcommon';
 import { ClassificationService } from './classification.service';
 import { CreateClassificationDto } from './dto/create-classification.dto';

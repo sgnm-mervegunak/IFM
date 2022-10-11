@@ -11,21 +11,15 @@ import {
   assignDtoPropToEntity,
   createDynamicCyperObject,
   CustomNeo4jError,
-  dynamicFilterPropertiesAdder,
-  dynamicLabelAdder,
-  dynamicNotLabelAdder,
-  filterArrayForEmptyString,
-  find_with_children_by_realm_as_tree__find_by_realm_error,
   Neo4jService,
-  required_fields_must_entered,
 } from 'sgnm-neo4j/dist';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 import { has_children_error, node_not_found } from 'src/common/const/custom.error.object';
 import { RelationName } from 'src/common/const/relation.name.enum';
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
 import { ContactHasChildrenException } from 'src/common/badRequestExceptions/bad.request.exception';
-import { PaginationParams } from 'src/common/commonDto/pagination.query';
 import { ContactInterface } from 'src/common/interface/modules.with.pagination.interface';
+import { PaginationParams } from 'ifmcommon/dist';
 
 @Injectable()
 export class ContactRepository implements ContactInterface<any> {
