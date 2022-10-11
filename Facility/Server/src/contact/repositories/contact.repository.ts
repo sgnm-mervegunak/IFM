@@ -58,6 +58,7 @@ export class ContactRepository implements ContactInterface<any> {
 
 
     children = children.map((item) => {
+      item.get('children').properties['id']= item.get('children').identity.low
       return item.get('children').properties
     })
 
