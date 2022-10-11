@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
+import { MultiSelect } from 'primereact/multiselect';
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
 import { FileUpload } from "primereact/fileupload";
@@ -8,6 +9,7 @@ import { Toolbar } from "primereact/toolbar";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Menu } from "primereact/menu";
+import { FilterMatchMode } from 'primereact/api';
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import ContactService from "../../services/contact";
@@ -38,6 +40,11 @@ interface Node {
   className?: string;
 }
 
+interface IColumn {
+  field: string;
+  header: string;
+}
+
 const SetContactTable = () => {
   let emptyComponent = {
     name: "",
@@ -61,18 +68,35 @@ const SetContactTable = () => {
     id: "",
   };
 
+  const columns = [
+    { field: 'country', header: 'Country' },
+    { field: 'department', header: 'Department' },
+    { field: 'description', header: 'Description' },
+    { field: 'organizationCode', header: 'Organization Code' },
+    { field: 'postalBox', header: 'Postal Box' },
+    { field: 'postalCode', header: 'Postal Code' },
+    { field: 'stateRegion', header: 'State Region' },
+    { field: 'street', header: 'Street' },
+    { field: 'tag', header: 'Tag' },
+    { field: 'town', header: 'Town' },
+  ];
+
+  const dtRef = useRef(null);
   const [data, setData] = useState<Node[]>([]);
   const [selectedNodeKey, setSelectedNodeKey] = useState<any>("");
   const [selectedNodeId, setSelectedNodeId] = useState<any>("");
   const [loading, setLoading] = useState(false);
   const [lazyParams, setLazyParams] = useState({
-    first: 1,
-    rows: 5,
-    page: 1,
+    first: 0,
+    rows: 10,
+    page: 0,
     orderBy: "ASC",
     orderByColumn: "email",
     sortField: null || undefined,
     sortOrder: null,
+    filters: {
+      email: { value: "", matchMode: "contains" }
+    }
   });
   const [deleteTypeDialog, setDeleteTypeDialog] = useState(false);
   const [typeDialog, setTypeDialog] = useState(false);
@@ -91,6 +115,8 @@ const SetContactTable = () => {
   const dt = useRef(null);
   const navigate = useNavigate();
   const menu = useRef(null);
+  const [globalFilterValue, setGlobalFilterValue] = useState('');
+  const [selectedColumns, setSelectedColumns] = useState<IColumn[]>();
 
   const params = useParams();
   const nodeKey: any = params.id;
@@ -98,14 +124,14 @@ const SetContactTable = () => {
   const getContact = () => {
     setLoading(true);
     ContactService.findAll({
-      page: lazyParams.page,
+      page: lazyParams.page + 1,
       limit: lazyParams.rows,
       orderBy: lazyParams.sortOrder === 1 ? "ASC" : "DESC",
       orderByColumn: lazyParams.sortField
     })
       .then((response) => {
         console.log(response.data);
-        
+
         setData(response.data.children);
         setCountFacilities(response.data.totalCount);
         setLoading(false);
@@ -123,11 +149,29 @@ const SetContactTable = () => {
 
   useEffect(() => {
     getContact();
-  }, []);
+  }, [lazyParams]);
 
-  const onPage = (event:any) => {
-    if (globalFilter === "") setLazyParams(event);
+  const onPage = (event: any) => {
+    if (globalFilter === "") {
+      console.log(event);
+
+      setLazyParams(event)
+    };
   };
+
+  const onSort = (event: any) => {
+    setLazyParams((prev) => ({ ...prev, ...event }));
+  };
+
+  const onFilter = (event: any) => {
+    setLazyParams(event);
+  };
+
+  const onColumnToggle = (event: any) => {
+    let selectedColumns = event.value;
+    let orderedSelectedColumns = columns.filter(col => selectedColumns.some((sCol: { field: string; }) => sCol.field === col.field));
+    setSelectedColumns(orderedSelectedColumns);
+  }
 
   const leftToolbarTemplate = () => {
     return (
@@ -147,14 +191,36 @@ const SetContactTable = () => {
       <React.Fragment>
         <div className="flex justify-content-between">
           <h5 className="m-0">Manage Contacts</h5>
+          <MultiSelect value={selectedColumns} options={columns} optionLabel="header" onChange={onColumnToggle} placeholder="Select Column" style={{ width: '20em' }} />
           <span className="p-input-icon-left">
             <i className="pi pi-search" />
-            <InputText value={globalFilter} onChange={(e) => { setGlobalFilter(e.target.value) }} placeholder="Search" />
+            <InputText value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Keyword Search" />
           </span>
         </div>
       </React.Fragment>
     )
   }
+
+  const [filters, setFilters] = useState({
+    'global': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'email': { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+    'givenName': { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+    'familyName': { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+    'phone': { value: null, matchMode: FilterMatchMode.STARTS_WITH }
+  });
+
+  const onGlobalFilterChange = (e: any) => {
+    const value = e.target.value;
+    let _filters = { ...filters };
+    _filters['global'].value = value;
+
+    setFilters(_filters);
+    setGlobalFilterValue(value);
+  }
+
+  const columnComponents = selectedColumns?.map(col => {
+    return <Column key={col.field} field={col.field} header={col.header} filter />;
+  });
 
   const renderFooterAdd = () => {
     return (
@@ -199,6 +265,8 @@ const SetContactTable = () => {
   };
 
   const deleteType = () => {
+    console.log(component.id);
+
     ContactService.remove(component.id)
       .then((response) => {
         toast.current.show({
@@ -268,52 +336,70 @@ const SetContactTable = () => {
 
           <DataTable
             value={data}
+            ref={dtRef}
             dataKey="id"
             paginator
             onPage={onPage}
+            onSort={onSort}
             first={lazyParams.first}
             responsiveLayout="scroll"
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Contacts"
             rows={lazyParams.rows}
-            rowsPerPageOptions={[5, 25, 50]}
+            rowsPerPageOptions={[10, 25, 50]}
             lazy
             totalRecords={countFacilities}
             header={header}
             emptyMessage="Contact not found"
-            globalFilter={globalFilter}
             sortField={lazyParams.sortField}
             sortOrder={lazyParams.sortOrder}
+            filterDisplay="row"
+            globalFilterFields={['email']}
+            onFilter={onFilter}
           >
             <Column
               field="email"
               header="Email"
               sortable
-              style={{ width: "20%" }}
+              filter
+              filterField="email"
             />
             <Column
               field="givenName"
               header="Name"
               sortable
-              style={{ width: "20%" }}
+              filter
+              filterField="givenName"
             />
             <Column
               field="familyName"
               header="Surname"
               sortable
-              style={{ width: "20%" }}
+              filter
+              filterField="familyName"
             />
             <Column
               field="phone"
               header="Phone"
               sortable
-              style={{ width: "20%" }}
+              filter
+              filterField="phone"
             />
             <Column
+              field="company"
+              header="Company"
+              sortable
+              filter
+              filterField="company"
+            />
+            {columnComponents}
+            <Column
               body={actionBodyTemplate}
+              bodyStyle={{ textAlign: "right", overflow: "visible" }}
               exportable={false}
               style={{ minWidth: '8rem' }}
             />
+
           </DataTable>
         </div>
 
