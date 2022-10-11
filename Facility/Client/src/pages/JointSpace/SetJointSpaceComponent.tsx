@@ -103,7 +103,9 @@ const SetJointSpaceComponent = ({ selectedBuildingKey, setSelectedBuildingKey }:
   const [facilityType, setFacilityType] = useState<string[]>([]);
   const [selectedFacilityType, setSelectedFacilityType] = useState<
     string | undefined
-  >("");
+    >("");
+  const [expandedKeys, setExpandedKeys] = useState({});
+  const [loadedNode, setLoadedNode] = useState<any>({});
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const [display, setDisplay] = useState(false);
@@ -235,6 +237,7 @@ const SetJointSpaceComponent = ({ selectedBuildingKey, setSelectedBuildingKey }:
         setSelectedNodeKeys([]);
         setSelectedKeysName([]);
         setDisplay(false); 
+        rollBack();
       })
       .catch((err) => {
         toast.current.show({
@@ -243,6 +246,9 @@ const SetJointSpaceComponent = ({ selectedBuildingKey, setSelectedBuildingKey }:
           detail: err.response ? err.response.data.message : err.message,
           life: 2000,
         });
+
+        rollBack();
+
       });
   };
 
@@ -288,6 +294,47 @@ const SetJointSpaceComponent = ({ selectedBuildingKey, setSelectedBuildingKey }:
         />
       </div>
     );
+  };
+
+  const rollBack = async (key?: any, dragingNode?: any) => {
+    setLoading(true);
+    console.log(loadedNode);
+    console.log(key);
+
+    const temp = key
+      ? loadedNode[key]
+        ? [...loadedNode[key], key]
+        : [key]
+      : loadedNode[selectedNodeKey];
+    console.log(temp);
+
+    JointSpaceServices.loadStructureWithPath(temp)
+      .then((res) => {
+        setData([res.data]);
+        if (key && dragingNode) {
+          setLoadedNode((prev: any) => ({ ...prev, [dragingNode]: temp }));
+        }
+        setExpandedKeys((prev: any) => {
+          prev = {
+            [res.data.key]: true,
+          };
+          for (let item of temp) {
+            prev[item] = true;
+          }
+          return prev;
+        });
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+
+        toast.current.show({
+          severity: "error",
+          summary: t("Error"),
+          detail: err.response ? err.response.data.message : err.message,
+          life: 4000,
+        });
+      });
   };
 
   const renderFooterEdit = () => {
