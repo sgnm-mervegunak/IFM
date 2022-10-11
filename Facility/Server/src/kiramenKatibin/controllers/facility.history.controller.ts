@@ -1,7 +1,8 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Unprotected } from 'nest-keycloak-connect';
-import { NoCache, PaginationParams } from 'ifmcommon';
+import { NoCache } from 'ifmcommon';
+import { PaginationParams } from 'src/common/dto/pagination.query';
 import { FacilityHistory } from '../entities/facility.history.entity';
 import { FacilityHistoryService } from '../services/facility.history.service';
 

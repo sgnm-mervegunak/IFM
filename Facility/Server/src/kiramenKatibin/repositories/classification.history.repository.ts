@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { BaseHistoryRepositoryInterface, PaginationParams } from 'ifmcommon';
+import { BaseHistoryRepositoryInterface } from 'ifmcommon';
+import { PaginationParams } from 'src/common/dto/pagination.query';
 import { CreateClassificationHistoryDto } from '../dtos/create.classification.history.dto';
 import { ClassificationHistory } from '../entities/classification.history.entity';
 

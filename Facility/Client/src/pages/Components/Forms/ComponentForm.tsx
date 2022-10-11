@@ -83,6 +83,7 @@ const TypeForm = ({
   const { t } = useTranslation(["common"]);
   const [codeWarrantyDurationUnit, setCodeWarrantyCodeDurationUnit] = useState("");
   const [expandedKeys, setExpandedKeys] = useState({});
+  const [loading, setLoading] = useState(true);
 
   const [data, setData] = useState<any>();
 
@@ -169,6 +170,11 @@ const TypeForm = ({
     if (!event.node.children) {
       console.log(event);
 
+      setLoading(true);
+      console.log(event);
+      event.node.icon = 'pi pi-spin pi-spinner'
+      setSpaces([...spaces]);
+
 
       FacilityStructureLazyService.lazyLoadByKey(event.node.key)
         .then((res) => {
@@ -177,13 +183,11 @@ const TypeForm = ({
             ...child,
             id: child.id,
             leaf: child.leaf,
+            label: child.name,
           }));
 
-          let temp = JSON.parse(
-            JSON.stringify([...spaces] || [])
-          );
-          fixNodesSpaces(temp);
-          setSpaces(temp);
+          delete event.node.icon;
+          setSpaces([...spaces]);
 
         })
         .catch((err) => {
@@ -516,8 +520,8 @@ const TypeForm = ({
                     value={field.value}
                     options={spaces}
                     onNodeExpand={loadOnExpand}
-                    // expandedKeys={expandedKeys}
-                    // onToggle={(e) => setExpandedKeys(e.value)}
+                    expandedKeys={expandedKeys}
+                    onToggle={(e) => setExpandedKeys(e.value)}
                     onShow={() => { console.log('show') }}
                     onHide={() => { console.log('hide') }}
                     onChange={(e) => {
