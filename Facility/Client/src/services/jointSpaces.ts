@@ -22,8 +22,12 @@ const findByKeyAndLeaf = async (key: string, leafType:string) => {
     return axios.get(url +"lazyLoading/"+key+"/"+leafType);
 };
 
+const loadStructureWithPath = async (path: string[]) => {
+  return axios.post(url + "/lazyloading/path", { path });
+};
 const service = {
-  findByKeyAndLeaf
+  findByKeyAndLeaf,
+  loadStructureWithPath
 
 };
 
