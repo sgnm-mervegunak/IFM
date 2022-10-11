@@ -19,7 +19,7 @@ import { RelationName } from 'src/common/const/relation.name.enum';
 import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.enum';
 import { ContactHasChildrenException } from 'src/common/badRequestExceptions/bad.request.exception';
 import { ContactInterface } from 'src/common/interface/modules.with.pagination.interface';
-import { PaginationParams } from 'ifmcommon/dist';
+import { PaginationParams } from 'src/common/dto/pagination.query';
 
 @Injectable()
 export class ContactRepository implements ContactInterface<any> {
