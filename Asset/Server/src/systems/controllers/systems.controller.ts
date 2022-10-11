@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Headers, Header } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Headers, Header, Query } from '@nestjs/common';
 import { Roles } from 'nest-keycloak-connect';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { NoCache } from 'ifmcommon';
 import { UserRoles } from 'src/common/const/keycloak.role.enum';
 import { SystemsService } from '../services/systems.service';
 import { SystemsDto } from '../dto/systems.dto';
+import { PaginationParams } from 'src/common/commonDto/pagination.dto';
 
 @ApiTags('systems')
 @ApiBearerAuth('JWT-auth')
@@ -46,5 +47,12 @@ export class SystemsController {
   @NoCache()
   findOneNode(@Param('key') key: string, @Headers() header) {
     return this.systemsService.findOneNode(key, header);
+  }
+ 
+  @Roles({ roles: [UserRoles.ADMIN] })
+  @Get('types/:key')
+  @NoCache()
+  async findTypesIncludedBySystem(@Param('key') key: string, @Headers() header,@Query()neo4jQuery: PaginationParams) {
+    return await this.systemsService.findTypesIncludedBySystem(key, header, neo4jQuery);
   }
 }

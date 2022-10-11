@@ -6,4 +6,5 @@ export interface SystemLazyLoadingInterface {
   findRootByRealm(header): any;
   findChildrensByKey(key: string, leafType: string, header);
   getPathByKey(lazyLoadingPathByKeyDto: LazyLoadingPathByKeyDto, header);
+  findChildrensByKeyAndFilterIt(key: string, leafType: string, header, filterKey: string);
 }

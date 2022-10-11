@@ -25,4 +25,7 @@ export class SystemLazyLoadingService {
   findChildrensByKey(key: string, leafType: string, header) {
     return this.systemRepository.findChildrensByKey(key, leafType, header);
   }
+  findChildrensByKeyAndFilterIt(key: string, leafType: string, header, filterKey: string) {
+    return this.systemRepository.findChildrensByKeyAndFilterIt(key, leafType, header, filterKey);
+  }
 }

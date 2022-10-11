@@ -46,4 +46,10 @@ export class StructureLazyLoadingController {
   getPath(@Body() lazyLoadingPathDto: LazyLoadingPathDto, @Headers() header) {
     return this.systemService.getPath(lazyLoadingPathDto, header);
   }
+  @Get('lazyLoading/filter/:key/:leafType/:filterKey')
+  @Roles({ roles: [UserRoles.ADMIN] })
+  @NoCache()
+  findChildrensByKeyAndFilterIt(@Param('key') key: string, @Param('leafType') leafType: string, @Headers() header, @Param('filterKey') filterKey: string) {
+    return this.systemService.findChildrensByKeyAndFilterIt(key, leafType, header,filterKey);
+  }
 }
