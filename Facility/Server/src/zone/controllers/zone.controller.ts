@@ -9,7 +9,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UserRoles } from 'src/common/const/keycloak.role.enum';
 @ApiTags('Zone')
 @ApiBearerAuth('JWT-auth')
-@Controller('Zone')
+@Controller('zone')
 export class ZoneController {
   constructor(private readonly zoneService: ZoneService) {}
 

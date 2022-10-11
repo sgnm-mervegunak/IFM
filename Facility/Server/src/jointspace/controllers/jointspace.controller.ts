@@ -8,7 +8,7 @@ import { UpdateJointSpaceDto } from '../dto/update.jointspace.dto';
 import { UserRoles } from 'src/common/const/keycloak.role.enum';
 @ApiTags('JointSpace')
 @ApiBearerAuth('JWT-auth')
-@Controller('JointSpace')
+@Controller('jointSpace')
 export class JointSpaceController {
   constructor(private readonly jointSpaceService: JointSpaceService) {}
 
