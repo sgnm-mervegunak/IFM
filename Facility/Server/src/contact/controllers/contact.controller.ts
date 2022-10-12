@@ -14,6 +14,33 @@ import { UserRoles } from 'src/common/const/keycloak.role.enum';
 export class ContactController {
   constructor(private readonly contactService: ContactService) {}
 
+  @Get('')
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
+  @NoCache()
+  findOne(@Headers() header,@Query() neo4jQuery:PaginationParams) {
+    const { language, realm } = header;
+    return this.contactService.findOne(realm, language,neo4jQuery);
+  }
+
+  @Get('/search')
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
+  @NoCache()
+  findWithSearchString(@Headers() header,@Query() neo4jQuery:PaginationParams,@Query('searchString') searchString:string) {
+    const { language, realm } = header;
+    return this.contactService.findWithSearchString(realm, language,neo4jQuery,searchString);
+  }
+
+  @Unprotected()
+  //@Roles({ roles: [UserRoles.ADMIN] })
+  @Get('/:key')
+  @NoCache()
+  findOneNode(@Param('key') key: string, @Headers() header) {
+    const { language, realm } = header;
+    return this.contactService.findOneNode(key, realm, language);
+  }
+
   //@Unprotected()
   @Roles({ roles: [UserRoles.ADMIN] })
   @ApiBody({
@@ -26,14 +53,7 @@ export class ContactController {
     return this.contactService.create(createContactDto, realm, language);
   }
 
-  @Get('')
-  //@Unprotected()
-  @Roles({ roles: [UserRoles.ADMIN] })
-  @NoCache()
-  findOne(@Headers() header,@Query() neo4jQuery:PaginationParams) {
-    const { language, realm } = header;
-    return this.contactService.findOne(realm, language,neo4jQuery);
-  }
+ 
 
   @Patch(':id')
   //@Unprotected()
@@ -58,12 +78,5 @@ export class ContactController {
     return this.contactService.changeNodeBranch(id, target_parent_id, realm, language);
   }
 
-  @Unprotected()
-  //@Roles({ roles: [UserRoles.ADMIN] })
-  @Get('/:key')
-  @NoCache()
-  findOneNode(@Param('key') key: string, @Headers() header) {
-    const { language, realm } = header;
-    return this.contactService.findOneNode(key, realm, language);
-  }
+ 
 }
