@@ -32,11 +32,11 @@ export class SystemComponentRepository implements SystemComponentInterface<Syste
         RelationDirection.RIGHT,
       );
       if (!systemNode.length) {
-        throw new HttpException(wrong_parent_error(), 400);
+        throw new HttpException(wrong_parent_error({}), 400);
       }
 
       if (systemComponentRelationDto.component_keys.length == 0) {
-        throw new HttpException(wrong_parent_error(), 400);  //Değişecek    
+        throw new HttpException(wrong_parent_error({}), 400);  //Değişecek    
       }
       
       systemComponentRelationDto.component_keys.forEach(async (item) => {

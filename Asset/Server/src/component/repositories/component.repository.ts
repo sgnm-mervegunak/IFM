@@ -129,7 +129,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
     );
 
     if (!typeNode.length) {
-      throw new HttpException(wrong_parent_error(), 400);
+      throw new HttpException(wrong_parent_error({}), 400);
     }
 
     const node = await this.neo4jService.findChildrensByLabelsAndFilters(
@@ -161,7 +161,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
         realm,
       });
       if (!typesNode.length) {
-        throw new HttpException(wrong_parent_error(), 400);
+        throw new HttpException(wrong_parent_error({}), 400);
       }
 
       const typeNode = await this.neo4jService.findChildrensByIdAndFilters(
@@ -176,7 +176,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
       );
 
       if (!typeNode.length) {
-        throw new HttpException(wrong_parent_error(), 400);
+        throw new HttpException(wrong_parent_error({}), 400);
       }
 
       if (!createComponentDto.name || createComponentDto.name.trim() === '' || createComponentDto.name === '') {
@@ -275,7 +275,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
         RelationName.PARENT_OF,
       );
       if (!node.length) {
-        throw new HttpException(node_not_found(), 400);
+        throw new HttpException(node_not_found({}), 400);
       }
 
     /////////////////////////////////// update classified_by  relation, if duration unit changed //////////////////////////////////////////////////////  
@@ -418,7 +418,7 @@ export class ComponentRepository implements ComponentInterface<Component> {
       );
 
       if (!node) {
-        throw new HttpException(node_not_found(), 400);
+        throw new HttpException(node_not_found({}), 400);
       }
 
       node = await this.neo4jService.changeObjectChildOfPropToChildren(node);

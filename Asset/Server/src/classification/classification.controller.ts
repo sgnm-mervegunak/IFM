@@ -19,8 +19,8 @@ export class ClassificationController {
   @Roles({ roles: [UserRoles.ADMIN] })
   //@Unprotected()
   create(@Body() createClassificationDto: CreateClassificationDto, @Headers() header) {
-    const {language, realm} = header;
-    return this.classificationService.create(createClassificationDto, realm, language);
+
+    return this.classificationService.create(createClassificationDto, header);
   }
   
   // @Unprotected()
@@ -34,22 +34,21 @@ export class ClassificationController {
   @Roles({ roles: [UserRoles.ADMIN] })
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateClassificationDto: UpdateClassificationDto, @Headers() header) {
-    const {language, realm} = header;
-    return this.classificationService.update(id, updateClassificationDto, realm, language);
+    return this.classificationService.update(id, updateClassificationDto, header);
   }
   //@Unprotected()
   @Roles({ roles: [UserRoles.ADMIN] })
   @Delete(':id')
   remove(@Param('id') id: string, @Headers() header) {
-    const {language, realm} = header;
-    return this.classificationService.remove(id,realm, language);
+
+    return this.classificationService.remove(id,header);
   }
   //@Unprotected()
   @Roles({ roles: [UserRoles.ADMIN] })
   @Post('/relation/:id/:target_parent_id')
   changeNodeBranch(@Param('id') id: string, @Param('target_parent_id') target_parent_id: string, @Headers() header) {
-    const {language, realm} = header;
-    return this.classificationService.changeNodeBranch(id, target_parent_id, realm, language);
+
+    return this.classificationService.changeNodeBranch(id, target_parent_id, header);
   }
 
   //@Unprotected()
@@ -57,8 +56,8 @@ export class ClassificationController {
   @Get(':key')
   @NoCache()
   findOneNode(@Param('key') key: string, @Headers() header) {
-    const {language, realm} = header;
-    return this.classificationService.findOneNode(key, realm,language);
+
+    return this.classificationService.findOneNode(key, header);
   }
 
 
@@ -66,8 +65,8 @@ export class ClassificationController {
   @Roles({ roles: [UserRoles.ADMIN] })
   @Patch("setIsActiveFalseOfClassificationAndItsChild/:id")
   async setIsActiveFalseOfClassificationAndItsChild(@Param('id') id:string, @Headers() header) {
-    const {language, realm} = header;
-    return this.classificationService.setIsActiveFalseOfClassificationAndItsChild(id, realm, language);
+ 
+    return this.classificationService.setIsActiveFalseOfClassificationAndItsChild(id, header);
 
   }
 
@@ -75,8 +74,8 @@ export class ClassificationController {
   @Roles({ roles: [UserRoles.ADMIN] })
   @Patch("setIsActiveTrueOfClassificationAndItsChild/:id")
   async setIsActiveTrueOfClassificationAndItsChild(@Param('id') id:string, @Headers() header) {
-    const {language, realm} = header;
-    return this.classificationService.setIsActiveTrueOfClassificationAndItsChild(id, realm, language);
+
+    return this.classificationService.setIsActiveTrueOfClassificationAndItsChild(id, header);
   }
 
   //@Unprotected()
@@ -85,8 +84,8 @@ export class ClassificationController {
   @Get("getClassificationByIsActiveStatus/active")
   @NoCache()
   async getClassificationByIsActiveStatus(@Headers() header){
-    const {language, realm} = header;
-    return this.classificationService.getClassificationByIsActiveStatus(realm,language);
+ 
+    return this.classificationService.getClassificationByIsActiveStatus(header);
   }
 
   //@Unprotected()
@@ -95,8 +94,8 @@ export class ClassificationController {
   @Get('')
   @NoCache()
   async getClassificationsByLanguage(@Headers() header){
-    const {language, realm} = header;
-    return this.classificationService.getClassificationsByLanguage(realm, language);
+
+    return this.classificationService.getClassificationsByLanguage(header);
   }
 
   //@Unprotected()
@@ -105,8 +104,8 @@ export class ClassificationController {
   @Get('getAClassificationByRealmAndLabelNameAndLanguage/info/:labelName')
   @NoCache()
   async getAClassificationByRealmAndLabelNameAndLanguage(@Param('labelName') labelName:string,@Headers() header){
-    const {language, realm} = header;
-    return this.classificationService.getAClassificationByRealmAndLabelNameAndLanguage(realm,labelName, language);
+   
+    return this.classificationService.getAClassificationByRealmAndLabelNameAndLanguage(labelName, header);
   }
 
   //@Unprotected()
@@ -129,8 +128,8 @@ export class ClassificationController {
   })
   @ApiConsumes('multipart/form-data')
  async addAClassificationFromExcel(@UploadedFile() file: Express.Multer.File, @Headers() header){
-  const {language, realm} = header;
-  return this.classificationService.addAClassificationFromExcel(file, realm, language);
+
+  return this.classificationService.addAClassificationFromExcel(file, header);
  }
 
 
@@ -154,8 +153,8 @@ export class ClassificationController {
   })
   @ApiConsumes('multipart/form-data')
  async addAClassificationWithCodeFromExcel(@UploadedFile() file: Express.Multer.File, @Headers() header){
-  const {language, realm} = header;
-  return this.classificationService.addAClassificationWithCodeFromExcel(file, realm, language);
+
+  return this.classificationService.addAClassificationWithCodeFromExcel(file, header);
  }
 
  //@Unprotected()
@@ -163,8 +162,8 @@ export class ClassificationController {
  @NoCache()
  @Get('getAClassificationNode/info/:classificationName/:code')
  async getNodeByClassificationLanguageRealmAndCode(@Param('classificationName') classificationName:string, @Param('code') code:string, @Headers() header){
-  const {language, realm} = header;
-  return this.classificationService.getNodeByClassificationLanguageRealmAndCode(classificationName, language,realm, code);
+
+  return this.classificationService.getNodeByClassificationLanguageRealmAndCode(classificationName, header, code);
 
  }
   
@@ -172,8 +171,8 @@ export class ClassificationController {
   @NoCache()
   @Get('getAClassificationNodeByCode/info/:code')
   async getNodeByLanguageRealmAndCode(@Param('code') code: string, @Headers() header) {
-    const { language, realm } = header;
-    return this.classificationService.getNodeByLanguageRealmAndCode(language, realm, code);
+   
+    return this.classificationService.getNodeByLanguageRealmAndCode(header, code);
 
   }
   
@@ -205,7 +204,7 @@ export class ClassificationController {
   //@Unprotected()
   @NoCache()
   findOneFirstLevel(@Param('label') label: string, @Headers() header) {
-    const { language, realm } = header;
-    return this.classificationService.findOneFirstLevel(label, realm, language);
+   
+    return this.classificationService.findOneFirstLevel(label, header);
   }
 }

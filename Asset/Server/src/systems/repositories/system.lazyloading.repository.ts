@@ -19,7 +19,7 @@ export class SystemLazyLoadingRepository implements SystemLazyLoadingInterface {
       const { realm } = header;
       const node = await this.neo4jService.findByLabelAndFilters([], { key });
       if (!node.length) {
-        throw new HttpException(node_not_found(), 400);
+        throw new HttpException(node_not_found({}), 400);
       }
 
       const parents = await (

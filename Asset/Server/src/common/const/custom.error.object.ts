@@ -1,4 +1,4 @@
-import { CustomTreeError } from './custom.error.enum';
+import { CustomAssetError, CustomTreeError } from './custom.error.enum';
 
 export function has_children_error(params) {
   return {
@@ -44,5 +44,17 @@ export function has_not_reference_key() {
   return {
     message: 'not have reference key',
     code: CustomTreeError.HAS_NOT_REFERENCE_KEY,
+  };
+}
+export function other_microservice_errors(message) {
+  return {
+    message,
+    code: CustomAssetError.OTHER_MICROSERVICE_ERROR,
+  };
+}
+export function invalid_classification() {
+  return {
+    message: 'some of classification ur entered is wrong',
+    code: CustomAssetError.INVALID_CLASSIFICATION,
   };
 }

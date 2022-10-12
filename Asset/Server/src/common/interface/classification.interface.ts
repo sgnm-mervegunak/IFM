@@ -1,20 +1,22 @@
 import { GeciciInterface } from "./gecici.interface";
 
-export interface classificationInterface<T> extends GeciciInterface<T> {
-  setIsActiveTrueOfClassificationAndItsChild(id: string, realm: string, language: string): any;
-  setIsActiveFalseOfClassificationAndItsChild(id: string, realm: string, language: string): any;
-  getClassificationByIsActiveStatus(realm: string, language: string): any;
-  getClassificationsByLanguage(realm: string, language: string): any;
-  getAClassificationByRealmAndLabelNameAndLanguage(realm: string, labelName: string, language: string): any;
-  addAClassificationFromExcel(file: Express.Multer.File, realm: string, language: string): any;
-  addAClassificationWithCodeFromExcel(file: Express.Multer.File, realm: string, language: string): any;
-  getNodeByClassificationLanguageRealmAndCode(
-    classificationName: string,
-    language: string,
-    realm: string,
-    code: string,
-  ): any;
-  getNodeByLanguageRealmAndCode(language: string, realm: string, code: string): any;
-  checkExcelFile(file: Express.Multer.File): any;
-  findOneFirstLevelByRealm(label: string, realm: string, language: string): any;
+export interface classificationInterface<T>  {
+  findOneFirstLevelByRealm(label: string, header): any,
+  findOneByRealm(header):any,
+  update(id: string, data: T | any, header): any;
+  create(data: T | any, header): any;
+  delete(id: string, header): any;
+  findOneNodeByKey(key: string,header): any;
+  changeNodeBranch(id: string, target_parent_id: string, header): any;
+  setIsActiveTrueOfClassificationAndItsChild(id:string, header):any;
+  setIsActiveFalseOfClassificationAndItsChild(id:string, header):any;
+  getClassificationByIsActiveStatus(header): any;
+  getClassificationsByLanguage(header): any;
+  getAClassificationByRealmAndLabelNameAndLanguage(labelName: string,header): any;
+  addAClassificationFromExcel(file: Express.Multer.File, header):any
+  addAClassificationWithCodeFromExcel(file: Express.Multer.File,header):any
+  getNodeByClassificationLanguageRealmAndCode( classificationName:string, code:string,header): any;
+  getNodeByLanguageRealmAndCode( code: string,header): any;
+  checkExcelFile(file: Express.Multer.File):any
+
 }

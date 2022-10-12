@@ -102,7 +102,7 @@ export class SystemsRepository implements SystemsInterface<System> {
       );
 
       if (!node) {
-        throw new HttpException(node_not_found(), 400);
+        throw new HttpException(node_not_found({}), 400);
       }
 
       node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
@@ -131,7 +131,7 @@ export class SystemsRepository implements SystemsInterface<System> {
         realm,
       });
       if (!rootNode.length) {
-        throw new HttpException(wrong_parent_error(), 400);
+        throw new HttpException(wrong_parent_error({}), 400);
       }
 
       const uniqnessCheck = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
@@ -216,7 +216,7 @@ export class SystemsRepository implements SystemsInterface<System> {
       RelationName.PARENT_OF,
     );
     if (!node.length) {
-      throw new HttpException(node_not_found(), 400);
+      throw new HttpException(node_not_found({}), 400);
     }
 
     if (node[0]['_fields'][0].properties.realm !== realm) {
@@ -347,7 +347,7 @@ export class SystemsRepository implements SystemsInterface<System> {
     const systemNode = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.SYSTEM],
       {"isDeleted": false, "key": key}, [Neo4jLabelEnum.VIRTUAL]);
     if (!systemNode['length']) {
-        throw new HttpException(node_not_found(), 400);
+        throw new HttpException(node_not_found({}), 400);
       }  
      
     const types = await this.neo4jService.findChildrensAndParentOfChildrenByRIdAndFilter(systemNode[0].get('n').identity.low,

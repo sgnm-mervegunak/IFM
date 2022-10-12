@@ -52,7 +52,7 @@ const { v4: uuidv4 } = require('uuid');
 export class ClassificationRepository implements classificationInterface<Classification> {
   constructor(private readonly neo4jService: Neo4jService) {}
 
-  async findOneByRealm(realm: string, language: string) {
+  async findOneByRealm(header) {
     // //let node = await this.neo4jService.findByRealmWithTreeStructure(label, realm);
     // let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
     //   ['FacilityStructure'],{"realm":realm, "isDeleted":false},[],{"isDeleted":false, "canDisplay":true}
@@ -65,7 +65,8 @@ export class ClassificationRepository implements classificationInterface<Classif
   }
 
   //REVISED FOR NEW NEO4J
-  async create(createClassificationDto: CreateClassificationDto, realm: string, language: string) {
+  async create(createClassificationDto: CreateClassificationDto, header) {
+    const {realm, language} = header
     function assignDtoPropToEntity(entity, dto) {
       Object.keys(dto).forEach((element) => {
         if (element != 'parentId' && element != 'parentKey') {
@@ -163,7 +164,8 @@ export class ClassificationRepository implements classificationInterface<Classif
   }
   /////////////////////////////////////////////
   //REVISED FOR NEW NEO4J
-  async update(_id: string, updateClassificationto: UpdateClassificationDto, realm: string, language: string) {
+  async update(_id: string, updateClassificationto: UpdateClassificationDto, header) {
+    const {realm, language} = header
     const updateClassificationDtoWithoutLabelsAndParentId = {};
 
     Object.keys(updateClassificationto).forEach((element) => {
@@ -200,8 +202,9 @@ export class ClassificationRepository implements classificationInterface<Classif
   }
 
   //REVISED FOR NEW NEO4J
-  async delete(_id: string, realm: string, language: string) {
+  async delete(_id: string, header) {
     try {
+      const {realm, language} = header;
       const children = await this.neo4jService.findChildrensByIdOneLevel(
         Number(_id),
         {},
@@ -226,8 +229,9 @@ export class ClassificationRepository implements classificationInterface<Classif
   }
   s;
   //REVISED FOR NEW NEO4J
-  async changeNodeBranch(_id: string, target_parent_id: string, realm: string, language: string) {
+  async changeNodeBranch(_id: string, target_parent_id: string, header) {
     try {
+      const {realm, language} = header
       const new_parent = await this.neo4jService.findByIdAndFilters(+target_parent_id, { isDeleted: false }, []);
       const node = await this.neo4jService.findByIdAndFilters(+_id, { isDeleted: false }, []);
       if (new_parent['labels'] && new_parent['labels'].includes('Classification')) {
@@ -322,8 +326,9 @@ export class ClassificationRepository implements classificationInterface<Classif
     }
   }
   //REVISED FOR NEW NEO4J
-  async findOneNodeByKey(key: string, realm: string, language: string) {
+  async findOneNodeByKey(key: string, header) {
     try {
+      const {realm, language} = header
       const node = await this.neo4jService.findByLabelAndFilters([], { isDeleted: false, key: key }, ['Virtual']);
 
       const result = {
@@ -342,7 +347,8 @@ export class ClassificationRepository implements classificationInterface<Classif
   }
 
   //REVISED FOR NEW NEO4J
-  async getClassificationByIsActiveStatus(realm: string, language: string) {
+  async getClassificationByIsActiveStatus(header) {
+    const {realm, language} = header
     const root_node = await this.neo4jService.findByLabelAndFilters(
       ['Classification'],
       { isDeleted: false, realm: realm },
@@ -388,7 +394,8 @@ export class ClassificationRepository implements classificationInterface<Classif
     return root;
   }
   //REVISED FOR NEW NEO4J
-  async setIsActiveTrueOfClassificationAndItsChild(id: string, realm: string, language: string) {
+  async setIsActiveTrueOfClassificationAndItsChild(id: string, header) {
+    const {realm, language} = header
     await this.neo4jService.updateByIdAndFilter(Number(id), { isDeleted: false }, [], { isActive: true });
 
     const children = await this.neo4jService.findChildrensByIdOneLevel(
@@ -412,7 +419,8 @@ export class ClassificationRepository implements classificationInterface<Classif
   }
 
   //REVISED FOR NEW NEO4J
-  async setIsActiveFalseOfClassificationAndItsChild(id: string, realm: string, language: string) {
+  async setIsActiveFalseOfClassificationAndItsChild(id: string, header) {
+    const {realm, language} = header
     await this.neo4jService.updateByIdAndFilter(Number(id), { isDeleted: false }, [], { isActive: false });
     const children = await this.neo4jService.findChildrensByIdOneLevel(
       Number(id),
@@ -436,8 +444,8 @@ export class ClassificationRepository implements classificationInterface<Classif
 
 
   //REVISED FOR NEW NEO4J
-  async getClassificationsByLanguage(realm: string, language: string) {
-    console.log(language);
+  async getClassificationsByLanguage(header) {
+    const {realm, language} = header
     const root_node = await this.neo4jService.findByLabelAndFilters(
       ['Classification'],
       { isDeleted: false, realm: realm },
@@ -488,7 +496,8 @@ export class ClassificationRepository implements classificationInterface<Classif
   }
 
   //REVISED FOR NEW NEO4J
-  async getAClassificationByRealmAndLabelNameAndLanguage(realm: string, labelName: string, language: string) {
+  async getAClassificationByRealmAndLabelNameAndLanguage( labelName: string, header) {
+    const {realm, language} = header
     const root_node = await this.neo4jService.findByLabelAndFilters(
       ['Classification'],
       { isDeleted: false, realm: realm },
@@ -507,8 +516,9 @@ export class ClassificationRepository implements classificationInterface<Classif
   }
 
   //REVISED FOR NEW NEO4J
-  async addAClassificationFromExcel(file: Express.Multer.File, realm: string, language: string) {
+  async addAClassificationFromExcel(file: Express.Multer.File, header) {
     try {
+      const {realm, language} = header
       let data;
 
       let buffer = new Uint8Array(file.buffer);
@@ -601,8 +611,9 @@ export class ClassificationRepository implements classificationInterface<Classif
   }
 
   //REVISED FOR NEW NEO4J
-  async addAClassificationWithCodeFromExcel(file: Express.Multer.File, realm: string, language: string) {
+  async addAClassificationWithCodeFromExcel(file: Express.Multer.File, header) {
     try {
+      const {realm, language} = header
       let data = [];
       let columnName;
       let buffer = new Uint8Array(file.buffer);
@@ -833,10 +844,10 @@ export class ClassificationRepository implements classificationInterface<Classif
 
   async getNodeByClassificationLanguageRealmAndCode(
     classificationName: string,
-    language: string,
-    realm: string,
+    header,
     code: string,
   ) {
+    const {realm, language} = header
     const cypher = `match (n:${classificationName}_${language} {realm:"${realm}"})-[:PARENT_OF*]->(m {code:"${code}"}) return m`;
 
     let data = await this.neo4jService.read(cypher);
@@ -844,10 +855,8 @@ export class ClassificationRepository implements classificationInterface<Classif
     return data.records[0]['_fields'][0].properties;
   }
 
-  async getNodeByLanguageRealmAndCode(language: string, realm: string, code: string) {
-    console.log(realm);
-    console.log(language);
-    console.log(code);
+  async getNodeByLanguageRealmAndCode(header,code: string) {
+    const {realm, language} = header
     // const x=await this.neo4jService.findChildrenNodesByLabelsAndRelationName([],{key},[],{language,isDeleted:false},'classified_by')
     const deneme = await this.neo4jService.findByLabelAndFilters([], {
       isDeleted: false,
@@ -886,8 +895,8 @@ export class ClassificationRepository implements classificationInterface<Classif
     }
   }
   //REVISED FOR NEW NEO4J
-  async findOneFirstLevelByRealm(label: string, realm: string, language: string) {
-    
+  async findOneFirstLevelByRealm(label: string, header) {
+    const {realm, language} = header 
     let node = await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructureOneLevel(
       [label + '_' + language],
       ['Virtual'],

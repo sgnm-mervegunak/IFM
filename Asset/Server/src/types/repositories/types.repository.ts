@@ -126,7 +126,7 @@ export class TypesRepository implements GeciciInterface<Type> {
       );
 
       if (!node) {
-        throw new HttpException(node_not_found(), 400);
+        throw new HttpException(node_not_found({}), 400);
       }
 
       node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
@@ -155,7 +155,7 @@ export class TypesRepository implements GeciciInterface<Type> {
         realm,
       });
       if (!rootNode.length) {
-        throw new HttpException(wrong_parent_error(), 400);
+        throw new HttpException(wrong_parent_error({}), 400);
       }
 
       const assetTypesLabel = 'AssetType' + '_' + language;
@@ -279,7 +279,7 @@ export class TypesRepository implements GeciciInterface<Type> {
         RelationName.PARENT_OF,
       );
       if (!node.length) {
-        throw new HttpException(node_not_found(), 400);
+        throw new HttpException(node_not_found({}), 400);
       }
 
       if (updateTypeDto.assetType) {
