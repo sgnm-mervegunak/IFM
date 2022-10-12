@@ -40,6 +40,5 @@ export class PaginationParams {
    */
   @ApiPropertyOptional()
   @IsOptional()
-  @IsString()
-  orderByColumn?: string="name";
+  orderByColumn?: string[]=["name"];
 }

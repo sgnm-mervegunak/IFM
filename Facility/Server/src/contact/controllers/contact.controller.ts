@@ -19,6 +19,7 @@ export class ContactController {
   @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
   findOne(@Headers() header,@Query() neo4jQuery:PaginationParams) {
+    console.log(neo4jQuery)
     const { language, realm } = header;
     return this.contactService.findOne(realm, language,neo4jQuery);
   }
