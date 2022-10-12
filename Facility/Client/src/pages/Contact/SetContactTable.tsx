@@ -192,7 +192,7 @@ const SetContactTable = () => {
     return (
       <React.Fragment>
         <div className="flex justify-content-between">
-          <h5 className="m-0">Manage Contacts</h5>
+          <h5 className="m-0">{t("Contact Management")}</h5>
           <MultiSelect value={selectedColumns} options={columns} optionLabel="header" onChange={onColumnToggle} placeholder="Select Column" style={{ width: '20em' }} />
           <span className="p-input-icon-left">
             <i className="pi pi-search" />
@@ -361,6 +361,7 @@ const SetContactTable = () => {
             filterDisplay="row"
             globalFilterFields={['email']}
             onFilter={onFilter}
+            onValueChange={filteredData => console.log(filteredData)}
           >
             <Column
               field="email"
