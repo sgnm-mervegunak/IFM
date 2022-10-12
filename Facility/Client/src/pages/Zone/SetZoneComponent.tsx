@@ -8,14 +8,14 @@ import { useTranslation } from "react-i18next";
 
 import FacilityStructureService from "../../services/facilitystructure";
 import ZoneService from "../../services/zone";
+import ZoneServices from "../../services/zones";
 import { useAppSelector } from "../../app/hook";
 import DisplayNode from "../FacilityStructure/Display/DisplayNode";
 import DocumentUploadComponent from "../FacilityStructure/Forms/FileUpload/DocumentUpload/DocumentUpload";
 import ImageUploadComponent from "../FacilityStructure/Forms/FileUpload/ImageUpload/ImageUpload";
 import ZoneForm from "./Forms/ZoneForm";
-import ClassificationsService from "../../services/classifications"
+import ClassificationsService from "../../services/classifications";
 import useToast from "../../hooks/useToast";
-
 
 interface Node {
   cantDeleted: boolean;
@@ -69,12 +69,15 @@ interface FormNode {
   icon?: string;
 }
 
-interface Params{
-  selectedBuildingKey: any,
-  setSelectedBuildingKey: React.Dispatch<React.SetStateAction<any>>
+interface Params {
+  selectedBuildingKey: any;
+  setSelectedBuildingKey: React.Dispatch<React.SetStateAction<any>>;
 }
 
-const SetZoneComponent = ({ selectedBuildingKey, setSelectedBuildingKey }: Params) => {
+const SetZoneComponent = ({
+  selectedBuildingKey,
+  setSelectedBuildingKey,
+}: Params) => {
   const [selectedNodeKey, setSelectedNodeKey] = useState<any>("");
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [spaceNames, setSpaceNames] = useState<string>("");
@@ -93,15 +96,21 @@ const SetZoneComponent = ({ selectedBuildingKey, setSelectedBuildingKey }: Param
   const [formData, setFormData] = useState<FormNode[]>([]);
   const [classification, setClassification] = useState<Node[]>([]);
   const auth = useAppSelector((state) => state.auth);
-  const { toast } = useToast()
+  const { toast } = useToast();
   const [realm, setRealm] = useState(auth.auth.realm);
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const [canDelete, setCanDelete] = useState<boolean>(false);
   const [generateNodeKey, setGenerateNodeKey] = useState("");
-  const [generateFormTypeKey, setGenerateFormTypeKey] = useState<string | undefined>("");
-  const [generateNodeName, setGenerateNodeName] = useState<string | undefined>("");
-  const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
+  const [generateFormTypeKey, setGenerateFormTypeKey] = useState<
+    string | undefined
+  >("");
+  const [generateNodeName, setGenerateNodeName] = useState<string | undefined>(
+    ""
+  );
+  const [selectedFacilityType, setSelectedFacilityType] = useState<
+    string | undefined
+  >("");
   const [deleteNodeKey, setDeleteNodeKey] = useState<any>("");
   const [codeCategory, setCodeCategory] = useState("");
 
@@ -109,49 +118,39 @@ const SetZoneComponent = ({ selectedBuildingKey, setSelectedBuildingKey }: Param
 
   const params = useParams();
 
-
-
-
   const getZone = () => {
-    // const key = params.id || "";
     const key = selectedBuildingKey || "";
 
-    ZoneService.findBuildingWithKey(key)
+    ZoneServices.findByKeyAndLeaf(key, "space")
       .then((res) => {
-        // console.log(res.data);
-        if (!res.data.root.children) {
-          setData([res.data.root.properties] || []);
-          let temp = JSON.parse(
-            JSON.stringify([res.data.root.properties] || [])
-          );
+          setData([res.data] || []);
+          let temp = JSON.parse(JSON.stringify([res.data] || []));
           fixNodes(temp);
           setData(temp);
-        } else if (res.data.root.children) {
-          setData([res.data.root] || []);
-          let temp = JSON.parse(JSON.stringify([res.data.root] || []));
-          fixNodes(temp);
-          setData(temp);
-        }
         setLoading(false);
       })
       .catch((err) => {
-        if (err.response.status === 500) {
+        if (err.response?.status === 500) {
           toast.current.show({
             severity: "error",
-            summary: "Error",
+            summary: t("Error"),
             detail: "Zone not found",
             life: 3000,
           });
           setTimeout(() => {
             navigate("/zone");
           }, 3000);
+
+          setLoading(false);
         }
       });
   };
 
   useEffect(() => {
     getZone();
-  }, [selectedBuildingKey])
+    setSelectedKeysName([]);
+    setSelectedKeys([]);
+  }, [selectedBuildingKey]);
 
   const fixNodesClassification = (nodes: Node[]) => {
     if (!nodes || nodes.length === 0) {
@@ -219,7 +218,6 @@ const SetZoneComponent = ({ selectedBuildingKey, setSelectedBuildingKey }: Param
       });
   };
 
-
   const renderFooterAdd = () => {
     return (
       <div>
@@ -237,8 +235,7 @@ const SetZoneComponent = ({ selectedBuildingKey, setSelectedBuildingKey }: Param
           icon="pi pi-check"
           onClick={() => {
             setSubmitted(true);
-          }
-          }
+          }}
           autoFocus
         />
       </div>
@@ -274,7 +271,6 @@ const SetZoneComponent = ({ selectedBuildingKey, setSelectedBuildingKey }: Param
   };
 
   return (
-
     <div className="container">
       <ConfirmDialog
         visible={delDia}
@@ -283,9 +279,8 @@ const SetZoneComponent = ({ selectedBuildingKey, setSelectedBuildingKey }: Param
         header="Delete Confirmation"
         icon="pi pi-exclamation-triangle"
         accept={() => {
-          deleteItem(deleteNodeKey)
-        }
-        }
+          deleteItem(deleteNodeKey);
+        }}
       />
       <Dialog
         header={t("Zone Detail")}
@@ -308,14 +303,13 @@ const SetZoneComponent = ({ selectedBuildingKey, setSelectedBuildingKey }: Param
         style={{ width: "40vw" }}
         footer={renderFooterAdd}
         onHide={() => {
-          // setFormTypeId(undefined); 
-          // setLabels([]); 
+          // setFormTypeId(undefined);
+          // setLabels([]);
           setAddDia(false);
           // setSelectedFacilityType(undefined);
           // reset({ ...createZone });
         }}
       >
-
         <ZoneForm
           submitted={submitted}
           setSubmitted={setSubmitted}
@@ -341,7 +335,7 @@ const SetZoneComponent = ({ selectedBuildingKey, setSelectedBuildingKey }: Param
         style={{ width: "40vw" }}
         footer={renderFooterEdit}
         onHide={() => {
-          // setFormTypeId(undefined); 
+          // setFormTypeId(undefined);
           // setLabels([]);
           // setAddDia(false);
           // setSelectedFacilityType(undefined);
@@ -350,7 +344,6 @@ const SetZoneComponent = ({ selectedBuildingKey, setSelectedBuildingKey }: Param
           setEditDia(false);
         }}
       >
-
         <ZoneForm
           submitted={submitted}
           setSubmitted={setSubmitted}
@@ -372,9 +365,7 @@ const SetZoneComponent = ({ selectedBuildingKey, setSelectedBuildingKey }: Param
 
       {/* <h3>Zone</h3> */}
       <div>
-        <h4>
-          Selected Spaces:
-        </h4>
+        <h4>Selected Spaces:</h4>
         <span
           style={{ fontWeight: "bold", fontSize: "14px", color: "red" }}
         >{` ${selectedKeysName.toString().replaceAll(",", ", ")} `}</span>
@@ -420,8 +411,40 @@ const SetZoneComponent = ({ selectedBuildingKey, setSelectedBuildingKey }: Param
             setSelectedNodeKey(event.value);
             setSelectedKeys(Object.keys(event.value));
             findKeyName(Object.keys(event.value));
-            selectedKeys?.map((key) => { findKeyName(key) });
+            selectedKeys?.map((key) => {
+              findKeyName(key);
+            });
+          }}
+          onExpand={(e) => {
+            const key = e.node.key?.toString() || "";
+            ZoneServices.findByKeyAndLeaf(key, "space")
+              .then((res) => {
+                if (!res.data.children) {
+                  return;
+                } else {
+                  let temp = JSON.parse(JSON.stringify([res.data] || []));
+                  fixNodes(temp);
+                  e.node.children = temp[0].children;
 
+                  setData([...data]);
+                }
+                setLoading(false);
+              })
+              .catch((err) => {
+                if (err.response?.status === 500) {
+                  toast.current.show({
+                    severity: "error",
+                    summary: t("Error"),
+                    detail: "Zone not found",
+                    life: 3000,
+                  });
+                  setTimeout(() => {
+                    navigate("/zone");
+                  }, 3000);
+
+                  setLoading(false);
+                }
+              });
           }}
           selectionKeys={selectedNodeKey}
           propagateSelectionUp={false}
@@ -481,9 +504,8 @@ const SetZoneComponent = ({ selectedBuildingKey, setSelectedBuildingKey }: Param
           )}
         />
       </div>
-
     </div>
-  )
-}
+  );
+};
 
 export default SetZoneComponent;

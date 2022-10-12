@@ -11,6 +11,7 @@ import { NotFound } from "./layouts/App/pages/NotFound";
 import SetClassificationAdmin from "./pages/Classifications/ClassificationAdmin/SetClassificationAdmin";
 import SetClassificationAdminLazy from "./pages/Classifications/ClassificationAdmin/SetClassificationAdminLazy";
 import SetAssetClassificationAdminLazy from "./pages/AssetClassifications/AssetClassificationAdmin/setAssetClassificationAdminLazy";
+import SetAssetClassificationUserLazy from "./pages/AssetClassifications/AssetClassificationUser/SetAssetClassificationUserLazy";
 import FacilityStructure from "./pages/FacilityStructure/FacilityStructure";
 import SetFacilityStructure from "./pages/FacilityStructure/SetFacilityStructure";
 import FormGenerate from "./pages/FormGenerate/FormGenerate";
@@ -67,14 +68,19 @@ export default function Router() {
         { path: "zone", element: <Zone /> },
         { path: "facilitystructure", element: <SetFacilityStructureLazy /> },
         // { path: "formgenerate", element: <FormGenerate />},
-        { path: "contact", element: <SetContactTable/> },
+        { path: "contact", element: <SetContactTable /> },
         { path: "structure-asset", element: <StructureAssetTable /> },
         { path: "asset-types", element: <SetType /> },
         { path: "asset-components", element: <SetComponent /> },
         { path: "asset-systems", element: <SetSystem /> },
         {
           path: "asset-classifications",
-          element: <SetAssetClassificationAdminLazy />,
+          element:
+            auth.auth.type === "facility_client_role_admin" ? (
+              <SetAssetClassificationAdminLazy />
+            ) : (
+              <SetAssetClassificationUserLazy />
+            ),
         },
       ],
     },
