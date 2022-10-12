@@ -20,10 +20,11 @@ import { CustomIfmCommonError } from 'src/common/const/custom-ifmcommon.error.en
 import { ContactHasChildrenException } from 'src/common/badRequestExceptions/bad.request.exception';
 import { ContactInterface } from 'src/common/interface/modules.with.pagination.interface';
 import { PaginationParams } from 'src/common/dto/pagination.query';
+import { SearchStringRepository } from 'src/common/class/search.string.from.nodes.dealer';
 
 @Injectable()
 export class ContactRepository implements ContactInterface<any> {
-  constructor(private readonly neo4jService: Neo4jService) { }
+  constructor(private readonly neo4jService: Neo4jService, private readonly SearchStringRepository: SearchStringRepository) { }
 
 
 
@@ -51,6 +52,7 @@ export class ContactRepository implements ContactInterface<any> {
     if (!contactNode.length) {
       throw new FacilityStructureNotFountException(realm);
     }
+
     neo4jQuery.skip = Math.abs(neo4jQuery.page - 1) * neo4jQuery.limit
     let children = await this.neo4jService.findChildrensByIdAndFiltersWithPagination(contactNode[0].get('n').identity.low, {}, [], { isDeleted: false }, 'PARENT_OF', neo4jQuery)
     let totalCount = await this.neo4jService.findChildrensByIdAndFilters(contactNode[0].get('n').identity.low, {}, [], { isDeleted: false }, 'PARENT_OF')
@@ -58,11 +60,39 @@ export class ContactRepository implements ContactInterface<any> {
 
 
     children = children.map((item) => {
-      item.get('children').properties['id']= item.get('children').identity.low
+      item.get('children').properties['id'] = item.get('children').identity.low
       return item.get('children').properties
     })
 
     const finalResponse = { ...contactNode[0].get('n').properties, totalCount, children }
+
+
+    return finalResponse;
+  }
+
+  async findWithSearchString(realm: string, language: string, neo4jQuery: PaginationParams, searchString) {
+    const contactNode = await this.neo4jService.findByLabelAndFilters(['Contact'], { realm, isDeleted: false })
+    if (!contactNode.length) {
+      throw new FacilityStructureNotFountException(realm);
+    }
+    // const searc = await this.neo4jService.read('match (m:Space) where (any(prop in keys(m) where m[prop] CONTAINS "us4")) return m')
+    neo4jQuery.skip = Math.abs(neo4jQuery.page - 1) * neo4jQuery.limit
+    const matchedNodes = await this.SearchStringRepository.searchByString(contactNode[0].get('n').identity.low, { isDeleted: false }, [], { isDeleted: false }, ['test', 'asdas', 'asdasd'], 'PARENT_OF', neo4jQuery, searchString)
+
+    // console.log(searc.records)
+
+
+    //let children = await this.neo4jService.findChildrensByIdAndFiltersWithPagination(contactNode[0].get('n').identity.low, {}, [], { isDeleted: false }, 'PARENT_OF', neo4jQuery)
+    //let totalCount = await this.neo4jService.findChildrensByIdAndFilters(contactNode[0].get('n').identity.low, {}, [], { isDeleted: false }, 'PARENT_OF')
+    //totalCount = totalCount.length
+
+
+    const children = matchedNodes.children.map((item) => {
+      item.get('children').properties['id'] = item.get('children').identity.low
+      return item.get('children').properties
+    })
+
+    const finalResponse = { ...contactNode[0].get('n').properties, totalCount: matchedNodes.totalCount, children }
 
 
     return finalResponse;
