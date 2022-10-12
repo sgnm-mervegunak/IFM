@@ -46,7 +46,7 @@ export class SystemLazyLoadingRepository implements SystemLazyLoadingInterface {
   async findRootByRealm(header) {
     try {
       let { realm } = header;
-      //realm = 'IFM';
+      realm = 'IFM';
       console.log(realm);
       const tree = await this.lazyLoadingDealer.loadByLabel(
         'Systems',
