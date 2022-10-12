@@ -34,4 +34,8 @@ export class SystemsService {
   async findTypesIncludedBySystem(key: string, header, neo4jQuery: PaginationParams) {
     return await this.systemsRepository.findTypesIncludedBySystem(key, header, neo4jQuery);
   }
+
+  async findComponentsIncludedBySystem(key: string, header, neo4jQuery: PaginationParams) {
+    return await this.systemsRepository.findComponentsIncludedBySystem(key, header, neo4jQuery); 
+  }  
 }

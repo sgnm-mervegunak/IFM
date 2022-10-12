@@ -9,7 +9,7 @@ import { LazyLoadingPathByKeyDto } from 'src/common/dto/lazy.loading.path.key.dt
 
 @ApiTags('systemsLazyLoading')
 @ApiBearerAuth('JWT-auth')
-@Controller('systems')
+@Controller('systemsLazyLoading')
 export class StructureLazyLoadingController {
   constructor(private readonly systemService: SystemLazyLoadingService) {}
 
