@@ -75,26 +75,16 @@ export class ContactRepository implements ContactInterface<any> {
     if (!contactNode.length) {
       throw new FacilityStructureNotFountException(realm);
     }
-    // const searc = await this.neo4jService.read('match (m:Space) where (any(prop in keys(m) where m[prop] CONTAINS "us4")) return m')
+
     neo4jQuery.skip = Math.abs(neo4jQuery.page - 1) * neo4jQuery.limit
     const matchedNodes = await this.SearchStringRepository.searchByString(contactNode[0].get('n').identity.low, { isDeleted: false }, [], { isDeleted: false }, ['test', 'asdas', 'asdasd'], 'PARENT_OF', neo4jQuery, searchString)
-
-    // console.log(searc.records)
-
-
-    //let children = await this.neo4jService.findChildrensByIdAndFiltersWithPagination(contactNode[0].get('n').identity.low, {}, [], { isDeleted: false }, 'PARENT_OF', neo4jQuery)
-    //let totalCount = await this.neo4jService.findChildrensByIdAndFilters(contactNode[0].get('n').identity.low, {}, [], { isDeleted: false }, 'PARENT_OF')
-    //totalCount = totalCount.length
-
-
     const children = matchedNodes.children.map((item) => {
       item.get('children').properties['id'] = item.get('children').identity.low
       return item.get('children').properties
     })
 
     const finalResponse = { ...contactNode[0].get('n').properties, totalCount: matchedNodes.totalCount, children }
-
-
+    
     return finalResponse;
   }
 
