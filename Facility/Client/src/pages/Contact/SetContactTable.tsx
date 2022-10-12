@@ -107,7 +107,6 @@ const SetContactTable = () => {
   const [component, setComponent] = useState(emptyComponent);
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
-  const [globalFilter, setGlobalFilter] = useState("");
   const [isUpload, setIsUpload] = useState(false);
   const [count, setCount] = useState(0);
   const { t } = useTranslation(["common"]);
@@ -115,48 +114,75 @@ const SetContactTable = () => {
   const dt = useRef(null);
   const navigate = useNavigate();
   const menu = useRef(null);
-  const [globalFilterValue, setGlobalFilterValue] = useState('');
+  const [globalFilterValue, setGlobalFilterValue] = useState("");
+  const [searchKey, setSearchKey] = useState("");
+  const [isSearchReset, setIsSearchReset] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState<IColumn[]>();
 
   const params = useParams();
   const nodeKey: any = params.id;
 
   const getContact = () => {
-    setLoading(true);
-    ContactService.findAll({
-      page: lazyParams.page + 1,
-      limit: lazyParams.rows,
-      orderBy: lazyParams.sortOrder === 1 ? "ASC" : "DESC",
-      orderByColumn: lazyParams.sortField
-    })
-      .then((response) => {
-        console.log(response.data);
-
-        setData(response.data.children);
-        setCountFacilities(response.data.totalCount);
-        setLoading(false);
+    if (searchKey === ""|| isSearchReset===true) {
+      setLoading(true);
+      ContactService.findAll({
+        page: lazyParams.page + 1,
+        limit: lazyParams.rows,
+        orderBy: lazyParams.sortOrder === 1 ? "ASC" : "DESC",
+        orderByColumn: lazyParams.sortField
       })
-      .catch((err) => {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
+        .then((response) => {
+          console.log(response.data);
+
+          setData(response.data.children);
+          setCountFacilities(response.data.totalCount);
+          setLoading(false);
+        })
+        .catch((err) => {
+          toast.current.show({
+            severity: "error",
+            summary: "Error",
+            detail: err.response ? err.response.data.message : err.message,
+            life: 2000,
+          });
+          setLoading(false);
         });
-        setLoading(false);
-      });
+    } else if(isSearchReset===false) {
+      ContactService.findSearch({
+        page: lazyParams.page + 1,
+        limit: lazyParams.rows,
+        orderBy: lazyParams.sortOrder === 1 ? "ASC" : "DESC",
+        orderByColumn: lazyParams.sortField,
+        searchString: searchKey
+      })
+        .then((response) => {
+          console.log(response.data);
+
+          setData(response.data.children);
+          setCountFacilities(response.data.totalCount);
+          setLoading(false);
+        })
+        .catch((err) => {
+          toast.current.show({
+            severity: "error",
+            summary: "Error",
+            detail: err.response ? err.response.data.message : err.message,
+            life: 2000,
+          });
+          setLoading(false);
+        });
+    }
   };
+
 
   useEffect(() => {
     getContact();
-  }, [lazyParams]);
+  }, [lazyParams,isSearchReset]);
+
+
 
   const onPage = (event: any) => {
-    if (globalFilter === "") {
-      console.log(event);
-
-      setLazyParams(event)
-    };
+    setLazyParams(event)
   };
 
   const onSort = (event: any) => {
@@ -164,8 +190,6 @@ const SetContactTable = () => {
   };
 
   const onFilter = (event: any) => {
-    console.log(event);
-    
     setLazyParams(event);
   };
 
@@ -188,6 +212,40 @@ const SetContactTable = () => {
     );
   };
 
+  const handleKeyDown = async (event: any) => {
+
+    if (event.key === "Enter") {
+      let _searchKey = await event.target.value;
+      setSearchKey(_searchKey);
+
+      ContactService.findSearch({
+        page: lazyParams.page + 1,
+        limit: lazyParams.rows,
+        orderBy: lazyParams.sortOrder === 1 ? "ASC" : "DESC",
+        orderByColumn: lazyParams.sortField,
+        searchString: _searchKey
+      })
+        .then((response) => {
+          console.log(response.data);
+
+          setData(response.data.children);
+          setCountFacilities(response.data.totalCount);
+          setLoading(false);
+          _searchKey = "";
+        })
+        .catch((err) => {
+          toast.current.show({
+            severity: "error",
+            summary: "Error",
+            detail: err.response ? err.response.data.message : err.message,
+            life: 2000,
+          });
+          setLoading(false);
+        });
+    }
+
+  }
+
   const renderSearch = () => {
     return (
       <React.Fragment>
@@ -196,7 +254,7 @@ const SetContactTable = () => {
           <MultiSelect value={selectedColumns} options={columns} optionLabel="header" onChange={onColumnToggle} placeholder="Select Column" style={{ width: '20em' }} />
           <span className="p-input-icon-left">
             <i className="pi pi-search" />
-            <InputText value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Keyword Search" />
+            <InputText value={globalFilterValue} onKeyDown={handleKeyDown} onChange={onGlobalFilterChange} placeholder="Keyword Search" />
           </span>
         </div>
       </React.Fragment>
@@ -212,18 +270,27 @@ const SetContactTable = () => {
     'country': { value: null, matchMode: FilterMatchMode.STARTS_WITH }
   });
 
-  const onGlobalFilterChange = (e: any) => {
+  const onGlobalFilterChange = async(e: any) => {
+    console.log(e);
+
     const value = e.target.value;
+    console.log(value);
+
     let _filters = { ...filters };
     _filters['global'].value = value;
 
     setFilters(_filters);
     setGlobalFilterValue(value);
+
+
+    if (value.length === 0) {
+      setIsSearchReset(true);
+    };
   }
 
   const columnComponents = selectedColumns?.map(col => {
     console.log(col);
-    
+
     return <Column key={col.field} field={col.field} header={col.header} filter filterField={col.field} sortable />;
   });
 

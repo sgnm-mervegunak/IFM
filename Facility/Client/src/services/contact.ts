@@ -6,7 +6,15 @@ interface PaginationParams {
     page?: number;
     limit?: number;
     orderBy?: string;
-    orderByColumn?: string|undefined|null;
+    orderByColumn?: string | undefined | null;
+}
+
+interface SearchParams {
+    page?: number;
+    limit?: number;
+    orderBy?: string;
+    orderByColumn?: string | undefined | null;
+    searchString?: string;
 }
 
 interface StructureInterface {
@@ -32,7 +40,7 @@ interface StructureInterface {
 
 const findAll = async (query: PaginationParams) => {
     return axios.get(url + `?page=${query.page}&limit=${query.limit}&orderBy=${query.orderBy}&orderByColumn=${query.orderByColumn}`);
-  };
+};
 
 const create = async (structure: StructureInterface) => {
     return axios.post(url, structure);
@@ -54,6 +62,10 @@ const nodeInfo = async (key: string) => {
     return axios.get(`${url}/${key}`);
 };
 
-const service = { findAll, create, update, remove, relation, nodeInfo };
+const findSearch = async (query: SearchParams) => {
+    return axios.get(url + "/search/" + `?page=${query.page}&limit=${query.limit}&orderBy=${query.orderBy}&orderByColumn=${query.orderByColumn}&searchString=${query.searchString}`);
+};
+
+const service = { findAll, create, update, remove, relation, nodeInfo, findSearch };
 
 export default service;
