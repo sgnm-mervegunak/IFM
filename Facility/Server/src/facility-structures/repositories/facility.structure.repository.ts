@@ -838,6 +838,23 @@ export class FacilityStructureRepository implements FacilityInterface<any> {
       const createNode = await this.neo4jService.createNode(baseFacilityObject, [structureData['nodeType']]);
 
       //////////////////////////////////////////////  CREATED_BY,CLASSIFIED_BY relations  ///////////////////////////////////////
+      if (structureData['nodeType'] == 'Block') {
+        let newCategoriesArr = [];
+        let relationArr = [];
+        let _root_idArr = [];
+        const contactNode = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
+          ['Contact'],
+          { isDeleted: false, realm: realm },
+          [],
+          { isDeleted: false, email: createdBy },
+          'PARENT_OF',
+        );
+        newCategoriesArr.push(contactNode);
+        relationArr.push(RelationName.CREATED_BY);
+        _root_idArr.push(createNode.identity.low);
+
+        await this.nodeRelationHandler.manageNodesRelations([], newCategoriesArr, relationArr, _root_idArr);
+      }
       if (structureData['nodeType'] != 'Block') {
         let newCategoriesArr = [];
         let relationArr = [];
