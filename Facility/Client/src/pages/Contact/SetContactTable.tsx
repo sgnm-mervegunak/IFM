@@ -123,7 +123,7 @@ const SetContactTable = () => {
   const nodeKey: any = params.id;
 
   const getContact = () => {
-    if (searchKey === ""|| isSearchReset===true) {
+    if (searchKey === "" || isSearchReset === true) {
       setLoading(true);
       ContactService.findAll({
         page: lazyParams.page + 1,
@@ -147,7 +147,7 @@ const SetContactTable = () => {
           });
           setLoading(false);
         });
-    } else if(isSearchReset===false) {
+    } else {
       ContactService.findSearch({
         page: lazyParams.page + 1,
         limit: lazyParams.rows,
@@ -174,12 +174,9 @@ const SetContactTable = () => {
     }
   };
 
-
   useEffect(() => {
     getContact();
-  }, [lazyParams,isSearchReset]);
-
-
+  }, [lazyParams]);
 
   const onPage = (event: any) => {
     setLazyParams(event)
@@ -215,6 +212,7 @@ const SetContactTable = () => {
   const handleKeyDown = async (event: any) => {
 
     if (event.key === "Enter") {
+      event.preventDefault()
       let _searchKey = await event.target.value;
       setSearchKey(_searchKey);
 
@@ -270,7 +268,7 @@ const SetContactTable = () => {
     'country': { value: null, matchMode: FilterMatchMode.STARTS_WITH }
   });
 
-  const onGlobalFilterChange = async(e: any) => {
+  const onGlobalFilterChange = async (e: any) => {
     console.log(e);
 
     const value = e.target.value;
@@ -283,8 +281,12 @@ const SetContactTable = () => {
     setGlobalFilterValue(value);
 
 
-    if (value.length === 0) {
+    // if (value.length === 0) {
+    //   setIsSearchReset(true);
+    // };
+    if (e.target.value === "") {
       setIsSearchReset(true);
+      getContact();
     };
   }
 
