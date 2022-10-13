@@ -64,6 +64,24 @@ export class ContactRepository implements ContactInterface<any> {
     return finalResponse;
   }
 
+  async findWithSearchStringByColumn(realm: string, language: string, neo4jQuery: PaginationParams,searchColumn, searchString) {
+    const contactNode = await this.neo4jService.findByLabelAndFilters(['Contact'], { realm, isDeleted: false })
+    if (!contactNode.length) {
+      throw new FacilityStructureNotFountException(realm);
+    }
+
+    neo4jQuery.skip = Math.abs(neo4jQuery.page - 1) * neo4jQuery.limit
+    const matchedNodes = await this.SearchStringRepository.searchByStringBySpecificColumn(contactNode[0].get('n').identity.low, { isDeleted: false }, [], { isDeleted: false }, [], 'PARENT_OF', neo4jQuery,searchColumn, searchString)
+    const children = matchedNodes.children.map((item) => {
+      item.get('children').properties['id'] = item.get('children').identity.low
+      return item.get('children').properties
+    })
+
+    const finalResponse = { ...contactNode[0].get('n').properties, totalCount: matchedNodes.totalCount, children }
+
+    return finalResponse;
+  }
+
 
 
 

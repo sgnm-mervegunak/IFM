@@ -27,6 +27,10 @@ export class ContactService {
     return this.contactRepository.findWithSearchString(realm, language, neo4jQuery, searchString);
   }
 
+  findWithSearchStringByColumn(realm: string, language: string, neo4jQuery,searchColumn, searchString) {
+    return this.contactRepository.findWithSearchStringByColumn(realm, language, neo4jQuery,searchColumn, searchString);
+  }
+
   update(id: string, updateContactDto: UpdateContactDto, realm: string, language: string) {
     return this.contactRepository.update(id, updateContactDto, realm, language);
   }
