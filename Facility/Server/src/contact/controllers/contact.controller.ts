@@ -12,35 +12,35 @@ import { UserRoles } from 'src/common/const/keycloak.role.enum';
 @ApiBearerAuth('JWT-auth')
 @Controller('contact')
 export class ContactController {
-  constructor(private readonly contactService: ContactService) {}
+  constructor(private readonly contactService: ContactService) { }
 
   @Get('')
   //@Unprotected()
   @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
-  findOne(@Headers() header,@Query() neo4jQuery:PaginationParams) {
+  findOne(@Headers() header, @Query() neo4jQuery: PaginationParams) {
     console.log(neo4jQuery)
     const { language, realm } = header;
-    return this.contactService.findOne(realm, language,neo4jQuery);
+    return this.contactService.findOne(realm, language, neo4jQuery);
   }
 
   @Get('/search')
   //@Unprotected()
   @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
-  findWithSearchString(@Headers() header,@Query() neo4jQuery:PaginationParams,@Query('searchString') searchString:string) {
+  findWithSearchString(@Headers() header, @Query() neo4jQuery: PaginationParams, @Query('searchString') searchString: string) {
     const { language, realm } = header;
-    return this.contactService.findWithSearchString(realm, language,neo4jQuery,searchString);
+    return this.contactService.findWithSearchString(realm, language, neo4jQuery, searchString);
   }
 
-  
+
   @Get('/searchByColumn')
   //@Unprotected()
   @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
-  findWithSearchString1(@Headers() header,@Query() neo4jQuery:PaginationParams,@Query('searchString') searchString:string) {
+  findWithSearchStringByColumn(@Headers() header, @Query() neo4jQuery: PaginationParams,@Query('searchColumn') searchColumn: string, @Query('searchString') searchString: string) {
     const { language, realm } = header;
-    return 'test';
+    return this.contactService.findWithSearchStringByColumn(realm, language, neo4jQuery,searchColumn,searchString);
   }
 
   @Unprotected()
@@ -64,7 +64,7 @@ export class ContactController {
     return this.contactService.create(createContactDto, realm, language);
   }
 
- 
+
 
   @Patch(':id')
   //@Unprotected()
@@ -89,5 +89,5 @@ export class ContactController {
     return this.contactService.changeNodeBranch(id, target_parent_id, realm, language);
   }
 
- 
+
 }

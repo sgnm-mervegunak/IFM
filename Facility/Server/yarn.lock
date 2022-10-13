@@ -8412,10 +8412,10 @@
     "express" "^4.18.1"
     "neo4j-driver" "^4.4.5"
 
-"sgnm-neo4j@^0.0.228":
-  "integrity" "sha512-jNDvjIomPIT1UOSFUVHIZZD8/WLawCbS89BWhq/dz/9xnjhISC+myn3BhzCM45UqP1rrUHsZ7Tz9DURNjUYsPA=="
-  "resolved" "https://registry.npmjs.org/sgnm-neo4j/-/sgnm-neo4j-0.0.228.tgz"
-  "version" "0.0.228"
+"sgnm-neo4j@^0.0.229":
+  "integrity" "sha512-wvo3Ea1Y6hLXAT2+FWipgEI654iDGigbUyjHVPFGbKwnOI0t6ZQqILtUPmpQ89VX82Bj2Uqdk6LHDNP2SNT0ag=="
+  "resolved" "https://registry.npmjs.org/sgnm-neo4j/-/sgnm-neo4j-0.0.229.tgz"
+  "version" "0.0.229"
   dependencies:
     "@nestjs/common" "^8.4.5"
     "@nestjs/config" "^2.0.0"
