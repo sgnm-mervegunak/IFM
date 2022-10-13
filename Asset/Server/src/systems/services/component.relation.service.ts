@@ -13,5 +13,7 @@ export class SystemComponentService {
   async create(systemComponentDto: SystemComponentRelationDto, header) {
     return await this.systemComponentRepository.create(systemComponentDto, header);
   }
-
+  async delete(_parent_key: string, _children_keys: string[], header) {
+    return await this.systemComponentRepository.delete(_parent_key, _children_keys, header);
+  }
 }

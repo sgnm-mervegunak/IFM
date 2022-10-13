@@ -52,8 +52,8 @@ export class SystemLazyLoadingRepository implements SystemLazyLoadingInterface {
         'Systems',
         'Component',
         { realm, isDeleted: false },
-        { isDeleted: false, canDisplay: true },
-        { isDeleted: false, canDisplay: true },
+        { isDeleted: false},
+        { isDeleted: false},
         [''],
         header,
       );

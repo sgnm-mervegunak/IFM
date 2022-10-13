@@ -90,7 +90,7 @@ export class SystemsRepository implements SystemsInterface<System> {
   async findRootByRealm(header) {
     try {
       let { realm } = header;
-      realm = 'IFM'; // test için kaldırılacaaaakkkk
+      //realm = 'IFM'; // test için kaldırılacaaaakkkk
 
       let node = await this.neo4jService.findByLabelAndNotLabelAndFiltersWithTreeStructure(
         [Neo4jLabelEnum.SYSTEMS],

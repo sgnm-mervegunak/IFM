@@ -12,11 +12,14 @@ import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
 import { SystemComponentInterface } from 'src/common/interface/system-component.interface';
 import { SystemComponentRelationDto } from '../dto/component.relation.dto';
 import { WrongIdProvided } from 'src/common/bad.request.exception';
+import { AssetNotFoundException } from 'src/common/notFoundExceptions/not.found.exception';
 
 @Injectable()
 export class SystemComponentRepository implements SystemComponentInterface<System> {
   constructor(
     private readonly neo4jService: Neo4jService,
+    private readonly nodeRelationHandler: NodeRelationHandler,
+   
   ) {}
   
   async create(systemComponentRelationDto: SystemComponentRelationDto, header) {
@@ -75,6 +78,45 @@ export class SystemComponentRepository implements SystemComponentInterface<Syste
         }
       } else {
         throw new HttpException(error, 500);
+      }
+    }
+  }
+  async delete(_parent_key: string, _children_keys: string[], header) {
+    try {
+      const { realm } = header;
+      const selectedSystemNode = await this.neo4jService.findByLabelAndFilters([],{"isDeleted": false, "key": _parent_key},[]);
+      if (!selectedSystemNode.length) {
+        throw new AssetNotFoundException(_parent_key);
+      }
+      //delete system_by relations in this database
+      _children_keys.forEach(async (child)=>{
+        let relatedComponent = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+          ['System'],
+          {"isDeleted": false, "key": _parent_key},
+          ['Component'],
+          {"isDeleted": false, "key": child},
+          RelationName.SYSTEM_OF,
+          RelationDirection.RIGHT
+        )
+        if (relatedComponent.length > 0) {
+          await this.neo4jService.deleteRelationByIdAndRelationNameWithFilters(
+            selectedSystemNode[0].get('n')['identity'].low,
+            {},
+            relatedComponent[0].get('children').identity.low,
+            {},
+            RelationName.SYSTEM_OF,
+            RelationDirection.RIGHT
+          )
+        }
+      }); 
+    } catch (error) {
+      const { code, message } = error.response;
+      if (code === CustomAssetError.HAS_CHILDREN) {
+        throw new HttpException({ message: error.response.message }, 400);
+      } else if (code === 5005) {
+        AssetNotFoundException(_parent_key);
+      } else {
+        throw new HttpException(message, code);
       }
     }
   }

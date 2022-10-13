@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Headers, Header } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Headers, Header, Query } from '@nestjs/common';
 import { Roles } from 'nest-keycloak-connect';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { NoCache } from 'ifmcommon';
@@ -23,5 +23,10 @@ export class SystemComponentRelationController {
   create(@Body() systemComponentRelationDto: SystemComponentRelationDto, @Headers() header) {
     return this.systemComponentService.create(systemComponentRelationDto, header);
   }
-
+  
+  @Delete(':parent_key/:chidren_keys')
+  @Roles({ roles: [UserRoles.ADMIN] })
+  remove(@Param('parent_key') parent_key: string,  @Query('chidren_keys') chidren_keys: string[],@Headers() header) {
+    return this.systemComponentService.delete(parent_key, chidren_keys, header);
+  }
 }
