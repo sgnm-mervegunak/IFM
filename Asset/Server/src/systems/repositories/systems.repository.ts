@@ -350,7 +350,7 @@ export class SystemsRepository implements SystemsInterface<System> {
         throw new HttpException(node_not_found({}), 400);
       }  
      
-    const types = await this.neo4jService.findChildrensAndParentOfChildrenByRIdAndFilter(systemNode[0].get('n').identity.low,
+    const types = await this.neo4jService.findChildrensAndParentOfChildrenByIdAndFilter(systemNode[0].get('n').identity.low,
      {"isDeleted": false}, ['Component'], {"isDeleted": false}, 'SYSTEM_OF', ['Type'], {"isDeleted": false}, 'PARENT_OF',neo4jQuery);
      
      let  id = -1;
