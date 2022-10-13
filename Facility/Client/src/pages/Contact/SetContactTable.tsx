@@ -19,25 +19,29 @@ import { useAppSelector } from "../../app/hook";
 import useToast from "../../hooks/useToast";
 
 interface Node {
-  cantDeleted: boolean;
-  children: Node[];
+  id: string;
+  company: string;
+  country: boolean;
+  department: boolean;
   description: string;
+  email: string;
+  familyName: string;
+  tag: string[];
+  givenName: string;
+  name: string;
+  organizationCode: string;
+  phone: string;
+  postalBox: string;
+  postalCode: string;
+  stateRegion: string;
+  street: string;
+  town: string;
+  cantDeleted: boolean;
   isActive: boolean;
   isDeleted: boolean;
   key: string;
-  name: string;
   realm: string;
-  tag: string[];
-  formTypeId?: string;
-  _id: {
-    low: string;
-    high: string;
-  };
-  icon?: string;
-  label?: string;
-  labels?: string[]; // for form type
-  parentId?: string;
-  className?: string;
+  children: Node[];
 }
 
 interface IColumn {
@@ -47,25 +51,23 @@ interface IColumn {
 
 const SetContactTable = () => {
   let emptyComponent = {
-    name: "",
-    space: "",
-    createdBy: "",
-    spaceType: "",
-    parentKey: "",
-    description: "",
-    serialNo: "",
-    tagNumber: "",
-    barCode: "",
-    assetIdentifier: "",
-    warrantyGuarantorParts: "",
-    warrantyDurationParts: "",
-    warrantyGuarantorLabor: "",
-    warrantyDurationLabor: "",
-    warrantyDurationUnit: "",
-    tag: [],
-    documents: "",
-    images: "",
     id: "",
+    company: "",
+    country: "",
+    department: "",
+    description: "",
+    email: "",
+    familyName: "",
+    givenName: "",
+    name: "",
+    organizationCode: "",
+    phone: "",
+    postalBox: "",
+    postalCode: "",
+    stateRegion: "",
+    street: "",
+    tag: [],
+    town: "",
   };
 
   const columns = [
@@ -98,9 +100,7 @@ const SetContactTable = () => {
       company: { value: "", matchMode: "contains" }
     }
   });
-  const [deleteTypeDialog, setDeleteTypeDialog] = useState(false);
-  const [typeDialog, setTypeDialog] = useState(false);
-  const [countFacilities, setCountFacilities] = useState(0);
+  const [countContacts, setCountContacts] = useState(0);
   const [addDia, setAddDia] = useState(false);
   const [editDia, setEditDia] = useState(false);
   const [delDia, setDelDia] = useState<boolean>(false);
@@ -108,22 +108,17 @@ const SetContactTable = () => {
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const [isUpload, setIsUpload] = useState(false);
-  const [count, setCount] = useState(0);
   const { t } = useTranslation(["common"]);
   const { toast } = useToast()
-  const dt = useRef(null);
   const navigate = useNavigate();
   const menu = useRef(null);
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [searchKey, setSearchKey] = useState("");
-  const [isSearchReset, setIsSearchReset] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState<IColumn[]>();
 
-  const params = useParams();
-  const nodeKey: any = params.id;
-
   const getContact = () => {
-    if (searchKey === "" || isSearchReset === true) {
+
+    if (searchKey === "") {
       setLoading(true);
       ContactService.findAll({
         page: lazyParams.page + 1,
@@ -135,7 +130,7 @@ const SetContactTable = () => {
           console.log(response.data);
 
           setData(response.data.children);
-          setCountFacilities(response.data.totalCount);
+          setCountContacts(response.data.totalCount);
           setLoading(false);
         })
         .catch((err) => {
@@ -159,7 +154,7 @@ const SetContactTable = () => {
           console.log(response.data);
 
           setData(response.data.children);
-          setCountFacilities(response.data.totalCount);
+          setCountContacts(response.data.totalCount);
           setLoading(false);
         })
         .catch((err) => {
@@ -172,6 +167,33 @@ const SetContactTable = () => {
           setLoading(false);
         });
     }
+  };
+
+  const getContactReset = () => {
+      setLoading(true);
+      ContactService.findAll({
+        page: lazyParams.page + 1,
+        limit: lazyParams.rows,
+        orderBy: lazyParams.sortOrder === 1 ? "ASC" : "DESC",
+        orderByColumn: lazyParams.sortField
+      })
+        .then((response) => {
+          console.log(response.data);
+
+          setData(response.data.children);
+          setCountContacts(response.data.totalCount);
+          setLoading(false);
+        })
+        .catch((err) => {
+          toast.current.show({
+            severity: "error",
+            summary: "Error",
+            detail: err.response ? err.response.data.message : err.message,
+            life: 2000,
+          });
+          setLoading(false);
+        });
+   
   };
 
   useEffect(() => {
@@ -187,7 +209,8 @@ const SetContactTable = () => {
   };
 
   const onFilter = (event: any) => {
-    setLazyParams(event);
+    console.log(event);
+    // setLazyParams(event);
   };
 
   const onColumnToggle = (event: any) => {
@@ -227,7 +250,7 @@ const SetContactTable = () => {
           console.log(response.data);
 
           setData(response.data.children);
-          setCountFacilities(response.data.totalCount);
+          setCountContacts(response.data.totalCount);
           setLoading(false);
           _searchKey = "";
         })
@@ -269,24 +292,19 @@ const SetContactTable = () => {
   });
 
   const onGlobalFilterChange = async (e: any) => {
-    console.log(e);
-
     const value = e.target.value;
     console.log(value);
 
-    let _filters = { ...filters };
-    _filters['global'].value = value;
+    // let _filters = { ...filters };
+    // _filters['global'].value = value;
 
-    setFilters(_filters);
+    // setFilters(_filters);
     setGlobalFilterValue(value);
 
 
-    // if (value.length === 0) {
-    //   setIsSearchReset(true);
-    // };
     if (e.target.value === "") {
-      setIsSearchReset(true);
-      getContact();
+      getContactReset();
+      setSearchKey("");
     };
   }
 
@@ -402,6 +420,15 @@ const SetContactTable = () => {
 
   const header = renderSearch();
 
+  const onValueChange =  (e:any) => {
+    console.log(e);
+
+  }
+
+  
+  
+
+
   return (
     <div className="grid crud-demo">
       <div className="col-12">
@@ -422,15 +449,14 @@ const SetContactTable = () => {
             rows={lazyParams.rows}
             rowsPerPageOptions={[10, 25, 50]}
             lazy
-            totalRecords={countFacilities}
+            totalRecords={countContacts}
             header={header}
             emptyMessage="Contact not found"
             sortField={lazyParams.sortField}
             sortOrder={lazyParams.sortOrder}
             filterDisplay="row"
-            globalFilterFields={['email']}
             onFilter={onFilter}
-            onValueChange={filteredData => console.log(filteredData)}
+            filters={filters}
           >
             <Column
               field="email"
@@ -438,6 +464,8 @@ const SetContactTable = () => {
               sortable
               filter
               filterField="email"
+              filterFunction={onValueChange}
+              
             />
             <Column
               field="givenName"
