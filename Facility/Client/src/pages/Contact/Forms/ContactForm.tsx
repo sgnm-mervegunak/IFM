@@ -39,7 +39,7 @@ interface Node {
   realm: string;
   tag: string[];
   formTypeId?: string;
-  _id: {
+  _id?: {
     low: string;
     high: string;
   };

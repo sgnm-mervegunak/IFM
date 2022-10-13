@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { MultiSelect } from "primereact/multiselect";
 import { useTranslation } from "react-i18next";
 import { useAppSelector } from "../../app/hook";
@@ -9,29 +9,22 @@ import { Dropdown } from "primereact/dropdown";
 import { FileUpload } from "primereact/fileupload";
 import { ProgressSpinner } from "primereact/progressspinner";
 import useToast from "../../hooks/useToast";
+import FacilityStructureLazyService from "../../services/facilitystructurelazy";
 
 const ImportZone = ({ setImportDia }: { setImportDia: any }) => {
   const auth = useAppSelector((state) => state.auth);
   const { toast } = useToast()
-  const [buildings, setBuildings] = React.useState([]);
-  const refUpload = React.useRef<any>(null);
-  const [selectedBuilding, setSelectedBuilding] = React.useState<any>(null);
+  const [buildings, setBuildings] = useState([]);
+  const refUpload = useRef<any>(null);
+  const [selectedBuilding, setSelectedBuilding] = useState<any>(null);
   const { t } = useTranslation(["common"]);
-  const [loading, setLoading] = React.useState(false);
+  const [loading, setLoading] = useState(false);
 
-  React.useEffect(() => {
-    FacilityStructureService.findStuctureFirstLevel(auth.auth.realm)
-      .then((response) => {
-        setBuildings(response.data);
-      })
-      .catch((err) => {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: err.response ? err.response.data.message : err.message,
-          life: 2000,
-        });
-      });
+  useEffect(() => {
+    FacilityStructureLazyService.findAll().then((res) => {
+      setBuildings(res.data.children);
+      setLoading(false);
+    });
   }, []);
 
   const uploadCSV = (e: any) => {
@@ -44,10 +37,10 @@ const ImportZone = ({ setImportDia }: { setImportDia: any }) => {
       formData.append("file", file);
       ExportService.importZones(selectedBuilding.key, formData)
         .then((res) => {
-        console.log("ok");
-        console.log(res.data);
-        setLoading(false);
-        setImportDia(false);
+          console.log("ok");
+          console.log(res.data);
+          setLoading(false);
+          setImportDia(false);
 
           toast.current.show({
             severity: 'success',
@@ -78,7 +71,7 @@ const ImportZone = ({ setImportDia }: { setImportDia: any }) => {
   return (
     <div>
       <h5>{t("Select Buildings")}</h5>
-      {loading ? <ProgressSpinner/>:<div>
+      {loading ? <ProgressSpinner /> : <div>
         <div className="field">
           <Dropdown
             style={{ width: "100%" }}
