@@ -1,7 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-
-//import { CustomNeo4jError, Neo4jService } from 'sgnm-neo4j';
-import { GeciciInterface } from 'src/common/interface/gecici.interface';
+import { HttpException, Injectable } from '@nestjs/common';
 import { CustomTreeError } from 'src/common/const/custom.error.enum';
 import { Contact } from '../entities/contact.entity';
 import { CreateContactDto } from '../dto/create-contact.dto';
@@ -26,27 +23,6 @@ import { SearchStringRepository } from 'src/common/class/search.string.from.node
 export class ContactRepository implements ContactInterface<any> {
   constructor(private readonly neo4jService: Neo4jService, private readonly SearchStringRepository: SearchStringRepository) { }
 
-
-
-  //REVISED FOR NEW NEO4J
-
-  /////////////////////////////////////////////     ESKİSİ  //////////////////////////////////////////////// 
-  // async findOneByRealm(realm: string, language: string): Promise<{ root: any; }> {
-  //   let node = await this.neo4jService.findByLabelAndFiltersWithTreeStructure(
-  //     ['Contact'],
-  //     { realm: realm, isDeleted: false },
-  //     [],
-  //     { isDeleted: false, canDisplay: true },
-  //   );
-  //   if (!node) {
-  //     //throw new FacilityStructureNotFountException(realm);
-  //   }
-  //   node = await this.neo4jService.changeObjectChildOfPropToChildren(node);
-  //   return node;
-  //   }
-
-  ////////////////////////////              YENİSİ                   ///////////////////////////////////
-  //REVISED FOR NEW NEO4J
   async findOneByRealm(realm: string, language: string, neo4jQuery: PaginationParams) {
     const contactNode = await this.neo4jService.findByLabelAndFilters(['Contact'], { realm, isDeleted: false })
     if (!contactNode.length) {
@@ -77,14 +53,14 @@ export class ContactRepository implements ContactInterface<any> {
     }
 
     neo4jQuery.skip = Math.abs(neo4jQuery.page - 1) * neo4jQuery.limit
-    const matchedNodes = await this.SearchStringRepository.searchByString(contactNode[0].get('n').identity.low, { isDeleted: false }, [], { isDeleted: false }, ['test', 'asdas', 'asdasd'], 'PARENT_OF', neo4jQuery, searchString)
+    const matchedNodes = await this.SearchStringRepository.searchByString(contactNode[0].get('n').identity.low, { isDeleted: false }, [], { isDeleted: false }, [], 'PARENT_OF', neo4jQuery, searchString)
     const children = matchedNodes.children.map((item) => {
       item.get('children').properties['id'] = item.get('children').identity.low
       return item.get('children').properties
     })
 
     const finalResponse = { ...contactNode[0].get('n').properties, totalCount: matchedNodes.totalCount, children }
-    
+
     return finalResponse;
   }
 
@@ -398,6 +374,7 @@ export class ContactRepository implements ContactInterface<any> {
       }
     }
   }
+
 
   async changeNodeBranch(_id: string, _target_parent_id: string, realm: string, language: string) {
     // try {

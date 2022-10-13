@@ -33,6 +33,16 @@ export class ContactController {
     return this.contactService.findWithSearchString(realm, language,neo4jQuery,searchString);
   }
 
+  
+  @Get('/searchByColumn')
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
+  @NoCache()
+  findWithSearchString1(@Headers() header,@Query() neo4jQuery:PaginationParams,@Query('searchString') searchString:string) {
+    const { language, realm } = header;
+    return 'test';
+  }
+
   @Unprotected()
   //@Roles({ roles: [UserRoles.ADMIN] })
   @Get('/:key')
