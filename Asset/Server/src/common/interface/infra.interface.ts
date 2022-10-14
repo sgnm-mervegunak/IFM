@@ -13,4 +13,5 @@ export interface InfraInterface {
   createConstraints();
 
   importClassificationFromExcel(file: Express.Multer.File, language: string);
+  importDefaultValuesOfAssetClassification();
 }

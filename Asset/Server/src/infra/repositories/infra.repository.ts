@@ -83,101 +83,101 @@ export class InfraRepository implements InfraInterface {
       await this.neo4jService.addParentRelationByIdAndFilters(assetNode.identity.low, {}, infraNode.identity.low, {});
       await this.neo4jService.addParentRelationByIdAndFilters(configNode.identity.low, {}, infraNode.identity.low, {});
 
-      const assetTypesNodeEN = await this.neo4jService.createNode(
-        { canDelete: false, isDeleted: false, canCopied: true, isActive: true, isRoot: true, name: 'Asset Type', realm: 'Signum' },
-        ['AssetType_en'],
-      );
-      const assetTypesNodeTR = await this.neo4jService.createNode(
-        { canDelete: false, isDeleted: false, canCopied: true, isActive: true, isRoot: true, name: 'Asset Type', realm: 'Signum' },
-        ['AssetType_tr'],
-      );
+      // const assetTypesNodeEN = await this.neo4jService.createNode(
+      //   { canDelete: false, isDeleted: false, canCopied: true, isActive: true, isRoot: true, name: 'Asset Type', realm: 'Signum' },
+      //   ['AssetType_en'],
+      // );
+      // const assetTypesNodeTR = await this.neo4jService.createNode(
+      //   { canDelete: false, isDeleted: false, canCopied: true, isActive: true, isRoot: true, name: 'Asset Type', realm: 'Signum' },
+      //   ['AssetType_tr'],
+      // );
 
-      await this.neo4jService.addParentRelationByIdAndFilters(
-        assetTypesNodeEN.identity.low,
-        {},
-        classificationNode.identity.low,
-        {},
-      );
-      await this.neo4jService.addParentRelationByIdAndFilters(
-        assetTypesNodeTR.identity.low,
-        {},
-        classificationNode.identity.low,
-        {},
-      );
+      // await this.neo4jService.addParentRelationByIdAndFilters(
+      //   assetTypesNodeEN.identity.low,
+      //   {},
+      //   classificationNode.identity.low,
+      //   {},
+      // );
+      // await this.neo4jService.addParentRelationByIdAndFilters(
+      //   assetTypesNodeTR.identity.low,
+      //   {},
+      //   classificationNode.identity.low,
+      //   {},
+      // );
 
-      const fixedAssetTypeNodeEN = await this.neo4jService.createNode(
-        {
-          canDelete: true,
-          isDeleted: false,
-          canDisplay: true,
-          name: 'Fixed',
-          code: 'AssetType1',
-          isActive: true,
-          language: 'en',
-        },
-        ['AssetType'],
-      );
-      const moveableAssetTypeNodeEN = await this.neo4jService.createNode(
-        {
-          canDelete: true,
-          isDeleted: false,
-          canDisplay: true,
-          name: 'Moveable',
-          code: 'AssetType2',
-          isActive: true,
-          language: 'en',
-        },
-        ['AssetType'],
-      );
-      await this.neo4jService.addParentRelationByIdAndFilters(
-        fixedAssetTypeNodeEN.identity.low,
-        {},
-        assetTypesNodeEN.identity.low,
-        {},
-      );
-      await this.neo4jService.addParentRelationByIdAndFilters(
-        moveableAssetTypeNodeEN.identity.low,
-        {},
-        assetTypesNodeEN.identity.low,
-        {},
-      );
+      // const fixedAssetTypeNodeEN = await this.neo4jService.createNode(
+      //   {
+      //     canDelete: true,
+      //     isDeleted: false,
+      //     canDisplay: true,
+      //     name: 'Fixed',
+      //     code: 'AssetType1',
+      //     isActive: true,
+      //     language: 'en',
+      //   },
+      //   ['AssetType'],
+      // );
+      // const moveableAssetTypeNodeEN = await this.neo4jService.createNode(
+      //   {
+      //     canDelete: true,
+      //     isDeleted: false,
+      //     canDisplay: true,
+      //     name: 'Moveable',
+      //     code: 'AssetType2',
+      //     isActive: true,
+      //     language: 'en',
+      //   },
+      //   ['AssetType'],
+      // );
+      // await this.neo4jService.addParentRelationByIdAndFilters(
+      //   fixedAssetTypeNodeEN.identity.low,
+      //   {},
+      //   assetTypesNodeEN.identity.low,
+      //   {},
+      // );
+      // await this.neo4jService.addParentRelationByIdAndFilters(
+      //   moveableAssetTypeNodeEN.identity.low,
+      //   {},
+      //   assetTypesNodeEN.identity.low,
+      //   {},
+      // );
 
-      const fixedAssetTypeNodeTR = await this.neo4jService.createNode(
-        {
-          canDelete: true,
-          isDeleted: false,
-          canDisplay: true,
-          name: 'Sabit',
-          code: 'AssetType1',
-          isActive: true,
-          language: 'tr',
-        },
-        ['AssetType'],
-      );
-      const moveableAssetTypeNodeTR = await this.neo4jService.createNode(
-        {
-          canDelete: true,
-          isDeleted: false,
-          canDisplay: true,
-          name: 'Hareketli',
-          code: 'AssetType2',
-          isActive: true,
-          language: 'tr',
-        },
-        ['AssetType'],
-      );
-      await this.neo4jService.addParentRelationByIdAndFilters(
-        fixedAssetTypeNodeTR.identity.low,
-        {},
-        assetTypesNodeTR.identity.low,
-        {},
-      );
-      await this.neo4jService.addParentRelationByIdAndFilters(
-        moveableAssetTypeNodeTR.identity.low,
-        {},
-        assetTypesNodeTR.identity.low,
-        {},
-      );
+      // const fixedAssetTypeNodeTR = await this.neo4jService.createNode(
+      //   {
+      //     canDelete: true,
+      //     isDeleted: false,
+      //     canDisplay: true,
+      //     name: 'Sabit',
+      //     code: 'AssetType1',
+      //     isActive: true,
+      //     language: 'tr',
+      //   },
+      //   ['AssetType'],
+      // );
+      // const moveableAssetTypeNodeTR = await this.neo4jService.createNode(
+      //   {
+      //     canDelete: true,
+      //     isDeleted: false,
+      //     canDisplay: true,
+      //     name: 'Hareketli',
+      //     code: 'AssetType2',
+      //     isActive: true,
+      //     language: 'tr',
+      //   },
+      //   ['AssetType'],
+      // );
+      // await this.neo4jService.addParentRelationByIdAndFilters(
+      //   fixedAssetTypeNodeTR.identity.low,
+      //   {},
+      //   assetTypesNodeTR.identity.low,
+      //   {},
+      // );
+      // await this.neo4jService.addParentRelationByIdAndFilters(
+      //   moveableAssetTypeNodeTR.identity.low,
+      //   {},
+      //   assetTypesNodeTR.identity.low,
+      //   {},
+      // );
 
       const languageConfigNode = await this.neo4jService.createNode(
         {
@@ -251,7 +251,7 @@ export class InfraRepository implements InfraInterface {
       await this.neo4jService.addParentRelationByIdAndFilters(systemsNode.identity.low, {}, assetNode.identity.low, {});
 
       
-      //await this.importDefaultValuesOfAssetClassifications()
+      await this.importDefaultValuesOfAssetClassification()
 
 
 
