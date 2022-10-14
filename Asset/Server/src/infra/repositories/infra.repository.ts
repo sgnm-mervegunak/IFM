@@ -4,6 +4,7 @@ import { NestKafkaService } from 'ifmcommon';
 import { Neo4jService } from 'sgnm-neo4j/dist';
 import { InfraInterface } from 'src/common/interface/infra.interface';
 const exceljs = require('exceljs');
+import * as path from 'path';
 import { generateUuid } from 'src/common/baseobject/base.virtual.node.object';
 @Injectable()
 export class InfraRepository implements InfraInterface {
@@ -249,7 +250,11 @@ export class InfraRepository implements InfraInterface {
       await this.neo4jService.addParentRelationByIdAndFilters(typesNode.identity.low, {}, assetNode.identity.low, {});
       await this.neo4jService.addParentRelationByIdAndFilters(systemsNode.identity.low, {}, assetNode.identity.low, {});
 
-    
+      
+      //await this.importDefaultValuesOfAssetClassifications()
+
+
+
       //EXcel ile yükleneceğinden iptal edildi
 
       // const durationUnitEN = await this.neo4jService.createNode(
@@ -773,5 +778,242 @@ export class InfraRepository implements InfraInterface {
     } catch (error) {
       throw new HttpException({ message: error.message, code: error.status }, error.status);
     }
+  }
+
+  async importDefaultValuesOfAssetClassification(){
+
+  const filePath = path.resolve(__dirname.replace("dist","src"), 'infra-asset.xlsx');
+  const workbook = new exceljs.Workbook();
+  const content = await workbook.xlsx.readFile(filePath);
+
+  let columnLength=content["_worksheets"][1]["_columns"].length;
+ 
+ 
+  let classificationNode=await this.neo4jService.findByRealm("Classification","Signum");
+  let classifications =[]
+   
+  for (let k = 0; k < 4; k++) {
+    classifications.push(content["_worksheets"][1]["_columns"][k].values)
+    
+  }
+ 
+  for (let j = 0; j < classifications.length; j++) {
+    let deneme = [];
+     let [name,language]= classifications[j][1].split("_");
+
+
+    for (let index = 2; index < classifications[j].length; index++) {
+      
+      const [code,...name] = classifications[j][index].split(new RegExp(/:\s{1}/g));
+      let arr = [code, name.join(': ')];
+      deneme.push(arr);
+    }
+
+    let newClassification = [];
+    let codearray = [];
+    
+    for (let q = 0; q < deneme.length; q++) {
+      
+      let parentcode = '';
+      var z = 0;
+      codearray = await deneme[q][0].split('-');
+
+      for (let j = 0; j < codearray.length; j++) {
+        if (codearray[j] == '00') {
+          z = z + 1;
+        }
+      }
+      if (z == 0) {
+        for (let i = 0; i < codearray.length - 1; i++) {
+          if (parentcode == '') {
+            parentcode = codearray[i];
+          } else {
+            parentcode = parentcode + '-' + codearray[i];
+          }
+        }
+        if (codearray.length == 4) {
+          parentcode = parentcode + '-' + '00';
+        }
+      } else {
+        if (z == 1) {
+          for (let i = 0; i < codearray.length - 2; i++) {
+            if (parentcode == '') {
+              parentcode = codearray[i];
+            } else {
+              parentcode = parentcode + '-' + codearray[i];
+            }
+          }
+          parentcode = parentcode + '-' + '00-00';
+        } else if (z == 2) {
+          for (let i = 0; i < codearray.length - 3; i++) {
+            if (parentcode == '') {
+              parentcode = codearray[i];
+            } else {
+              parentcode = parentcode + '-' + codearray[i];
+            }
+          }
+          parentcode = parentcode + '-' + '00-00-00';
+        } else if (z == 3) {
+          for (let i = 0; i < codearray.length - 4; i++) {
+            if (parentcode == '') {
+              parentcode = codearray[i];
+            } else {
+              parentcode = parentcode + '-' + codearray[i];
+            }
+          }
+          if (parentcode == '') {
+            parentcode = '00-00-00-00';
+          } else {
+            parentcode = parentcode + '-' + '00-00-00-00';
+          }
+        } else if (z == 4) {
+          for (let i = 0; i < codearray.length - 5; i++) {
+            if (parentcode == '') {
+              parentcode = codearray[i];
+            } else {
+              parentcode = parentcode + '-' + codearray[i];
+            }
+          }
+          if (parentcode == '') {
+            parentcode = '00-00-00-00-00';
+          } else {
+            parentcode = parentcode + '-' + '00-00-00-00-00';
+          }
+        } else if (z == 5) {
+          for (let i = 0; i < codearray.length - 6; i++) {
+            if (parentcode == '') {
+              parentcode = codearray[i];
+            } else {
+              parentcode = parentcode + '-' + codearray[i];
+            }
+          }
+          if (parentcode == '') {
+            parentcode = '00-00-00-00-00-00';
+          } else {
+            parentcode = parentcode + '-' + '00-00-00-00-00-00';
+          }
+        } else if (z == 6) {
+          for (let i = 0; i < codearray.length - 7; i++) {
+            if (parentcode == '') {
+              parentcode = codearray[i];
+            } else {
+              parentcode = parentcode + '-' + codearray[i];
+            }
+          }
+          if (parentcode == '') {
+            parentcode = '00-00-00-00-00-00-00';
+          } else {
+            parentcode = parentcode + '-' + '00-00-00-00-00-00-00';
+          }
+        }
+      }
+
+      var codestr = '';
+      for (let t = 0; t < codearray.length; t++) {
+        if (codestr == '') {
+          codestr = codearray[t];
+        } else {
+          codestr = codestr + '-' + codearray[t];
+        }
+      }
+
+      let dto = {
+        code: codestr,
+        parentCode: parentcode.length < codestr.length ? parentcode + '-00' : parentcode,
+        name: deneme[q][1],
+        isDeleted: false,
+        isActive: true,
+        canDelete: true,
+        canDisplay: true,
+      };
+      newClassification.push(dto);
+    }
+
+    let params = {
+      code: newClassification[0].parentCode,
+      name: name,
+      isDeleted: false,
+      canCopied: true,
+      canDelete: false,
+      realm: "Signum",
+      isRoot: true,
+      canDisplay: true,
+      isActive: true,
+      language: language,
+    };
+    let mainNode = await this.neo4jService.createNode(params, [classifications[j][1]]);
+
+     await this.neo4jService.addRelations(mainNode.identity.low, classificationNode.identity.low);
+
+      for (let i = 0; i < newClassification.length; i++) {
+        let params = {
+          code: newClassification[i].code,
+          parentCode: newClassification[i].parentCode,
+          name: newClassification[i].name,
+          isDeleted: newClassification[i].isDeleted,
+          isActive: newClassification[i].isActive,
+          canDelete: newClassification[i].canDelete,
+          canDisplay: newClassification[i].canDisplay,
+          language: language,
+          realm: "Signum",
+        };
+
+
+        let node = await this.neo4jService.createNode(params, [name]);
+      
+        let parent = await this.neo4jService.findByLabelAndFilters(
+          [],
+          { isDeleted: false, code:node.properties.parentCode, language:node.properties.language },
+          [],
+        );
+    
+        await this.neo4jService.addRelations(node.identity.low, parent[0]['_fields'][0]['identity'].low);
+      }
+  }
+
+  for (let i = 4; i < columnLength; i++) {
+  
+    let array =content["_worksheets"][1]["_columns"][i].values as Array<string>;
+
+
+    let [name,language]= array[1].split("_");
+    const mainNode = await this.neo4jService.createNode(
+      {
+        canDelete: false,
+        isDeleted: false,
+        name,
+        realm: 'Signum',
+        isRoot: true,
+        canCopied: true,
+        isActive: true,
+        language,
+      },
+      [name+"_"+language]
+    );
+
+
+for (let index = 2; index < array.length; index++) {
+  let [childCode,childValue]= array[index].split(": ");
+ let node =await this.neo4jService.createNode({
+  canDelete: true,
+  canDisplay: true,
+  isDeleted: false,
+  name: childValue,
+  code: childCode+(index-1),
+  isActive: true,
+  language,
+},
+[name])
+  
+await this.neo4jService.addRelations(node.identity.low, mainNode.identity.low);
+
+}
+await this.neo4jService.addRelations(mainNode.identity.low, classificationNode.identity.low);
+
+
+
+    
+   }
+ 
   }
 }

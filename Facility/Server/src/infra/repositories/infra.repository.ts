@@ -3,6 +3,7 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { NestKafkaService } from 'ifmcommon';
 import { Neo4jService } from 'sgnm-neo4j/dist';
 const exceljs = require('exceljs');
+import * as path from 'path';
 import { generateUuid } from 'src/common/baseobject/base.virtual.node.object';
 import { InfraInterface } from 'src/common/interface/infra.interface';
 @Injectable()
@@ -2556,5 +2557,58 @@ export class InfraRepository implements InfraInterface {
         let data2 = await this.neo4jService.write(cypher2);
       }
     }
+  }
+
+  async importDefaultValuesOfFacilityClassification(){
+
+  const filePath = path.resolve(__dirname.replace("dist","src"), 'infra-facility.xlsx');
+  const workbook = new exceljs.Workbook();
+  const content = await workbook.xlsx.readFile(filePath);
+ 
+  let classificationNode=await this.neo4jService.findByRealm("Classification","Signum");
+
+  let columnLength=content["_worksheets"][1]["_columns"].length
+
+  for (let i = 0; i < columnLength; i++) {
+  
+    let array =content["_worksheets"][1]["_columns"][i].values as Array<string>;
+
+
+    let [name,language]= array[1].split("_");
+    console.log(name,language);
+    const mainNode = await this.neo4jService.createNode(
+      {
+        canDelete: false,
+        isDeleted: false,
+        name,
+        realm: 'Signum',
+        isRoot: true,
+        canCopied: true,
+        isActive: true,
+        language,
+      },
+      [name+"_"+language]
+    );
+
+
+    for (let index = 2; index < array.length; index++) {
+      let [childCode,childValue]= array[index].split(": ");
+    console.log(childCode,childValue);
+    let node =await this.neo4jService.createNode({
+      canDelete: true,
+      canDisplay: true,
+      isDeleted: false,
+      name: childValue,
+      code: childCode+(index-1),
+      isActive: true, 
+      language,
+    },
+    [name])
+  
+    await this.neo4jService.addRelations(node.identity.low, mainNode.identity.low);
+
+   }
+    await this.neo4jService.addRelations(mainNode.identity.low, classificationNode.identity.low);
+   }
   }
 }
