@@ -549,21 +549,21 @@ const SetAssetClassificationAdmin = () => {
       label: t("Upload File With Code"),
       icon: "pi pi-upload",
       command: () => {
-        navigate("/classifications/fileimportwithcode");
+        navigate("/asset-classifications/fileimportwithcode");
       },
     },
     {
       label: t("Upload File Without Code"),
       icon: "pi pi-upload",
       command: () => {
-        navigate("/classifications/fileimportwithoutcode");
+        navigate("/asset-classifications/fileimportwithoutcode");
       },
     },
     {
       label: t("Check File"),
       icon: "pi pi-upload",
       command: () => {
-        navigate("/classifications/fileimportcheck");
+        navigate("/asset-classifications/fileimportcheck");
       },
     },
   ];
