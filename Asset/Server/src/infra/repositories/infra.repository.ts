@@ -249,223 +249,225 @@ export class InfraRepository implements InfraInterface {
       await this.neo4jService.addParentRelationByIdAndFilters(typesNode.identity.low, {}, assetNode.identity.low, {});
       await this.neo4jService.addParentRelationByIdAndFilters(systemsNode.identity.low, {}, assetNode.identity.low, {});
 
+    
+      //EXcel ile yükleneceğinden iptal edildi
 
-      const durationUnitEN = await this.neo4jService.createNode(
-        {
-          canDelete: false,
-          isDeleted: false,
-          name: 'DurationUnit',
-          realm: 'Signum',
-          isRoot: true,
-          canCopied: true,
-          isActive: true,
-          language: 'en',
-        },
-        ['DurationUnit_en'],
-      );
-      const durationUnitTR = await this.neo4jService.createNode(
-        {
-          canDelete: false,
-          isDeleted: false,
-          name: 'DurationUnit',
-          realm: 'Signum',
-          isRoot: true,
-          canCopied: true,
-          isActive: true,
-          language: 'tr',
-        },
-        ['DurationUnit_tr'],
-      );
+      // const durationUnitEN = await this.neo4jService.createNode(
+      //   {
+      //     canDelete: false,
+      //     isDeleted: false,
+      //     name: 'DurationUnit',
+      //     realm: 'Signum',
+      //     isRoot: true,
+      //     canCopied: true,
+      //     isActive: true,
+      //     language: 'en',
+      //   },
+      //   ['DurationUnit_en'],
+      // );
+      // const durationUnitTR = await this.neo4jService.createNode(
+      //   {
+      //     canDelete: false,
+      //     isDeleted: false,
+      //     name: 'DurationUnit',
+      //     realm: 'Signum',
+      //     isRoot: true,
+      //     canCopied: true,
+      //     isActive: true,
+      //     language: 'tr',
+      //   },
+      //   ['DurationUnit_tr'],
+      // );
 
-      await this.neo4jService.addParentRelationByIdAndFilters(durationUnitEN.identity.low, {}, classificationNode.identity.low,{});
-      await this.neo4jService.addParentRelationByIdAndFilters(durationUnitTR.identity.low, {}, classificationNode.identity.low,{});
-
-
-      const durationUnit1EN = await this.neo4jService.createNode(
-        {
-          canDelete: true,
-          canDisplay: true,
-          isDeleted: false,
-          name: 'as required',
-          code: 'DurationUnit1',
-          isActive: true,
-          language: 'en',
-        },
-        ['DurationUnit'],
-      );
-      const durationUnit2EN = await this.neo4jService.createNode(
-        {
-          canDelete: true,
-          canDisplay: true,
-          isDeleted: false,
-          name: 'day',
-          code: 'DurationUnit2',
-          isActive: true,
-          language: 'en',
-        },
-        ['DurationUnit'],
-      );
-      const durationUnit3EN = await this.neo4jService.createNode(
-        {
-          canDelete: true,
-          canDisplay: true,
-          isDeleted: false,
-          name: 'minute',
-          code: 'DurationUnit3',
-          isActive: true,
-          language: 'en',
-        },
-        ['DurationUnit'],
-      );  
-      const durationUnit4EN= await this.neo4jService.createNode(
-        {
-          canDelete: true,
-          canDisplay: true,
-          isDeleted: false,
-          name: 'month',
-          code: 'DurationUnit4',
-          isActive: true,
-          language: 'en',
-        },
-        ['DurationUnit'],
-      );  
-      const durationUnit5EN = await this.neo4jService.createNode(
-        {
-          canDelete: true,
-          canDisplay: true,
-          isDeleted: false,
-          name: 'quarter',
-          code: 'DurationUnit5',
-          isActive: true,
-          language: 'en',
-        },
-        ['DurationUnit'],
-      );  
-      const durationUnit6EN = await this.neo4jService.createNode(
-        {
-          canDelete: true,
-          canDisplay: true,
-          isDeleted: false,
-          name: 'week',
-          code: 'DurationUnit6',
-          isActive: true,
-          language: 'en',
-        },
-        ['DurationUnit'],
-      );  
-      const durationUnit7EN = await this.neo4jService.createNode(
-        {
-          canDelete: true,
-          canDisplay: true,
-          isDeleted: false,
-          name: 'year',
-          code: 'DurationUnit7',
-          isActive: true,
-          language: 'en',
-        },
-        ['DurationUnit'],
-      );  
-      await this.neo4jService.addParentRelationByIdAndFilters(durationUnit1EN.identity.low, {}, durationUnitEN.identity.low,{});
-      await this.neo4jService.addParentRelationByIdAndFilters(durationUnit2EN.identity.low, {}, durationUnitEN.identity.low,{});
-      await this.neo4jService.addParentRelationByIdAndFilters(durationUnit3EN.identity.low, {}, durationUnitEN.identity.low,{});
-      await this.neo4jService.addParentRelationByIdAndFilters(durationUnit4EN.identity.low, {}, durationUnitEN.identity.low,{});
-      await this.neo4jService.addParentRelationByIdAndFilters(durationUnit5EN.identity.low, {}, durationUnitEN.identity.low,{});
-      await this.neo4jService.addParentRelationByIdAndFilters(durationUnit6EN.identity.low, {}, durationUnitEN.identity.low,{});
-      await this.neo4jService.addParentRelationByIdAndFilters(durationUnit7EN.identity.low, {}, durationUnitEN.identity.low,{});
+      // await this.neo4jService.addParentRelationByIdAndFilters(durationUnitEN.identity.low, {}, classificationNode.identity.low,{});
+      // await this.neo4jService.addParentRelationByIdAndFilters(durationUnitTR.identity.low, {}, classificationNode.identity.low,{});
 
 
+      // const durationUnit1EN = await this.neo4jService.createNode(
+      //   {
+      //     canDelete: true,
+      //     canDisplay: true,
+      //     isDeleted: false,
+      //     name: 'as required',
+      //     code: 'DurationUnit1',
+      //     isActive: true,
+      //     language: 'en',
+      //   },
+      //   ['DurationUnit'],
+      // );
+      // const durationUnit2EN = await this.neo4jService.createNode(
+      //   {
+      //     canDelete: true,
+      //     canDisplay: true,
+      //     isDeleted: false,
+      //     name: 'day',
+      //     code: 'DurationUnit2',
+      //     isActive: true,
+      //     language: 'en',
+      //   },
+      //   ['DurationUnit'],
+      // );
+      // const durationUnit3EN = await this.neo4jService.createNode(
+      //   {
+      //     canDelete: true,
+      //     canDisplay: true,
+      //     isDeleted: false,
+      //     name: 'minute',
+      //     code: 'DurationUnit3',
+      //     isActive: true,
+      //     language: 'en',
+      //   },
+      //   ['DurationUnit'],
+      // );  
+      // const durationUnit4EN= await this.neo4jService.createNode(
+      //   {
+      //     canDelete: true,
+      //     canDisplay: true,
+      //     isDeleted: false,
+      //     name: 'month',
+      //     code: 'DurationUnit4',
+      //     isActive: true,
+      //     language: 'en',
+      //   },
+      //   ['DurationUnit'],
+      // );  
+      // const durationUnit5EN = await this.neo4jService.createNode(
+      //   {
+      //     canDelete: true,
+      //     canDisplay: true,
+      //     isDeleted: false,
+      //     name: 'quarter',
+      //     code: 'DurationUnit5',
+      //     isActive: true,
+      //     language: 'en',
+      //   },
+      //   ['DurationUnit'],
+      // );  
+      // const durationUnit6EN = await this.neo4jService.createNode(
+      //   {
+      //     canDelete: true,
+      //     canDisplay: true,
+      //     isDeleted: false,
+      //     name: 'week',
+      //     code: 'DurationUnit6',
+      //     isActive: true,
+      //     language: 'en',
+      //   },
+      //   ['DurationUnit'],
+      // );  
+      // const durationUnit7EN = await this.neo4jService.createNode(
+      //   {
+      //     canDelete: true,
+      //     canDisplay: true,
+      //     isDeleted: false,
+      //     name: 'year',
+      //     code: 'DurationUnit7',
+      //     isActive: true,
+      //     language: 'en',
+      //   },
+      //   ['DurationUnit'],
+      // );  
+      // await this.neo4jService.addParentRelationByIdAndFilters(durationUnit1EN.identity.low, {}, durationUnitEN.identity.low,{});
+      // await this.neo4jService.addParentRelationByIdAndFilters(durationUnit2EN.identity.low, {}, durationUnitEN.identity.low,{});
+      // await this.neo4jService.addParentRelationByIdAndFilters(durationUnit3EN.identity.low, {}, durationUnitEN.identity.low,{});
+      // await this.neo4jService.addParentRelationByIdAndFilters(durationUnit4EN.identity.low, {}, durationUnitEN.identity.low,{});
+      // await this.neo4jService.addParentRelationByIdAndFilters(durationUnit5EN.identity.low, {}, durationUnitEN.identity.low,{});
+      // await this.neo4jService.addParentRelationByIdAndFilters(durationUnit6EN.identity.low, {}, durationUnitEN.identity.low,{});
+      // await this.neo4jService.addParentRelationByIdAndFilters(durationUnit7EN.identity.low, {}, durationUnitEN.identity.low,{});
 
-      const durationUnit1TR = await this.neo4jService.createNode(
-        {
-          canDelete: true,
-          canDisplay: true,
-          isDeleted: false,
-          name: 'Gerektiğince',
-          code: 'DurationUnit1',
-          isActive: true,
-          language: 'tr',
-        },
-        ['DurationUnit'],
-      );
-      const durationUnit2TR = await this.neo4jService.createNode(
-        {
-          canDelete: true,
-          canDisplay: true,
-          isDeleted: false,
-          name: 'Gün',
-          code: 'DurationUnit2',
-          isActive: true,
-          language: 'tr',
-        },
-        ['DurationUnit'],
-      );
-      const durationUnit3TR = await this.neo4jService.createNode(
-        {
-          canDelete: true,
-          canDisplay: true,
-          isDeleted: false,
-          name: 'Dakika',
-          code: 'DurationUnit3',
-          isActive: true,
-          language: 'tr',
-        },
-        ['DurationUnit'],
-      );  
-      const durationUnit4TR = await this.neo4jService.createNode(
-        {
-          canDelete: true,
-          canDisplay: true,
-          isDeleted: false,
-          name: 'Ay',
-          code: 'DurationUnit4',
-          isActive: true,
-          language: 'tr',
-        },
-        ['DurationUnit'],
-      );  
-      const durationUnit5TR = await this.neo4jService.createNode(
-        {
-          canDelete: true,
-          canDisplay: true,
-          isDeleted: false,
-          name: 'Çeyrek',
-          code: 'DurationUnit5',
-          isActive: true,
-          language: 'tr',
-        },
-        ['DurationUnit'],
-      );  
-      const durationUnit6TR = await this.neo4jService.createNode(
-        {
-          canDelete: true,
-          canDisplay: true,
-          isDeleted: false,
-          name: 'Hafta',
-          code: 'DurationUnit6',
-          isActive: true,
-          language: 'tr',
-        },
-        ['DurationUnit'],
-      );  
-      const durationUnit7TR = await this.neo4jService.createNode(
-        {
-          canDelete: true,
-          canDisplay: true,
-          isDeleted: false,
-          name: 'Yıl',
-          code: 'DurationUnit7',
-          isActive: true,
-          language: 'tr',
-        },
-        ['DurationUnit'],
-      );  
-      await this.neo4jService.addParentRelationByIdAndFilters(durationUnit1TR.identity.low, {}, durationUnitTR.identity.low,{});
-      await this.neo4jService.addParentRelationByIdAndFilters(durationUnit2TR.identity.low, {}, durationUnitTR.identity.low,{});
-      await this.neo4jService.addParentRelationByIdAndFilters(durationUnit3TR.identity.low, {}, durationUnitTR.identity.low,{});
-      await this.neo4jService.addParentRelationByIdAndFilters(durationUnit4TR.identity.low, {}, durationUnitTR.identity.low,{});
-      await this.neo4jService.addParentRelationByIdAndFilters(durationUnit5TR.identity.low, {}, durationUnitTR.identity.low,{});
-      await this.neo4jService.addParentRelationByIdAndFilters(durationUnit6TR.identity.low, {}, durationUnitTR.identity.low,{});
-      await this.neo4jService.addParentRelationByIdAndFilters(durationUnit7TR.identity.low, {}, durationUnitTR.identity.low,{});
+
+
+      // const durationUnit1TR = await this.neo4jService.createNode(
+      //   {
+      //     canDelete: true,
+      //     canDisplay: true,
+      //     isDeleted: false,
+      //     name: 'Gerektiğince',
+      //     code: 'DurationUnit1',
+      //     isActive: true,
+      //     language: 'tr',
+      //   },
+      //   ['DurationUnit'],
+      // );
+      // const durationUnit2TR = await this.neo4jService.createNode(
+      //   {
+      //     canDelete: true,
+      //     canDisplay: true,
+      //     isDeleted: false,
+      //     name: 'Gün',
+      //     code: 'DurationUnit2',
+      //     isActive: true,
+      //     language: 'tr',
+      //   },
+      //   ['DurationUnit'],
+      // );
+      // const durationUnit3TR = await this.neo4jService.createNode(
+      //   {
+      //     canDelete: true,
+      //     canDisplay: true,
+      //     isDeleted: false,
+      //     name: 'Dakika',
+      //     code: 'DurationUnit3',
+      //     isActive: true,
+      //     language: 'tr',
+      //   },
+      //   ['DurationUnit'],
+      // );  
+      // const durationUnit4TR = await this.neo4jService.createNode(
+      //   {
+      //     canDelete: true,
+      //     canDisplay: true,
+      //     isDeleted: false,
+      //     name: 'Ay',
+      //     code: 'DurationUnit4',
+      //     isActive: true,
+      //     language: 'tr',
+      //   },
+      //   ['DurationUnit'],
+      // );  
+      // const durationUnit5TR = await this.neo4jService.createNode(
+      //   {
+      //     canDelete: true,
+      //     canDisplay: true,
+      //     isDeleted: false,
+      //     name: 'Çeyrek',
+      //     code: 'DurationUnit5',
+      //     isActive: true,
+      //     language: 'tr',
+      //   },
+      //   ['DurationUnit'],
+      // );  
+      // const durationUnit6TR = await this.neo4jService.createNode(
+      //   {
+      //     canDelete: true,
+      //     canDisplay: true,
+      //     isDeleted: false,
+      //     name: 'Hafta',
+      //     code: 'DurationUnit6',
+      //     isActive: true,
+      //     language: 'tr',
+      //   },
+      //   ['DurationUnit'],
+      // );  
+      // const durationUnit7TR = await this.neo4jService.createNode(
+      //   {
+      //     canDelete: true,
+      //     canDisplay: true,
+      //     isDeleted: false,
+      //     name: 'Yıl',
+      //     code: 'DurationUnit7',
+      //     isActive: true,
+      //     language: 'tr',
+      //   },
+      //   ['DurationUnit'],
+      // );  
+      // await this.neo4jService.addParentRelationByIdAndFilters(durationUnit1TR.identity.low, {}, durationUnitTR.identity.low,{});
+      // await this.neo4jService.addParentRelationByIdAndFilters(durationUnit2TR.identity.low, {}, durationUnitTR.identity.low,{});
+      // await this.neo4jService.addParentRelationByIdAndFilters(durationUnit3TR.identity.low, {}, durationUnitTR.identity.low,{});
+      // await this.neo4jService.addParentRelationByIdAndFilters(durationUnit4TR.identity.low, {}, durationUnitTR.identity.low,{});
+      // await this.neo4jService.addParentRelationByIdAndFilters(durationUnit5TR.identity.low, {}, durationUnitTR.identity.low,{});
+      // await this.neo4jService.addParentRelationByIdAndFilters(durationUnit6TR.identity.low, {}, durationUnitTR.identity.low,{});
+      // await this.neo4jService.addParentRelationByIdAndFilters(durationUnit7TR.identity.low, {}, durationUnitTR.identity.low,{});
 
       return infraNode;
     } catch (error) {

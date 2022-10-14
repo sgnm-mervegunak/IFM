@@ -172,4 +172,15 @@ export class CreateTypesDto {
   @ApiProperty()
   @IsOptional()
   images: string;
+
+  @ApiProperty()
+  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
+  @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
+  typeCategory: string;
+
+  @ApiProperty()
+  @IsNotEmptyWithI18nMessage(i18nValidationMessageEnum.NOT_FOUND)
+  @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
+  brandModel: string;
+
 }

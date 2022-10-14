@@ -107,6 +107,30 @@ export class TypesRepository implements GeciciInterface<Type> {
         assetTypeNode[0].get('children').properties.code;  
       }
 
+      const typeCategoryNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        [Neo4jLabelEnum.TYPE],
+        { key: nodes[0].get('parent').properties.key },
+        [],
+        { isDeleted: false, language: language },
+        RelationName.TYPE_CLASSIFIED_BY,
+      );
+      if (typeCategoryNode.length>0) {
+        nodes[0].get('parent').properties['typeCategory'] =
+        typeCategoryNode[0].get('children').properties.code;  
+      }
+
+      const brandModelNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        [Neo4jLabelEnum.TYPE],
+        { key: nodes[0].get('parent').properties.key },
+        [],
+        { isDeleted: false},
+        RelationName.BRAND_BY,
+      );
+      if (brandModelNode.length>0) {
+        nodes[0].get('parent').properties['branModel'] =
+        brandModelNode[0].get('children').properties.code;  
+      }
+
       return nodes[0].get('parent');
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -201,6 +225,9 @@ export class TypesRepository implements GeciciInterface<Type> {
       delete typeObject['durationUnit'];
       delete typeObject['category'];
 
+      delete typeObject['typeCategory'];
+      delete typeObject['brandModel'];
+
       const finalObjectArray = avaiableCreateVirtualPropsGetter(createTypesDto);
 
       for (let index = 0; index < finalObjectArray.length; index++) {
@@ -229,7 +256,9 @@ export class TypesRepository implements GeciciInterface<Type> {
     const newWarrantyDurationUnits = await this.nodeRelationHandler.getNewCategories(realm, createTypesDto['warrantyDurationUnit']);
     const newDurationUnits = await this.nodeRelationHandler.getNewCategories(realm, createTypesDto['durationUnit']);
     const newCategories = await this.nodeRelationHandler.getNewCategories(realm, createTypesDto['category']);
-
+    
+    const newTypeCategories = await this.nodeRelationHandler.getNewCategories(realm, createTypesDto['typeCategory']);
+    const newBrandModels = await this.nodeRelationHandler.getNewCategories(realm, createTypesDto['brandModel']);
 
 
       newCategoriesArr.push(newAssetTypes); 
@@ -237,9 +266,11 @@ export class TypesRepository implements GeciciInterface<Type> {
       newCategoriesArr.push(newDurationUnits);
       newCategoriesArr.push(newCategories); 
     
+      newCategoriesArr.push(newTypeCategories); 
+      newCategoriesArr.push(newBrandModels); 
 
-    relationArr.push(RelationName.ASSET_TYPE_BY,RelationName.WARRANTY_DURATION_UNIT_BY,RelationName.DURATION_UNIT_BY, RelationName.CLASSIFIED_BY);
-    _root_idArr.push(typeNode.identity.low,typeNode.identity.low,typeNode.identity.low,typeNode.identity.low);
+    relationArr.push(RelationName.ASSET_TYPE_BY,RelationName.WARRANTY_DURATION_UNIT_BY,RelationName.DURATION_UNIT_BY, RelationName.TYPE_CLASSIFIED_BY, RelationName.BRAND_BY);
+    _root_idArr.push(typeNode.identity.low,typeNode.identity.low,typeNode.identity.low,typeNode.identity.low,typeNode.identity.low,typeNode.identity.low);
     await this.nodeRelationHandler.manageNodesRelations([], newCategoriesArr,relationArr,_root_idArr);
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -302,17 +333,25 @@ export class TypesRepository implements GeciciInterface<Type> {
     delete updateTypeDto['category'];
     const assetType = updateTypeDto['assetType'];
     delete updateTypeDto['assetType'];
+    const typeCategory = updateTypeDto['typeCategory'];
+    delete updateTypeDto['typeCategory'];
+    const brandModel = updateTypeDto['brandModel'];
+    delete updateTypeDto['brandModel'];
 
     const newAssetTypes = await this.nodeRelationHandler.getNewCategories(realm, assetType);
     const newWarrantyDurationUnits = await this.nodeRelationHandler.getNewCategories(realm, warrantyDurationUnit);
     const newDurationUnits = await this.nodeRelationHandler.getNewCategories(realm, durationUnit);
     const newCategories = await this.nodeRelationHandler.getNewCategories(realm, category);
+    const newTypeCategories = await this.nodeRelationHandler.getNewCategories(realm, typeCategory);
+    const newBrandModels = await this.nodeRelationHandler.getNewCategories(realm, brandModel);
+
 
     const oldCategories = await this.nodeRelationHandler.getOldCategories(node[0]['_fields'][1].properties.key, RelationName.CLASSIFIED_BY); 
     const oldAssetTypes = await this.nodeRelationHandler.getOldCategories(node[0]['_fields'][1].properties.key, RelationName.ASSET_TYPE_BY); 
     const oldDurationUnits = await this.nodeRelationHandler.getOldCategories(node[0]['_fields'][1].properties.key, RelationName.DURATION_UNIT_BY); 
     const oldWarrantyDurationUnits = await this.nodeRelationHandler.getOldCategories(node[0]['_fields'][1].properties.key, RelationName.WARRANTY_DURATION_UNIT_BY); 
-
+    const oldTypeCategories = await this.nodeRelationHandler.getOldCategories(node[0]['_fields'][1].properties.key, RelationName.TYPE_CLASSIFIED_BY); 
+    const oldBrandModels = await this.nodeRelationHandler.getOldCategories(node[0]['_fields'][1].properties.key, RelationName.BRAND_BY); 
 
     let categoriesArr = [];
     let newCategoriesArr = [];
@@ -341,6 +380,16 @@ export class TypesRepository implements GeciciInterface<Type> {
       newCategoriesArr.push(newAssetTypes); 
     relationArr.push(RelationName.ASSET_TYPE_BY);
     _root_idArr.push(node[0]['_fields'][1].identity.low);
+
+    categoriesArr.push(oldTypeCategories);
+      newCategoriesArr.push(newTypeCategories); 
+    relationArr.push(RelationName.TYPE_CLASSIFIED_BY);
+    _root_idArr.push(node[0]['_fields'][1].identity.low);
+
+    categoriesArr.push(oldBrandModels);
+    newCategoriesArr.push(newBrandModels); 
+  relationArr.push(RelationName.BRAND_BY);
+  _root_idArr.push(node[0]['_fields'][1].identity.low);
 
 
     await this.nodeRelationHandler.manageNodesRelations(categoriesArr, newCategoriesArr,relationArr,_root_idArr);
@@ -435,7 +484,7 @@ export class TypesRepository implements GeciciInterface<Type> {
           JSON.stringify({ referenceKey: typeNode.properties.key }),
         );
 
-         //delete warrantyunit relations in this database
+         //delete warrantyunit..etc relations in this database
          let categoriesArr = [];
          let relationArr = [];
          let _root_idArr = [];
@@ -443,9 +492,12 @@ export class TypesRepository implements GeciciInterface<Type> {
          const olDurationUnits = await this.nodeRelationHandler.getOldCategories(typeNode.properties.key, RelationName.DURATION_UNIT_BY);
          const oldCategories = await this.nodeRelationHandler.getOldCategories(typeNode.properties.key, RelationName.CLASSIFIED_BY);
          const oldTypeNodes = await this.nodeRelationHandler.getOldCategories(typeNode.properties.key, RelationName.ASSET_TYPE_BY); 
-         categoriesArr.push(oldWarrantyDurationUnits,olDurationUnits,oldCategories,oldTypeNodes);
-         relationArr.push(RelationName.WARRANTY_DURATION_UNIT_BY, RelationName.DURATION_UNIT_BY, RelationName.CLASSIFIED_BY, RelationName.ASSET_TYPE_BY);
-         _root_idArr.push(typeNode.identity.low,typeNode.identity.low,typeNode.identity.low,typeNode.identity.low);
+         const oldTypeCategories = await this.nodeRelationHandler.getOldCategories(typeNode.properties.key, RelationName.TYPE_CLASSIFIED_BY);
+         const oldBrandModels = await this.nodeRelationHandler.getOldCategories(typeNode.properties.key, RelationName.BRAND_BY);
+         categoriesArr.push(oldWarrantyDurationUnits,olDurationUnits,oldCategories,oldTypeNodes, oldTypeCategories, oldBrandModels);
+         relationArr.push(RelationName.WARRANTY_DURATION_UNIT_BY, RelationName.DURATION_UNIT_BY, RelationName.CLASSIFIED_BY, 
+                                                                   RelationName.ASSET_TYPE_BY, RelationName.TYPE_CLASSIFIED_BY, RelationName.BRAND_BY);
+         _root_idArr.push(typeNode.identity.low,typeNode.identity.low,typeNode.identity.low,typeNode.identity.low,typeNode.identity.low,typeNode.identity.low);
          await this.nodeRelationHandler.deleteNodesRelations(categoriesArr, relationArr, _root_idArr) 
          //////////////////////////////////////////////
 
