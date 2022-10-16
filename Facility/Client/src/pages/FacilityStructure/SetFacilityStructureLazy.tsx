@@ -720,6 +720,8 @@ const SetFacilityStructure = () => {
         }
       })()}
 
+      <ConfirmDialog />
+
       <ConfirmDialog
         visible={delDia}
         onHide={() => setDelDia(false)}
@@ -1024,7 +1026,7 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={rollBack}
+            getFacilityStructure={getFacilityStructure}
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}
