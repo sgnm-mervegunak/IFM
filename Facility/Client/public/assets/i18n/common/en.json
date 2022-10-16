@@ -157,7 +157,7 @@
 	"Net Area can not be negative":"Net Area can not be negative",
 	"Usable Height must be a number":"Usable Height must be a number",
 	"Usable Height can not be negative":"Usable Height can not be negative",
-	"Import Contacts": "Import Contacts",
+	"Import Contact": "Import Contact",
 	"Manage Types": "Manage Types",
 	"Manage Components":"Manage Components",
 	"Manage Systems": "Manage Systems",
@@ -197,8 +197,14 @@
 	"Asset Identifier": "Asset Identifier",
 	"Operator Name": "Operator Name",
 	"Operator Code": "Operator Code",
-	"Room Tag": "Room Tag"
-
+	"Room Tag": "Room Tag",
+	"Add Contact": "Add Contact",
+	"Select Column": "Select Column",
+	"Clear": "Clear",
+	"Showing {first} to {last} of {totalRecords} Contacts":"Showing {first} to {last} of {totalRecords} Contacts",
+	"Starts With": "Starts With",
+	"Contains": "Contains",
+	"Apply": "Apply"
 }
 
 
