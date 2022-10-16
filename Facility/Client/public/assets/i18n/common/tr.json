@@ -157,7 +157,7 @@
 	"Net Area can not be negative": "Net alan negatif bir değer alamaz.",
 	"Usable Height must be a number": "Kullanılabilir yükseklik sayısal bir değer almak zorundadır",
 	"Usable Height can not be negative": "Kullanılabilir yükseklik negatif bir değer alamaz.",
-	"Import Contacts": "İletişim İçeri Aktar",
+	"Import Contact": "Kişi İçeri Aktar",
 	"Manage Types": "Tür Yönetimi",
 	"Manage Components":"Bileşen Yönetimi",
 	"Manage Systems": "Sistem Yönetimi",
@@ -197,5 +197,13 @@
 	"Asset Identifier": "Varlık Tanımlayıcı",
 	"Operator Name": "Operatör Adı",
 	"Operator Code": "Operatör Kodu",
-	"Room Tag": "Oda Etiketi"
+	"Room Tag": "Oda Etiketi",
+	"Add Contact": "Kişi Ekle",
+	"Select Column": "Sütun Seç",
+	"Clear": "Temizle",
+	"Showing {first} to {last} of {totalRecords} Contacts":"{totalRecords} kayıtdan {first} ile {last} arasında gösteriliyor",
+	"Starts With": "İle Başlayan",
+	"Contains": "İçeren",
+	"addRule":"Kural Ekle",
+	"Apply": "Uygula"
 }
