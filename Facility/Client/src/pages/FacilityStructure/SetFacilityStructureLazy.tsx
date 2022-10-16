@@ -6,7 +6,12 @@ import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Button } from "primereact/button";
 import { Toolbar } from "primereact/toolbar";
 import { Dropdown } from "primereact/dropdown";
-import { useParams, useNavigate, useLocation, useSearchParams, } from "react-router-dom";
+import {
+  useParams,
+  useNavigate,
+  useLocation,
+  useSearchParams,
+} from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import FacilityStructureService from "../../services/facilitystructure";
@@ -82,6 +87,7 @@ interface FormNode {
 
 const SetFacilityStructure = () => {
   const [selectedNodeKey, setSelectedNodeKey] = useState<any>("");
+  const [selectedNodeParent, setSelectedNodeParent] = useState<any>(null);
   const [lastNodeKey, setLastNodeKey] = useState<any>("");
   const [selectedNode, setSelectedNode] = useState<Node>({} as Node);
   const [expandedKeys, setExpandedKeys] = useState({});
@@ -108,10 +114,18 @@ const SetFacilityStructure = () => {
   const auth = useAppSelector((state) => state.auth);
   const [realm, setRealm] = useState(auth.auth.realm);
   const [generateNodeKey, setGenerateNodeKey] = useState("");
-  const [generateFormTypeKey, setGenerateFormTypeKey] = useState<string | undefined>("");
-  const [generateNodeName, setGenerateNodeName] = useState<string | undefined>("");
-  const [facilityType, setFacilityType] = useState<{ name: string; code: string }[]>([]);
-  const [selectedFacilityType, setSelectedFacilityType] = useState<string | undefined>("");
+  const [generateFormTypeKey, setGenerateFormTypeKey] = useState<
+    string | undefined
+  >("");
+  const [generateNodeName, setGenerateNodeName] = useState<string | undefined>(
+    ""
+  );
+  const [facilityType, setFacilityType] = useState<
+    { name: string; code: string }[]
+  >([]);
+  const [selectedFacilityType, setSelectedFacilityType] = useState<
+    string | undefined
+  >("");
   const [submitted, setSubmitted] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const [display, setDisplay] = useState(false);
@@ -119,7 +133,7 @@ const SetFacilityStructure = () => {
   const [docTypes, setDocTypes] = React.useState([]);
   const [search, setSearch] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
-  const { toast } = useToast()
+  const { toast } = useToast();
   const { t } = useTranslation(["common"]);
   const language = useAppSelector((state) => state.language.language);
 
@@ -522,7 +536,6 @@ const SetFacilityStructure = () => {
       });
   };
 
-
   useEffect(() => {
     getFacilityStructure();
   }, []);
@@ -551,9 +564,9 @@ const SetFacilityStructure = () => {
               detail: t(`${res.data.properties.nodeType} Deleted`),
               life: 4000,
             });
-            if(res.data.properties.nodeType === "Building"){
+            if (res.data.properties.nodeType === "Building") {
               getFacilityStructure();
-            } else{
+            } else {
               rollBack();
             }
           })
@@ -581,7 +594,8 @@ const SetFacilityStructure = () => {
     dragId: string,
     dropId: string,
     key: string,
-    dragingNode: string) => {
+    dragingNode: string
+  ) => {
     FacilityStructureService.relation(dragId, dropId)
       .then((res) => {
         showSuccess("Structure Updated");
@@ -602,7 +616,8 @@ const SetFacilityStructure = () => {
     dragId: string,
     dropId: string,
     key: string,
-    dragingnode: string) => {
+    dragingnode: string
+  ) => {
     confirmDialog({
       message: t("Are you sure you want to move?"),
       header: t("Move Confirmation"),
@@ -757,6 +772,7 @@ const SetFacilityStructure = () => {
         }}
       >
         <AddPlan
+          selectedNodeParent={selectedNodeParent}
           submitted={submitted}
           setSubmitted={setSubmitted}
           setPlanDia={setPlanDia}
@@ -847,7 +863,7 @@ const SetFacilityStructure = () => {
           />
         </div>
         {selectedFacilityType === "Building" ||
-          selectedFacilityType === "Bina" ? (
+        selectedFacilityType === "Bina" ? (
           <BuildingForm
             selectedFacilityType={selectedFacilityType}
             submitted={submitted}
@@ -1001,7 +1017,7 @@ const SetFacilityStructure = () => {
           />
         </div>
         {selectedFacilityType === "Building" ||
-          selectedFacilityType === "Bina" ? (
+        selectedFacilityType === "Bina" ? (
           <BuildingForm
             selectedFacilityType={selectedFacilityType}
             submitted={submitted}
@@ -1240,10 +1256,11 @@ const SetFacilityStructure = () => {
             setSearchParams({ search: e.value });
             setSearch(e.value);
           }}
-          nodeTemplate={(data: Node, options) => (
+          nodeTemplate={(data: Node, options: any) => (
             <span className="flex align-items-center font-bold">
               {data.code ? data.code + " / " : ""}
-              {data.label}{data.name}{" "}
+              {data.label}
+              {data.name}{" "}
               {
                 <>
                   <span className="ml-4 ">
@@ -1325,7 +1342,8 @@ const SetFacilityStructure = () => {
                             "?key=" +
                             data.key
                           }
-                          target="_blank" rel="noopener noreferrer"
+                          target="_blank"
+                          rel="noopener noreferrer"
                         >
                           <Button
                             icon="pi pi-map"
@@ -1341,6 +1359,9 @@ const SetFacilityStructure = () => {
                           aria-label="Add Plan"
                           title={"Add Plan"}
                           onClick={() => {
+                            console.log(data);
+                            setSelectedNodeParent(options.props.parent)
+
                             setSelectedNodeKey(data.key);
                             setPlanDia(true);
                           }}

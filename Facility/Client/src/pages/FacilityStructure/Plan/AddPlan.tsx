@@ -13,18 +13,21 @@ const AddPlan = ({
   setPlanDia,
   selectedNodeKey,
   getFacilityStructure,
+  selectedNodeParent,
 }: {
   submitted: boolean;
   setSubmitted: any;
   setPlanDia: any;
   selectedNodeKey: string;
   getFacilityStructure: any;
+  selectedNodeParent?:any;
 }) => {
   const { toast } = useToast()
   const { t } = useTranslation(["common"]);
   const emptyPlan = "empty";
   const [options, setOptions] = React.useState<any>([
     { label: emptyPlan, value: emptyPlan },
+    ...selectedNodeParent.children.filter((item:any)=>item.key !== selectedNodeKey).map((item:any)=>({label:item.name,value:item.key}))
   ]);
   const [selectedOption, setSelectedOption] = React.useState<any>(emptyPlan);
 
@@ -33,8 +36,9 @@ const AddPlan = ({
       const url = process.env.REACT_APP_API_FACILITY + "structure";
       const plannerUrl = process.env.REACT_APP_API_PLANNER_SERVER+"/plan/"
       axios
-        .post(plannerUrl, { key: selectedNodeKey })
+        .post(plannerUrl, { key: selectedNodeKey,cloneKey:selectedOption === "empty" ? undefined : selectedOption })
         .then((res) => {
+          console.log(res.data);
           axios
             .patch(url + "/addPlanToFloor/" + selectedNodeKey)
             .then((res) => {
@@ -104,7 +108,7 @@ const AddPlan = ({
         onChange={(e) => {
           console.log(e.value);
 
-          setSelectedOption(e);
+          setSelectedOption(e.value);
         }}
         placeholder={t("Select Floor")}
       />
