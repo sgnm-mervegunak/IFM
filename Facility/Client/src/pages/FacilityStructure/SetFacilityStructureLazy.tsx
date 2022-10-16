@@ -551,9 +551,9 @@ const SetFacilityStructure = () => {
               detail: t(`${res.data.properties.nodeType} Deleted`),
               life: 4000,
             });
-            if(res.data.properties.nodeType === "Building"){
+            if (res.data.properties.nodeType === "Building") {
               getFacilityStructure();
-            } else{
+            } else {
               rollBack();
             }
           })
@@ -704,6 +704,8 @@ const SetFacilityStructure = () => {
           return <ContextMenu model={menu} ref={cm} />;
         }
       })()}
+
+      <ConfirmDialog />
 
       <ConfirmDialog
         visible={delDia}
@@ -1008,7 +1010,7 @@ const SetFacilityStructure = () => {
             setSubmitted={setSubmitted}
             selectedNodeKey={selectedNodeKey}
             editDia={editDia}
-            getFacilityStructure={rollBack}
+            getFacilityStructure={getFacilityStructure}
             setAddDia={setAddDia}
             setEditDia={setEditDia}
             isUpdate={isUpdate}

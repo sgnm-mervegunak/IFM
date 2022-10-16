@@ -20,6 +20,7 @@ interface Params {
   selectedNodeKey: string;
   editDia: boolean;
   getClassification: any;
+  RollBack: any;
   setAddDia: React.Dispatch<React.SetStateAction<boolean>>;
   setEditDia: React.Dispatch<React.SetStateAction<boolean>>;
   isUpdate: boolean;
@@ -55,6 +56,7 @@ const ClassificationForm = ({
   selectedNodeKey,
   editDia,
   getClassification,
+  RollBack,
   setAddDia,
   setEditDia,
   isUpdate,
@@ -173,7 +175,12 @@ const ClassificationForm = ({
                 life: 3000,
               });
 
-              getClassification(res.data.properties.key);
+              // getClassification(res.data.properties.key);
+              if (res.data.properties.isRoot === true) {
+                getClassification();
+              } else {
+                RollBack(res.data.properties.key);
+              }
             })
             .catch((err) => {
               toast.current.show({
@@ -218,6 +225,7 @@ const ClassificationForm = ({
               isActive: isActive,
             };
           }
+          console.log(res.data);
 
           ClassificationsService.update(res.data.id, updateNode)
             .then(async (res) => {
@@ -232,7 +240,12 @@ const ClassificationForm = ({
               } else {
                 await ClassificationsService.setPassive(res.data.id);
               }
-              getClassification();
+              if (res.data.properties.isRoot === true) {
+                getClassification();
+              } else {
+                RollBack();
+              }
+
             })
             .catch((err) => {
               toast.current.show({

@@ -355,6 +355,10 @@ const SetClassificationAdmin = () => {
     });
   };
 
+  const RollBack = () => {
+    
+  };
+
   const renderFooterAdd = () => {
     return (
       <div>
@@ -472,6 +476,7 @@ const SetClassificationAdmin = () => {
           isUpdate={isUpdate}
           setIsUpdate={setIsUpdate}
           contactData={data}
+          RollBack={RollBack}
         />
       </Dialog>
       <Dialog
@@ -498,6 +503,7 @@ const SetClassificationAdmin = () => {
           isUpdate={isUpdate}
           setIsUpdate={setIsUpdate}
           contactData={data}
+          RollBack={RollBack}
         />
 
       </Dialog>

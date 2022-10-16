@@ -64,7 +64,7 @@ const SetClassificationAdmin = () => {
   const [realm, setRealm] = useState(auth.auth.realm);
   const [labels, setLabels] = useState<string[]>([]);
   const [codeShow, setCodeShow] = useState(false);
-  const menuImport = useRef({ current: { toggle: () => {} } } as any);
+  const menuImport = useRef({ current: { toggle: () => { } } } as any);
   const { t } = useTranslation(["common"]);
   const language = useAppSelector((state) => state.language.language);
   const [submitted, setSubmitted] = useState(false);
@@ -388,6 +388,7 @@ const SetClassificationAdmin = () => {
   const deleteItem = (key: string) => {
     ClassificationsService.nodeInfo(key)
       .then((res) => {
+        console.log(res.data);
         ClassificationsService.remove(res.data.id)
           .then(() => {
             toast.current.show({
@@ -396,8 +397,11 @@ const SetClassificationAdmin = () => {
               detail: t("Classification Deleted"),
               life: 4000,
             });
-            // getClassification();
-            RollBack();
+            if (res.data.properties.isRoot === true) {
+              getClassificationRootAndChildren();
+            } else {
+              RollBack();
+            }
           })
           .catch((err) => {
             toast.current.show({
@@ -450,6 +454,8 @@ const SetClassificationAdmin = () => {
     key: string,
     dragingnode: string
   ) => {
+    console.log("test");
+
     confirmDialog({
       message: "Are you sure you want to move?",
       header: "Confirmation",
@@ -571,6 +577,7 @@ const SetClassificationAdmin = () => {
     <div className="container">
       <Toolbar className="mb-4" right={rightToolbarTemplate}></Toolbar>
       <ContextMenu model={menu} ref={cm} />
+      <ConfirmDialog />
       <ConfirmDialog
         visible={delDia}
         onHide={() => setDelDia(false)}
@@ -598,7 +605,8 @@ const SetClassificationAdmin = () => {
           setSubmitted={setSubmitted}
           selectedNodeKey={selectedNodeKey}
           editDia={editDia}
-          getClassification={(nodeKey: string) =>
+          getClassification={getClassificationRootAndChildren}
+          RollBack={(nodeKey: string) =>
             RollBack(selectedNodeKey, nodeKey)
           }
           setAddDia={setAddDia}
@@ -626,7 +634,8 @@ const SetClassificationAdmin = () => {
           setSubmitted={setSubmitted}
           selectedNodeKey={selectedNodeKey}
           editDia={editDia}
-          getClassification={RollBack}
+          getClassification={getClassificationRootAndChildren}
+          RollBack={RollBack}
           setAddDia={setAddDia}
           setEditDia={setEditDia}
           isUpdate={isUpdate}
@@ -667,6 +676,7 @@ const SetClassificationAdmin = () => {
               event.dropNode.key,
               event.dragNode.key
             );
+
             // dragConfirm(event.dragNode._id.low, event.dropNode._id.low);
           }}
           filter
