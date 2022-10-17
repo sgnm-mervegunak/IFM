@@ -199,10 +199,13 @@ const SetContactTable = () => {
 
   useEffect(() => {
     getContact();
-    setSelectedColumns([]);
     setSelectedData(null);
     setSelectedDataKeys([]);
   }, [lazyParams]);
+
+  useEffect(() => {
+    setSelectedColumns([]);
+  }, []);
 
   const matchModes = [
     { label: t("Starts With"), value: FilterMatchMode.STARTS_WITH },
@@ -378,7 +381,7 @@ const SetContactTable = () => {
 
   const onFilterApplyClick = (e: any) => {
     let _searchKey = e.constraints.constraints[0].value;
- 
+
     setSearchKey(_searchKey);
     ContactService.findSearchByColumn({
       page: lazyParams.page + 1,
