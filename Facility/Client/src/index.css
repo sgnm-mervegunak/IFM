@@ -33,4 +33,9 @@ code {
   text-decoration:underline;
 }
 
+.required:after {
+  content:" *";
+  color: red;
+}
+
 

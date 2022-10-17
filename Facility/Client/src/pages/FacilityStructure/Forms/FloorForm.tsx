@@ -48,8 +48,6 @@ interface Node {
     className?: string;
 }
 
-
-
 const FloorForm = ({
     selectedFacilityType,
     submitted,
@@ -248,7 +246,7 @@ const FloorForm = ({
         <form>
 
             <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
+                <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
                 <InputText
                     autoComplete="off"
                     {...register("name")}
@@ -278,7 +276,7 @@ const FloorForm = ({
             </div>
 
             <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
+                <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
                 <Controller
                     defaultValue={data?.category || ""}
                     name="category"
