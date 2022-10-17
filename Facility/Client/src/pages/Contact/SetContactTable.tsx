@@ -19,7 +19,7 @@ import ImportContact from "./ImportContact"
 import { useAppSelector } from "../../app/hook";
 import useToast from "../../hooks/useToast";
 
-
+import { CustomDataTable } from "./ContactComponents";
 interface Node {
   id: string;
   company: string;
@@ -549,128 +549,33 @@ const SetContactTable = () => {
         <div className="card">
           <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
 
-          <DataTable
+          <CustomDataTable
             value={data}
             ref={dtRef}
-            dataKey="id"
-            paginator
             onPage={onPage}
             onSort={onSort}
             first={lazyParams.first}
-            responsiveLayout="scroll"
-            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-            currentPageReportTemplate={t("Showing {first} to {last} of {totalRecords} Contacts")}
             rows={lazyParams.rows}
-            rowsPerPageOptions={[10, 25, 50]}
-            lazy
             totalRecords={countContacts}
             header={header}
-            emptyMessage="Contact not found"
             sortField={lazyParams.sortField}
             sortOrder={lazyParams.sortOrder}
-            filterDisplay="menu"
-            showGridlines
             loading={loading}
-            selectionMode="checkbox"
             selection={selectedData}
-            onSelectionChange={e => {
+            onSelectionChange={(e:any) => {
               setSelectedData(e.value);
               setSelectedDataKeys(e.value.map((item: any) => item.key));
             }}
-          // onFilter={onFilter}
-          // filters={filters}
+            matchModes={matchModes}
+            onFilterApplyClick={onFilterApplyClick}
+            onFilterClear={getContactReset}
+            filterClear={filterClearTemplate}
+            filterApply={filterApplyTemplate}
+            body={actionBodyTemplate}
+
           >
 
-            <Column
-              selectionMode="multiple"
-              headerStyle={{ width: '3em' }}>
-            </Column>
-
-            <Column
-              field="email"
-              header="Email"
-              sortable
-              filter
-              filterField="email"
-              filterMatchModeOptions={matchModes}
-              onFilterApplyClick={onFilterApplyClick}
-              onFilterClear={getContactReset}
-              showFilterOperator={false}
-              filterPlaceholder={t("Search")}
-              filterClear={filterClearTemplate}
-              filterApply={filterApplyTemplate}
-              showAddButton={false}
-            />
-            <Column
-              field="givenName"
-              header="Name"
-              sortable
-              filter
-              filterField="givenName"
-              filterMatchModeOptions={matchModes}
-              onFilterApplyClick={onFilterApplyClick}
-              onFilterClear={getContactReset}
-              showFilterOperator={false}
-              filterPlaceholder={t("Search")}
-              filterClear={filterClearTemplate}
-              filterApply={filterApplyTemplate}
-              showAddButton={false}
-            />
-            <Column
-              field="familyName"
-              header="Surname"
-              sortable
-              filter
-              filterField="familyName"
-              filterMatchModeOptions={matchModes}
-              onFilterApplyClick={onFilterApplyClick}
-              onFilterClear={getContactReset}
-              showFilterOperator={false}
-              filterPlaceholder={t("Search")}
-              filterClear={filterClearTemplate}
-              filterApply={filterApplyTemplate}
-              showAddButton={false}
-            />
-            <Column
-              field="phone"
-              header="Phone"
-              sortable
-              filter
-              filterField="phone"
-              filterMatchModeOptions={matchModes}
-              onFilterApplyClick={onFilterApplyClick}
-              onFilterClear={getContactReset}
-              showFilterOperator={false}
-              filterPlaceholder={t("Search")}
-              filterClear={filterClearTemplate}
-              filterApply={filterApplyTemplate}
-              showAddButton={false}
-            />
-            <Column
-              field="company"
-              header="Company"
-              sortable
-              filter
-              filterField="company"
-              filterMatchModeOptions={matchModes}
-              onFilterApplyClick={onFilterApplyClick}
-              onFilterClear={getContactReset}
-              showFilterOperator={false}
-              filterPlaceholder={t("Search")}
-              filterClear={filterClearTemplate}
-              filterApply={filterApplyTemplate}
-              showAddButton={false}
-            />
-            {columnComponents}
-            <Column
-              body={actionBodyTemplate}
-              bodyStyle={{ textAlign: "right", overflow: "visible" }}
-              exportable={false}
-              style={{ minWidth: '8rem' }}
-              filter={false}
-            />
-
-          </DataTable>
+          </CustomDataTable>  
         </div>
 
         <Dialog
