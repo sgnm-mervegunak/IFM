@@ -396,7 +396,7 @@ const SystemForm = ({
           <div className="formgrid grid">
 
             <div className="field col-12 md:col-12">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("name")}
@@ -407,7 +407,7 @@ const SystemForm = ({
             </div>
 
             <div className="field col-12 md:col-12">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
               <Controller
                 defaultValue={data?.category || ""}
                 name="category"
@@ -464,7 +464,7 @@ const SystemForm = ({
             </div>
 
             <div className="field col-12 md:col-12">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Created By")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Created By")}</h5>
               <Controller
                 defaultValue={data?.createdBy || ""}
                 name="createdBy"

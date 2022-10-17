@@ -448,7 +448,7 @@ const SpaceForm = ({
         <TabPanel header={t("Form")}>
           <div className="formgrid grid">
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("name")}
@@ -459,7 +459,7 @@ const SpaceForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("code")}
@@ -541,7 +541,7 @@ const SpaceForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
               <Controller
                 defaultValue={data?.category || ""}
                 name="category"
@@ -568,7 +568,7 @@ const SpaceForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Usage")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Usage")}</h5>
               <Controller
                 defaultValue={data?.usage || ""}
                 name="usage"
@@ -595,7 +595,7 @@ const SpaceForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Status")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Status")}</h5>
               <Controller
                 defaultValue={data?.status || ""}
                 name="status"

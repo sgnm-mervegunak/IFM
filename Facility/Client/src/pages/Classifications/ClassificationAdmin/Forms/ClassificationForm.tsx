@@ -283,7 +283,7 @@ const ClassificationForm = ({
 
         {codeShow === true ? (
           <div className="field col-12 md:col-12">
-            <h5 style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
+            <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Code")}</h5>
             <InputText
               autoComplete="off"
               {...register("code")}
@@ -306,7 +306,7 @@ const ClassificationForm = ({
         </div> */}
 
         <div className="field col-12 md:col-12">
-          <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
+          <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
           <InputText
             autoComplete="off"
             {...register("name")}
