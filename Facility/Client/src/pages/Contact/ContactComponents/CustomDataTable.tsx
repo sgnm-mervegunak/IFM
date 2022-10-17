@@ -14,81 +14,59 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 
-export const CustomDataTable = ({ value, ref, onPage, onSort, first, rows, totalRecords, header, sortField, sortOrder, loading, selection, onSelectionChange, children, matchModes, onFilterApplyClick, onFilterClear, filterClear, filterApply, body }:
-    {
-        value: any, ref: any, onPage: any, onSort: any, first: number, rows: any, totalRecords: any, header: any, sortField: any, sortOrder: any, loading: any, selection: any, onSelectionChange: any, children: any, matchModes?: any, onFilterApplyClick?: any, onFilterClear?: any, filterClear?: any, filterApply?: any, body?: any
-    }) => {
-
+export const CustomDataTable = (
+    // { value, ref, onPage, onSort, first, rows, totalRecords, header, sortField, sortOrder, loading, selection, onSelectionChange, children, matchModes, onFilterApplyClick, onFilterClear, filterClear, filterApply, body }:
+    // {
+    //     value: any, ref: any, onPage: any, onSort: any, first: number, rows: any, totalRecords: any, header: any, sortField: any, sortOrder: any, loading: any, selection: any, onSelectionChange: any, children: any, matchModes?: any, onFilterApplyClick?: any, onFilterClear?: any, filterClear?: any, filterApply?: any, body?: any
+    //     }
+    { ...props }
+) => {
     const { t } = useTranslation(["common"]);
 
-    const TableColumn = ({field, header, filterField }: {field:any, header:any,filterField:any}) => {
-        const { t } = useTranslation(["common"]);
-
-        return (
-            <div>
-                <Column
-                    field={field}
-                    header={header}
-                    sortable
-                    filter
-                    filterField={filterField}
-                    filterMatchModeOptions={matchModes}
-                    onFilterApplyClick={onFilterApplyClick}
-                    onFilterClear={onFilterClear}
-                    showFilterOperator={false}
-                    filterPlaceholder={t("Search")}
-                    filterClear={filterClear}
-                    filterApply={filterApply}
-                    showAddButton={false}
-                    selectionMode="multiple"
-                    headerStyle={{ width: '3em' }}
-                />
-            </div>)
-    }
-
     return (
-        <div>
-            <DataTable
-                value={value}
-                ref={ref}
-                dataKey="id"
-                paginator
-                onPage={onPage}
-                onSort={onSort}
-                first={first}
-                responsiveLayout="scroll"
-                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-                currentPageReportTemplate={t("Showing {first} to {last} of {totalRecords} Contacts")}
-                rows={rows}
-                rowsPerPageOptions={[10, 25, 50]}
-                lazy
-                totalRecords={totalRecords}
-                header={header}
-                emptyMessage="Contact not found"
-                sortField={sortField}
-                sortOrder={sortOrder}
-                filterDisplay="menu"
-                showGridlines
-                loading={loading}
-                selectionMode="checkbox"
-                selection={selection}
-                onSelectionChange={onSelectionChange}
-                
-            // onFilter={onFilter}
-            // filters={filters}
-            >
 
-                <Column
-                    selectionMode="multiple"
-                    headerStyle={{ width: '3em' }}>
-                </Column>
+        <DataTable
+            value={props.value}
+            ref={props.ref}
+            dataKey="id"
+            paginator
+            onPage={props.onPage}
+            onSort={props.onSort}
+            first={props.first}
+            responsiveLayout="scroll"
+            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+            currentPageReportTemplate={t("Showing {first} to {last} of {totalRecords} Contacts")}
+            rows={props.rows}
+            rowsPerPageOptions={[10, 25, 50]}
+            lazy
+            totalRecords={props.totalRecords}
+            header={props.header}
+            emptyMessage="Contact not found"
+            sortField={props.sortField}
+            sortOrder={props.sortOrder}
+            filterDisplay="menu"
+            showGridlines
+            loading={props.loading}
+            selectionMode="checkbox"
+            selection={props.selection}
+            onSelectionChange={props.onSelectionChange}
 
+        // onFilter={onFilter}
+        // filters={filters}
+        >
+
+            <Column
+                selectionMode="single"
+                headerStyle={{ width: '3em' }}>
+            </Column>
+            {/* 
                 <TableColumn
                     field="email"
                     header="Email"
-                    filterField="email" 
+                filterField="email"
+                
                 />
-                <TableColumn
+              <TableColumn
                     field="givenName"
                     header="Name"
                     filterField="givenName"
@@ -106,18 +84,47 @@ export const CustomDataTable = ({ value, ref, onPage, onSort, first, rows, total
                 <TableColumn
                     field="company"
                     header="Company"
-                    filterField="company"
-                />
+                filterField="company"
 
-                <Column
-                    body={body}
-                    bodyStyle={{ textAlign: "right", overflow: "visible" }}
-                    exportable={false}
-                    style={{ minWidth: '8rem' }}
-                    filter={false}
-                />
-                {children}
-            </DataTable>
-        </div>
+                /> */}
+
+            {props.children}
+            <Column
+                body={props.body}
+                bodyStyle={{ textAlign: "right", overflow: "visible" }}
+                exportable={false}
+                style={{ minWidth: '8rem' }}
+                filter={false}
+            />
+
+
+        </DataTable>
+
     )
 }
+
+const TableColumn = (props: any) => {
+    const { t } = useTranslation(["common"]);
+
+    return (
+
+        <Column
+            field={props.field}
+            header={props.header}
+            sortable
+            filter
+            filterField={props.filterField}
+            filterMatchModeOptions={props.matchModes}
+            onFilterApplyClick={props.onFilterApplyClick}
+            onFilterClear={props.onFilterClear}
+            showFilterOperator={false}
+            filterPlaceholder={t("Search")}
+            filterClear={props.filterClear}
+            filterApply={props.filterApply}
+            showAddButton={false}
+            selectionMode="multiple"
+            headerStyle={{ width: '3em' }}
+        />
+    );
+}
+CustomDataTable.Column = TableColumn;

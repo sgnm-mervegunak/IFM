@@ -19,7 +19,7 @@ import ImportContact from "./ImportContact"
 import { useAppSelector } from "../../app/hook";
 import useToast from "../../hooks/useToast";
 
-import { CustomDataTable } from "./ContactComponents";
+import { ContactTable, CustomDataTable } from "./ContactComponents";
 interface Node {
   id: string;
   company: string;
@@ -549,33 +549,7 @@ const SetContactTable = () => {
         <div className="card">
           <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
 
-          <CustomDataTable
-            value={data}
-            ref={dtRef}
-            onPage={onPage}
-            onSort={onSort}
-            first={lazyParams.first}
-            rows={lazyParams.rows}
-            totalRecords={countContacts}
-            header={header}
-            sortField={lazyParams.sortField}
-            sortOrder={lazyParams.sortOrder}
-            loading={loading}
-            selection={selectedData}
-            onSelectionChange={(e:any) => {
-              setSelectedData(e.value);
-              setSelectedDataKeys(e.value.map((item: any) => item.key));
-            }}
-            matchModes={matchModes}
-            onFilterApplyClick={onFilterApplyClick}
-            onFilterClear={getContactReset}
-            filterClear={filterClearTemplate}
-            filterApply={filterApplyTemplate}
-            body={actionBodyTemplate}
-
-          >
-
-          </CustomDataTable>  
+          <ContactTable value={data} rows={lazyParams.rows} body={actionBodyTemplate} />
         </div>
 
         <Dialog
