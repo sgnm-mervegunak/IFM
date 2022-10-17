@@ -13,6 +13,7 @@ import { SystemComponentInterface } from 'src/common/interface/system-component.
 import { SystemComponentRelationDto } from '../dto/component.relation.dto';
 import { WrongIdProvided } from 'src/common/bad.request.exception';
 import { AssetNotFoundException } from 'src/common/notFoundExceptions/not.found.exception';
+import { string } from 'joi';
 
 @Injectable()
 export class SystemComponentRepository implements SystemComponentInterface<System> {
@@ -83,6 +84,9 @@ export class SystemComponentRepository implements SystemComponentInterface<Syste
   }
   async delete(_parent_key: string, _children_keys: string[], header) {
     try {
+      if ( typeof(_children_keys) == 'string') {
+        _children_keys = [_children_keys];
+      }
       const { realm } = header;
       const selectedSystemNode = await this.neo4jService.findByLabelAndFilters([],{"isDeleted": false, "key": _parent_key},[]);
       if (!selectedSystemNode.length) {
