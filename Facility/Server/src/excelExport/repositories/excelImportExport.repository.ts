@@ -392,21 +392,8 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
    let checkBuilding = await this.neo4jService.findChildrensByLabelsAndFilters(['FacilityStructure'],{realm},[`Building`],{name:data[1][1],isDeleted:false});
    if(checkBuilding.length==0){
     let categoryCode = await data[1][4].split(":");
-  
-    let code =await categoryCode[0].replaceAll(" ","-")
-   
-   // add digits to code  
-    let getClassificationType=`MATCH (n:OmniClass11_en {realm:"${realm}",isDeleted:false}) return n`
-    let codeData= await this.neo4jService.write(getClassificationType)
-    console.log(codeData)
-    let abc = codeData.records[0]["_fields"][0].properties.code
-   
-    for (let index = 0; index = (abc.length-code.length)/3; index++) {
-     
-       code=await code+"-00"
-    }
-  
-       let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"OmniClass11",code,"b");
+
+       let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"OmniClass11",categoryCode[0],"b","cc","c","PARENT_OF");
  
        if(typeof data[1][2]=='object'){
          email=await data[1][2].text;
@@ -415,12 +402,13 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
        }
    
    //cypher query for building 
+
    let cypher=`MATCH (r:FacilityStructure {realm:"${realm}"}) \
    ${createdCypher} \
-   MATCH (p {email:"${email}",isDeleted:false} ) \
+   MATCH (cnt:Contact {realm:"${realm}"})-[:PARENT_OF]->(p {email:"${email}",isDeleted:false} ) \
    MERGE (b:Building {name:"${data[1][1]}",createdOn:"${data[1][3]}",projectName:"${data[1][5]}",siteName:"${data[1][6]}",areaMeasurement:"${data[1][11]}",externalSystem:"${data[1][12]}",externalObject:"${data[1][13]}", \
    externalIdentifier:"${data[1][14]}",externalSiteObject:"${data[1][15]}",externalSiteIdentifier:"${data[1][16]}",externalFacilityObject:"${data[1][17]}",externalFacilityIdentifier:"${data[1][18]}", \
-   description:"${data[1][19]}",projectDescription:"${data[1][20]}",siteDescription:"${data[1][21]}",phase:"${data[1][22]}",address:"",status:"${data[1][23]}",owner:"",operator:"",contractor:"",handoverDate:"",operationStartDate:"",warrantyExpireDate:"",tag:[],canDisplay:true,key:"${this.keyGenerate()}",canDelete:true,isActive:true,isDeleted:false, \
+   description:"${data[1][19]}",projectDescription:"${data[1][20]}",siteDescription:"${data[1][21]}",phase:"${data[1][22]}",address:"",status:"${data[1][23]}",code:"${data[1][24]}",owner:"",operator:"",contractor:"",handoverDate:"",operationStartDate:"",warrantyExpireDate:"",tag:[],canDisplay:true,key:"${this.keyGenerate()}",canDelete:true,isActive:true,isDeleted:false, \
    nodeType:"Building"}) MERGE (js:JointSpaces {key:"${this.keyGenerate()}",canDelete:false,canDisplay:false,isActive:true,isDeleted:false,name:"Joint Space"})\ 
    MERGE (zs:Zones {key:"${this.keyGenerate()}",canDelete:false,canDisplay:false,isActive:true,isDeleted:false,name:"Zones"})\ 
    MERGE (b)-[:PARENT_OF]->(zs) MERGE (b)-[:PARENT_OF]->(js)  MERGE (r)-[:PARENT_OF]->(b) ${createdRelationCypher} MERGE (b)-[:CREATED_BY]->(p) ;`
@@ -441,7 +429,7 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
     
   }
 
-  async addFloorsToBuilding(file: Express.Multer.File, header:MainHeaderInterface, buildingKey: string)
+async addFloorsToBuilding(file: Express.Multer.File, header:MainHeaderInterface, buildingKey: string)
 {
   let data=[]
   try {
@@ -467,7 +455,7 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
       let checkFloor = await this.neo4jService.findChildrensByLabelsAndFilters(['Building'],{key:buildingKey,isDeleted:false},[`Floor`],{name:data[i][1],isDeleted:false});
 
       if(checkFloor.length==0){
-        let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"FacilityFloorTypes",data[i][4],"f");
+        let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"FacilityFloorTypes",data[i][4],"f","cc","c","PARENT_OF");
   
         if(typeof data[i][2]=='object'){
           email=await data[i][2].text;
@@ -477,7 +465,7 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
     
         let cypher=`MATCH (a:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b:Building {key:"${buildingKey}",isDeleted:false}) \
                     ${createdCypher} \
-                    MATCH (p {email:"${email}",isDeleted:false}) \
+                    MATCH (cont:Contact {realm:"${realm}"})-[:PARENT_OF]->(p {email:"${email}",isDeleted:false}) \
                     MERGE (f:Floor {code:"",name:"${data[i][1]}",isDeleted:false,isActive:true,nodeType:"Floor",description:"${data[i][8]}",tag:[],canDelete:true,canDisplay:true,key:"${this.keyGenerate()}",createdOn:"${data[i][3]}",elevation:"${data[i][9]}",height:"${data[i][10]}",externalSystem:"",externalObject:"",externalIdentifier:""}) \
                     MERGE (b)-[:PARENT_OF]->(f)\
                     ${createdRelationCypher} \
@@ -522,82 +510,46 @@ async addSpacesToBuilding( file: Express.Multer.File, header:MainHeaderInterface
           data.push(row.values);
         });
     
-        values= firstSheet.getColumn(4).values;
+        values= firstSheet.getColumn(6).values; // getting classification values
         
      })
     
     
-     for (let index = 2; index < values.length; index++) {
+     for (let index = 1; index < values.length; index++) {
          
-      const element = values[index].split(new RegExp(/\s{3,}|:\s{1,}/g));
+      const element = values[index].split(new RegExp(/:\s{1}/g));
      
       categoryColumn.push(element);
     }
-      for(let i=0;i<categoryColumn.length;i++){
-    
-        categoryColumn[i][0]=categoryColumn[i][0].replace(/ /g, '-')
-      }
-    
-    
-    
-    let long=10
-    
-    for (let index = 0; index < categoryColumn.length; index++) {
-      categoryColumn[index][0] = categoryColumn[index][0].replaceAll('-', '');
-    }
-    //
-    for (let index = 0; index < categoryColumn.length; index++) {
-      if (categoryColumn[index][0].length == 4) {
-        categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
-        for (let i = 0; i < (long - 4) / 2; i++) {
-          categoryColumn[index][0].push(['00']);
-        }
-        categoryColumn[index][0] = categoryColumn[index][0].join('-');
-      } else if (categoryColumn[index][0].length == 6) {
-        categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
-        for (let i = 0; i < (long - 6) / 2; i++) {
-          categoryColumn[index][0].push(['00']);
-        }
-        categoryColumn[index][0] = categoryColumn[index][0].join('-');
-      } else if (categoryColumn[index][0].length == 8) {
-        categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
-        for (let i = 0; i < (long - 8) / 2; i++) {
-          categoryColumn[index][0].push(['00']);
-        }
-        categoryColumn[index][0] = categoryColumn[index][0].join('-');
-      } else if (categoryColumn[index][0].length == 10) {
-        categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
-        for (let i = 0; i < (long - 10) / 2; i++) {
-          categoryColumn[index][0].push(['00']);
-        }
-        categoryColumn[index][0] = categoryColumn[index][0].join('-');
-      } 
-    }
-    
+
     for (let i = 1; i < data.length; i++) {
-      let checkSpaces = await this.neo4jService.findChildrensByLabelsAndFilters(['Building'],{key:buildingKey},[`Space`],{name:data[i][1],isDeleted:false});
+      let checkSpaces = await this.neo4jService.findChildrensByLabelsAndFilters(['Building'],{key:buildingKey},[`Space`],{locationCode:data[i][3],isDeleted:false});
+
       if(checkSpaces.length == 0) {
-        let {createdCypher,createdRelationCypher} =await this.createCypherForClassification(realm,'OmniClass13',categoryColumn[i-1][0],"s")
-        if(typeof data[i][2]=='object'){
-          email=await data[i][2].text;
+        let {createdCypher,createdRelationCypher} =await this.createCypherForClassification(realm,'OmniClass13',categoryColumn[i][0],"s","cc","c","PARENT_OF")
+        if(typeof data[i][4]=='object'){
+          email=await data[i][4].text;
         }else {
-          email= await data[i][2];
+          email= await data[i][4];
         }
       
         let cypher=`MATCH (a:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b:Building {key:"${buildingKey}",isDeleted:false}) \
-        MATCH (p {email:"${email}",isDeleted:false}) \
+         MATCH (cont:Contact {realm:"${realm}"})-[:PARENT_OF]->(p {email:"${email}",isDeleted:false}) \
          ${createdCypher} \
-         MATCH (b)-[:PARENT_OF]->(f:Floor {name:"${data[i][5]}",isDeleted:false})\
-         MERGE (s:Space {operatorCode:"",operatorName:"",code:"",name:"${data[i][1]}",architecturalCode:"",architecturalName:"${data[i][1]}",createdOn:"${data[i][3]}",description:"${data[i][6]}",key:"${this.keyGenerate()}",externalSystem:"${data[i][7]}",externalObject:"${data[i][8]}",externalIdentifier:"${data[i][9]}",tag:[],roomTag:["${data[i][10]}"],usableHeight:"${data[i][11]}",grossArea:"${data[i][12]}",netArea:"${data[i][13]}",images:[],canDisplay:true,isDeleted:false,isActive:true,nodeType:"Space",isBlocked:false,canDelete:true})\
+         MATCH (b)-[:PARENT_OF]->(f:Floor {name:"${data[i][7]}",isDeleted:false}) \
+         MERGE (s:Space {operatorCode:"",operatorName:"",name:"${data[i][1]}",architecturalCode:"${data[i][2]}",architecturalName:"${data[i][1]}",locationCode:"${data[i][3]}",createdOn:"${data[i][5]}",description:"${data[i][8]}",key:"${this.keyGenerate()}",externalSystem:"${data[i][9]}",externalObject:"${data[i][10]}",externalIdentifier:"${data[i][11]}", \ 
+         tag:[],roomTag:["${data[i][12]}"],usableHeight:"${data[i][13]}",grossArea:"${data[i][14]}",netArea:"${data[i][15]}",images:"",documents:"", \
+         canDisplay:true,isDeleted:false,isActive:true,nodeType:"Space",isBlocked:false,canDelete:true}) \
          MERGE (f)-[:PARENT_OF]->(s) MERGE (s)-[:CREATED_BY]->(p) ${createdRelationCypher};`
         await this.neo4jService.write(cypher);
+        console.log(cypher)
       }else{
-        throw new HttpException(space_already_exist_object(data[i][1]),400) 
+        throw new HttpException(space_already_exist_object(data[i][3]),400) 
       }
 
    
     
-    }
+     }
   } catch (error) {
     if(error.response?.code===10005){
       space_already_exist(error.response?.name)
@@ -629,14 +581,13 @@ async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, 
   
   
    for (let i = 1; i <data.length; i++) {
-   //let abc =await this.neo4jService.findChildrensByLabelsAndFilters(['Building'],{realm},['Space'],{name:data[i][5]});
-  let cypher =`MATCH (n:Building {key:"${buildingKey}",isDeleted:false})-[:PARENT_OF*]->(s:Space {name:"${data[i][5]}",isDeleted:false}) \ 
+  let cypher =`MATCH (n:Building {key:"${buildingKey}",isDeleted:false})-[:PARENT_OF*]->(s:Space {locationCode:"${data[i][5]}",isDeleted:false}) \ 
    MATCH (s)-[:MERGEDZN]->(z:Zone {name:"${data[i][1]}",isDeleted:false}) return z`;
    let abc = await this.neo4jService.read(cypher);
    
  
     if(abc.records.length==0){
-  let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"FacilityZoneTypes",data[i][4],"zz");
+  let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"FacilityZoneTypes",data[i][4],"zz","cc","c","PARENT_OF");
   
       if(typeof data[i][2]=='object'){
         email=await data[i][2].text;
@@ -645,16 +596,15 @@ async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, 
       }
   
     let cypher =`MATCH (b:Building {key:"${buildingKey}"})-[:PARENT_OF]->(z:Zones {name:"Zones"})\
-    MATCH (c:Space {name:"${data[i][5]}"})\
-    MATCH (p {email:"${email}"})\
+    MATCH (c:Space {locationCode:"${data[i][5]}"})\
+    MATCH (cnt:Contact {realm:"${realm}"})-[:PARENT_OF]->(p {email:"${email}"})\
     ${createdCypher} \
     ${await this.getZoneFromDb(buildingKey,data[i])} \
     MERGE (z)-[:PARENT_OF]->(zz)  \
     MERGE (c)-[:MERGEDZN]->(zz)  \
     ${createdRelationCypher} \
     MERGE (zz)-[:CREATED_BY]->(p);`
-  
-  
+
      await this.neo4jService.write(cypher)
     }else {
       throw new HttpException(space_has_already_relation_object(),400)
@@ -700,64 +650,16 @@ async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, 
       
    })
   
-  
-   for (let index = 2; index < values.length; index++) {
-       
-    const element = values[index].split(new RegExp(/\s{3,}|:\s{1,}/g));
+   for (let index = 1; index < values.length; index++) {
+         
+    const element = values[index].split(new RegExp(/:\s{1}/g));
    
     categoryColumn.push(element);
-  }
-    for(let i=0;i<categoryColumn.length;i++){
-  
-      categoryColumn[i][0]=categoryColumn[i][0].replace(/ /g, '-')
-    }
-  
-  
-  
-  let long=12
-  
-  for (let index = 0; index < categoryColumn.length; index++) {
-    categoryColumn[index][0] = categoryColumn[index][0].replaceAll('-', '');
-  }
-  //
-  for (let index = 0; index < categoryColumn.length; index++) {
-    if (categoryColumn[index][0].length == 4) {
-      categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
-      for (let i = 0; i < (long - 4) / 2; i++) {
-        categoryColumn[index][0].push(['00']);
-      }
-      categoryColumn[index][0] = categoryColumn[index][0].join('-');
-    } else if (categoryColumn[index][0].length == 6) {
-      categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
-      for (let i = 0; i < (long - 6) / 2; i++) {
-        categoryColumn[index][0].push(['00']);
-      }
-      categoryColumn[index][0] = categoryColumn[index][0].join('-');
-    } else if (categoryColumn[index][0].length == 8) {
-      categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
-      for (let i = 0; i < (long - 8) / 2; i++) {
-        categoryColumn[index][0].push(['00']);
-      }
-      categoryColumn[index][0] = categoryColumn[index][0].join('-');
-    } else if (categoryColumn[index][0].length == 10) {
-      categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
-      for (let i = 0; i < (long - 10) / 2; i++) {
-        categoryColumn[index][0].push(['00']);
-      }
-      categoryColumn[index][0] = categoryColumn[index][0].join('-');
-    } 
-    else if (categoryColumn[index][0].length == 12) {
-      categoryColumn[index][0] = categoryColumn[index][0].match(/.{2}/g);
-      for (let i = 0; i < (long - 12) / 2; i++) {
-        categoryColumn[index][0].push(['00']);
-      }
-      categoryColumn[index][0] = categoryColumn[index][0].join('-');
-    } 
   }
   
   for (let i = 1; i < data.length; i++) {
     
-    let {createdCypher,createdRelationCypher} =await this.createCypherForClassification(realm,'OmniClass34',categoryColumn[i-1][0],"p")
+    let {createdCypher,createdRelationCypher} =await this.createCypherForClassification(realm,'OmniClass34',categoryColumn[i-1][0],"p","cc","c","PARENT_OF")
 
     if(typeof data[i][1]=='object'){
       email=await data[i][1].text;
@@ -806,21 +708,21 @@ async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, 
 
   ////common functions for this page
 
-  async createCypherForClassification(realm:string,classificationLabel:string,categoryCode:string,nodeName:string){
+  async createCypherForClassification(realm:string,classificationLabel:string,categoryCode:string,nodeName:string,classificationParentPlaceholder:string,classificationChildrenPlaceholder:string,relationName:string){
     let cypherArray=[]
-    let cypherArray2=[]
-    let cypher= `MATCH (a:Language_Config {realm:"${realm}"})-[:PARENT_OF]->(z) return z`;
-    let abc = await this.neo4jService.read(cypher);
-    let datasLenght=  await abc.records;  
-  
-    for (let index = 0; index < datasLenght.length; index++) {
-     let createdCypher=` MATCH (cc${index}:${classificationLabel}_${datasLenght[index]["_fields"][0].properties.name} {realm:"${realm}",isDeleted:false})-[:PARENT_OF*]->(c${index} {code:"${categoryCode}",language:"${datasLenght[index]["_fields"][0].properties.name}",isDeleted:false})`;
-     let createdRelationCypher=`MERGE (${nodeName})-[:CLASSIFIED_BY]->(c${index})`
-      cypherArray.push(createdCypher);
-      cypherArray2.push(createdRelationCypher);
-    }
-  
-  return {createdCypher:cypherArray.join(" "),createdRelationCypher:cypherArray2.join(" ")}
+  let cypherArray2=[]
+  let cypher= `MATCH (a:Language_Config {realm:"${realm}"})-[:PARENT_OF]->(z) return z`;
+  let abc = await this.neo4jService.read(cypher);
+  let datasLenght=  await abc.records;  
+
+  for (let index = 0; index < datasLenght.length; index++) {
+   let createdCypher=` MATCH (${classificationParentPlaceholder}${index}:${classificationLabel}_${datasLenght[index]["_fields"][0].properties.name} {realm:"${realm}"})-[:PARENT_OF*]->(${classificationChildrenPlaceholder}${index} {code:"${categoryCode}",language:"${datasLenght[index]["_fields"][0].properties.name}"})`;
+   let createdRelationCypher=`MERGE (${nodeName})-[:${relationName}]->(${classificationChildrenPlaceholder}${index})`
+    cypherArray.push(createdCypher);
+    cypherArray2.push(createdRelationCypher);
+  }
+
+return {createdCypher:cypherArray.join(" "),createdRelationCypher:cypherArray2.join(" ")}
     }
 
   keyGenerate(){
