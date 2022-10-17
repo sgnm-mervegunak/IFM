@@ -76,7 +76,7 @@ const findSearch = async (query: SearchParams) => {
 };
 
 const findSearchByColumn = async (query: SearchParamsColumn) => {
-    return axios.get(url + "/searchByColumn/" + `?page=${query.page}&limit=${query.limit}&orderBy=${query.orderBy}&orderByColumn=${query.orderByColumn}&searchColumn=${query.searchColumn}searchString=${query.searchString}`);
+    return axios.get(url + "/searchByColumn/" + `?page=${query.page}&limit=${query.limit}&orderBy=${query.orderBy}&orderByColumn=${query.orderByColumn}&searchColumn=${query.searchColumn}&searchString=${query.searchString}`);
 };
 
 const service = { findAll, create, update, remove, relation, nodeInfo, findSearch, findSearchByColumn };

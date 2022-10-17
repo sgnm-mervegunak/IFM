@@ -378,12 +378,14 @@ const SetContactTable = () => {
 
   const onFilterApplyClick = (e: any) => {
     let _searchKey = e.constraints.constraints[0].value;
+ 
     setSearchKey(_searchKey);
-    ContactService.findSearch({
+    ContactService.findSearchByColumn({
       page: lazyParams.page + 1,
       limit: lazyParams.rows,
       orderBy: lazyParams.sortOrder === 1 ? "ASC" : "DESC",
       orderByColumn: lazyParams.sortField,
+      searchColumn: e.field,
       searchString: _searchKey
     })
       .then((response) => {
