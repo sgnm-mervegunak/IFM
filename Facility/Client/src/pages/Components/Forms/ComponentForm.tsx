@@ -510,7 +510,7 @@ const TypeForm = ({
             </div>
 
             <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Space")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Space")}</h5>
               <Controller
                 defaultValue={data?.space || ""}
                 name="space"
@@ -561,7 +561,7 @@ const TypeForm = ({
             </div>
 
             <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Description")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Description")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("description")}
@@ -572,7 +572,7 @@ const TypeForm = ({
             </div>
 
             <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Created By")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Created By")}</h5>
               <Controller
                 defaultValue={data?.createdBy || ""}
                 name="createdBy"
@@ -680,7 +680,7 @@ const TypeForm = ({
             </div>
 
             <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Guarantor Parts")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Warranty Guarantor Parts")}</h5>
               <Controller
                 defaultValue={data?.warrantyGuarantorParts || ""}
                 name="warrantyGuarantorParts"
@@ -714,7 +714,7 @@ const TypeForm = ({
             </div>
 
             <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Guarantor Labor")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Warranty Guarantor Labor")}</h5>
               <Controller
                 defaultValue={data?.warrantyGuarantorLabor || ""}
                 name="warrantyGuarantorLabor"
@@ -748,7 +748,7 @@ const TypeForm = ({
             </div>
 
             <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Duration Unit")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Warranty Duration Unit")}</h5>
               <Controller
                 defaultValue={data?.warrantyDurationUnit || ""}
                 name="warrantyDurationUnit"

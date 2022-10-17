@@ -18,6 +18,7 @@ import { ContactHasChildrenException } from 'src/common/badRequestExceptions/bad
 import { ContactInterface } from 'src/common/interface/modules.with.pagination.interface';
 import { PaginationParams } from 'src/common/dto/pagination.query';
 import { SearchStringRepository } from 'src/common/class/search.string.from.nodes.dealer';
+import { SearchType } from 'sgnm-neo4j/dist/constant/pagination.enum';
 
 @Injectable()
 export class ContactRepository implements ContactInterface<any> {
@@ -64,14 +65,14 @@ export class ContactRepository implements ContactInterface<any> {
     return finalResponse;
   }
 
-  async findWithSearchStringByColumn(realm: string, language: string, neo4jQuery: PaginationParams,searchColumn, searchString) {
+  async findWithSearchStringByColumn(realm: string, language: string, neo4jQuery: PaginationParams,searchColumn, searchString,searchType:SearchType=SearchType.CONTAINS) {
     const contactNode = await this.neo4jService.findByLabelAndFilters(['Contact'], { realm, isDeleted: false })
     if (!contactNode.length) {
       throw new FacilityStructureNotFountException(realm);
     }
 
     neo4jQuery.skip = Math.abs(neo4jQuery.page - 1) * neo4jQuery.limit
-    const matchedNodes = await this.SearchStringRepository.searchByStringBySpecificColumn(contactNode[0].get('n').identity.low, { isDeleted: false }, [], { isDeleted: false }, [], 'PARENT_OF', neo4jQuery,searchColumn, searchString)
+    const matchedNodes = await this.SearchStringRepository.searchByStringBySpecificColumn(contactNode[0].get('n').identity.low, { isDeleted: false }, [], { isDeleted: false }, [], 'PARENT_OF', neo4jQuery,searchColumn, searchString,searchType)
     const children = matchedNodes.children.map((item) => {
       item.get('children').properties['id'] = item.get('children').identity.low
       return item.get('children').properties

@@ -532,7 +532,7 @@ const TypeForm = ({
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
               <Controller
                 defaultValue={data?.category || ""}
                 name="category"
@@ -569,7 +569,7 @@ const TypeForm = ({
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Asset Type")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Asset Type")}</h5>
               <Controller
                 defaultValue={data?.assetType || ""}
                 name="assetType"
@@ -595,7 +595,7 @@ const TypeForm = ({
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Created By")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Created By")}</h5>
               <Controller
                 defaultValue={data?.createdBy || ""}
                 name="createdBy"
@@ -617,7 +617,7 @@ const TypeForm = ({
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Manufacturer")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Manufacturer")}</h5>
               <Controller
                 defaultValue={data?.manufacturer || ""}
                 name="manufacturer"
@@ -639,7 +639,7 @@ const TypeForm = ({
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Model Number")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Model Number")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("modelNo")}
@@ -650,7 +650,7 @@ const TypeForm = ({
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Guarantor Parts")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Warranty Guarantor Parts")}</h5>
               <Controller
                 defaultValue={data?.warrantyGuarantorParts || ""}
                 name="warrantyGuarantorParts"
@@ -684,7 +684,7 @@ const TypeForm = ({
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Guarantor Labor")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Warranty Guarantor Labor")}</h5>
               <Controller
                 defaultValue={data?.warrantyGuarantorLabor || ""}
                 name="warrantyGuarantorLabor"
@@ -718,7 +718,7 @@ const TypeForm = ({
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Warranty Duration Unit")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Warranty Duration Unit")}</h5>
               <Controller
                 defaultValue={data?.warrantyDurationUnit || ""}
                 name="warrantyDurationUnit"
@@ -768,7 +768,7 @@ const TypeForm = ({
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Duration Unit")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Duration Unit")}</h5>
               <Controller
                 defaultValue={data?.durationUnit || ""}
                 name="durationUnit"
@@ -841,7 +841,7 @@ const TypeForm = ({
             </div>
 
             <div className="field col-12 md:col-3">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Model Reference")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Model Reference")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("modelReference")}

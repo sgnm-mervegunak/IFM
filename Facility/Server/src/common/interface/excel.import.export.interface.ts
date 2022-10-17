@@ -32,7 +32,7 @@ export interface ExcelImportExportInterface<T> {
     addSystemWithCobie(file: Express.Multer.File,header:MainHeaderInterface)
 
 
-    createCypherForClassification(realm:string,classificationLabel:string,categoryCode:string,nodeName:string)
+    createCypherForClassification(realm:string,classificationLabel:string,categoryCode:string,nodeName:string,classificationParentPlaceholder:string,classificationChildrenPlaceholder:string,relationName:string)
     keyGenerate();
     getZoneFromDb(buildingKey:string,data:string[]);
   }

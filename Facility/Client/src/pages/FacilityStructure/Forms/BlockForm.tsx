@@ -46,8 +46,6 @@ interface Node {
     className?: string;
 }
 
-
-
 const BlockForm = ({
     selectedFacilityType,
     submitted,
@@ -70,14 +68,12 @@ const BlockForm = ({
         name: yup.string().required(t("This area is required.")).max(50, t("This area accepts max 50 characters.")),
     });
 
-
     const { register, handleSubmit, watch, formState: { errors }, control } = useForm({
         defaultValues: {
             ...data,
         },
         resolver: yupResolver(schema)
     });
-
 
     useEffect(() => {
         if (submitted) {
@@ -93,7 +89,6 @@ const BlockForm = ({
         }
         setIsUpdate(false);
     }, [isUpdate]);
-
 
     const getNodeInfoForUpdate = (selectedNodeKey: string) => {
         FacilityStructureService.nodeInfo(selectedNodeKey)
@@ -194,7 +189,7 @@ const BlockForm = ({
     return (
         <form>
             <div className="field">
-                <h5 style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
+                <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Name")}</h5>
                 <InputText
                     autoComplete="off"
                     {...register("name")}

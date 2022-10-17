@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import {  IsOptional, IsString } from 'class-validator';
-import { AscendingEnum } from 'sgnm-neo4j/dist/constant/pagination.enum';
+import { AscendingEnum, SearchType } from 'sgnm-neo4j/dist/constant/pagination.enum';
 
 
 
@@ -41,4 +41,33 @@ export class PaginationParams {
   @ApiPropertyOptional()
   @IsOptional()
   orderByColumn?: string[]=["name"];
+}
+
+/**
+ * Common Pagination DTO for all  APIs
+ */
+ export class SearchParams {
+  /**
+   * Which column u wanna search
+   */
+  @ApiPropertyOptional()
+  @IsString()
+  searchColumn: string;
+
+ /**
+   * Which string u wanna search
+   */
+  @ApiPropertyOptional()
+  @IsString()
+  searchString: string;
+
+  /**
+   * Order by(asc or desc)
+   */
+  @ApiPropertyOptional({enum:SearchType})
+  @IsOptional()
+  @IsString()
+  searchType: SearchType=SearchType.CONTAINS;
+
+ 
 }
