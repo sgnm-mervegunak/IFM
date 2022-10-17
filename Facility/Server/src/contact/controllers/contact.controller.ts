@@ -3,10 +3,11 @@ import { ContactService } from '../services/contact.service';
 import { Roles, Unprotected } from 'nest-keycloak-connect';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { NoCache } from 'ifmcommon';
-import { PaginationParams } from 'src/common/dto/pagination.query';
+import { PaginationParams, SearchParams } from 'src/common/dto/pagination.query';
 import { CreateContactDto } from '../dto/create-contact.dto';
 import { UpdateContactDto } from '../dto/update-contact.dto';
 import { UserRoles } from 'src/common/const/keycloak.role.enum';
+import { SearchType } from 'sgnm-neo4j/dist/constant/pagination.enum';
 
 @ApiTags('contact')
 @ApiBearerAuth('JWT-auth')
@@ -38,9 +39,10 @@ export class ContactController {
   //@Unprotected()
   @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
-  findWithSearchStringByColumn(@Headers() header, @Query() neo4jQuery: PaginationParams,@Query('searchColumn') searchColumn: string, @Query('searchString') searchString: string) {
+  findWithSearchStringByColumn(@Headers() header, @Query() neo4jQuery: PaginationParams,@Query() searchParams:SearchParams) {
+    const {searchColumn,searchType,searchString}=searchParams
     const { language, realm } = header;
-    return this.contactService.findWithSearchStringByColumn(realm, language, neo4jQuery,searchColumn,searchString);
+    return this.contactService.findWithSearchStringByColumn(realm, language, neo4jQuery,searchColumn,searchString,searchType);
   }
 
   @Unprotected()

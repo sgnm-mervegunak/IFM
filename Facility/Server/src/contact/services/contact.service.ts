@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { BaseGraphDatabaseInterfaceRepository } from 'ifmcommon';
+import { SearchType } from 'sgnm-neo4j/dist/constant/pagination.enum';
 import { RepositoryEnums } from 'src/common/const/repository.enum';
 import { GeciciInterface } from 'src/common/interface/gecici.interface';
 import { ContactInterface } from 'src/common/interface/modules.with.pagination.interface';
@@ -27,8 +28,8 @@ export class ContactService {
     return this.contactRepository.findWithSearchString(realm, language, neo4jQuery, searchString);
   }
 
-  findWithSearchStringByColumn(realm: string, language: string, neo4jQuery,searchColumn, searchString) {
-    return this.contactRepository.findWithSearchStringByColumn(realm, language, neo4jQuery,searchColumn, searchString);
+  findWithSearchStringByColumn(realm: string, language: string, neo4jQuery,searchColumn, searchString,searchType:SearchType) {
+    return this.contactRepository.findWithSearchStringByColumn(realm, language, neo4jQuery,searchColumn, searchString,searchType);
   }
 
   update(id: string, updateContactDto: UpdateContactDto, realm: string, language: string) {
