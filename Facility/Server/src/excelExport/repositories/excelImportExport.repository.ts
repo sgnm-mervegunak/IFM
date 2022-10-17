@@ -375,7 +375,7 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
     let email:string;
     
     let data=[]
-    let values:[string];
+
     let buffer = new Uint8Array(file.buffer);
     const workbook = new exceljs.Workbook();
   
@@ -386,14 +386,14 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
         data.push(row.values);
       });
 
-      values= firstSheet.getColumn(4).values;
+
    })
   
    let checkBuilding = await this.neo4jService.findChildrensByLabelsAndFilters(['FacilityStructure'],{realm},[`Building`],{name:data[1][1],isDeleted:false});
    if(checkBuilding.length==0){
-    let categoryCode = await data[1][4].split(":");
+    let categoryCode = await data[1][4].split(": ");
 
-       let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"OmniClass11",categoryCode[0],"b","cc","c","PARENT_OF");
+       let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"OmniClass11",categoryCode[0],"b","cc","c","CLASSIFIED_BY");
  
        if(typeof data[1][2]=='object'){
          email=await data[1][2].text;
@@ -401,10 +401,9 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
          email= await data[1][2];
        }
    
-   //cypher query for building 
+   //CYPHER QUERY FOR BUILDING 
 
-   let cypher=`MATCH (r:FacilityStructure {realm:"${realm}"}) \
-   ${createdCypher} \
+   let cypher=`MATCH (r:FacilityStructure {realm:"${realm}"}) ${createdCypher} \
    MATCH (cnt:Contact {realm:"${realm}"})-[:PARENT_OF]->(p {email:"${email}",isDeleted:false} ) \
    MERGE (b:Building {name:"${data[1][1]}",createdOn:"${data[1][3]}",projectName:"${data[1][5]}",siteName:"${data[1][6]}",areaMeasurement:"${data[1][11]}",externalSystem:"${data[1][12]}",externalObject:"${data[1][13]}", \
    externalIdentifier:"${data[1][14]}",externalSiteObject:"${data[1][15]}",externalSiteIdentifier:"${data[1][16]}",externalFacilityObject:"${data[1][17]}",externalFacilityIdentifier:"${data[1][18]}", \
@@ -429,7 +428,7 @@ export class ExcelImportExportRepository implements ExcelImportExportInterface<a
     
   }
 
-async addFloorsToBuilding(file: Express.Multer.File, header:MainHeaderInterface, buildingKey: string)
+ async addFloorsToBuilding(file: Express.Multer.File, header:MainHeaderInterface, buildingKey: string)
 {
   let data=[]
   try {
@@ -455,7 +454,7 @@ async addFloorsToBuilding(file: Express.Multer.File, header:MainHeaderInterface,
       let checkFloor = await this.neo4jService.findChildrensByLabelsAndFilters(['Building'],{key:buildingKey,isDeleted:false},[`Floor`],{name:data[i][1],isDeleted:false});
 
       if(checkFloor.length==0){
-        let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"FacilityFloorTypes",data[i][4],"f","cc","c","PARENT_OF");
+        let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"FacilityFloorTypes",data[i][4],"f","cc","c","CLASSIFIED_BY");
   
         if(typeof data[i][2]=='object'){
           email=await data[i][2].text;
@@ -510,39 +509,38 @@ async addSpacesToBuilding( file: Express.Multer.File, header:MainHeaderInterface
           data.push(row.values);
         });
     
-        values= firstSheet.getColumn(6).values; // getting classification values
+        values= firstSheet.getColumn(8).values; // getting classification values
         
      })
     
     
      for (let index = 1; index < values.length; index++) {
-         
-      const element = values[index].split(new RegExp(/:\s{1}/g));
-     
-      categoryColumn.push(element);
+      const [first, ...rest] = values[index].split(new RegExp(/:\s{1}/g));
+      let arr = [first, rest.join(': ')];
+      categoryColumn.push(arr);
     }
-
+console.log(categoryColumn)
     for (let i = 1; i < data.length; i++) {
       let checkSpaces = await this.neo4jService.findChildrensByLabelsAndFilters(['Building'],{key:buildingKey},[`Space`],{locationCode:data[i][3],isDeleted:false});
 
       if(checkSpaces.length == 0) {
-        let {createdCypher,createdRelationCypher} =await this.createCypherForClassification(realm,'OmniClass13',categoryColumn[i][0],"s","cc","c","PARENT_OF")
-        if(typeof data[i][4]=='object'){
-          email=await data[i][4].text;
+        let {createdCypher,createdRelationCypher} =await this.createCypherForClassification(realm,'OmniClass13',categoryColumn[i][0],"s","cc","c","CLASSIFIED_BY")
+        if(typeof data[i][6]=='object'){
+          email=await data[i][6].text;
         }else {
-          email= await data[i][4];
+          email= await data[i][6];
         }
       
         let cypher=`MATCH (a:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b:Building {key:"${buildingKey}",isDeleted:false}) \
          MATCH (cont:Contact {realm:"${realm}"})-[:PARENT_OF]->(p {email:"${email}",isDeleted:false}) \
          ${createdCypher} \
          MATCH (b)-[:PARENT_OF]->(f:Floor {name:"${data[i][7]}",isDeleted:false}) \
-         MERGE (s:Space {operatorCode:"",operatorName:"",name:"${data[i][1]}",architecturalCode:"${data[i][2]}",architecturalName:"${data[i][1]}",locationCode:"${data[i][3]}",createdOn:"${data[i][5]}",description:"${data[i][8]}",key:"${this.keyGenerate()}",externalSystem:"${data[i][9]}",externalObject:"${data[i][10]}",externalIdentifier:"${data[i][11]}", \ 
-         tag:[],roomTag:["${data[i][12]}"],usableHeight:"${data[i][13]}",grossArea:"${data[i][14]}",netArea:"${data[i][15]}",images:"",documents:"", \
+         MERGE (s:Space {operatorCode:"",operatorName:"",name:"${data[i][1]}",architecturalCode:"${data[i][4]}",architecturalName:"${data[i][2]}",locationCode:"${data[i][5]}",createdOn:"${data[i][7]}",description:"${data[i][10]}",key:"${this.keyGenerate()}",externalSystem:"${data[i][11]}",externalObject:"${data[i][12]}",externalIdentifier:"${data[i][13]}", \ 
+         tag:[],roomTag:["${data[i][14]}"],usableHeight:"${data[i][15]}",grossArea:"${data[i][16]}",netArea:"${data[i][17]}",images:"",documents:"", \
          canDisplay:true,isDeleted:false,isActive:true,nodeType:"Space",isBlocked:false,canDelete:true}) \
          MERGE (f)-[:PARENT_OF]->(s) MERGE (s)-[:CREATED_BY]->(p) ${createdRelationCypher};`
-        await this.neo4jService.write(cypher);
-        console.log(cypher)
+        let abc =await this.neo4jService.write(cypher);
+        console.log(abc)
       }else{
         throw new HttpException(space_already_exist_object(data[i][3]),400) 
       }
@@ -583,11 +581,11 @@ async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, 
    for (let i = 1; i <data.length; i++) {
   let cypher =`MATCH (n:Building {key:"${buildingKey}",isDeleted:false})-[:PARENT_OF*]->(s:Space {locationCode:"${data[i][5]}",isDeleted:false}) \ 
    MATCH (s)-[:MERGEDZN]->(z:Zone {name:"${data[i][1]}",isDeleted:false}) return z`;
-   let abc = await this.neo4jService.read(cypher);
+   let returnData = await this.neo4jService.read(cypher);
    
  
-    if(abc.records.length==0){
-  let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"FacilityZoneTypes",data[i][4],"zz","cc","c","PARENT_OF");
+    if(returnData.records.length==0){
+  let {createdCypher,createdRelationCypher}=await this.createCypherForClassification(realm,"FacilityZoneTypes",data[i][4],"zz","cc","c","CLASSIFIED_BY");
   
       if(typeof data[i][2]=='object'){
         email=await data[i][2].text;
@@ -652,9 +650,10 @@ async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, 
   
    for (let index = 1; index < values.length; index++) {
          
-    const element = values[index].split(new RegExp(/:\s{1}/g));
+    const [first, ...rest] = values[index].split(new RegExp(/:\s{1}/g));
+    let arr = [first, rest.join(': ')];
    
-    categoryColumn.push(element);
+    categoryColumn.push(arr);
   }
   
   for (let i = 1; i < data.length; i++) {
