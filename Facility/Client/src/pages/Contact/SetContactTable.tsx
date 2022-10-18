@@ -95,8 +95,8 @@ const SetContactTable = () => {
     rows: 10,
     page: 0,
     orderBy: "ASC",
-    orderByColumn: "email",
-    sortField: null || undefined,
+    orderByColumn: ["email"],
+    sortField:  null || undefined,
     sortOrder: null,
     filters: {
     }
@@ -129,7 +129,7 @@ const SetContactTable = () => {
         page: lazyParams.page + 1,
         limit: lazyParams.rows,
         orderBy: lazyParams.sortOrder === 1 ? "ASC" : "DESC",
-        orderByColumn: lazyParams.sortField
+        orderByColumn: lazyParams.sortField ? [lazyParams.sortField] : [],
       })
         .then((response) => {
           setData(response.data.children);
@@ -179,7 +179,7 @@ const SetContactTable = () => {
       page: lazyParams.page + 1,
       limit: lazyParams.rows,
       orderBy: lazyParams.sortOrder === 1 ? "ASC" : "DESC",
-      orderByColumn: lazyParams.sortField
+      orderByColumn: lazyParams.sortField ? [lazyParams.sortField] : [],
     })
       .then((response) => {
         setData(response.data.children);
