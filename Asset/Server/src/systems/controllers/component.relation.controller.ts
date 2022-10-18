@@ -26,7 +26,7 @@ export class SystemComponentRelationController {
   
   @Delete(':parent_key/:chidren_keys')
   @Roles({ roles: [UserRoles.ADMIN] })
-  remove(@Param('parent_key') parent_key: string,  @Query('chidren_keys') chidren_keys: string[],@Headers() header) {
+  remove(@Param('parent_key') parent_key: string, @Body() chidren_keys: string[],@Headers() header) {
     return this.systemComponentService.delete(parent_key, chidren_keys, header);
   }
 }
