@@ -84,9 +84,9 @@ export class SystemComponentRepository implements SystemComponentInterface<Syste
   }
   async delete(_parent_key: string, _children_keys: string[], header) {
     try {
-      if ( typeof(_children_keys) == 'string') {
-        _children_keys = [_children_keys];
-      }
+      // if ( typeof(_children_keys) == 'string') {
+      //   _children_keys = [_children_keys];
+      // }
       const { realm } = header;
       const selectedSystemNode = await this.neo4jService.findByLabelAndFilters([],{"isDeleted": false, "key": _parent_key},[]);
       if (!selectedSystemNode.length) {
