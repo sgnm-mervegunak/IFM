@@ -24,9 +24,9 @@ export class SystemComponentRelationController {
     return this.systemComponentService.create(systemComponentRelationDto, header);
   }
   
-  @Delete(':parent_key/:chidren_keys')
+  @Delete(':parent_key')
   @Roles({ roles: [UserRoles.ADMIN] })
-  remove(@Param('parent_key') parent_key: string, @Body() chidren_keys: string[],@Headers() header) {
-    return this.systemComponentService.delete(parent_key, chidren_keys, header);
+  remove(@Param('parent_key') parent_key: string, @Body() children_keys: string[],@Headers() header) {
+    return this.systemComponentService.delete(parent_key, children_keys, header);
   }
 }
