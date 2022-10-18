@@ -18,16 +18,27 @@ interface SearchParams {
     searchString?: string;
 }
 
-interface SearchParamsColumn {
+interface SearchCountParams {
+    searchString?: string;
+}
+
+interface SearchColumnParams {
     page?: number;
     limit?: number;
     orderBy?: string;
     orderByColumn?: string | undefined | null;
     searchColumn?: string;
     searchString?: string;
+    searchType?: string;
 }
 
-interface StructureInterface {
+interface SearchColumnCountParams {
+    searchColumn?: string;
+    searchString?: string;
+    searchType?: string;
+}
+
+interface ContactInterface {
     key: string;
     parentId?: string;
     name: string;
@@ -50,23 +61,27 @@ interface StructureInterface {
 
 const findAll = async (query: PaginationParams) => {
     return axios.get(url + `?page=${query.page}&limit=${query.limit}&orderBy=${query.orderBy}`,
-    {
-        params: {
-          orderByColumn: query.orderByColumn
-        },
-        paramsSerializer: params => {
-          return qs.stringify(params)
+        {
+            params: {
+                orderByColumn: query.orderByColumn
+            },
+            paramsSerializer: params => {
+                return qs.stringify(params)
+            }
         }
-      }
     );
 };
 
-const create = async (structure: StructureInterface) => {
-    return axios.post(url, structure);
+const getContactCounts = async () => {
+    return axios.get(url + "/totalCount");
 };
 
-const update = async (id: string, structure: StructureInterface) => {
-    return axios.patch(url + "/" + id, structure);
+const create = async (contact: ContactInterface) => {
+    return axios.post(url, contact);
+};
+
+const update = async (id: string, contact: ContactInterface) => {
+    return axios.patch(url + "/" + id, contact);
 };
 
 const remove = async (id: string) => {
@@ -85,10 +100,30 @@ const findSearch = async (query: SearchParams) => {
     return axios.get(url + "/search/" + `?page=${query.page}&limit=${query.limit}&orderBy=${query.orderBy}&orderByColumn=${query.orderByColumn}&searchString=${query.searchString}`);
 };
 
-const findSearchByColumn = async (query: SearchParamsColumn) => {
-    return axios.get(url + "/searchByColumn/" + `?page=${query.page}&limit=${query.limit}&orderBy=${query.orderBy}&orderByColumn=${query.orderByColumn}&searchColumn=${query.searchColumn}&searchString=${query.searchString}`);
+const getSearchContactCounts = async (query: SearchCountParams) => {
+    return axios.get(url + "/search/totalCount" + `?searchString=${query.searchString}`);
 };
 
-const service = { findAll, create, update, remove, relation, nodeInfo, findSearch, findSearchByColumn };
+const findSearchByColumn = async (query: SearchColumnParams) => {
+    return axios.get(url + "/searchByColumn/" + `?page=${query.page}&limit=${query.limit}&orderBy=${query.orderBy}&orderByColumn=${query.orderByColumn}&searchColumn=${query.searchColumn}&searchString=${query.searchString}&searchType=${query.searchType}`);
+};
+
+const getSearchColumnContactCounts = async (query: SearchColumnCountParams) => {
+    return axios.get(url + "/searchByColumn/totalCount" + `?searchColumn=${query.searchColumn}&searchString=${query.searchString}&searchType=${query.searchType}`);
+};
+
+const service = {
+    findAll,
+    getContactCounts,
+    create,
+    update,
+    remove,
+    relation,
+    nodeInfo,
+    findSearch,
+    getSearchContactCounts,
+    findSearchByColumn,
+    getSearchColumnContactCounts
+};
 
 export default service;

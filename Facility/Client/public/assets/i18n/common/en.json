@@ -204,7 +204,8 @@
 	"Showing {first} to {last} of {totalRecords} Contacts":"Showing {first} to {last} of {totalRecords} Contacts",
 	"Starts With": "Starts With",
 	"Contains": "Contains",
-	"Apply": "Apply"
+	"Apply": "Apply",
+	"Ends With": "Ends With"
 }
 
 

@@ -111,21 +111,14 @@ export class ContactRepository implements ContactInterface<any> {
       'PARENT_OF',
       neo4jQuery,
     );
-    let totalCount = await this.neo4jService.findChildrensByIdAndFilters(
-      contactNode[0].get('n').identity.low,
-      {},
-      [],
-      { isDeleted: false },
-      'PARENT_OF',
-    );
-    totalCount = totalCount.length;
+  
 
     children = children.map((item) => {
       item.get('children').properties['id'] = item.get('children').identity.low;
       return item.get('children').properties;
     });
 
-    const finalResponse = { ...contactNode[0].get('n').properties, totalCount, children };
+    const finalResponse = { ...contactNode[0].get('n').properties,  children };
 
     return finalResponse;
   }

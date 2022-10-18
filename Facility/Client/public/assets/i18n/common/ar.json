@@ -205,5 +205,6 @@
 	"Starts With": "يبدأ بـ",
 	"Contains": "يحتوي على",
 	"addRule":"إضافة قاعدة",
-	"Apply": "تطبيق"
+	"Apply": "تطبيق",
+	"Ends With": "ينتهي بـ"
 }
