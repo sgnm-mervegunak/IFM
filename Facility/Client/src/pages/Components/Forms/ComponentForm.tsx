@@ -1,7 +1,8 @@
-import React, { useState, useEffect, InputHTMLAttributes } from "react";
+import React, { useState, useEffect, InputHTMLAttributes, useRef } from "react";
 import { InputText } from "primereact/inputtext";
 import { Chips } from "primereact/chips";
 import { TreeSelect } from "primereact/treeselect";
+import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from "primereact/calendar";
 import { TabView, TabPanel } from 'primereact/tabview';
 import { useForm, Controller } from "react-hook-form";
@@ -77,6 +78,7 @@ const TypeForm = ({
   const [spaces, setSpaces] = useState<Node[]>([]);
   const [spaceType, setSpaceType] = useState("");
   const [contact, setContact] = useState<any>([]);
+  const [contactData, setContactData] = useState<any>([]);
   const [deleteFiles, setDeleteFiles] = useState<any[]>([]);
   const [uploadFiles, setUploadFiles] = useState<any>({});
   const { toast } = useToast()
@@ -84,6 +86,16 @@ const TypeForm = ({
   const [codeWarrantyDurationUnit, setCodeWarrantyCodeDurationUnit] = useState("");
   const [expandedKeys, setExpandedKeys] = useState({});
   const [loading, setLoading] = useState(true);
+  const contactRef = useRef<any>(null);
+  const [lazyParams, setLazyParams] = useState({
+    first: 1,
+    limit: 20,
+    page: 1,
+    orderBy: "ASC",
+    orderByColumn: "email",
+  });
+  const [totalRecords, setTotalRecords] = useState(0);
+
 
   const [data, setData] = useState<any>();
 
@@ -119,6 +131,7 @@ const TypeForm = ({
     },
     resolver: yupResolver(schema)
   });
+
 
   const fixNodes = (nodes: Node[]) => {
     if (!nodes || nodes.length === 0) {
@@ -202,11 +215,24 @@ const TypeForm = ({
   };
 
   const getContact = async () => {
-    ContactService.findAll({page:1,limit:1000,orderBy:"ASC",orderByColumn:"email"})
+    ContactService.findAll({ page: 1, limit: 10, orderBy: "ASC", orderByColumn: ["email"] })
       .then((res) => {
         let temp = JSON.parse(JSON.stringify([res.data] || []));
         fixNodes(temp);
         setContact(temp);
+      });
+  };
+
+  const getContactData = async () => {
+    ContactService.findAll({ page: 1, limit: 10, orderBy: "ASC", orderByColumn: ["email"] }
+    )
+      .then((res) => {
+        let temp = res.data.children.map((child: any) => ({
+          email: child.email,
+          key: child.key
+        })
+        );
+        setContactData(temp);
       });
   };
 
@@ -224,6 +250,7 @@ const TypeForm = ({
   useEffect(() => {
     getClassificationCategory();
     getContact();
+    getContactData();
     getSpaces();
     getClassificationDurationUnit();
   }, []);
@@ -264,7 +291,6 @@ const TypeForm = ({
             );
             fixNodesSpaces(temp);
             setSpaces(temp);
-
           })
 
         // setData(temp);
@@ -297,6 +323,58 @@ const TypeForm = ({
     return axios.delete(url, { data: { fileName, realmName } });
   };
 
+  const handleKeyDownContact = async (e: any) => {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      let _searchKey = await e.target.value;
+      console.log(_searchKey);
+      ContactService.findSearchByColumn({
+        page: 1,
+        limit: 10,
+        orderBy: "ASC",
+        orderByColumn: "email",
+        searchColumn: "email",
+        searchString: _searchKey
+      })
+        .then((response) => {
+          console.log(response.data);
+          setContactData(response.data.children.map((child: any) => ({
+            email: child.email,
+            key: child.key
+          })
+          ));
+
+          _searchKey = "";
+        })
+        .catch((err) => {
+          toast.current.show({
+            severity: "error",
+            summary: "Error",
+            detail: err.response ? err.response.data.message : err.message,
+            life: 2000,
+          });
+        });
+    }
+  }
+
+  const handleChangeContact = (e: any) => {
+    if (e.target.value === "") {
+      getContactData();
+    }
+  }
+
+  const filterTemplate = (event: any, options: any) => {
+
+    return (
+      <span className="p-input-icon-left" style={{ width: "100%" }}>
+        <i className="pi pi-search" />
+        <InputText style={{ width: "100%" }} onKeyDown={handleKeyDownContact} onChange={handleChangeContact} placeholder={t("Search")} />
+      </span>
+    )
+  }
+
+
+
   const onSubmit = (data: any) => {
     if (editDia === false) {
       let newNode: any = {};
@@ -325,7 +403,7 @@ const TypeForm = ({
       };
 
       console.log(newNode);
-      
+
 
       ComponentService.create(newNode)
         .then(async (res) => {
@@ -413,7 +491,7 @@ const TypeForm = ({
       };
 
       console.log(updateNode);
-      
+
 
       ComponentService.update(selectedNodeId, updateNode)
         .then(async (res) => {
@@ -571,7 +649,7 @@ const TypeForm = ({
               <p style={{ color: "red" }}>{errors.description?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-4">
+            {/* <div className="field col-12 md:col-4">
               <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Created By")}</h5>
               <Controller
                 defaultValue={data?.createdBy || ""}
@@ -585,6 +663,33 @@ const TypeForm = ({
                       field.onChange(e.value)
                     }}
                     filter
+                    placeholder=""
+                    style={{ width: "100%" }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.createdBy?.message}</p>
+            </div> */}
+
+            <div className="field col-12 md:col-4">
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Created By Table")}</h5>
+              <Controller
+                defaultValue={data?.createdBy || ""}
+                name="createdBy"
+                control={control}
+                render={({ field }) => (
+                  <Dropdown
+                    value={field.value}
+                    ref={contactRef}
+                    options={contactData}
+                    optionLabel="email"
+                    optionValue="key"
+                    onChange={(e) => {
+                      field.onChange(e.value)
+                      // getContactData();
+                    }}
+                    filter
+                    filterTemplate={filterTemplate}
                     placeholder=""
                     style={{ width: "100%" }}
                   />

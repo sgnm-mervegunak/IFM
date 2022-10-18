@@ -175,7 +175,7 @@ const TypeForm = ({
   };
 
   const getContact = async () => {
-    ContactService.findAll({page:1,limit:1000,orderBy:"ASC",orderByColumn:"email"})
+    ContactService.findAll({page:1,limit:1000,orderBy:"ASC",orderByColumn:["email"]})
       .then((res) => {
         console.log(res.data);
         
