@@ -31,6 +31,27 @@ export class SearchStringRepository {
     }
   }
 
+  async searchByStringTotalCount(
+    rootId: number,
+    rootFilters: object = {},
+    childrenLabels: string[] = [''],
+    childerenFilters: object = {},
+    exclutedLabelsForChildren: string[] = [''],
+    relationName: string,
+    searchString: string = '',
+    searchType:SearchType=SearchType.CONTAINS
+
+  ) {
+    try {
+      let totalCount = await this.neo4jService.findChildrensByIdAndFiltersWithoutPaginationAndSearcString(rootId, rootFilters, childrenLabels, childerenFilters, exclutedLabelsForChildren, relationName, searchString,searchType)
+
+      const finalResult = { totalCount: totalCount.length }
+      return finalResult
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   async searchByStringBySpecificColumn(
     rootId: number,
     rootFilters: object = {},
@@ -46,8 +67,31 @@ export class SearchStringRepository {
     try {
       const children = await this.neo4jService.findChildrensByIdAndFiltersWithPaginationAndSearcStringBySpecificColumn(rootId, rootFilters, childrenLabels, childerenFilters, exclutedLabelsForChildren, relationName, neo4jQuery, searchColumn, searchString,searchType)
       let totalCount = await this.neo4jService.findChildrensByIdAndFiltersWithoutPaginationAndSearcStringBySpecificColumn(rootId, rootFilters, childrenLabels, childerenFilters, exclutedLabelsForChildren, relationName, searchColumn, searchString,searchType)
-
+      
       const finalResult = { totalCount: totalCount.length, children }
+      console.log(finalResult)
+      return finalResult
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async searchByStringBySpecificColumnTotalCount(
+    rootId: number,
+    rootFilters: object = {},
+    childrenLabels: string[] = [''],
+    childerenFilters: object = {},
+    exclutedLabelsForChildren: string[] = [''],
+    relationName: string,
+    searchColumn: string = '',
+    searchString: string = '',
+    searchType:SearchType=SearchType.CONTAINS
+  ) {
+    try {
+  
+      let totalCount = await this.neo4jService.findChildrensByIdAndFiltersWithoutPaginationAndSearcStringBySpecificColumn(rootId, rootFilters, childrenLabels, childerenFilters, exclutedLabelsForChildren, relationName, searchColumn, searchString,searchType)
+      
+      const finalResult = { totalCount: totalCount.length }
       console.log(finalResult)
       return finalResult
     } catch (error) {

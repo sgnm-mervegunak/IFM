@@ -25,6 +25,15 @@ export class ContactController {
     return this.contactService.findOne(realm, language, neo4jQuery);
   }
 
+  @Get('totalCount')
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
+  @NoCache()
+  findOneTotalCount(@Headers() header) {
+    const { language, realm } = header;
+    return this.contactService.findOneTotalCount(realm, language);
+  }
+
   @Get('/search')
   //@Unprotected()
   @Roles({ roles: [UserRoles.ADMIN] })
@@ -43,6 +52,27 @@ export class ContactController {
     const {searchColumn,searchType,searchString}=searchParams
     const { language, realm } = header;
     return this.contactService.findWithSearchStringByColumn(realm, language, neo4jQuery,searchColumn,searchString,searchType);
+  }
+
+
+  @Get('/search/totalCount')
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
+  @NoCache()
+  findWithSearchStringTotalCount(@Headers() header,  @Query('searchString') searchString: string) {
+    const { language, realm } = header;
+    return this.contactService.findWithSearchStringTotalCount(realm, language, searchString);
+
+  }
+
+  @Get('/searchByColumn/totalCount')
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
+  @NoCache()
+  findWithSearchStringByColumnTotalCOunt(@Headers() header,@Query() searchParams:SearchParams) {
+    const {searchColumn,searchType,searchString}=searchParams
+    const { language, realm } = header;
+    return this.contactService.findWithSearchStringByColumnTotalCount(realm, language,searchColumn,searchString,searchType);
   }
 
   @Unprotected()

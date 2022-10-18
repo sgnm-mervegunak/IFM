@@ -23,13 +23,23 @@ export class ContactService {
   findOne(realm: string, language: string, neo4jQuery) {
     return this.contactRepository.findOneByRealm(realm, language, neo4jQuery);
   }
+  findOneTotalCount(realm: string, language: string) {
+    return this.contactRepository.findOneByRealmTotalCount(realm, language);
+  }
 
   findWithSearchString(realm: string, language: string, neo4jQuery, searchString) {
     return this.contactRepository.findWithSearchString(realm, language, neo4jQuery, searchString);
   }
+  findWithSearchStringTotalCount(realm: string, language: string, searchString) {
+    return this.contactRepository.findWithSearchStringTotalCount(realm, language, searchString);
+  }
 
   findWithSearchStringByColumn(realm: string, language: string, neo4jQuery,searchColumn, searchString,searchType:SearchType) {
     return this.contactRepository.findWithSearchStringByColumn(realm, language, neo4jQuery,searchColumn, searchString,searchType);
+  }
+
+  findWithSearchStringByColumnTotalCount(realm: string, language: string,searchColumn, searchString,searchType:SearchType) {
+    return this.contactRepository.findWithSearchStringByColumnTotalCount(realm, language,searchColumn, searchString,searchType);
   }
 
   update(id: string, updateContactDto: UpdateContactDto, realm: string, language: string) {
