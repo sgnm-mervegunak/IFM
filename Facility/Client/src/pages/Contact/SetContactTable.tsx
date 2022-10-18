@@ -96,12 +96,12 @@ const SetContactTable = () => {
     page: 0,
     orderBy: "ASC",
     orderByColumn: ["email"],
-    sortField:  null || undefined,
+    sortField: null || undefined,
     sortOrder: null,
     filters: {
     }
   });
-  const [countContacts, setCountContacts] = useState(0);
+  const [contactCounts, setContactCounts] = useState(0);
   const [addDia, setAddDia] = useState<boolean>(false);
   const [editDia, setEditDia] = useState<boolean>(false);
   const [delDia, setDelDia] = useState<boolean>(false);
@@ -124,6 +124,11 @@ const SetContactTable = () => {
 
   const getContact = () => {
     if (searchKey === "") {
+      ContactService.getContactCounts()
+        .then((response) => {
+          setContactCounts(response.data.totalCount);
+        })
+
       setLoading(true);
       ContactService.findAll({
         page: lazyParams.page + 1,
@@ -133,7 +138,6 @@ const SetContactTable = () => {
       })
         .then((response) => {
           setData(response.data.children);
-          setCountContacts(response.data.totalCount);
           setLoading(false);
         })
         .catch((err) => {
@@ -146,6 +150,13 @@ const SetContactTable = () => {
           setLoading(false);
         });
     } else {
+
+      ContactService.getSearchContactCounts({ searchString: searchKey })
+        .then((response) => {
+          setContactCounts(response.data.totalCount);
+        })
+
+      setLoading(true);
       ContactService.findSearch({
         page: lazyParams.page + 1,
         limit: lazyParams.rows,
@@ -155,7 +166,6 @@ const SetContactTable = () => {
       })
         .then((response) => {
           setData(response.data.children);
-          setCountContacts(response.data.totalCount);
           setLoading(false);
         })
         .catch((err) => {
@@ -183,7 +193,7 @@ const SetContactTable = () => {
     })
       .then((response) => {
         setData(response.data.children);
-        setCountContacts(response.data.totalCount);
+        // setCountContacts(response.data.totalCount);
         setLoading(false);
       })
       .catch((err) => {
@@ -209,6 +219,7 @@ const SetContactTable = () => {
 
   const matchModes = [
     { label: t("Starts With"), value: FilterMatchMode.STARTS_WITH },
+    { label: t("Ends With"), value: FilterMatchMode.ENDS_WITH },
     { label: t("Contains"), value: FilterMatchMode.CONTAINS }
   ];
 
@@ -297,6 +308,12 @@ const SetContactTable = () => {
       let _searchKey = await event.target.value;
       setSearchKey(_searchKey);
 
+      ContactService.getSearchContactCounts({ searchString: _searchKey })
+        .then((response) => {
+          setContactCounts(response.data.totalCount);
+        })
+
+      setLoading(true);
       ContactService.findSearch({
         page: lazyParams.page + 1,
         limit: lazyParams.rows,
@@ -306,9 +323,8 @@ const SetContactTable = () => {
       })
         .then((response) => {
           setData(response.data.children);
-          setCountContacts(response.data.totalCount);
-          setLoading(false);
           _searchKey = "";
+          setLoading(false);
         })
         .catch((err) => {
           toast.current.show({
@@ -381,21 +397,40 @@ const SetContactTable = () => {
 
   const onFilterApplyClick = (e: any) => {
     let _searchKey = e.constraints.constraints[0].value;
-
     setSearchKey(_searchKey);
+
+    let searchType = e.constraints.constraints[0].matchMode.toUpperCase();
+    if (searchType === "STARTSWITH") {
+      searchType = "STARTS WITH";
+    }
+
+    if (searchType === "ENDSWITH") {
+      searchType = "ENDS WITH";
+    }
+
+    ContactService.getSearchColumnContactCounts({
+      searchColumn: e.field,
+      searchString: _searchKey,
+      searchType: searchType
+    })
+      .then((response) => {
+        setContactCounts(response.data.totalCount);
+      })
+
+    setLoading(true);
     ContactService.findSearchByColumn({
       page: lazyParams.page + 1,
       limit: lazyParams.rows,
       orderBy: lazyParams.sortOrder === 1 ? "ASC" : "DESC",
       orderByColumn: lazyParams.sortField,
       searchColumn: e.field,
-      searchString: _searchKey
+      searchString: _searchKey,
+      searchType: searchType
     })
       .then((response) => {
         setData(response.data.children);
-        setCountContacts(response.data.totalCount);
-        setLoading(false);
         _searchKey = "";
+        setLoading(false);
       })
       .catch((err) => {
         toast.current.show({
@@ -568,7 +603,7 @@ const SetContactTable = () => {
             rows={lazyParams.rows}
             rowsPerPageOptions={[10, 25, 50]}
             lazy
-            totalRecords={countContacts}
+            totalRecords={contactCounts}
             header={header}
             emptyMessage="Contact not found"
             sortField={lazyParams.sortField}
