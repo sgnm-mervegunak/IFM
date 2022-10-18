@@ -20,7 +20,7 @@ const AssetClassificationFileImportWithoutCode: React.FC = () => {
     const history = useNavigate();
 
     function backToClassification() {
-        history('/classifications');
+        history('/asset-classifications');
     }
 
     const uploadCSV = (e: any) => {

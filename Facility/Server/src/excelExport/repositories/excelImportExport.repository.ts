@@ -493,12 +493,8 @@ async addSpacesToBuilding( file: Express.Multer.File, header:MainHeaderInterface
   try {
     let email:string;
     const {realm}= header;
-    
 
-    
       let data=[]
-      let categoryColumn=[];
-      let values:[string];
       let buffer = new Uint8Array(file.buffer);
       const workbook = new exceljs.Workbook();
     
@@ -508,23 +504,18 @@ async addSpacesToBuilding( file: Express.Multer.File, header:MainHeaderInterface
         firstSheet.eachRow({ includeEmpty: false }, function(row) {
           data.push(row.values);
         });
-    
-        values= firstSheet.getColumn(8).values; // getting classification values
+  
         
      })
-    
-    
-     for (let index = 1; index < values.length; index++) {
-      const [first, ...rest] = values[index].split(new RegExp(/:\s{1}/g));
-      let arr = [first, rest.join(': ')];
-      categoryColumn.push(arr);
-    }
-console.log(categoryColumn)
+     
     for (let i = 1; i < data.length; i++) {
       let checkSpaces = await this.neo4jService.findChildrensByLabelsAndFilters(['Building'],{key:buildingKey},[`Space`],{locationCode:data[i][3],isDeleted:false});
 
       if(checkSpaces.length == 0) {
-        let {createdCypher,createdRelationCypher} =await this.createCypherForClassification(realm,'OmniClass13',categoryColumn[i][0],"s","cc","c","CLASSIFIED_BY")
+
+        const [code, ...rest] = await data[i][8].split(new RegExp(/:\s{1}/g));
+
+        let {createdCypher,createdRelationCypher} =await this.createCypherForClassification(realm,'OmniClass13',code,"s","cc","c","CLASSIFIED_BY")
         if(typeof data[i][6]=='object'){
           email=await data[i][6].text;
         }else {
@@ -632,8 +623,6 @@ async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, 
 
  
     let data=[]
-    let categoryColumn=[];
-    let values:[string];
     let buffer = new Uint8Array(file.buffer);
     const workbook = new exceljs.Workbook();
   
@@ -643,22 +632,14 @@ async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, 
       firstSheet.eachRow({ includeEmpty: false }, function(row) {
         data.push(row.values);
       });
-  
-      values= firstSheet.getColumn(4).values;
-      
    })
   
-   for (let index = 1; index < values.length; index++) {
-         
-    const [first, ...rest] = values[index].split(new RegExp(/:\s{1}/g));
-    let arr = [first, rest.join(': ')];
-   
-    categoryColumn.push(arr);
-  }
   
   for (let i = 1; i < data.length; i++) {
     
-    let {createdCypher,createdRelationCypher} =await this.createCypherForClassification(realm,'OmniClass34',categoryColumn[i-1][0],"p","cc","c","PARENT_OF")
+    const [code, ...rest] =await data[i][4].split(new RegExp(/:\s{1}/g));
+    
+    let {createdCypher,createdRelationCypher} =await this.createCypherForClassification(realm,'OmniClass34',code,"p","clsp","cls","CLASSIFIED_BY")
 
     if(typeof data[i][1]=='object'){
       email=await data[i][1].text;
@@ -681,7 +662,7 @@ async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, 
     console.log(data2)
 
     let cypher2 = `MATCH (p {email:"${email}"}) MATCH (p2 {email:"${createdByEmail}"}) MERGE (p)-[:CREATED_BY]->(p2)`
-    let data3 =await this.neo4jService.write(cypher2);
+    await this.neo4jService.write(cypher2);
     }else{
       throw new HttpException(contact_already_exist_object(email),400)
     }
@@ -708,15 +689,15 @@ async addZonesToBuilding( file: Express.Multer.File,header:MainHeaderInterface, 
   ////common functions for this page
 
   async createCypherForClassification(realm:string,classificationLabel:string,categoryCode:string,nodeName:string,classificationParentPlaceholder:string,classificationChildrenPlaceholder:string,relationName:string){
-    let cypherArray=[]
+  let cypherArray=[];
   let cypherArray2=[]
   let cypher= `MATCH (a:Language_Config {realm:"${realm}"})-[:PARENT_OF]->(z) return z`;
-  let abc = await this.neo4jService.read(cypher);
-  let datasLenght=  await abc.records;  
+  let value = await this.neo4jService.read(cypher);
+  let datasLenght=  await value.records;  
 
   for (let index = 0; index < datasLenght.length; index++) {
    let createdCypher=` MATCH (${classificationParentPlaceholder}${index}:${classificationLabel}_${datasLenght[index]["_fields"][0].properties.name} {realm:"${realm}"})-[:PARENT_OF*]->(${classificationChildrenPlaceholder}${index} {code:"${categoryCode}",language:"${datasLenght[index]["_fields"][0].properties.name}"})`;
-   let createdRelationCypher=`MERGE (${nodeName})-[:${relationName}]->(${classificationChildrenPlaceholder}${index})`
+   let createdRelationCypher=`MERGE (${nodeName})-[:${relationName}]->(${classificationChildrenPlaceholder}${index})`;
     cypherArray.push(createdCypher);
     cypherArray2.push(createdRelationCypher);
   }

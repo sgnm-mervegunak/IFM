@@ -171,7 +171,7 @@ export class ExcelImportRepository implements ExcelImportInterface<any> {
   
     for (let index = 0; index < datasLenght.length; index++) {
      let createdCypher=` MATCH (cc${index}:${classificationLabel}_${datasLenght[index]["_fields"][0].properties.name} {realm:"${realm}"})-[:PARENT_OF*]->(c${index} {code:"${categoryCode}",language:"${datasLenght[index]["_fields"][0].properties.name}"})`;
-     let createdRelationCypher=`MERGE (${nodeName})-[:CLASSIFIED_BY]->(c${index})`
+     let createdRelationCypher=`MERGE (${nodeName})-[:CLASSIFIED_BY]->(c${index})`;
       cypherArray.push(createdCypher);
       cypherArray2.push(createdRelationCypher);
     }
