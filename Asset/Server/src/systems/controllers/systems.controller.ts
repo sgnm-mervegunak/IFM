@@ -56,12 +56,6 @@ export class SystemsController {
     return await this.systemsService.findTypesIncludedBySystem(key, header, neo4jQuery);
   }
 
-  @Roles({ roles: [UserRoles.ADMIN] })
-  @Get('components/list/:key')
-  @NoCache()
-  async findComponentsIncludedBySystem(@Param('key') key: string, @Headers() header,@Query()neo4jQuery: PaginationParams) {
-    return await this.systemsService.findComponentsIncludedBySystem(key, header, neo4jQuery);
-  }
-
+  
   
 }

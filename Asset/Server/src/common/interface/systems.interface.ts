@@ -8,5 +8,5 @@ export interface SystemsInterface<T> {
   delete(id: string, header): any;
   findByKey(key: string, header): any;
   findTypesIncludedBySystem(key: string, header, params: PaginationParams): any;
-  findComponentsIncludedBySystem(key: string, header, params: PaginationParams): any;
+
 }
