@@ -163,7 +163,7 @@ const SetContactTable = () => {
         page: lazyParams.page + 1,
         limit: lazyParams.rows,
         orderBy: lazyParams.sortOrder === 1 ? "ASC" : "DESC",
-        orderByColumn: lazyParams.sortField,
+        orderByColumn: lazyParams.sortField ? lazyParams.sortField : "",
         searchString: searchKey
       })
         .then((response) => {
@@ -220,6 +220,7 @@ const SetContactTable = () => {
     getContact();
     setSelectedData(null);
     setSelectedDataKeys([]);
+  
   }, [lazyParams]);
 
   useEffect(() => {
@@ -328,7 +329,7 @@ const SetContactTable = () => {
         page: lazyParams.page + 1,
         limit: lazyParams.rows,
         orderBy: lazyParams.sortOrder === 1 ? "ASC" : "DESC",
-        orderByColumn: lazyParams.sortField,
+        orderByColumn: lazyParams.sortField ? lazyParams.sortField : "",
         searchString: _searchKey
       })
         .then((response) => {
@@ -433,7 +434,7 @@ const SetContactTable = () => {
       page: lazyParams.page + 1,
       limit: lazyParams.rows,
       orderBy: lazyParams.sortOrder === 1 ? "ASC" : "DESC",
-      orderByColumn: lazyParams.sortField,
+      orderByColumn: lazyParams.sortField ? lazyParams.sortField : "",
       searchColumn: e.field,
       searchString: _searchKey,
       searchType: searchType
