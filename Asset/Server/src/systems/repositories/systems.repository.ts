@@ -368,27 +368,5 @@ export class SystemsRepository implements SystemsInterface<System> {
     
      return resultObject;     
   }
-  async findComponentsIncludedBySystem(key: string, header, neo4jQuery: PaginationParams) {
-    const systemNode = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.SYSTEM],
-      {"isDeleted": false, "key": key}, [Neo4jLabelEnum.VIRTUAL]);
-    if (!systemNode['length']) {
-        throw new HttpException(node_not_found({}), 400);
-      }  
-    const systemComponents = await this.neo4jService.findChildrensByIdAndFiltersWithPagination(
-      systemNode[0].get('n').identity.low,
-      {"isDeleted": false},
-      ['Component'],
-      {"isDeleted": false},
-      RelationName.SYSTEM_OF,
-      neo4jQuery
-    ); 
-    let components = []; 
-    systemComponents.forEach((record) => {
-      components.push(record.get('children').properties);
-    });
-
-     let resultObject =  {"totalCount": systemComponents['length'], "properties": components}
-    
-     return resultObject;     
-  }
+  
 }

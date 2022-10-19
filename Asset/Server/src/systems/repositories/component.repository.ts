@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CustomNeo4jError, Neo4jService } from 'sgnm-neo4j/dist';
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
-import { wrong_parent_error} from 'src/common/const/custom.error.object';
+import { node_not_found, wrong_parent_error} from 'src/common/const/custom.error.object';
 import { CustomAssetError } from 'src/common/const/custom.error.enum';
 import { RelationName } from 'src/common/const/relation.name.enum';
 import { System } from '../entities/systems.entity';
@@ -14,14 +14,32 @@ import { SystemComponentRelationDto } from '../dto/component.relation.dto';
 import { WrongIdProvided } from 'src/common/bad.request.exception';
 import { AssetNotFoundException } from 'src/common/notFoundExceptions/not.found.exception';
 import { string } from 'joi';
+import { PaginationParams } from 'src/common/commonDto/pagination.dto';
+import { SystemComponentService } from '../services/component.relation.service';
 
 @Injectable()
 export class SystemComponentRepository implements SystemComponentInterface<System> {
   constructor(
     private readonly neo4jService: Neo4jService,
     private readonly nodeRelationHandler: NodeRelationHandler,
+    private readonly systemComponentService: SystemComponentService
    
   ) {}
+
+  async findOneByRealmTotalCount(systemId: string, realm: string, language: string) {
+    try {
+      let totalCount = await this.neo4jService.findChildrensByIdAndFiltersTotalCount(
+        +systemId,
+        {},
+        [Neo4jLabelEnum.COMPONENT],
+        { isDeleted: false },
+        'SYSTEM_OF',
+      );
+      totalCount=totalCount[0].get('count').low
+      
+      return { totalCount};
+    } catch (error) {}
+  }
   
   async create(systemComponentRelationDto: SystemComponentRelationDto, header) {
     try {
@@ -123,5 +141,30 @@ export class SystemComponentRepository implements SystemComponentInterface<Syste
         throw new HttpException(message, code);
       }
     }
+  }
+
+  async findComponentsIncludedBySystem(key: string, header, neo4jQuery: PaginationParams) {
+    const {language, realm} = header;
+    const systemNode = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.SYSTEM],
+      {"isDeleted": false, "key": key}, [Neo4jLabelEnum.VIRTUAL]);
+    if (!systemNode['length']) {
+        throw new HttpException(node_not_found({}), 400);
+      }  
+    const systemComponents = await this.neo4jService.findChildrensByIdAndFiltersWithPagination(
+      systemNode[0].get('n').identity.low,
+      {"isDeleted": false},
+      ['Component'],
+      {"isDeleted": false},
+      RelationName.SYSTEM_OF,
+      neo4jQuery
+    ); 
+    let components = []; 
+    systemComponents.forEach((record) => {
+      components.push(record.get('children').properties);
+    });
+     const totalCount = await this.systemComponentService.findOneTotalCount(systemNode[0].get('n').identity.low, realm, language);
+     let resultObject =  {"totalCount": totalCount, "properties": components}
+    
+     return resultObject;     
   }
 }
