@@ -7,7 +7,7 @@ import {
   ContactNotFoundException,
   FacilityStructureNotFountException,
 } from 'src/common/notFoundExceptions/not.found.exception';
-import { assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError, Neo4jService } from 'sgnm-neo4j/dist';
+import { assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError, dynamicFilterPropertiesAdder, dynamicLabelAdder, dynamicNotLabelAdder, dynamicOrderByColumnAdder, filterArrayForEmptyString, find_with_children_by_realm_as_tree__find_by_realm_error, Neo4jService, required_fields_must_entered } from 'sgnm-neo4j/dist';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 import { has_children_error, node_not_found } from 'src/common/const/custom.error.object';
 import { RelationName } from 'src/common/const/relation.name.enum';
@@ -17,6 +17,7 @@ import { ContactInterface } from 'src/common/interface/modules.with.pagination.i
 import { PaginationParams } from 'src/common/dto/pagination.query';
 import { SearchStringRepository } from 'src/common/class/search.string.from.nodes.dealer';
 import { SearchType } from 'sgnm-neo4j/dist/constant/pagination.enum';
+import { queryObjectType } from 'sgnm-neo4j/dist/dtos/dtos';
 
 @Injectable()
 export class ContactRepository implements ContactInterface<any> {
@@ -105,11 +106,18 @@ export class ContactRepository implements ContactInterface<any> {
 
     //  );
     //  }
+    // const cyper ='match (n:Contact)-[:PARENT_OF]->(m) return n,m limit 10'
+    // const now = Date.now();
+    // const res=await this.neo4jService.read(cyper)
+    // const responseTime= `${Date.now() - now} ms`
+    // console.log(responseTime)
+    // console.log(res)
+
     if (!contactNode.length) {
       throw new FacilityStructureNotFountException(realm);
     }
     neo4jQuery.skip = Math.abs(neo4jQuery.page - 1) * neo4jQuery.limit;
-    let children = await this.neo4jService.findChildrensByIdAndFiltersWithPagination(
+    let children = await this.findChildrensByIdAndFiltersWithPagination(
       contactNode[0].get('n').identity.low,
       {},
       [],
@@ -122,7 +130,6 @@ export class ContactRepository implements ContactInterface<any> {
       item.get('children').properties['id'] = item.get('children').identity.low;
       return item.get('children').properties;
     });
-
     const finalResponse = { ...contactNode[0].get('n').properties, children };
 
     return finalResponse;
@@ -523,4 +530,65 @@ export class ContactRepository implements ContactInterface<any> {
   async findOneFirstLevelByRealm(label: string, realm: string, language: string) {}
 
   async findChildrenByFacilityTypeNode(language: string, realm: string, typename: string) {}
+
+  async findChildrensByIdAndFiltersWithPagination(
+    root_id: number,
+    root_filters: object = {},
+    children_labels: Array<string> = [],
+    children_filters: object = {},
+    relation_name: string,
+    queryObject: queryObjectType,
+    databaseOrTransaction?: string
+  ) {
+    try {
+      if (!relation_name) {
+        throw new HttpException(required_fields_must_entered, 404);
+      }
+      const now = Date.now();
+      const childrenLabelsWithoutEmptyString =
+        children_labels
+      const rootNode = await this.neo4jService.findByIdAndFilters(root_id, root_filters);
+      if (!rootNode || rootNode.length == 0) {
+        throw new HttpException(
+          find_with_children_by_realm_as_tree__find_by_realm_error,
+          404
+        );
+      }
+      const rootId = rootNode.identity.low;
+      const parameters = { rootId, ...children_filters, ...queryObject };
+      parameters.skip = this.neo4jService.int(+queryObject.skip) as unknown as number
+      parameters.limit = this.neo4jService.int(+queryObject.limit) as unknown as number
+
+      let cypher;
+      let response;
+
+      cypher =
+        `MATCH p=(n)-[:${relation_name}*]->(m` +
+        dynamicLabelAdder(childrenLabelsWithoutEmptyString) +
+        dynamicFilterPropertiesAdder(children_filters) +
+        `  WHERE  id(n) = $rootId  RETURN n as parent,m as children `;
+     
+        cypher = cypher + ` SKIP $skip LIMIT $limit `
+      
+     
+      
+
+console.log(cypher)
+      children_filters["rootId"] = rootId;
+      response = await this.neo4jService.read(cypher, parameters, databaseOrTransaction);
+      const responseTime= `${Date.now() - now} ms`
+      console.log(responseTime)
+      return response["records"];
+    } catch (error) {
+      if (error.response?.code) {
+        throw new HttpException(
+          { message: error.response?.message, code: error.response?.code },
+          error.status
+        );
+      } else {
+        throw new HttpException(error, 500);
+      }
+    }
+  }
+  
 }
