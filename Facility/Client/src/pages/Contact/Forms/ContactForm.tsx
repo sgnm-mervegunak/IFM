@@ -495,7 +495,7 @@ const ContactForm = ({
               <p style={{ color: "red" }}>{errors.createdBy?.message}</p>
             </div>
 
-            {
+            {/* {
               editDia === true &&
               <div className="field col-12 md:col-4">
                 <h5 style={{ marginBottom: "0.5em" }}>{t("Is Active")}</h5>
@@ -507,7 +507,7 @@ const ContactForm = ({
                 />
                 <p style={{ color: "red" }}>{errors.isActive?.message}</p>
               </div>
-            }
+            } */}
 
           </div>
 
