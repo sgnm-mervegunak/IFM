@@ -27,15 +27,18 @@ export class ContactRepository implements ContactInterface<any> {
   async findOneByRealmTotalCount(realm: string, language: string) {
     try {
       const contactNode = await this.neo4jService.findByLabelAndFilters(['Contact'], { realm, isDeleted: false });
-      let totalCount = await this.neo4jService.findChildrensByIdAndFilters(
-        contactNode[0].get('n').identity.low,
-        {},
-        [],
-        { isDeleted: false },
-        'PARENT_OF',
-      );
-      totalCount = totalCount.length;
-      return { totalCount };
+      // let totalCount = await this.neo4jService.findChildrensByIdAndFilters(
+      //   contactNode[0].get('n').identity.low,
+      //   {},
+      //   [],
+      //   { isDeleted: false },
+      //   'PARENT_OF',
+      // );
+      // totalCount = totalCount.length;
+      const cyper=`Match (n:Contact)-[:PARENT_OF]->(m) return count(m)`
+      const totalCount=await this.neo4jService.read(cyper)
+      console.log(totalCount.records[0]['_fields'][0])
+      return { totalCount:totalCount.records[0]['_fields'][0].low };
     } catch (error) {}
   }
   async findWithSearchStringTotalCount(realm: string, language: string, searchString: string) {
@@ -44,16 +47,19 @@ export class ContactRepository implements ContactInterface<any> {
       if (!contactNode.length) {
         throw new FacilityStructureNotFountException(realm);
       }
-      const totalCount = await this.SearchStringRepository.searchByStringTotalCount(
-        contactNode[0].get('n').identity.low,
-        { isDeleted: false },
-        [],
-        { isDeleted: false },
-        [],
-        'PARENT_OF',
-        searchString,
-      );
-      return totalCount;
+      // const totalCount = await this.SearchStringRepository.searchByStringTotalCount(
+      //   contactNode[0].get('n').identity.low,
+      //   { isDeleted: false },
+      //   [],
+      //   { isDeleted: false },
+      //   [],
+      //   'PARENT_OF',
+      //   searchString,
+      // );
+      const cyper=`Match (n:Contact)-[:PARENT_OF]->(m) return count(m)`
+      const totalCount=await this.neo4jService.read(cyper)
+      console.log(totalCount.records[0]['_fields'][0])
+      return { totalCount:totalCount.records[0]['_fields'][0].low };
     } catch (error) {}
   }
   async findWithSearchStringByColumnTotalCount(
@@ -64,19 +70,10 @@ export class ContactRepository implements ContactInterface<any> {
     searchType: SearchType,
   ) {
     try {
-      const contactNode = await this.neo4jService.findByLabelAndFilters(['Contact'], { realm, isDeleted: false });
-      const totalCount = await this.SearchStringRepository.searchByStringBySpecificColumnTotalCount(
-        contactNode[0].get('n').identity.low,
-        { isDeleted: false },
-        [],
-        { isDeleted: false },
-        [],
-        'PARENT_OF',
-        searchColumn,
-        searchString,
-        searchType,
-      );
-      return totalCount;
+      const cyper=`Match (n:Contact)-[:PARENT_OF]->(m) return count(m)`
+      const totalCount=await this.neo4jService.read(cyper)
+      console.log(totalCount.records[0]['_fields'][0])
+      return { totalCount:totalCount.records[0]['_fields'][0].low };
     } catch (error) {}
   }
 
@@ -101,6 +98,14 @@ export class ContactRepository implements ContactInterface<any> {
     if (!contactNode.length) {
       throw new FacilityStructureNotFountException(realm);
     }
+     let totalCount = await this.neo4jService.findChildrensByIdAndFiltersTotalCount(
+        contactNode[0].get('n').identity.low,
+        {},
+        [],
+        { isDeleted: false },
+        'PARENT_OF',
+      );
+      totalCount = totalCount[0].get('count').low;
 
     neo4jQuery.skip = Math.abs(neo4jQuery.page - 1) * neo4jQuery.limit;
     let children = await this.neo4jService.findChildrensByIdAndFiltersWithPagination(
@@ -112,13 +117,12 @@ export class ContactRepository implements ContactInterface<any> {
       neo4jQuery,
     );
   
-
     children = children.map((item) => {
       item.get('children').properties['id'] = item.get('children').identity.low;
       return item.get('children').properties;
     });
 
-    const finalResponse = { ...contactNode[0].get('n').properties,  children };
+    const finalResponse = { ...contactNode[0].get('n').properties, totalCount, children };
 
     return finalResponse;
   }

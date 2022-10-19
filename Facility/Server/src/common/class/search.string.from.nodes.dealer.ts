@@ -21,9 +21,9 @@ export class SearchStringRepository {
   ) {
     try {
       const children = await this.neo4jService.findChildrensByIdAndFiltersWithPaginationAndSearcString(rootId, rootFilters, childrenLabels, childerenFilters, exclutedLabelsForChildren, relationName, neo4jQuery, searchString,searchType)
-      let totalCount = await this.neo4jService.findChildrensByIdAndFiltersWithoutPaginationAndSearcString(rootId, rootFilters, childrenLabels, childerenFilters, exclutedLabelsForChildren, relationName, searchString,searchType)
+      let totalCount = await this.searchByStringTotalCount(rootId, rootFilters, childrenLabels, childerenFilters, exclutedLabelsForChildren, relationName, searchString,searchType)
 
-      const finalResult = { totalCount: totalCount.length, children }
+      const finalResult = { totalCount, children }
       console.log(finalResult)
       return finalResult
     } catch (error) {
@@ -43,10 +43,10 @@ export class SearchStringRepository {
 
   ) {
     try {
-      let totalCount = await this.neo4jService.findChildrensByIdAndFiltersWithoutPaginationAndSearcString(rootId, rootFilters, childrenLabels, childerenFilters, exclutedLabelsForChildren, relationName, searchString,searchType)
-
-      const finalResult = { totalCount: totalCount.length }
-      return finalResult
+      let totalCount = await this.neo4jService.findChildrensByIdAndFiltersAndSearcStringsTotalCount(rootId, rootFilters, childrenLabels, childerenFilters, exclutedLabelsForChildren, relationName, searchString,searchType)
+      totalCount=totalCount[0].get('count').low
+    
+      return totalCount
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -66,10 +66,9 @@ export class SearchStringRepository {
   ) {
     try {
       const children = await this.neo4jService.findChildrensByIdAndFiltersWithPaginationAndSearcStringBySpecificColumn(rootId, rootFilters, childrenLabels, childerenFilters, exclutedLabelsForChildren, relationName, neo4jQuery, searchColumn, searchString,searchType)
-      let totalCount = await this.neo4jService.findChildrensByIdAndFiltersWithoutPaginationAndSearcStringBySpecificColumn(rootId, rootFilters, childrenLabels, childerenFilters, exclutedLabelsForChildren, relationName, searchColumn, searchString,searchType)
+      let totalCount = await this.searchByStringBySpecificColumnTotalCount(rootId, rootFilters, childrenLabels, childerenFilters, exclutedLabelsForChildren, relationName, searchColumn, searchString,searchType)
       
-      const finalResult = { totalCount: totalCount.length, children }
-      console.log(finalResult)
+      const finalResult = { totalCount, children }
       return finalResult
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -89,11 +88,10 @@ export class SearchStringRepository {
   ) {
     try {
   
-      let totalCount = await this.neo4jService.findChildrensByIdAndFiltersWithoutPaginationAndSearcStringBySpecificColumn(rootId, rootFilters, childrenLabels, childerenFilters, exclutedLabelsForChildren, relationName, searchColumn, searchString,searchType)
-      
-      const finalResult = { totalCount: totalCount.length }
-      console.log(finalResult)
-      return finalResult
+      let totalCount = await this.neo4jService.findChildrensByIdAndFiltersBySearcStringBySpecificColumnTotalCount(rootId, rootFilters, childrenLabels, childerenFilters, exclutedLabelsForChildren, relationName, searchColumn, searchString,searchType)
+      totalCount=totalCount[0].get('count').low
+  
+      return totalCount
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
