@@ -269,7 +269,7 @@ const ContactForm = ({
           <div className="formgrid grid">
 
             <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Email")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Email")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("email")}
@@ -280,7 +280,7 @@ const ContactForm = ({
             </div>
 
             <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Category")}</h5>
               <Controller
                 defaultValue={data?.category}
                 name="category"
@@ -307,7 +307,7 @@ const ContactForm = ({
             </div>
 
             <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Company")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Company")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("company")}
@@ -318,7 +318,7 @@ const ContactForm = ({
             </div>
 
             <div className="field col-12 md:col-4">
-              <h5 style={{ marginBottom: "0.5em" }}>{t("Phone")}</h5>
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Phone")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("phone")}
@@ -495,7 +495,7 @@ const ContactForm = ({
               <p style={{ color: "red" }}>{errors.createdBy?.message}</p>
             </div>
 
-            {
+            {/* {
               editDia === true &&
               <div className="field col-12 md:col-4">
                 <h5 style={{ marginBottom: "0.5em" }}>{t("Is Active")}</h5>
@@ -507,7 +507,7 @@ const ContactForm = ({
                 />
                 <p style={{ color: "red" }}>{errors.isActive?.message}</p>
               </div>
-            }
+            } */}
 
           </div>
 

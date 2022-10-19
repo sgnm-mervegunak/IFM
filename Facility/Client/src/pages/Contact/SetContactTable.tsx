@@ -121,13 +121,14 @@ const SetContactTable = () => {
   const language = useAppSelector((state) => state.language.language);
   const [selectedData, setSelectedData] = useState(null);
   const [selectedDataKeys, setSelectedDataKeys] = useState([]);
+  const [selectedDataIDs, setSelectedDataIDs] = useState([]);
 
   const getContact = () => {
     if (searchKey === "") {
-      ContactService.getContactCounts()
-        .then((response) => {
-          setContactCounts(response.data.totalCount);
-        })
+      // ContactService.getContactCounts()
+      //   .then((response) => {
+      //     setContactCounts(response.data.totalCount);
+      //   })
 
       setLoading(true);
       ContactService.findAll({
@@ -137,6 +138,7 @@ const SetContactTable = () => {
         orderByColumn: lazyParams.sortField ? [lazyParams.sortField] : [],
       })
         .then((response) => {
+          setContactCounts(response.data.totalCount);
           setData(response.data.children);
           setLoading(false);
         })
@@ -151,10 +153,10 @@ const SetContactTable = () => {
         });
     } else {
 
-      ContactService.getSearchContactCounts({ searchString: searchKey })
-        .then((response) => {
-          setContactCounts(response.data.totalCount);
-        })
+      // ContactService.getSearchContactCounts({ searchString: searchKey })
+      //   .then((response) => {
+      //     setContactCounts(response.data.totalCount);
+      //   })
 
       setLoading(true);
       ContactService.findSearch({
@@ -165,6 +167,7 @@ const SetContactTable = () => {
         searchString: searchKey
       })
         .then((response) => {
+          setContactCounts(response.data.totalCount);
           setData(response.data.children);
           setLoading(false);
         })
@@ -192,8 +195,8 @@ const SetContactTable = () => {
       orderByColumn: lazyParams.sortField ? [lazyParams.sortField] : [],
     })
       .then((response) => {
+        setContactCounts(response.data.totalCount);
         setData(response.data.children);
-        // setCountContacts(response.data.totalCount);
         setLoading(false);
       })
       .catch((err) => {
@@ -241,7 +244,7 @@ const SetContactTable = () => {
     let selectedColumns = event.value;
     let orderedSelectedColumns = columns.filter(col => selectedColumns.some((sCol: { field: string; }) => sCol.field === col.field));
     setSelectedColumns(orderedSelectedColumns);
-  }
+  };  
 
   const leftToolbarTemplate = () => {
     return (
@@ -253,7 +256,8 @@ const SetContactTable = () => {
           onClick={() => setAddDia(true)}
         />
 
-        {selectedDataKeys.length > 1 && (
+        {
+        selectedDataIDs.length > 1 && (
           <Button
             label={t("Delete")}
             icon="pi pi-trash"
@@ -308,10 +312,10 @@ const SetContactTable = () => {
       let _searchKey = await event.target.value;
       setSearchKey(_searchKey);
 
-      ContactService.getSearchContactCounts({ searchString: _searchKey })
-        .then((response) => {
-          setContactCounts(response.data.totalCount);
-        })
+      // ContactService.getSearchContactCounts({ searchString: _searchKey })
+      //   .then((response) => {
+      //     setContactCounts(response.data.totalCount);
+      //   })
 
       setLoading(true);
       ContactService.findSearch({
@@ -322,6 +326,7 @@ const SetContactTable = () => {
         searchString: _searchKey
       })
         .then((response) => {
+          setContactCounts(response.data.totalCount);
           setData(response.data.children);
           _searchKey = "";
           setLoading(false);
@@ -408,14 +413,14 @@ const SetContactTable = () => {
       searchType = "ENDS WITH";
     }
 
-    ContactService.getSearchColumnContactCounts({
-      searchColumn: e.field,
-      searchString: _searchKey,
-      searchType: searchType
-    })
-      .then((response) => {
-        setContactCounts(response.data.totalCount);
-      })
+    // ContactService.getSearchColumnContactCounts({
+    //   searchColumn: e.field,
+    //   searchString: _searchKey,
+    //   searchType: searchType
+    // })
+    //   .then((response) => {
+    //     setContactCounts(response.data.totalCount);
+    //   })
 
     setLoading(true);
     ContactService.findSearchByColumn({
@@ -428,6 +433,7 @@ const SetContactTable = () => {
       searchType: searchType
     })
       .then((response) => {
+        setContactCounts(response.data.totalCount);
         setData(response.data.children);
         _searchKey = "";
         setLoading(false);
@@ -530,6 +536,35 @@ const SetContactTable = () => {
       });
   };
 
+  const deleteMultipleContact = () => {
+    selectedDataIDs.forEach((id) => {
+      ContactService.remove(id)
+        .then((response) => {
+          toast.current.show({
+            severity: "success",
+            summary: "Successful",
+            detail: "Selected Contacts Deleted",
+            life: 3000,
+          });
+          setDelAllDia(false);
+          setContact(emptyContact);
+          getContact(); //loadLazyData();
+        })
+        .catch((err) => {
+          toast.current.show({
+            severity: "error",
+            summary: "Error",
+            detail: err.response ? err.response.data.message : err.message,
+            life: 2000,
+          });
+          setDelAllDia(false);
+          setContact(emptyContact);
+          getContact(); //loadLazyData();
+        });
+    });
+    setSelectedDataIDs([]);
+  };
+
   const deleteDialogFooter = (
     <React.Fragment>
       <Button
@@ -559,7 +594,7 @@ const SetContactTable = () => {
         label="Yes"
         icon="pi pi-check"
         className="p-button-text"
-        onClick={() => console.log("yes")}
+        onClick={deleteMultipleContact}
       />
     </React.Fragment>
   );
@@ -616,6 +651,7 @@ const SetContactTable = () => {
             onSelectionChange={e => {
               setSelectedData(e.value);
               setSelectedDataKeys(e.value.map((item: any) => item.key));
+              setSelectedDataIDs(e.value.map((item: any) => item.id));
             }}
           // onFilter={onFilter}
           // filters={filters}
