@@ -185,7 +185,14 @@ export class ComponentRepository implements ComponentInterface<Component> {
 
       const component = new Component();
       const componentFinalObject = assignDtoPropToEntity(component, createComponentDto);
+
+      const space = await this.neo4jService.findByLabelAndFilters([],{"isDeleted": false, key : componentFinalObject['space']});
+      if (space.length > 0) {
+        componentFinalObject["spaceName"] =  space[0].get('n').name;
+      }
+      
       delete componentFinalObject['space'];
+
       delete componentFinalObject['spaceType'];
       delete componentFinalObject['createdBy'];
       delete componentFinalObject['warrantyGuarantorParts'];
@@ -309,11 +316,17 @@ export class ComponentRepository implements ComponentInterface<Component> {
       }
 
       await this.virtualNodeHandler.updateVirtualNode(+_id, componentUrl, finalObjectArray);
+      const newSpace = await this.neo4jService.findByLabelAndFilters([],{"isDeleted": false, key : updateComponentDto['space']});
       delete updateComponentDto['space'];
       delete updateComponentDto['spaceType'];
       delete updateComponentDto['createdBy'];
       delete updateComponentDto['warrantyGuarantorParts'];
       delete updateComponentDto['warrantyGuarantorLabor'];
+
+     
+      if (newSpace.length > 0) {
+        updateComponentDto["spaceName"] =  newSpace[0].get('n').name;
+      }
 
       const updatedNode = await this.neo4jService.updateById(_id, updateComponentDto);
       if (!updatedNode) {
