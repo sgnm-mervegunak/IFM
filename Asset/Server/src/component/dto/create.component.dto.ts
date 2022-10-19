@@ -116,4 +116,10 @@ export class CreateComponentDto {
   @ApiProperty()
   @IsOptional()
   images: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @LengthWithI18nMessage(i18nValidationMessageEnum.LENGTH, 0, 256)
+  @IsStringWithI18nMessage(i18nValidationMessageEnum.IS_STRING)
+  spaceName: string;
 }
