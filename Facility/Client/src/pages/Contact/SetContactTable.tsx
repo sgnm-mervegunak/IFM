@@ -125,10 +125,10 @@ const SetContactTable = () => {
 
   const getContact = () => {
     if (searchKey === "") {
-      // ContactService.getContactCounts()
-      //   .then((response) => {
-      //     setContactCounts(response.data.totalCount);
-      //   })
+      ContactService.getContactCounts()
+        .then((response) => {
+          setContactCounts(response.data.totalCount);
+        })
 
       setLoading(true);
       ContactService.findAll({
@@ -138,7 +138,7 @@ const SetContactTable = () => {
         orderByColumn: lazyParams.sortField ? [lazyParams.sortField] : [],
       })
         .then((response) => {
-          setContactCounts(response.data.totalCount);
+          // setContactCounts(response.data.totalCount);
           setData(response.data.children);
           setLoading(false);
         })
@@ -153,10 +153,10 @@ const SetContactTable = () => {
         });
     } else {
 
-      // ContactService.getSearchContactCounts({ searchString: searchKey })
-      //   .then((response) => {
-      //     setContactCounts(response.data.totalCount);
-      //   })
+      ContactService.getSearchContactCounts({ searchString: searchKey })
+        .then((response) => {
+          setContactCounts(response.data.totalCount);
+        })
 
       setLoading(true);
       ContactService.findSearch({
@@ -167,7 +167,7 @@ const SetContactTable = () => {
         searchString: searchKey
       })
         .then((response) => {
-          setContactCounts(response.data.totalCount);
+          // setContactCounts(response.data.totalCount);
           setData(response.data.children);
           setLoading(false);
         })
@@ -187,6 +187,12 @@ const SetContactTable = () => {
     dtRef.current.reset();
     setGlobalFilterValue("");
     setSearchKey("");
+
+    ContactService.getContactCounts()
+      .then((response) => {
+        setContactCounts(response.data.totalCount);
+      })
+
     setLoading(true);
     ContactService.findAll({
       page: lazyParams.page + 1,
@@ -195,7 +201,7 @@ const SetContactTable = () => {
       orderByColumn: lazyParams.sortField ? [lazyParams.sortField] : [],
     })
       .then((response) => {
-        setContactCounts(response.data.totalCount);
+        // setContactCounts(response.data.totalCount);
         setData(response.data.children);
         setLoading(false);
       })
@@ -244,7 +250,7 @@ const SetContactTable = () => {
     let selectedColumns = event.value;
     let orderedSelectedColumns = columns.filter(col => selectedColumns.some((sCol: { field: string; }) => sCol.field === col.field));
     setSelectedColumns(orderedSelectedColumns);
-  };  
+  };
 
   const leftToolbarTemplate = () => {
     return (
@@ -257,13 +263,13 @@ const SetContactTable = () => {
         />
 
         {
-        selectedDataIDs.length > 1 && (
-          <Button
-            label={t("Delete")}
-            icon="pi pi-trash"
-            className="p-button-danger mr-2"
-            onClick={() => setDelAllDia(true)}
-          />)}
+          selectedDataIDs.length > 1 && (
+            <Button
+              label={t("Delete")}
+              icon="pi pi-trash"
+              className="p-button-danger mr-2"
+              onClick={() => setDelAllDia(true)}
+            />)}
       </React.Fragment>
     );
   };
@@ -312,10 +318,10 @@ const SetContactTable = () => {
       let _searchKey = await event.target.value;
       setSearchKey(_searchKey);
 
-      // ContactService.getSearchContactCounts({ searchString: _searchKey })
-      //   .then((response) => {
-      //     setContactCounts(response.data.totalCount);
-      //   })
+      ContactService.getSearchContactCounts({ searchString: _searchKey })
+        .then((response) => {
+          setContactCounts(response.data.totalCount);
+        })
 
       setLoading(true);
       ContactService.findSearch({
@@ -326,7 +332,7 @@ const SetContactTable = () => {
         searchString: _searchKey
       })
         .then((response) => {
-          setContactCounts(response.data.totalCount);
+          // setContactCounts(response.data.totalCount);
           setData(response.data.children);
           _searchKey = "";
           setLoading(false);
@@ -413,14 +419,14 @@ const SetContactTable = () => {
       searchType = "ENDS WITH";
     }
 
-    // ContactService.getSearchColumnContactCounts({
-    //   searchColumn: e.field,
-    //   searchString: _searchKey,
-    //   searchType: searchType
-    // })
-    //   .then((response) => {
-    //     setContactCounts(response.data.totalCount);
-    //   })
+    ContactService.getSearchColumnContactCounts({
+      searchColumn: e.field,
+      searchString: _searchKey,
+      searchType: searchType
+    })
+      .then((response) => {
+        setContactCounts(response.data.totalCount);
+      })
 
     setLoading(true);
     ContactService.findSearchByColumn({
@@ -433,7 +439,7 @@ const SetContactTable = () => {
       searchType: searchType
     })
       .then((response) => {
-        setContactCounts(response.data.totalCount);
+        // setContactCounts(response.data.totalCount);
         setData(response.data.children);
         _searchKey = "";
         setLoading(false);
