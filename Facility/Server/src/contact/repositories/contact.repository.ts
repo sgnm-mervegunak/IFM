@@ -567,8 +567,13 @@ export class ContactRepository implements ContactInterface<any> {
         dynamicLabelAdder(childrenLabelsWithoutEmptyString) +
         dynamicFilterPropertiesAdder(children_filters) +
         `  WHERE  id(n) = $rootId  RETURN n as parent,m as children `;
+        if (queryObject.orderByColumn && queryObject.orderByColumn.length >= 1) {
+          cypher = cypher + dynamicOrderByColumnAdder("m", queryObject.orderByColumn) + ` ${queryObject.orderBy} SKIP $skip LIMIT $limit  `
+        } else {
+          cypher = cypher + ` SKIP $skip LIMIT $limit `
+        }
      
-        cypher = cypher + ` SKIP $skip LIMIT $limit `
+
       
      
       
