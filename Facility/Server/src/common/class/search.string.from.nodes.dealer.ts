@@ -1,5 +1,5 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { dynamicFilterPropertiesAdder, dynamicLabelAdder, dynamicNotLabelAdder, filterArrayForEmptyString, Neo4jService } from 'sgnm-neo4j/dist';
+import { dynamicFilterPropertiesAdder, dynamicLabelAdder, dynamicNotLabelAdder, dynamicOrderByColumnAdder, filterArrayForEmptyString, Neo4jService } from 'sgnm-neo4j/dist';
 import { SearchType } from 'sgnm-neo4j/dist/constant/pagination.enum';
 import { queryObjectType } from 'sgnm-neo4j/dist/dtos/dtos';
 import { PaginationParams } from '../dto/pagination.query';
@@ -198,8 +198,11 @@ export class SearchStringRepository {
       } else {
         cypher = cypher + `(any(prop in keys(m) where m[prop] ${search_type}  toLower($searchString))) ` + `RETURN n as parent,m as children `;
       }
-    
-        cypher = cypher + ` SKIP $skip LIMIT $limit `
+      if (queryObject.orderByColumn && queryObject.orderByColumn.length >= 1) {
+        cypher = cypher + dynamicOrderByColumnAdder("m", queryObject.orderByColumn) + ` ${queryObject.orderBy} SKIP $skip LIMIT $limit  `
+      } else {
+        cypher = cypher + `SKIP $skip LIMIT $limit `
+      }
       
       console.log(cypher)
 
@@ -263,10 +266,11 @@ export class SearchStringRepository {
       } else {
         cypher = cypher + ` toLower(m.${searchColumn}) ${search_type}  toLower($searchString) ` + `RETURN n as parent,m as children `;
       }
-     
-        cypher = cypher + ` SKIP $skip LIMIT $limit `
-     
-
+      if (queryObject.orderByColumn && queryObject.orderByColumn.length >= 1) {
+        cypher = cypher + dynamicOrderByColumnAdder("m", queryObject.orderByColumn) + ` ${queryObject.orderBy} SKIP $skip LIMIT $limit  `
+      } else {
+        cypher = cypher + `SKIP $skip LIMIT $limit `
+      }
       response = await this.neo4jService.read(cypher, parameters, databaseOrTransaction);
 
       return response["records"];
