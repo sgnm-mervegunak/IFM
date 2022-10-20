@@ -3,6 +3,7 @@
  */
 export enum Neo4jLabelEnum {
   FACILITY_STRUCTURE = 'FacilityStructure',
+  CONTACTS = 'Contacts',
   CONTACT = 'Contact',
   CLASSIFICATION = 'Classification',
   TYPES = 'Types',

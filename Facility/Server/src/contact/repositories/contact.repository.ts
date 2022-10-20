@@ -7,7 +7,17 @@ import {
   ContactNotFoundException,
   FacilityStructureNotFountException,
 } from 'src/common/notFoundExceptions/not.found.exception';
-import { assignDtoPropToEntity, createDynamicCyperObject, CustomNeo4jError, dynamicFilterPropertiesAdder, dynamicLabelAdder, dynamicNotLabelAdder, dynamicOrderByColumnAdder, filterArrayForEmptyString, find_with_children_by_realm_as_tree__find_by_realm_error, Neo4jService, required_fields_must_entered } from 'sgnm-neo4j/dist';
+import {
+  assignDtoPropToEntity,
+  createDynamicCyperObject,
+  CustomNeo4jError,
+  dynamicFilterPropertiesAdder,
+  dynamicLabelAdder,
+  dynamicOrderByColumnAdder,
+  find_with_children_by_realm_as_tree__find_by_realm_error,
+  Neo4jService,
+  required_fields_must_entered,
+} from 'sgnm-neo4j/dist';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
 import { has_children_error, node_not_found } from 'src/common/const/custom.error.object';
 import { RelationName } from 'src/common/const/relation.name.enum';
@@ -27,7 +37,7 @@ export class ContactRepository implements ContactInterface<any> {
   ) {}
   async findOneByRealmTotalCount(realm: string, language: string) {
     try {
-      const contactNode = await this.neo4jService.findByLabelAndFilters(['Contact'], { realm, isDeleted: false });
+      const contactNode = await this.neo4jService.findByLabelAndFilters(['Contacts'], { realm, isDeleted: false });
       let totalCount = await this.neo4jService.findChildrensByIdAndFiltersTotalCount(
         contactNode[0].get('n').identity.low,
         {},
@@ -35,14 +45,14 @@ export class ContactRepository implements ContactInterface<any> {
         { isDeleted: false },
         'PARENT_OF',
       );
-      totalCount=totalCount[0].get('count').low
-      
-      return { totalCount};
+      totalCount = totalCount[0].get('count').low;
+
+      return { totalCount };
     } catch (error) {}
   }
   async findWithSearchStringTotalCount(realm: string, language: string, searchString: string) {
     try {
-      const contactNode = await this.neo4jService.findByLabelAndFilters(['Contact'], { realm, isDeleted: false });
+      const contactNode = await this.neo4jService.findByLabelAndFilters(['Contacts'], { realm, isDeleted: false });
       if (!contactNode.length) {
         throw new FacilityStructureNotFountException(realm);
       }
@@ -55,8 +65,8 @@ export class ContactRepository implements ContactInterface<any> {
         'PARENT_OF',
         searchString,
       );
-    
-      return { totalCount};
+
+      return { totalCount };
     } catch (error) {}
   }
   async findWithSearchStringByColumnTotalCount(
@@ -67,8 +77,8 @@ export class ContactRepository implements ContactInterface<any> {
     searchType: SearchType,
   ) {
     try {
-      console.log('totalCount')
-      const contactNode = await this.neo4jService.findByLabelAndFilters(['Contact'], { realm, isDeleted: false });
+      console.log('totalCount');
+      const contactNode = await this.neo4jService.findByLabelAndFilters(['Contacts'], { realm, isDeleted: false });
       if (!contactNode.length) {
         throw new FacilityStructureNotFountException(realm);
       }
@@ -81,15 +91,15 @@ export class ContactRepository implements ContactInterface<any> {
         'PARENT_OF',
         searchColumn,
         searchString,
-        searchType
+        searchType,
       );
-      
+
       return { totalCount };
     } catch (error) {}
   }
 
   async findOneByRealm(realm: string, language: string, neo4jQuery: PaginationParams) {
-    const contactNode = await this.neo4jService.findByLabelAndFilters(['Contact'], { realm, isDeleted: false });
+    const contactNode = await this.neo4jService.findByLabelAndFilters(['Contacts'], { realm, isDeleted: false });
     // for (let index = 0; index < 2000000; index++) {
     //   const key=generateUuid()
     //   console.log(key)
@@ -98,7 +108,7 @@ export class ContactRepository implements ContactInterface<any> {
     //   contact['email']=key+'@gmail.com'
     //   contact['phone']=key
     //   contact['classificationId']='34-55-00-00-00-00'
-    //  let value = await this.neo4jService.createNode(contact);
+    //  let value = await this.neo4jService.createNode(contact,['Contact']);
 
     //   await this.neo4jService.addParentRelationByIdAndFilters(
     //    value.identity.low,{},
@@ -125,7 +135,7 @@ export class ContactRepository implements ContactInterface<any> {
       'PARENT_OF',
       neo4jQuery,
     );
-  
+
     children = children.map((item) => {
       item.get('children').properties['id'] = item.get('children').identity.low;
       return item.get('children').properties;
@@ -136,7 +146,7 @@ export class ContactRepository implements ContactInterface<any> {
   }
 
   async findWithSearchString(realm: string, language: string, neo4jQuery: PaginationParams, searchString) {
-    const contactNode = await this.neo4jService.findByLabelAndFilters(['Contact'], { realm, isDeleted: false });
+    const contactNode = await this.neo4jService.findByLabelAndFilters(['Contacts'], { realm, isDeleted: false });
     if (!contactNode.length) {
       throw new FacilityStructureNotFountException(realm);
     }
@@ -170,7 +180,7 @@ export class ContactRepository implements ContactInterface<any> {
     searchString,
     searchType: SearchType = SearchType.CONTAINS,
   ) {
-    const contactNode = await this.neo4jService.findByLabelAndFilters(['Contact'], { realm, isDeleted: false });
+    const contactNode = await this.neo4jService.findByLabelAndFilters(['Contacts'], { realm, isDeleted: false });
     if (!contactNode.length) {
       throw new FacilityStructureNotFountException(realm);
     }
@@ -202,7 +212,7 @@ export class ContactRepository implements ContactInterface<any> {
   async create(createContactDto: CreateContactDto, realm: string, language: string) {
     try {
       const contactRootNode = await this.neo4jService.findByLabelAndFilters(
-        ['Contact'],
+        ['Contacts'],
         { isDeleted: false, realm },
         [],
       );
@@ -280,7 +290,7 @@ export class ContactRepository implements ContactInterface<any> {
   async update(_id: string, updateContactDto: UpdateContactDto, realm: string, language: string) {
     try {
       const structureRootNode = await this.neo4jService.findChildrensByChildIdAndFilters(
-        ['Contact'],
+        ['Contacts'],
         { isDeleted: false },
         +_id,
         { isDeleted: false },
@@ -538,26 +548,22 @@ export class ContactRepository implements ContactInterface<any> {
     children_filters: object = {},
     relation_name: string,
     queryObject: queryObjectType,
-    databaseOrTransaction?: string
+    databaseOrTransaction?: string,
   ) {
     try {
       if (!relation_name) {
         throw new HttpException(required_fields_must_entered, 404);
       }
       const now = Date.now();
-      const childrenLabelsWithoutEmptyString =
-        children_labels
+      const childrenLabelsWithoutEmptyString = children_labels;
       const rootNode = await this.neo4jService.findByIdAndFilters(root_id, root_filters);
       if (!rootNode || rootNode.length == 0) {
-        throw new HttpException(
-          find_with_children_by_realm_as_tree__find_by_realm_error,
-          404
-        );
+        throw new HttpException(find_with_children_by_realm_as_tree__find_by_realm_error, 404);
       }
       const rootId = rootNode.identity.low;
       const parameters = { rootId, ...children_filters, ...queryObject };
-      parameters.skip = this.neo4jService.int(+queryObject.skip) as unknown as number
-      parameters.limit = this.neo4jService.int(+queryObject.limit) as unknown as number
+      parameters.skip = this.neo4jService.int(+queryObject.skip) as unknown as number;
+      parameters.limit = this.neo4jService.int(+queryObject.limit) as unknown as number;
 
       let cypher;
       let response;
@@ -567,35 +573,27 @@ export class ContactRepository implements ContactInterface<any> {
         dynamicLabelAdder(childrenLabelsWithoutEmptyString) +
         dynamicFilterPropertiesAdder(children_filters) +
         `  WHERE  id(n) = $rootId  RETURN n as parent,m as children `;
-        if (queryObject.orderByColumn && queryObject.orderByColumn.length >= 1) {
-          cypher = cypher + dynamicOrderByColumnAdder("m", queryObject.orderByColumn) + ` ${queryObject.orderBy} SKIP $skip LIMIT $limit  `
-        } else {
-          cypher = cypher + ` SKIP $skip LIMIT $limit `
-        }
-     
+      if (queryObject.orderByColumn && queryObject.orderByColumn.length >= 1) {
+        cypher =
+          cypher +
+          dynamicOrderByColumnAdder('m', queryObject.orderByColumn) +
+          ` ${queryObject.orderBy} SKIP $skip LIMIT $limit  `;
+      } else {
+        cypher = cypher + ` SKIP $skip LIMIT $limit `;
+      }
 
-      
-     
-      
-
-console.log(cypher)
-      children_filters["rootId"] = rootId;
+      console.log(cypher);
+      children_filters['rootId'] = rootId;
       response = await this.neo4jService.read(cypher, parameters, databaseOrTransaction);
-      const responseTime= `${Date.now() - now} ms`
-      console.log(responseTime)
-      return response["records"];
+      const responseTime = `${Date.now() - now} ms`;
+      console.log(responseTime);
+      return response['records'];
     } catch (error) {
       if (error.response?.code) {
-        throw new HttpException(
-          { message: error.response?.message, code: error.response?.code },
-          error.status
-        );
+        throw new HttpException({ message: error.response?.message, code: error.response?.code }, error.status);
       } else {
         throw new HttpException(error, 500);
       }
     }
   }
-
-  
-  
 }
