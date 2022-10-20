@@ -403,7 +403,7 @@ async addBuildingWithCobie(file: Express.Multer.File,header:MainHeaderInterface)
    //CYPHER QUERY FOR BUILDING 
 
    let cypher=`MATCH (r:FacilityStructure {realm:"${realm}"}) ${createdCypher} \
-   MATCH (cnt:Contact {realm:"${realm}"})-[:PARENT_OF]->(p {email:"${email}",isDeleted:false} ) \
+   MATCH (cnt:Contacts {realm:"${realm}"})-[:PARENT_OF]->(p:Contact {email:"${email}",isDeleted:false} ) \
    MERGE (b:Building {name:"${data[1][1]}",createdOn:"${data[1][3]}",projectName:"${data[1][5]}",siteName:"${data[1][6]}",areaMeasurement:"${data[1][11]}",externalSystem:"${data[1][12]}",externalObject:"${data[1][13]}", \
    externalIdentifier:"${data[1][14]}",externalSiteObject:"${data[1][15]}",externalSiteIdentifier:"${data[1][16]}",externalFacilityObject:"${data[1][17]}",externalFacilityIdentifier:"${data[1][18]}", \
    description:"${data[1][19]}",projectDescription:"${data[1][20]}",siteDescription:"${data[1][21]}",phase:"${data[1][22]}",address:"",status:"${data[1][23]}",code:"${data[1][24]}",owner:"",operator:"",contractor:"",handoverDate:"",operationStartDate:"",warrantyExpireDate:"",tag:[],canDisplay:true,key:"${this.keyGenerate()}",canDelete:true,isActive:true,isDeleted:false, \
@@ -463,7 +463,7 @@ async addFloorsToBuilding(file: Express.Multer.File, header:MainHeaderInterface,
     
         let cypher=`MATCH (a:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b:Building {key:"${buildingKey}",isDeleted:false}) \
                     ${createdCypher} \
-                    MATCH (cont:Contact {realm:"${realm}"})-[:PARENT_OF]->(p {email:"${email}",isDeleted:false}) \
+                    MATCH (cont:Contacts {realm:"${realm}"})-[:PARENT_OF]->(p:Contact {email:"${email}",isDeleted:false}) \
                     MERGE (f:Floor {code:"",name:"${data[i][1]}",isDeleted:false,isActive:true,nodeType:"Floor",description:"${data[i][8]}",tag:[],canDelete:true,canDisplay:true,key:"${this.keyGenerate()}",createdOn:"${data[i][3]}",elevation:"${data[i][9]}",height:"${data[i][10]}",externalSystem:"",externalObject:"",externalIdentifier:""}) \
                     MERGE (b)-[:PARENT_OF]->(f)\
                     ${createdRelationCypher} \
@@ -520,7 +520,7 @@ async addSpacesToBuilding(file: Express.Multer.File, header:MainHeaderInterface,
           email= await data[i][6];
         }
         let cypher=`MATCH (a:FacilityStructure {realm:"${realm}"})-[:PARENT_OF]->(b:Building {key:"${buildingKey}",isDeleted:false}) \
-         MATCH (cont:Contact {realm:"${realm}"})-[:PARENT_OF]->(p {email:"${email}",isDeleted:false}) \
+         MATCH (cont:Contacts {realm:"${realm}"})-[:PARENT_OF]->(p:Contact {email:"${email}",isDeleted:false}) \
          ${createdCypher} \
          MATCH (b)-[:PARENT_OF]->(f:Floor {name:"${data[i][9]}",isDeleted:false}) \
          MERGE (s:Space {operatorCode:"",operatorName:"",name:"${data[i][1]}",architecturalCode:"${data[i][4]}",architecturalName:"${data[i][2]}",locationCode:"${data[i][5]}",createdOn:"${data[i][7]}",description:"${data[i][10]}",key:"${this.keyGenerate()}",externalSystem:"${data[i][11]}",externalObject:"${data[i][12]}",externalIdentifier:"${data[i][13]}", \ 
@@ -583,7 +583,7 @@ async addZonesToBuilding(file: Express.Multer.File,header:MainHeaderInterface, b
   
     let cypher =`MATCH (b:Building {key:"${buildingKey}"})-[:PARENT_OF]->(z:Zones {name:"Zones"})\
     MATCH (c:Space {locationCode:"${data[i][5]}"})\
-    MATCH (cnt:Contact {realm:"${realm}"})-[:PARENT_OF]->(p {email:"${email}"})\
+    MATCH (cnt:Contacts {realm:"${realm}"})-[:PARENT_OF]->(p:Contact {email:"${email}"})\
     ${createdCypher} \
     ${await this.getZoneFromDb(buildingKey,data[i])} \
     MERGE (z)-[:PARENT_OF]->(zz)  \
@@ -649,16 +649,16 @@ async addContacts(file: Express.Multer.File,header:MainHeaderInterface)  {
       createdByEmail= await data[i][2];
     }
 
-    let checkEmail = await this.neo4jService.findChildrensByLabelsAndFilters(['Contact'],{realm},[],{email,isDeleted:false});
+    let checkEmail = await this.neo4jService.findChildrensByLabelsAndFilters(['Contacts'],{realm},['Contact'],{email,isDeleted:false});
     if(checkEmail.length==0){
-      let cypher=`MATCH (c:Contact {realm:"${realm}"}) ${createdCypher} \
-      MERGE (p {email:"${email}",createdOn:"${data[i][3]}",company:"${data[i][5]}", phone:"${data[i][6]}",externalSystem:"${data[i][7]}",externalObject:"${data[i][8]}",externalIdentifier:"${data[i][9]}",department:"${data[i][10]}",organizationCode:"${data[i][11]}", \
+      let cypher=`MATCH (c:Contacts {realm:"${realm}"}) ${createdCypher} \
+      MERGE (p:Contact {email:"${email}",createdOn:"${data[i][3]}",company:"${data[i][5]}", phone:"${data[i][6]}",externalSystem:"${data[i][7]}",externalObject:"${data[i][8]}",externalIdentifier:"${data[i][9]}",department:"${data[i][10]}",organizationCode:"${data[i][11]}", \
       givenName:"${data[i][12]}",familyName:"${data[i][13]}",street:"${data[i][14]}",postalBox:"${data[i][15]}",town:"${data[i][16]}",stateRegion:"${data[i][17]}",postalCode:"${data[i][18]}",country:"${data[i][19]}",canDisplay:true,isDeleted:false,isActive:true,className:"Contact",key:"${this.keyGenerate()}",canDelete:true} )\
       MERGE (c)-[:PARENT_OF]->(p)  ${createdRelationCypher}`
       await this.neo4jService.write(cypher);
 
 
-    let cypher2 = `MATCH (p {email:"${email}"}) MATCH (p2 {email:"${createdByEmail}"}) MERGE (p)-[:CREATED_BY]->(p2)`
+    let cypher2 = `MATCH (p:Contact {email:"${email}"}) MATCH (p2:Contact {email:"${createdByEmail}"}) MERGE (p)-[:CREATED_BY]->(p2)`
     await this.neo4jService.write(cypher2);
     }else{
       throw new HttpException(contact_already_exist_object(email),400)
