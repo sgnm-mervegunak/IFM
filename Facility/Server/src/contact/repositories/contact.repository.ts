@@ -28,6 +28,7 @@ import { PaginationParams } from 'src/common/dto/pagination.query';
 import { SearchStringRepository } from 'src/common/class/search.string.from.nodes.dealer';
 import { SearchType } from 'sgnm-neo4j/dist/constant/pagination.enum';
 import { queryObjectType } from 'sgnm-neo4j/dist/dtos/dtos';
+import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
 
 @Injectable()
 export class ContactRepository implements ContactInterface<any> {
@@ -52,7 +53,10 @@ export class ContactRepository implements ContactInterface<any> {
   }
   async findWithSearchStringTotalCount(realm: string, language: string, searchString: string) {
     try {
-      const contactNode = await this.neo4jService.findByLabelAndFilters(['Contacts'], { realm, isDeleted: false });
+      const contactNode = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.CONTACTS], {
+        realm,
+        isDeleted: false,
+      });
       if (!contactNode.length) {
         throw new FacilityStructureNotFountException(realm);
       }
@@ -78,7 +82,10 @@ export class ContactRepository implements ContactInterface<any> {
   ) {
     try {
       console.log('totalCount');
-      const contactNode = await this.neo4jService.findByLabelAndFilters(['Contacts'], { realm, isDeleted: false });
+      const contactNode = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.CONTACTS], {
+        realm,
+        isDeleted: false,
+      });
       if (!contactNode.length) {
         throw new FacilityStructureNotFountException(realm);
       }
@@ -99,7 +106,10 @@ export class ContactRepository implements ContactInterface<any> {
   }
 
   async findOneByRealm(realm: string, language: string, neo4jQuery: PaginationParams) {
-    const contactNode = await this.neo4jService.findByLabelAndFilters(['Contacts'], { realm, isDeleted: false });
+    const contactNode = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.CONTACTS], {
+      realm,
+      isDeleted: false,
+    });
     // for (let index = 0; index < 2000000; index++) {
     //   const key=generateUuid()
     //   console.log(key)
@@ -146,7 +156,10 @@ export class ContactRepository implements ContactInterface<any> {
   }
 
   async findWithSearchString(realm: string, language: string, neo4jQuery: PaginationParams, searchString) {
-    const contactNode = await this.neo4jService.findByLabelAndFilters(['Contacts'], { realm, isDeleted: false });
+    const contactNode = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.CONTACTS], {
+      realm,
+      isDeleted: false,
+    });
     if (!contactNode.length) {
       throw new FacilityStructureNotFountException(realm);
     }
@@ -180,7 +193,10 @@ export class ContactRepository implements ContactInterface<any> {
     searchString,
     searchType: SearchType = SearchType.CONTAINS,
   ) {
-    const contactNode = await this.neo4jService.findByLabelAndFilters(['Contacts'], { realm, isDeleted: false });
+    const contactNode = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.CONTACTS], {
+      realm,
+      isDeleted: false,
+    });
     if (!contactNode.length) {
       throw new FacilityStructureNotFountException(realm);
     }
@@ -230,7 +246,7 @@ export class ContactRepository implements ContactInterface<any> {
       if (createContactDto['labels']) {
         value = await this.neo4jService.createNode(contactObject, createContactDto['labels']);
       } else {
-        value = await this.neo4jService.createNode(contactObject);
+        value = await this.neo4jService.createNode(contactObject, [Neo4jLabelEnum.CONTACT]);
       }
       value['properties']['id'] = value['identity'].low;
       const result = { id: value['identity'].low, labels: value['labels'], properties: value['properties'] };
@@ -290,7 +306,7 @@ export class ContactRepository implements ContactInterface<any> {
   async update(_id: string, updateContactDto: UpdateContactDto, realm: string, language: string) {
     try {
       const structureRootNode = await this.neo4jService.findChildrensByChildIdAndFilters(
-        ['Contacts'],
+        [Neo4jLabelEnum.CONTACTS],
         { isDeleted: false },
         +_id,
         { isDeleted: false },

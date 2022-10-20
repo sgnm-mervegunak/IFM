@@ -82,7 +82,7 @@ export class OrganizationRepository {
         Neo4jLabelEnum.CLASSIFICATION,
       ]);
       const typeNode = await this.neo4jService.createNode(finalTypesObject, [Neo4jLabelEnum.TYPES]);
-      const contactNode = await this.neo4jService.createNode(finalContactObject, [Neo4jLabelEnum.CONTACT]);
+      const contactNode = await this.neo4jService.createNode(finalContactObject, [Neo4jLabelEnum.CONTACTS]);
       const configNode = await this.neo4jService.createNode(finalConfigObject, [Neo4jLabelEnum.SYSTEM_CONFIG]);
 
       await this.neo4jService.addRelations(structureNode.identity.low, organizationNode.identity.low);
