@@ -16,8 +16,7 @@ import { ContactHasChildrenException } from 'src/common/badRequestExceptions/bad
 import { ContactInterface } from 'src/common/interface/modules.with.pagination.interface';
 import { PaginationParams } from 'src/common/dto/pagination.query';
 import { SearchStringRepository } from 'src/common/class/search.string.from.nodes.dealer';
-import { SearchType } from 'sgnm-neo4j/dist/constant/pagination.enum';
-
+import { AscendingEnum, SearchType } from 'sgnm-neo4j/dist/constant/pagination.enum';
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
 
 @Injectable()
@@ -26,6 +25,126 @@ export class ContactRepository implements ContactInterface<any> {
     private readonly neo4jService: Neo4jService,
     private readonly searchStringRepository: SearchStringRepository,
   ) {}
+
+  async findWithSearchStringWithSearchedStringTotalCount(
+    header,
+    neo4jQuery: PaginationParams,
+    searchString,
+    searchedStringTotalCount: number,
+  ) {
+    try {
+      const { realm } = header;
+      const contactNode = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.CONTACTS], {
+        realm,
+        isDeleted: false,
+      });
+      if (!contactNode.length) {
+        throw new FacilityStructureNotFountException(realm);
+      }
+
+      const paginationParam: PaginationParams = {
+        skip: 0,
+        limit: searchedStringTotalCount,
+        page: 1,
+        orderBy: AscendingEnum.ASCENDING,
+      };
+
+      neo4jQuery.skip = Math.abs(neo4jQuery.page - 1) * neo4jQuery.limit;
+      const matchedNodes = await this.searchStringRepository.searchByString(
+        contactNode[0].get('n').identity.low,
+        { isDeleted: false },
+        [],
+        { isDeleted: false },
+        [],
+        'PARENT_OF',
+        paginationParam,
+        searchString,
+      );
+
+      let children = matchedNodes.map((item) => {
+        item.get('children').properties['id'] = item.get('children').identity.low;
+        return item.get('children').properties;
+      });
+      let orderByColumn;
+      if (!Array.isArray(neo4jQuery.orderByColumn)) {
+        orderByColumn = neo4jQuery.orderByColumn;
+      } else {
+        orderByColumn = neo4jQuery.orderByColumn[0];
+      }
+      if (neo4jQuery.orderBy === AscendingEnum.ASCENDING) {
+        children.sort((a, b) => (a[orderByColumn] < b[orderByColumn] ? -1 : 1));
+      } else {
+        children.sort((a, b) => (a[orderByColumn] > b[orderByColumn] ? -1 : 1));
+      }
+
+      children = children.slice(neo4jQuery.skip, neo4jQuery.skip + neo4jQuery.limit);
+
+      const finalResponse = { ...contactNode[0].get('n').properties, children };
+
+      return finalResponse;
+    } catch (error) {}
+  }
+
+  async findWithSearchStringByColumnWithSearchedStringTotalCount(
+    header,
+    neo4jQuery: PaginationParams,
+    searchColumn,
+    searchString,
+    searchType: SearchType = SearchType.CONTAINS,
+    searchedStringTotalCount: number,
+  ) {
+    try {
+      const { realm } = header;
+      const contactNode = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.CONTACTS], {
+        realm,
+        isDeleted: false,
+      });
+      if (!contactNode.length) {
+        throw new FacilityStructureNotFountException(realm);
+      }
+
+      const paginationParam: PaginationParams = {
+        skip: 0,
+        limit: searchedStringTotalCount,
+        page: 1,
+        orderBy: AscendingEnum.ASCENDING,
+      };
+
+      neo4jQuery.skip = Math.abs(neo4jQuery.page - 1) * neo4jQuery.limit;
+      const matchedNodes = await this.searchStringRepository.searchByStringBySpecificColumn(
+        contactNode[0].get('n').identity.low,
+        { isDeleted: false },
+        [],
+        { isDeleted: false },
+        [],
+        'PARENT_OF',
+        paginationParam,
+        searchColumn,
+        searchString,
+        searchType,
+      );
+      let children = matchedNodes.map((item) => {
+        item.get('children').properties['id'] = item.get('children').identity.low;
+        return item.get('children').properties;
+      });
+      let orderByColumn;
+      if (!Array.isArray(neo4jQuery.orderByColumn)) {
+        orderByColumn = neo4jQuery.orderByColumn;
+      } else {
+        orderByColumn = neo4jQuery.orderByColumn[0];
+      }
+      if (neo4jQuery.orderBy === AscendingEnum.ASCENDING) {
+        children.sort((a, b) => (a[orderByColumn] < b[orderByColumn] ? -1 : 1));
+      } else {
+        children.sort((a, b) => (a[orderByColumn] > b[orderByColumn] ? -1 : 1));
+      }
+      children = children.slice(neo4jQuery.skip, neo4jQuery.skip + neo4jQuery.limit);
+
+      const finalResponse = { ...contactNode[0].get('n').properties, children };
+
+      return finalResponse;
+    } catch (error) {}
+  }
   async findOneByRealmTotalCount(header) {
     try {
       const { realm } = header;
@@ -111,7 +230,7 @@ export class ContactRepository implements ContactInterface<any> {
       //   contact['email'] = key + '@gmail.com';
       //   contact['phone'] = key;
       //   contact['classificationId'] = '34-55-00-00-00-00';
-      //   let value = await this.neo4jService.createNode(contact, ['Contact']);
+      //   const value = await this.neo4jService.createNode(contact, ['Contact']);
 
       //   await this.neo4jService.addParentRelationByIdAndFilters(
       //     value.identity.low,
@@ -120,12 +239,6 @@ export class ContactRepository implements ContactInterface<any> {
       //     {},
       //   );
       // }
-      // const cyper ='match (n:Contact)-[:PARENT_OF]->(m) return n,m limit 10'
-      // const now = Date.now();
-      // const res=await this.neo4jService.read(cyper)
-      // const responseTime= `${Date.now() - now} ms`
-      // console.log(responseTime)
-      // console.log(res)
 
       if (!contactNode.length) {
         throw new FacilityStructureNotFountException(realm);

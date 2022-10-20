@@ -1,8 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import {  IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { AscendingEnum, SearchType } from 'sgnm-neo4j/dist/constant/pagination.enum';
-
-
 
 /**
  * Common Pagination DTO for all  APIs
@@ -13,40 +11,45 @@ export class PaginationParams {
    */
   @ApiPropertyOptional()
   @IsOptional()
-  page: number = 1;
+  @IsNumber()
+  page = 1;
 
   /**
    * Skip number(how many items)
    */
-  skip:number=0 ;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  skip = 0;
 
   /**
    * Limit number(how many items per page)
    */
   @ApiPropertyOptional()
   @IsOptional()
-  limit:number=200;
+  @IsNumber()
+  limit = 200;
 
   /**
    * Order by(asc or desc)
    */
-  @ApiPropertyOptional({enum:AscendingEnum})
+  @ApiPropertyOptional({ enum: AscendingEnum })
   @IsOptional()
   @IsString()
-  orderBy: AscendingEnum=AscendingEnum.ASCENDING;
+  orderBy: AscendingEnum = AscendingEnum.ASCENDING;
 
   /**
    * Order by Column(for example: createdAt)
    */
   @ApiPropertyOptional()
   @IsOptional()
-  orderByColumn?:string[];
+  orderByColumn?: string[];
 }
 
 /**
  * Common Pagination DTO for all  APIs
  */
- export class SearchParams {
+export class SearchParams {
   /**
    * Which column u wanna search
    */
@@ -54,7 +57,7 @@ export class PaginationParams {
   @IsString()
   searchColumn: string;
 
- /**
+  /**
    * Which string u wanna search
    */
   @ApiPropertyOptional()
@@ -64,10 +67,8 @@ export class PaginationParams {
   /**
    * Order by(asc or desc)
    */
-  @ApiPropertyOptional({enum:SearchType})
+  @ApiPropertyOptional({ enum: SearchType })
   @IsOptional()
   @IsString()
-  searchType: SearchType=SearchType.CONTAINS;
-
- 
+  searchType: SearchType = SearchType.CONTAINS;
 }

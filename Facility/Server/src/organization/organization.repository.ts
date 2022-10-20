@@ -9,7 +9,7 @@ import { Facility } from './entities/facility.entity';
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
 @Injectable()
 export class OrganizationRepository {
-  constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) { }
+  constructor(private readonly neo4jService: Neo4jService, private readonly kafkaService: NestKafkaService) {}
 
   async create(createFacilityDto: CreateOrganizationDto) {
     try {
@@ -36,34 +36,34 @@ export class OrganizationRepository {
 
       const organizationInfo = {
         name: realm,
-        canDelete:false,
-        nodeType: 'Organization'
+        canDelete: false,
+        nodeType: 'Organization',
       };
       const classificationInfo = {
         name: realm + 'Classification',
-        canDelete:false,
-        nodeType: 'Classification'
+        canDelete: false,
+        nodeType: 'Classification',
       };
       const structureInfo = {
         name: realm + 'Structure',
-        canDelete:false,
-        nodeType: 'FacilityStructure'
+        canDelete: false,
+        nodeType: 'FacilityStructure',
       };
       const typeInfo = {
-        name: realm+'Type',
-        canDelete:false,
-        nodeType: 'Type'
+        name: realm + 'Type',
+        canDelete: false,
+        nodeType: 'Type',
       };
 
       const contactInfo = {
-        name: realm+'Contact',
-        canDelete:false,
-        nodeType: 'Contact'
+        name: realm + 'Contact',
+        canDelete: false,
+        nodeType: 'Contact',
       };
       const configInfo = {
-        name: realm+'Config',
-        canDelete:false,
-        nodeType: 'Config'
+        name: realm + 'Config',
+        canDelete: false,
+        nodeType: 'Config',
       };
 
       const finalOrganizationObject = assignDtoPropToEntity(facility, organizationInfo);

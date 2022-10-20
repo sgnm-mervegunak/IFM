@@ -56,6 +56,44 @@ export class ContactController {
     return this.contactService.findWithSearchStringByColumn(header, neo4jQuery, searchColumn, searchString, searchType);
   }
 
+  @Get('/search/order')
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
+  @NoCache()
+  findWithSearchStringOrderSearchedString(
+    @Headers() header,
+    @Query() neo4jQuery: PaginationParams,
+    @Query('searchString') searchString: string,
+    @Query('searchedStringTotalCount') searchedStringTotalCount: number,
+  ) {
+    return this.contactService.findWithSearchStringWithSearchedStringTotalCount(
+      header,
+      neo4jQuery,
+      searchString,
+      searchedStringTotalCount,
+    );
+  }
+  @Get('/searchByColumn/order')
+  //@Unprotected()
+  @Roles({ roles: [UserRoles.ADMIN] })
+  @NoCache()
+  findWithSearchStringByColumnOrderSearchedString(
+    @Headers() header,
+    @Query() neo4jQuery: PaginationParams,
+    @Query() searchParams: SearchParams,
+    @Query('searchedStringTotalCount') searchedStringTotalCount: number,
+  ) {
+    const { searchColumn, searchType, searchString } = searchParams;
+
+    return this.contactService.findWithSearchStringByColumnWithSearchedStringTotalCount(
+      header,
+      neo4jQuery,
+      searchColumn,
+      searchString,
+      searchType,
+      searchedStringTotalCount,
+    );
+  }
   @Get('/search/totalCount')
   //@Unprotected()
   @Roles({ roles: [UserRoles.ADMIN] })

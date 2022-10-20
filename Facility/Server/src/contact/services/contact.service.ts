@@ -39,6 +39,33 @@ export class ContactService {
     );
   }
 
+  findWithSearchStringWithSearchedStringTotalCount(header, neo4jQuery, searchString, searchedStringTotalCount) {
+    return this.contactRepository.findWithSearchStringWithSearchedStringTotalCount(
+      header,
+      neo4jQuery,
+      searchString,
+      searchedStringTotalCount,
+    );
+  }
+
+  findWithSearchStringByColumnWithSearchedStringTotalCount(
+    header,
+    neo4jQuery,
+    searchColumn,
+    searchString,
+    searchType: SearchType,
+    searchedStringTotalCount,
+  ) {
+    return this.contactRepository.findWithSearchStringByColumnWithSearchedStringTotalCount(
+      header,
+      neo4jQuery,
+      searchColumn,
+      searchString,
+      searchType,
+      searchedStringTotalCount,
+    );
+  }
+
   findWithSearchStringByColumnTotalCount(header, searchColumn, searchString, searchType: SearchType) {
     return this.contactRepository.findWithSearchStringByColumnTotalCount(
       header,
