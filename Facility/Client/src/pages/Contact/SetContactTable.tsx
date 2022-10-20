@@ -125,15 +125,29 @@ const SetContactTable = () => {
   const [selectedData, setSelectedData] = useState(null);
   const [selectedDataKeys, setSelectedDataKeys] = useState([]);
   const [selectedDataIDs, setSelectedDataIDs] = useState([]);
+  const [selectedColumn, setSelectedColumn] = useState<string>("");
+  const [columnSearchKey, setColumnSearchKey] = useState<string>("");
+  const [searchType, setSearchType] = useState<string>("");
+  const [isSortable, setIsSortable] = useState<boolean>(true);
 
+  const sortable = (count:number) => {
+    
+    if (count > 100) {
+      setIsSortable(false);
+    } else{
+      setIsSortable(true);
+    }
+  };
 
   const getContact = () => {
-    if (searchKey === "") {
+
+    if (searchKey === "" && selectedColumn === "") {
 
       setLoadingCount(true);
       ContactService.getContactCounts()
         .then((response) => {
           setContactCounts(response.data.totalCount);
+          sortable(response.data.totalCount);
           setLoadingCount(false);
         })
 
@@ -158,11 +172,55 @@ const SetContactTable = () => {
           });
           setLoading(false);
         });
-    } else {
+    }
+    else if (searchKey === "" && selectedColumn !== "") {
 
+      setLoadingCount(true);
+      ContactService.getSearchColumnContactCounts({
+        searchColumn: selectedColumn,
+        searchString: columnSearchKey,
+        searchType: searchType
+      })
+        .then((response) => {
+          setContactCounts(response.data.totalCount);
+          sortable(response.data.totalCount);
+          setLoadingCount(false);
+        })
+
+      setLoading(true);
+      ContactService.findSearchByColumn({
+        page: lazyParams.page + 1,
+        limit: lazyParams.rows,
+        orderBy: lazyParams.sortOrder === 1 ? "ASC" : "DESC",
+        orderByColumn: lazyParams.sortField ? lazyParams.sortField : "",
+        searchColumn: selectedColumn,
+        searchString: columnSearchKey,
+        searchType: searchType
+      })
+        .then((response) => {
+          // setContactCounts(response.data.totalCount);
+          setData(response.data.children);
+          // setColumnSearchKey("");
+          setLoading(false);
+        })
+        .catch((err) => {
+          toast.current.show({
+            severity: "error",
+            summary: "Error",
+            detail: err.response ? err.response.data.message : err.message,
+            life: 2000,
+          });
+          setLoading(false);
+        });
+
+    }
+    else {
+      setLoadingCount(true);
       ContactService.getSearchContactCounts({ searchString: searchKey })
         .then((response) => {
           setContactCounts(response.data.totalCount);
+          sortable(response.data.totalCount);
+          setLoadingCount(false);
         })
 
       setLoading(true);
@@ -195,12 +253,14 @@ const SetContactTable = () => {
       dtRef.current.reset();
     }
     setGlobalFilterValue("");
-
     setSearchKey("");
 
+    setLoadingCount(true);
     ContactService.getContactCounts()
       .then((response) => {
         setContactCounts(response.data.totalCount);
+        sortable(response.data.totalCount);
+        setLoadingCount(false);
       })
 
     setLoading(true);
@@ -251,10 +311,10 @@ const SetContactTable = () => {
 
   useEffect(() => {
     console.log("lazy params----", lazyParams);
-  },[lazyParams])
+  }, [lazyParams])
   const onSort = (event: any) => {
     console.log("-----onSort")
-    setLazyParams((prev) => { console.log("prev", prev); console.log("event", event); return ({ ...prev, ...event })});
+    setLazyParams((prev) => { console.log("prev", prev); console.log("event", event); return ({ ...prev, ...event }) });
   };
 
   // const onFilter = (event: any) => {
@@ -335,9 +395,12 @@ const SetContactTable = () => {
       let _searchKey = await event.target.value;
       setSearchKey(_searchKey);
 
+      setLoadingCount(true);
       ContactService.getSearchContactCounts({ searchString: _searchKey })
         .then((response) => {
           setContactCounts(response.data.totalCount);
+          sortable(response.data.totalCount);
+          setLoadingCount(false);
         })
 
       setLoading(true);
@@ -375,7 +438,7 @@ const SetContactTable = () => {
           </div>
           <div className="flex">
             <div className="m-2">
-              <MultiSelect value={selectedColumns} options={columns} optionLabel="header" /*onChange={onColumnToggle}*/ placeholder={t("Select Column")} style={{ width: '20em' }} />
+              <MultiSelect value={selectedColumns} options={columns} optionLabel="header" onChange={onColumnToggle} placeholder={t("Select Column")} style={{ width: '20em' }} />
             </div>
             <div className="m-2">
               <span className="p-input-icon-left">
@@ -425,7 +488,7 @@ const SetContactTable = () => {
 
   const onFilterApplyClick = (e: any) => {
     let _searchKey = e.constraints.constraints[0].value;
-    setSearchKey(_searchKey);
+    // setSearchKey(_searchKey);
 
     let searchType = e.constraints.constraints[0].matchMode.toUpperCase();
     if (searchType === "STARTSWITH") {
@@ -436,6 +499,10 @@ const SetContactTable = () => {
       searchType = "ENDS WITH";
     }
 
+    setColumnSearchKey(_searchKey);
+    setSelectedColumn(e.field);
+    setSearchType(searchType);
+
     ContactService.getSearchColumnContactCounts({
       searchColumn: e.field,
       searchString: _searchKey,
@@ -443,6 +510,7 @@ const SetContactTable = () => {
     })
       .then((response) => {
         setContactCounts(response.data.totalCount);
+        sortable(response.data.totalCount);
       })
 
     setLoading(true);
@@ -479,7 +547,7 @@ const SetContactTable = () => {
       header={col.header}
       filter
       filterField={col.field}
-      sortable
+      sortable={isSortable}
       filterMatchModeOptions={matchModes}
       onFilterApplyClick={onFilterApplyClick}
       onFilterClear={getContactReset}
@@ -671,8 +739,8 @@ const SetContactTable = () => {
             emptyMessage="Contact not found"
             sortField={lazyParams.sortField}
             sortOrder={lazyParams.sortOrder}
-            // filterDisplay="menu"
-            // showGridlines
+            filterDisplay="menu"
+            showGridlines
             loading={loading}
             selectionMode="checkbox"
             selection={selectedData}
@@ -697,7 +765,7 @@ const SetContactTable = () => {
             <Column
               field="email"
               header="Email"
-              sortable
+              sortable={isSortable}
               filter
               filterField="email"
               filterMatchModeOptions={matchModes}
@@ -712,7 +780,7 @@ const SetContactTable = () => {
             <Column
               field="givenName"
               header="Name"
-              sortable
+              sortable={isSortable}
               filter
               filterField="givenName"
               filterMatchModeOptions={matchModes}
@@ -727,7 +795,7 @@ const SetContactTable = () => {
             <Column
               field="familyName"
               header="Surname"
-              sortable
+              sortable={isSortable}
               filter
               filterField="familyName"
               filterMatchModeOptions={matchModes}
@@ -743,7 +811,7 @@ const SetContactTable = () => {
             <Column
               field="phone"
               header="Phone"
-              sortable
+              sortable={isSortable}
               filter
               filterField="phone"
               filterMatchModeOptions={matchModes}
@@ -758,7 +826,7 @@ const SetContactTable = () => {
             <Column
               field="company"
               header="Company"
-              sortable
+              sortable={isSortable}
               filter
               filterField="company"
               filterMatchModeOptions={matchModes}
@@ -778,7 +846,7 @@ const SetContactTable = () => {
               style={{ minWidth: '8rem' }}
               filter={false}
             />
-            
+
           </DataTable>
 
           {/* <ContactTable
@@ -799,6 +867,7 @@ const SetContactTable = () => {
             filterClear={filterClearTemplate}
             filterApply={filterApplyTemplate}
           /> */}
+
         </div>
 
         <Dialog
