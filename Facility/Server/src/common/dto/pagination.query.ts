@@ -18,21 +18,35 @@ export class PaginationParams {
     format: 'int32',
     default: 1,
   })
-  page = 1;
+  page: number;
 
   /**
    * Skip number(how many items)
    */
-  @ApiPropertyOptional()
-  @IsOptional()
-  skip = 0;
+  @ApiProperty({
+    minimum: 0,
+    maximum: 5000,
+    title: 'Skip',
+    exclusiveMaximum: true,
+    exclusiveMinimum: true,
+    format: 'int32',
+    default: 0,
+  })
+  skip: number;
 
   /**
    * Limit number(how many items per page)
    */
-  @ApiPropertyOptional()
-  @IsOptional()
-  limit = 200;
+  @ApiProperty({
+    minimum: 0,
+    maximum: 5000,
+    title: 'Limit',
+    exclusiveMaximum: true,
+    exclusiveMinimum: true,
+    format: 'int32',
+    default: 200,
+  })
+  limit: number;
 
   /**
    * Order by(asc or desc)
