@@ -248,6 +248,7 @@ export class ContactRepository implements ContactInterface<any> {
         'PARENT_OF',
         neo4jQuery,
       );
+      console.log(children);
 
       children = children.map((item) => {
         item.get('children').properties['id'] = item.get('children').identity.low;
