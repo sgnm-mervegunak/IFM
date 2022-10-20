@@ -30,20 +30,37 @@ import { I18NEnums } from "./i18n.enum";
   export function space_has_already_relation() {
     throw new HttpException({ key: I18NEnums.SPACE_HAS_ALREADY_RELATION ,code:CustomClassificationError.SPACE_HAS_ALREADY_RELATION}, HttpStatus.BAD_REQUEST);
   }
+  
   export function contact_already_exist(name) {
     throw new HttpException({ key: I18NEnums.CONTACT_ALREADY_EXIST ,code:CustomClassificationError.CONTACT_ALREADY_EXIST,args:{name}}, HttpStatus.BAD_REQUEST);
   }
+
   export function default_error() {
     throw new HttpException({ key: I18NEnums.DEFAULT_ERROR,code:CustomClassificationError.DEFAULT_ERROR}, HttpStatus.BAD_REQUEST);
   }
+
   export function there_are_no_spaces() {
     throw new HttpException({ key: I18NEnums.THERE_ARE_NO_SPACES,code:CustomClassificationError.THERE_ARE_NO_SPACES}, HttpStatus.NOT_FOUND);
   }
+
   export function there_are_no_jointSpaces() {
     throw new HttpException({ key: I18NEnums.THERE_ARE_NO_JOINTSPACES,code:CustomClassificationError.THERE_ARE_NO_JOINTSPACES}, HttpStatus.NOT_FOUND);
   }
+
   export function there_are_no_zones() {
     throw new HttpException({ key: I18NEnums.THERE_ARE_NO_ZONES,code:CustomClassificationError.THERE_ARE_NO_ZONES}, HttpStatus.NOT_FOUND);
+  }
+
+  export function type_already_exists() {
+    throw new HttpException({ key: I18NEnums.TYPE_ALREADY_EXISTS,code:CustomClassificationError.TYPE_ALREADY_EXISTS}, HttpStatus.NOT_FOUND);
+  }
+
+  export function component_already_exists() {
+    throw new HttpException({ key: I18NEnums.COMPONENT_ALREADY_EXISTS,code:CustomClassificationError.COMPONENT_ALREADY_EXISTS}, HttpStatus.NOT_FOUND);
+  }
+
+  export function component_already_exist_inside_a_system() {
+    throw new HttpException({ key: I18NEnums.COMPONENT_ALREADY_EXIST_INSIDE_A_SYSTEM,code:CustomClassificationError.COMPONENT_ALREADY_EXIST_INSIDE_A_SYSTEM}, HttpStatus.NOT_FOUND);
   }
 
 
@@ -126,5 +143,30 @@ import { I18NEnums } from "./i18n.enum";
     return {
       message: 'error',
       code: CustomClassificationError.THERE_ARE_NO_ZONES,
+    };
+  }
+
+  export function  type_already_exists_object(name) {
+    return {
+      message: 'error',
+      code: CustomClassificationError.TYPE_ALREADY_EXISTS,
+      name
+    };
+  }
+
+  export function  component_already_exists_object(name) {
+    return {
+      message: 'error',
+      code: CustomClassificationError.COMPONENT_ALREADY_EXISTS,
+      name
+    };
+  }
+
+
+  export function  component_already_exist_inside_a_system_object(name) {
+    return {
+      message: 'error',
+      code: CustomClassificationError.COMPONENT_ALREADY_EXIST_INSIDE_A_SYSTEM,
+      name
     };
   }
