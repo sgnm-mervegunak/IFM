@@ -218,23 +218,23 @@ export class ContactRepository implements ContactInterface<any> {
         realm,
         isDeleted: false,
       });
-      for (let index = 0; index < 2000000; index++) {
-        const key = generateUuid();
-        console.log(key);
-        const contact = new Contact();
-        contact['company'] = key;
-        contact['email'] = key + '@gmail.com';
-        contact['phone'] = key;
-        contact['classificationId'] = '34-55-00-00-00-00';
-        const value = await this.neo4jService.createNode(contact, ['Contact']);
+      // for (let index = 0; index < 2000000; index++) {
+      //   const key = generateUuid();
+      //   console.log(key);
+      //   const contact = new Contact();
+      //   contact['company'] = key;
+      //   contact['email'] = key + '@gmail.com';
+      //   contact['phone'] = key;
+      //   contact['classificationId'] = '34-55-00-00-00-00';
+      //   const value = await this.neo4jService.createNode(contact, ['Contact']);
 
-        await this.neo4jService.addParentRelationByIdAndFilters(
-          value.identity.low,
-          {},
-          contactNode[0].get('n').identity.low,
-          {},
-        );
-      }
+      //   await this.neo4jService.addParentRelationByIdAndFilters(
+      //     value.identity.low,
+      //     {},
+      //     contactNode[0].get('n').identity.low,
+      //     {},
+      //   );
+      // }
 
       if (!contactNode.length) {
         throw new FacilityStructureNotFountException(realm);
