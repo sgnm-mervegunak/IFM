@@ -5169,11 +5169,6 @@
   "resolved" "https://registry.npmjs.org/fs.realpath/-/fs.realpath-1.0.0.tgz"
   "version" "1.0.0"
 
-"fsevents@^2.3.2", "fsevents@~2.3.2":
-  "integrity" "sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA=="
-  "resolved" "https://registry.npmjs.org/fsevents/-/fsevents-2.3.2.tgz"
-  "version" "2.3.2"
-
 "fstream@^1.0.12":
   "integrity" "sha512-WvJ193OHa0GHPEL+AycEJgxvBEwyfRkN1vhjca23OaPVMCaLCXTd5qAu82AjTcgP1UJmytkOKb63Ypde7raDIg=="
   "resolved" "https://registry.npmjs.org/fstream/-/fstream-1.0.12.tgz"
@@ -8417,10 +8412,10 @@
     "express" "^4.18.1"
     "neo4j-driver" "^4.4.5"
 
-"sgnm-neo4j@^0.0.235":
-  "integrity" "sha512-e4+Q1ViNkUG7L+YDzAlG+1LDzumSNB097aqKC0tiQ9/ElFQBE+Pz1wTikaGzI4uGHnbDWfVDCYrl1VD6X1MLlw=="
-  "resolved" "https://registry.npmjs.org/sgnm-neo4j/-/sgnm-neo4j-0.0.235.tgz"
-  "version" "0.0.235"
+"sgnm-neo4j@^0.0.236":
+  "integrity" "sha512-qb+yP9E+X4Y9BDnI3c5tWOdO836ede+azJZrPpjCsxvdI2ZlPajnYCRTQlvOHRQdTQMWh6p7VZuU0PyOAQrseg=="
+  "resolved" "https://registry.npmjs.org/sgnm-neo4j/-/sgnm-neo4j-0.0.236.tgz"
+  "version" "0.0.236"
   dependencies:
     "@nestjs/common" "^8.4.5"
     "@nestjs/config" "^2.0.0"
