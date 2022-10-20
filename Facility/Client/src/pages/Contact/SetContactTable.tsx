@@ -90,6 +90,7 @@ const SetContactTable = () => {
   const [selectedNodeKey, setSelectedNodeKey] = useState<any>("");
   const [selectedNodeId, setSelectedNodeId] = useState<any>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [loadingCount, setLoadingCount] = useState<boolean>(false);
   const [lazyParams, setLazyParams] = useState({
     first: 0,
     rows: 10,
@@ -125,9 +126,12 @@ const SetContactTable = () => {
 
   const getContact = () => {
     if (searchKey === "") {
+
+      setLoadingCount(true);
       ContactService.getContactCounts()
         .then((response) => {
           setContactCounts(response.data.totalCount);
+          setLoadingCount(false);
         })
 
       setLoading(true);
@@ -220,7 +224,7 @@ const SetContactTable = () => {
     getContact();
     setSelectedData(null);
     setSelectedDataKeys([]);
-  
+
   }, [lazyParams]);
 
   useEffect(() => {
@@ -623,6 +627,12 @@ const SetContactTable = () => {
     );
   }
 
+  const countTemplate = () => {
+    const counts = t("Showing {first} to {last} of {totalRecords} Contacts");
+    return loadingCount === true ?
+      "Loading..." : counts;
+  }
+
   const header = renderSearch();
 
   return (
@@ -641,7 +651,7 @@ const SetContactTable = () => {
             first={lazyParams.first}
             responsiveLayout="scroll"
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-            currentPageReportTemplate={t("Showing {first} to {last} of {totalRecords} Contacts")}
+            currentPageReportTemplate={countTemplate()}
             rows={lazyParams.rows}
             rowsPerPageOptions={[10, 25, 50]}
             lazy
