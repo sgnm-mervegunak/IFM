@@ -13,11 +13,13 @@ import { FilterMatchMode, FilterOperator } from 'primereact/api';
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
+import { ContactTable, CustomDataTable } from "./ContactComponents";
 import ContactService from "../../services/contact";
 import ContactForm from "./Forms/ContactForm";
 import ImportContact from "./ImportContact"
 import { useAppSelector } from "../../app/hook";
 import useToast from "../../hooks/useToast";
+// import { DenemeChild } from "./ContactComponents/CustomDataTable";
 
 
 interface Node {
@@ -84,7 +86,6 @@ const SetContactTable = () => {
     { field: 'tag', header: 'Tag' },
     { field: 'town', header: 'Town' },
   ];
-
   const dtRef = useRef<any>(null);
   const [data, setData] = useState<Node[]>([]);
   const [selectedNodeKey, setSelectedNodeKey] = useState<any>("");
@@ -104,6 +105,7 @@ const SetContactTable = () => {
   });
   const [contactCounts, setContactCounts] = useState(0);
   const [addDia, setAddDia] = useState<boolean>(false);
+
   const [editDia, setEditDia] = useState<boolean>(false);
   const [delDia, setDelDia] = useState<boolean>(false);
   const [delAllDia, setDelAllDia] = useState<boolean>(false);
@@ -123,6 +125,7 @@ const SetContactTable = () => {
   const [selectedData, setSelectedData] = useState(null);
   const [selectedDataKeys, setSelectedDataKeys] = useState([]);
   const [selectedDataIDs, setSelectedDataIDs] = useState([]);
+
 
   const getContact = () => {
     if (searchKey === "") {
@@ -188,8 +191,11 @@ const SetContactTable = () => {
   };
 
   const getContactReset = async () => {
-    dtRef.current.reset();
+    if (dtRef.current !== null) {
+      dtRef.current.reset();
+    }
     setGlobalFilterValue("");
+
     setSearchKey("");
 
     ContactService.getContactCounts()
@@ -228,6 +234,7 @@ const SetContactTable = () => {
   }, [lazyParams]);
 
   useEffect(() => {
+    console.log("selected columns:", selectedColumns)
     setSelectedColumns([]);
   }, []);
 
@@ -238,11 +245,16 @@ const SetContactTable = () => {
   ];
 
   const onPage = (event: any) => {
+    console.log("-----onpage")
     setLazyParams(event)
   };
 
+  useEffect(() => {
+    console.log("lazy params----", lazyParams);
+  },[lazyParams])
   const onSort = (event: any) => {
-    setLazyParams((prev) => ({ ...prev, ...event }));
+    console.log("-----onSort")
+    setLazyParams((prev) => { console.log("prev", prev); console.log("event", event); return ({ ...prev, ...event })});
   };
 
   // const onFilter = (event: any) => {
@@ -363,7 +375,7 @@ const SetContactTable = () => {
           </div>
           <div className="flex">
             <div className="m-2">
-              <MultiSelect value={selectedColumns} options={columns} optionLabel="header" onChange={onColumnToggle} placeholder={t("Select Column")} style={{ width: '20em' }} />
+              <MultiSelect value={selectedColumns} options={columns} optionLabel="header" /*onChange={onColumnToggle}*/ placeholder={t("Select Column")} style={{ width: '20em' }} />
             </div>
             <div className="m-2">
               <span className="p-input-icon-left">
@@ -389,7 +401,7 @@ const SetContactTable = () => {
   //   'country': { value: null, matchMode: FilterMatchMode.CONTAINS }
   // });
 
-  const onGlobalFilterChange = async (e: any) => {
+  const onGlobalFilterChange = async (e: any) => { //eklendi
     const value = e.target.value;
 
     // let _filters = { ...filters };
@@ -640,7 +652,6 @@ const SetContactTable = () => {
       <div className="col-12">
         <div className="card">
           <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
-
           <DataTable
             value={data}
             ref={dtRef}
@@ -660,8 +671,8 @@ const SetContactTable = () => {
             emptyMessage="Contact not found"
             sortField={lazyParams.sortField}
             sortOrder={lazyParams.sortOrder}
-            filterDisplay="menu"
-            showGridlines
+            // filterDisplay="menu"
+            // showGridlines
             loading={loading}
             selectionMode="checkbox"
             selection={selectedData}
@@ -670,9 +681,13 @@ const SetContactTable = () => {
               setSelectedDataKeys(e.value.map((item: any) => item.key));
               setSelectedDataIDs(e.value.map((item: any) => item.id));
             }}
+
+
           // onFilter={onFilter}
           // filters={filters}
           >
+
+
 
             <Column
               selectionMode="multiple"
@@ -723,6 +738,7 @@ const SetContactTable = () => {
               filterClear={filterClearTemplate}
               filterApply={filterApplyTemplate}
               showAddButton={false}
+
             />
             <Column
               field="phone"
@@ -762,8 +778,27 @@ const SetContactTable = () => {
               style={{ minWidth: '8rem' }}
               filter={false}
             />
-
+            
           </DataTable>
+
+          {/* <ContactTable
+            value={data}
+            rows={lazyParams.rows}
+            body={actionBodyTemplate}
+            handleFind={handleKeyDown}
+            handleReset={getContactReset}
+            loading={loading}
+            ref={dtRef}
+            onSort={onSort}
+            onPage={onPage}
+
+
+            filterMatchModeOptions={matchModes}
+            onFilterApplyClick={onFilterApplyClick}
+            onFilterClear={getContactReset}
+            filterClear={filterClearTemplate}
+            filterApply={filterApplyTemplate}
+          /> */}
         </div>
 
         <Dialog
