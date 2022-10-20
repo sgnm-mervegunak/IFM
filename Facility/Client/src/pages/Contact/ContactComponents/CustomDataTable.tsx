@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
+import { DataTable, DataTableRowEventParams } from "primereact/datatable";
+import { Column, ColumnFilterApplyClickParams, ColumnFilterApplyType, ColumnFilterClearType, ColumnFilterMatchModeOptions, ColumnHeaderType } from "primereact/column";
 import { MultiSelect } from 'primereact/multiselect';
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
@@ -9,19 +9,112 @@ import { Toolbar } from "primereact/toolbar";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Menu } from "primereact/menu";
-import { FilterMatchMode, FilterOperator } from 'primereact/api';
+import PrimeReact, { FilterMatchMode, FilterOperator } from 'primereact/api';
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import ContactService from "../../../services/contact";
+
+interface IColumn {
+    field: string;
+    header: string;
+}
+
+
+interface DataTableProps<P>{
+    props:P
+}
 
 
 export const CustomDataTable = (
-    // { value, ref, onPage, onSort, first, rows, totalRecords, header, sortField, sortOrder, loading, selection, onSelectionChange, children, matchModes, onFilterApplyClick, onFilterClear, filterClear, filterApply, body }:
-    // {
-    //     value: any, ref: any, onPage: any, onSort: any, first: number, rows: any, totalRecords: any, header: any, sortField: any, sortOrder: any, loading: any, selection: any, onSelectionChange: any, children: any, matchModes?: any, onFilterApplyClick?: any, onFilterClear?: any, filterClear?: any, filterApply?: any, body?: any
-    //     }
+  
     { ...props }
 ) => {
+
+    const columns = [
+        { field: 'country', header: 'Country' },
+        { field: 'department', header: 'Department' },
+        { field: 'description', header: 'Description' },
+        { field: 'organizationCode', header: 'Organization Code' },
+        { field: 'postalBox', header: 'Postal Box' },
+        { field: 'postalCode', header: 'Postal Code' },
+        { field: 'stateRegion', header: 'State Region' },
+        { field: 'street', header: 'Street' },
+        { field: 'tag', header: 'Tag' },
+        { field: 'town', header: 'Town' },
+    ];
+
+
     const { t } = useTranslation(["common"]);
+    const [selectedColumns, setSelectedColumns] = useState<IColumn[]>(columns);
+    const [globalFilterValue, setGlobalFilterValue] = useState("");
+    const [searchKey, setSearchKey] = useState("");
+    const [loading, setLoading] = useState<boolean>(false);
+
+
+    const [lazyParams, setLazyParams] = useState({
+        first: 0,
+        rows: 10,
+        page: 0,
+        orderBy: "ASC",
+        orderByColumn: "email",
+        sortField: null || undefined,
+        sortOrder: null,
+        filters: {
+        }
+    });
+
+    const onGlobalFilterChange = async (e: any) => {
+        const value = e.target.value;
+
+        // let _filters = { ...filters };
+        // _filters['global'].value = value;
+
+        // setFilters(_filters);
+        setGlobalFilterValue(value);
+
+
+        if (e.target.value === "") {
+            // getContactReset(); //----------------ekle
+            setSearchKey("");
+        };
+    }
+
+    const onColumnToggle = (event: any) => {
+        let selectedColumns = event.value;
+        let orderedSelectedColumns = columns.filter(col => selectedColumns.some((sCol: { field: string; }) => sCol.field === col.field));
+        setSelectedColumns(orderedSelectedColumns);
+    }
+
+
+
+
+    const renderSearch = (title: string) => {
+        return (
+            <React.Fragment>
+                <div className="flex justify-content-between align-items-center justify-content-center">
+                    <div>
+                        <h5 className="m-0">{title}</h5>
+                    </div>
+                    <div className="flex">
+                        <div className="m-2">
+                            <MultiSelect value={selectedColumns} options={columns} optionLabel="header" onChange={onColumnToggle} placeholder={t("Select Column")} style={{ width: '20em' }} />
+                        </div>
+                        <div className="m-2">
+                            <span className="p-input-icon-left">
+                                <i className="pi pi-search" />
+                                <InputText value={globalFilterValue} onKeyDown={props.handleFind} onChange={onGlobalFilterChange} placeholder={t("Search")} />
+                            </span>
+                        </div>
+                        <div className="m-2">
+                            <Button type="button" icon="pi pi-filter-slash" label={t("Clear")} className="p-button-outlined" onClick={props.handleReset} />
+                        </div>
+                    </div>
+                </div>
+            </React.Fragment>
+        )
+    }
+
+    const header = renderSearch("Contact Management");
 
     return (
 
@@ -40,7 +133,7 @@ export const CustomDataTable = (
             rowsPerPageOptions={[10, 25, 50]}
             lazy
             totalRecords={props.totalRecords}
-            header={props.header}
+            header={header}
             emptyMessage="Contact not found"
             sortField={props.sortField}
             sortOrder={props.sortOrder}
@@ -51,42 +144,17 @@ export const CustomDataTable = (
             selection={props.selection}
             onSelectionChange={props.onSelectionChange}
 
+
         // onFilter={onFilter}
         // filters={filters}
         >
+            
 
             <Column
-                selectionMode="single"
+                selectionMode="multiple"
                 headerStyle={{ width: '3em' }}>
             </Column>
-            {/* 
-                <TableColumn
-                    field="email"
-                    header="Email"
-                filterField="email"
-                
-                />
-              <TableColumn
-                    field="givenName"
-                    header="Name"
-                    filterField="givenName"
-                />
-                <TableColumn
-                    field="familyName"
-                    header="Surname"
-                    filterField="familyName"
-                />
-                <TableColumn
-                    field="phone"
-                    header="Phone"
-                    filterField="phone"
-                   />
-                <TableColumn
-                    field="company"
-                    header="Company"
-                filterField="company"
 
-                /> */}
 
             {props.children}
             <Column
@@ -97,34 +165,98 @@ export const CustomDataTable = (
                 filter={false}
             />
 
+      
+
 
         </DataTable>
 
     )
+
+
 }
 
-const TableColumn = (props: any) => {
+type Props = {
+    field: string;
+    header: ColumnHeaderType;
+    filter?: boolean | undefined;
+    filterField: string | undefined;
+    sortable?: true;
+    filterMatchModeOptions?: ColumnFilterMatchModeOptions[] | undefined
+    onFilterApplyClick?(e: ColumnFilterApplyClickParams): void
+    onFilterClear?(): void
+    showFilterOperator?: boolean | undefined
+    filterPlaceholder?: string | undefined
+    filterClear?: ColumnFilterClearType
+    filterApply?: ColumnFilterApplyType
+    showAddButton?: boolean | undefined
+}
+
+
+
+const TableColumn: React.FC<Props> =({
+
+    field,
+    header,
+    filter,
+    filterField,
+    sortable,
+    filterMatchModeOptions,
+    onFilterApplyClick,
+    onFilterClear,
+    showFilterOperator,
+    filterPlaceholder,
+    filterClear,
+    filterApply,
+    showAddButton
+}) => {
     const { t } = useTranslation(["common"]);
+
 
     return (
 
         <Column
-            field={props.field}
-            header={props.header}
-            sortable
-            filter
-            filterField={props.filterField}
-            filterMatchModeOptions={props.matchModes}
-            onFilterApplyClick={props.onFilterApplyClick}
-            onFilterClear={props.onFilterClear}
-            showFilterOperator={false}
-            filterPlaceholder={t("Search")}
-            filterClear={props.filterClear}
-            filterApply={props.filterApply}
-            showAddButton={false}
-            selectionMode="multiple"
-            headerStyle={{ width: '3em' }}
+            field={field}
+            header={header}
+            filter={filter}
+            filterField={filterField}
+            filterMatchModeOptions={filterMatchModeOptions}
+            onFilterApplyClick={onFilterApplyClick}
+            onFilterClear={onFilterClear}
+            sortable={sortable}
+            showFilterOperator={showFilterOperator}
+            filterPlaceholder={filterPlaceholder}
+            filterClear={filterClear}
+            filterApply={filterApply}
+            showAddButton={showAddButton}
         />
     );
+
+}
+
+
+
+export { DenemeParent, DenemeChild}
+
+const DenemeChild = ({a}:{a?:boolean}) => {
+    return (
+        <Text style={{ color: a ? "red" : "green" }} >adfsdfsdf</Text> 
+    )
+}
+
+const DenemeParent = ({...props}) => {
+    return (
+        <div >
+            {props.children}
+        </div>
+    )
+}
+
+const Text = ({...props}) => {
+    return (
+        <h1>aaa</h1>
+    )
 }
 CustomDataTable.Column = TableColumn;
+
+export { TableColumn };
+
