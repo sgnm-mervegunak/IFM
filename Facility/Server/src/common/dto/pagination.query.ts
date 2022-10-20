@@ -1,5 +1,5 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsString } from 'class-validator';
 import { AscendingEnum, SearchType } from 'sgnm-neo4j/dist/constant/pagination.enum';
 
 /**
@@ -9,9 +9,15 @@ export class PaginationParams {
   /**
    * Page number
    */
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
+  @ApiProperty({
+    minimum: 0,
+    maximum: 10000,
+    title: 'Page',
+    exclusiveMaximum: true,
+    exclusiveMinimum: true,
+    format: 'int32',
+    default: 1,
+  })
   page = 1;
 
   /**
@@ -19,7 +25,6 @@ export class PaginationParams {
    */
   @ApiPropertyOptional()
   @IsOptional()
-  @IsNumber()
   skip = 0;
 
   /**
@@ -27,7 +32,6 @@ export class PaginationParams {
    */
   @ApiPropertyOptional()
   @IsOptional()
-  @IsNumber()
   limit = 200;
 
   /**

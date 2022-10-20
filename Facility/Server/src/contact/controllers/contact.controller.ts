@@ -18,7 +18,7 @@ export class ContactController {
   //@Unprotected()
   @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
-  findOne(@Headers() header, @Query() neo4jQuery: PaginationParams) {
+  findOne(@Query() neo4jQuery: PaginationParams, @Headers() header) {
     return this.contactService.findOne(header, neo4jQuery);
   }
 
@@ -61,10 +61,10 @@ export class ContactController {
   @Roles({ roles: [UserRoles.ADMIN] })
   @NoCache()
   findWithSearchStringOrderSearchedString(
-    @Headers() header,
     @Query() neo4jQuery: PaginationParams,
     @Query('searchString') searchString: string,
     @Query('searchedStringTotalCount') searchedStringTotalCount: number,
+    @Headers() header,
   ) {
     return this.contactService.findWithSearchStringWithSearchedStringTotalCount(
       header,

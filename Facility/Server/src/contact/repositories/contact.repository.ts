@@ -18,6 +18,8 @@ import { PaginationParams } from 'src/common/dto/pagination.query';
 import { SearchStringRepository } from 'src/common/class/search.string.from.nodes.dealer';
 import { AscendingEnum, SearchType } from 'sgnm-neo4j/dist/constant/pagination.enum';
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
+import { generateUuid } from 'src/common/baseobject/base.virtual.node.object';
+import { fieldSorter } from 'src/common/func/common.func';
 
 @Injectable()
 export class ContactRepository implements ContactInterface<any> {
@@ -65,17 +67,13 @@ export class ContactRepository implements ContactInterface<any> {
         item.get('children').properties['id'] = item.get('children').identity.low;
         return item.get('children').properties;
       });
-      let orderByColumn;
+      let orderByColumn: string[] = [];
       if (!Array.isArray(neo4jQuery.orderByColumn)) {
+        orderByColumn = [neo4jQuery.orderByColumn];
+      } else {
         orderByColumn = neo4jQuery.orderByColumn;
-      } else {
-        orderByColumn = neo4jQuery.orderByColumn[0];
       }
-      if (neo4jQuery.orderBy === AscendingEnum.ASCENDING) {
-        children.sort((a, b) => (a[orderByColumn] < b[orderByColumn] ? -1 : 1));
-      } else {
-        children.sort((a, b) => (a[orderByColumn] > b[orderByColumn] ? -1 : 1));
-      }
+      children = children.sort(fieldSorter(orderByColumn, neo4jQuery.orderBy));
 
       children = children.slice(neo4jQuery.skip, neo4jQuery.skip + neo4jQuery.limit);
 
@@ -127,17 +125,15 @@ export class ContactRepository implements ContactInterface<any> {
         item.get('children').properties['id'] = item.get('children').identity.low;
         return item.get('children').properties;
       });
-      let orderByColumn;
+      let orderByColumn: string[] = [];
       if (!Array.isArray(neo4jQuery.orderByColumn)) {
+        orderByColumn = [neo4jQuery.orderByColumn];
+      } else {
         orderByColumn = neo4jQuery.orderByColumn;
-      } else {
-        orderByColumn = neo4jQuery.orderByColumn[0];
       }
-      if (neo4jQuery.orderBy === AscendingEnum.ASCENDING) {
-        children.sort((a, b) => (a[orderByColumn] < b[orderByColumn] ? -1 : 1));
-      } else {
-        children.sort((a, b) => (a[orderByColumn] > b[orderByColumn] ? -1 : 1));
-      }
+
+      children = children.sort(fieldSorter(orderByColumn, neo4jQuery.orderBy));
+
       children = children.slice(neo4jQuery.skip, neo4jQuery.skip + neo4jQuery.limit);
 
       const finalResponse = { ...contactNode[0].get('n').properties, children };
@@ -222,23 +218,23 @@ export class ContactRepository implements ContactInterface<any> {
         realm,
         isDeleted: false,
       });
-      // for (let index = 0; index < 2000000; index++) {
-      //   const key = generateUuid();
-      //   console.log(key);
-      //   const contact = new Contact();
-      //   contact['company'] = key;
-      //   contact['email'] = key + '@gmail.com';
-      //   contact['phone'] = key;
-      //   contact['classificationId'] = '34-55-00-00-00-00';
-      //   const value = await this.neo4jService.createNode(contact, ['Contact']);
+      for (let index = 0; index < 2000000; index++) {
+        const key = generateUuid();
+        console.log(key);
+        const contact = new Contact();
+        contact['company'] = key;
+        contact['email'] = key + '@gmail.com';
+        contact['phone'] = key;
+        contact['classificationId'] = '34-55-00-00-00-00';
+        const value = await this.neo4jService.createNode(contact, ['Contact']);
 
-      //   await this.neo4jService.addParentRelationByIdAndFilters(
-      //     value.identity.low,
-      //     {},
-      //     contactNode[0].get('n').identity.low,
-      //     {},
-      //   );
-      // }
+        await this.neo4jService.addParentRelationByIdAndFilters(
+          value.identity.low,
+          {},
+          contactNode[0].get('n').identity.low,
+          {},
+        );
+      }
 
       if (!contactNode.length) {
         throw new FacilityStructureNotFountException(realm);

@@ -17,7 +17,7 @@ import { SearchStringRepository } from 'src/common/class/search.string.from.node
       useClass: ContactRepository,
     },
     {
-      provide:SearchStringRepository,
+      provide: SearchStringRepository,
       useClass: SearchStringRepository,
     },
   ],

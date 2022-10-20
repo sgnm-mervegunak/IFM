@@ -14,5 +14,5 @@ export enum Neo4jLabelEnum {
   WINFORM_DATA = 'WinformData',
   SYSTEM_CONFIG = 'System_Config',
   JOINT_SPACE = 'JointSpace',
-  ZONE = 'Zone'
+  ZONE = 'Zone',
 }
