@@ -1,30 +1,21 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { CustomNeo4jError, Neo4jService } from 'sgnm-neo4j/dist';
 import { Neo4jLabelEnum } from 'src/common/const/neo4j.label.enum';
-import { node_not_found, wrong_parent_error} from 'src/common/const/custom.error.object';
+import { node_not_found, wrong_parent_error } from 'src/common/const/custom.error.object';
 import { CustomAssetError } from 'src/common/const/custom.error.enum';
 import { RelationName } from 'src/common/const/relation.name.enum';
 import { System } from '../entities/systems.entity';
 import { RelationDirection } from 'sgnm-neo4j/dist/constant/relation.direction.enum';
-
-import { ConfigService } from '@nestjs/config';
 import { NodeRelationHandler } from 'src/common/class/node.relation.dealer';
 import { SystemComponentInterface } from 'src/common/interface/system-component.interface';
 import { SystemComponentRelationDto } from '../dto/component.relation.dto';
 import { WrongIdProvided } from 'src/common/bad.request.exception';
 import { AssetNotFoundException } from 'src/common/notFoundExceptions/not.found.exception';
-import { string } from 'joi';
 import { PaginationParams } from 'src/common/commonDto/pagination.dto';
-import { SystemComponentService } from '../services/component.relation.service';
 
 @Injectable()
 export class SystemComponentRepository implements SystemComponentInterface<System> {
-  constructor(
-    private readonly neo4jService: Neo4jService,
-    private readonly nodeRelationHandler: NodeRelationHandler,
-    private readonly systemComponentService: SystemComponentService
-   
-  ) {}
+  constructor(private readonly neo4jService: Neo4jService, private readonly nodeRelationHandler: NodeRelationHandler) {}
 
   async findOneByRealmTotalCount(systemId: string, realm: string, language: string) {
     try {
@@ -35,21 +26,21 @@ export class SystemComponentRepository implements SystemComponentInterface<Syste
         { isDeleted: false },
         'SYSTEM_OF',
       );
-      totalCount=totalCount[0].get('count').low
-      
-      return { totalCount};
+      totalCount = totalCount[0].get('count').low;
+
+      return { totalCount };
     } catch (error) {}
   }
-  
+
   async create(systemComponentRelationDto: SystemComponentRelationDto, header) {
     try {
       const { realm, authorization, language } = header;
-      
+
       const systemNode = await this.neo4jService.findChildrensByLabelsAndRelationNameOneLevel(
         [Neo4jLabelEnum.SYSTEMS],
-        {isDeleted: false, realm },
+        { isDeleted: false, realm },
         [Neo4jLabelEnum.SYSTEM],
-        { isDeleted: false, key: systemComponentRelationDto.system_key  },
+        { isDeleted: false, key: systemComponentRelationDto.system_key },
         RelationName.PARENT_OF,
         RelationDirection.RIGHT,
       );
@@ -58,18 +49,18 @@ export class SystemComponentRepository implements SystemComponentInterface<Syste
       }
 
       if (systemComponentRelationDto.component_keys.length == 0) {
-        throw new HttpException(wrong_parent_error({}), 400);  //Değişecek    
+        throw new HttpException(wrong_parent_error({}), 400); //Değişecek
       }
-      
+
       systemComponentRelationDto.component_keys.forEach(async (item) => {
-        let componentNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+        const componentNode = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
           [Neo4jLabelEnum.TYPES],
-          {isDeleted: false, realm },
+          { isDeleted: false, realm },
           [Neo4jLabelEnum.COMPONENT],
-          { isDeleted: false, key: item},
+          { isDeleted: false, key: item },
           RelationName.PARENT_OF,
           RelationDirection.RIGHT,
-        )
+        );
         if (componentNode['length'] > 0) {
           await this.neo4jService.addRelationByIdAndRelationNameWithFilters(
             systemNode[0].get('children').identity.low,
@@ -77,7 +68,7 @@ export class SystemComponentRepository implements SystemComponentInterface<Syste
             componentNode[0].get('children').identity.low,
             { isDeleted: false },
             'SYSTEM_OF',
-            RelationDirection.RIGHT
+            RelationDirection.RIGHT,
           );
         }
       });
@@ -106,20 +97,24 @@ export class SystemComponentRepository implements SystemComponentInterface<Syste
       //   _children_keys = [_children_keys];
       // }
       const { realm } = header;
-      const selectedSystemNode = await this.neo4jService.findByLabelAndFilters([],{"isDeleted": false, "key": _parent_key},[]);
+      const selectedSystemNode = await this.neo4jService.findByLabelAndFilters(
+        [],
+        { isDeleted: false, key: _parent_key },
+        [],
+      );
       if (!selectedSystemNode.length) {
         throw new AssetNotFoundException(_parent_key);
       }
       //delete system_by relations in this database
-      _children_keys.forEach(async (child)=>{
-        let relatedComponent = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
+      _children_keys.forEach(async (child) => {
+        const relatedComponent = await this.neo4jService.findChildrenNodesByLabelsAndRelationName(
           ['System'],
-          {"isDeleted": false, "key": _parent_key},
+          { isDeleted: false, key: _parent_key },
           ['Component'],
-          {"isDeleted": false, "key": child},
+          { isDeleted: false, key: child },
           RelationName.SYSTEM_OF,
-          RelationDirection.RIGHT
-        )
+          RelationDirection.RIGHT,
+        );
         if (relatedComponent.length > 0) {
           await this.neo4jService.deleteRelationByIdAndRelationNameWithFilters(
             selectedSystemNode[0].get('n')['identity'].low,
@@ -127,10 +122,10 @@ export class SystemComponentRepository implements SystemComponentInterface<Syste
             relatedComponent[0].get('children').identity.low,
             {},
             RelationName.SYSTEM_OF,
-            RelationDirection.RIGHT
-          )
+            RelationDirection.RIGHT,
+          );
         }
-      }); 
+      });
     } catch (error) {
       const { code, message } = error.response;
       if (code === CustomAssetError.HAS_CHILDREN) {
@@ -144,27 +139,30 @@ export class SystemComponentRepository implements SystemComponentInterface<Syste
   }
 
   async findComponentsIncludedBySystem(key: string, header, neo4jQuery: PaginationParams) {
-    const {language, realm} = header;
-    const systemNode = await this.neo4jService.findByLabelAndFilters([Neo4jLabelEnum.SYSTEM],
-      {"isDeleted": false, "key": key}, [Neo4jLabelEnum.VIRTUAL]);
+    const { language, realm } = header;
+    const systemNode = await this.neo4jService.findByLabelAndFilters(
+      [Neo4jLabelEnum.SYSTEM],
+      { isDeleted: false, key: key },
+      [Neo4jLabelEnum.VIRTUAL],
+    );
     if (!systemNode['length']) {
-        throw new HttpException(node_not_found({}), 400);
-      }  
+      throw new HttpException(node_not_found({}), 400);
+    }
     const systemComponents = await this.neo4jService.findChildrensByIdAndFiltersWithPagination(
       systemNode[0].get('n').identity.low,
-      {"isDeleted": false},
+      { isDeleted: false },
       ['Component'],
-      {"isDeleted": false},
+      { isDeleted: false },
       RelationName.SYSTEM_OF,
-      neo4jQuery
-    ); 
-    let components = []; 
+      neo4jQuery,
+    );
+    const components = [];
     systemComponents.forEach((record) => {
       components.push(record.get('children').properties);
     });
-     const totalCount = await this.systemComponentService.findOneTotalCount(systemNode[0].get('n').identity.low, realm, language);
-     let resultObject =  {"totalCount": totalCount, "properties": components}
-    
-     return resultObject;     
+    const totalCount = await this.findOneByRealmTotalCount(systemNode[0].get('n').identity.low, realm, language);
+    const resultObject = { totalCount: totalCount, properties: components };
+
+    return resultObject;
   }
 }
