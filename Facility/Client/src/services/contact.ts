@@ -18,6 +18,15 @@ interface SearchParams {
     searchString?: string;
 }
 
+interface SearchOrderParams {
+    page?: number;
+    limit?: number;
+    orderBy?: string;
+    orderByColumn?: string | undefined | null;
+    searchString?: string;
+    searchedStringTotalCount?: number;
+}
+
 interface SearchCountParams {
     searchString?: string;
 }
@@ -30,6 +39,17 @@ interface SearchColumnParams {
     searchColumn?: string;
     searchString?: string;
     searchType?: string;
+}
+
+interface SearchColumnOrderParams {
+    page?: number;
+    limit?: number;
+    orderBy?: string;
+    orderByColumn?: string | undefined | null;
+    searchColumn?: string;
+    searchString?: string;
+    searchType?: string;
+    searchedStringTotalCount?: number;
 }
 
 interface SearchColumnCountParams {
@@ -100,6 +120,10 @@ const findSearch = async (query: SearchParams) => {
     return axios.get(url + "/search/" + `?page=${query.page}&limit=${query.limit}&orderBy=${query.orderBy}&orderByColumn=${query.orderByColumn}&searchString=${query.searchString}`);
 };
 
+const findSearchOrder = async (query: SearchOrderParams) => {
+    return axios.get(url + "/search/" + `?page=${query.page}&limit=${query.limit}&orderBy=${query.orderBy}&orderByColumn=${query.orderByColumn}&searchString=${query.searchString}&searchedStringTotalCount=${query.searchedStringTotalCount}`);
+};
+
 const getSearchContactCounts = async (query: SearchCountParams) => {
     return axios.get(url + "/search/totalCount" + `?searchString=${query.searchString}`);
 };
@@ -107,6 +131,11 @@ const getSearchContactCounts = async (query: SearchCountParams) => {
 const findSearchByColumn = async (query: SearchColumnParams) => {
     return axios.get(url + "/searchByColumn/" + `?page=${query.page}&limit=${query.limit}&orderBy=${query.orderBy}&orderByColumn=${query.orderByColumn}&searchColumn=${query.searchColumn}&searchString=${query.searchString}&searchType=${query.searchType}`);
 };
+
+const findSearchByColumnOrder = async (query: SearchColumnOrderParams) => {
+    return axios.get(url + "/searchByColumn/" + `?page=${query.page}&limit=${query.limit}&orderBy=${query.orderBy}&orderByColumn=${query.orderByColumn}&searchColumn=${query.searchColumn}&searchString=${query.searchString}&searchType=${query.searchType}&searchedStringTotalCount=${query.searchedStringTotalCount}`);
+};
+
 
 const getSearchColumnContactCounts = async (query: SearchColumnCountParams) => {
     return axios.get(url + "/searchByColumn/totalCount" + `?searchColumn=${query.searchColumn}&searchString=${query.searchString}&searchType=${query.searchType}`);
@@ -121,8 +150,10 @@ const service = {
     relation,
     nodeInfo,
     findSearch,
+    findSearchOrder,
     getSearchContactCounts,
     findSearchByColumn,
+    findSearchByColumnOrder,
     getSearchColumnContactCounts
 };
 
