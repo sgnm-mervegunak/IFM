@@ -130,11 +130,10 @@ const SetContactTable = () => {
   const [searchType, setSearchType] = useState<string>("");
   const [isSortable, setIsSortable] = useState<boolean>(true);
 
-  const sortable = (count:number) => {
-    
-    if (count > 100) {
+  const sortable = (count: number) => {
+    if (count > 10000) {
       setIsSortable(false);
-    } else{
+    } else {
       setIsSortable(true);
     }
   };
@@ -144,6 +143,7 @@ const SetContactTable = () => {
     if (searchKey === "" && selectedColumn === "") {
 
       setLoadingCount(true);
+      setIsSortable(false);
       ContactService.getContactCounts()
         .then((response) => {
           setContactCounts(response.data.totalCount);
@@ -176,6 +176,7 @@ const SetContactTable = () => {
     else if (searchKey === "" && selectedColumn !== "") {
 
       setLoadingCount(true);
+      setIsSortable(false);
       ContactService.getSearchColumnContactCounts({
         searchColumn: selectedColumn,
         searchString: columnSearchKey,
@@ -216,6 +217,7 @@ const SetContactTable = () => {
     }
     else {
       setLoadingCount(true);
+      setIsSortable(false);
       ContactService.getSearchContactCounts({ searchString: searchKey })
         .then((response) => {
           setContactCounts(response.data.totalCount);
@@ -252,15 +254,31 @@ const SetContactTable = () => {
     if (dtRef.current !== null) {
       dtRef.current.reset();
     }
+    
     setGlobalFilterValue("");
     setSearchKey("");
 
     setLoadingCount(true);
+    setIsSortable(false);
     ContactService.getContactCounts()
       .then((response) => {
         setContactCounts(response.data.totalCount);
         sortable(response.data.totalCount);
         setLoadingCount(false);
+
+        setLazyParams({
+          first: 0,
+          rows: 10,
+          page: 0,
+          orderBy: "ASC",
+          orderByColumn: ["email"],
+          sortField: null || undefined,
+          sortOrder: null,
+          filters: {
+          }
+        });
+
+        setSelectedColumn("");
       })
 
     setLoading(true);
@@ -396,6 +414,7 @@ const SetContactTable = () => {
       setSearchKey(_searchKey);
 
       setLoadingCount(true);
+      setIsSortable(false);
       ContactService.getSearchContactCounts({ searchString: _searchKey })
         .then((response) => {
           setContactCounts(response.data.totalCount);
@@ -503,6 +522,8 @@ const SetContactTable = () => {
     setSelectedColumn(e.field);
     setSearchType(searchType);
 
+    setLoadingCount(true);
+    setIsSortable(false);
     ContactService.getSearchColumnContactCounts({
       searchColumn: e.field,
       searchString: _searchKey,
@@ -511,6 +532,7 @@ const SetContactTable = () => {
       .then((response) => {
         setContactCounts(response.data.totalCount);
         sortable(response.data.totalCount);
+        setLoadingCount(false);
       })
 
     setLoading(true);
