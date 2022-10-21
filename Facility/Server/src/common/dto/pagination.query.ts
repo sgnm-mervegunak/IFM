@@ -16,8 +16,6 @@ export class PaginationParams {
   /**
    * Skip number(how many items)
    */
-  @ApiProperty()
-  @IsOptional()
   skip: number = 0;
 
   /**
