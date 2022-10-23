@@ -148,6 +148,7 @@ export class SystemComponentRepository implements SystemComponentInterface<Syste
     if (!systemNode['length']) {
       throw new HttpException(node_not_found({}), 400);
     }
+    neo4jQuery.skip = Math.abs(neo4jQuery.page - 1) * neo4jQuery.limit;
     const systemComponents = await this.neo4jService.findChildrensByIdAndFiltersWithPagination(
       systemNode[0].get('n').identity.low,
       { isDeleted: false },

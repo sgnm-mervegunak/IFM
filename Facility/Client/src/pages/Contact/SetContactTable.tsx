@@ -96,8 +96,8 @@ const SetContactTable = () => {
     first: 0,
     rows: 10,
     page: 0,
-    orderBy: "ASC",
-    orderByColumn: ["email"],
+    // orderBy: "ASC",
+    // orderByColumn: ["email"],
     sortField: null || undefined,
     sortOrder: null,
     filters: {
@@ -177,32 +177,35 @@ const SetContactTable = () => {
 
       setLoadingCount(true);
       setIsSortable(false);
-      ContactService.getSearchColumnContactCounts({
-        searchColumn: selectedColumn,
-        searchString: columnSearchKey,
-        searchType: searchType
-      })
-        .then((response) => {
-          setContactCounts(response.data.totalCount);
-          sortable(response.data.totalCount);
-          setLoadingCount(false);
-        })
+      // ContactService.getSearchColumnContactCounts({
+      //   searchColumn: selectedColumn,
+      //   searchString: columnSearchKey,
+      //   searchType: searchType
+      // })
+      //   .then((response) => {
+      //     setContactCounts(response.data.totalCount);
+      //     sortable(response.data.totalCount);
+      //     setLoadingCount(false);
+      //   })
 
       setLoading(true);
-      ContactService.findSearchByColumn({
+      ContactService.findSearchByColumnOrder({
         page: lazyParams.page + 1,
         limit: lazyParams.rows,
         orderBy: lazyParams.sortOrder === 1 ? "ASC" : "DESC",
         orderByColumn: lazyParams.sortField ? lazyParams.sortField : "",
         searchColumn: selectedColumn,
         searchString: columnSearchKey,
-        searchType: searchType
+        searchType: searchType,
+        searchedStringTotalCount: contactCounts
       })
         .then((response) => {
           // setContactCounts(response.data.totalCount);
           setData(response.data.children);
           // setColumnSearchKey("");
           setLoading(false);
+          setLoadingCount(false);
+          sortable(contactCounts);
         })
         .catch((err) => {
           toast.current.show({
@@ -218,25 +221,28 @@ const SetContactTable = () => {
     else {
       setLoadingCount(true);
       setIsSortable(false);
-      ContactService.getSearchContactCounts({ searchString: searchKey })
-        .then((response) => {
-          setContactCounts(response.data.totalCount);
-          sortable(response.data.totalCount);
-          setLoadingCount(false);
-        })
-
+      // ContactService.getSearchContactCounts({ searchString: searchKey })
+      //   .then((response) => {
+      //     setContactCounts(response.data.totalCount);
+      //     sortable(response.data.totalCount);
+      //     setLoadingCount(false);
+      //   })
+      
       setLoading(true);
-      ContactService.findSearch({
+      ContactService.findSearchOrder({
         page: lazyParams.page + 1,
         limit: lazyParams.rows,
         orderBy: lazyParams.sortOrder === 1 ? "ASC" : "DESC",
         orderByColumn: lazyParams.sortField ? lazyParams.sortField : "",
-        searchString: searchKey
+        searchString: searchKey,
+        searchedStringTotalCount: contactCounts
       })
         .then((response) => {
           // setContactCounts(response.data.totalCount);
           setData(response.data.children);
           setLoading(false);
+          setLoadingCount(false);
+          sortable(contactCounts);
         })
         .catch((err) => {
           toast.current.show({
@@ -270,8 +276,8 @@ const SetContactTable = () => {
           first: 0,
           rows: 10,
           page: 0,
-          orderBy: "ASC",
-          orderByColumn: ["email"],
+          // orderBy: "ASC",
+          // orderByColumn: ["email"],
           sortField: null || undefined,
           sortOrder: null,
           filters: {
