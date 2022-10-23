@@ -74,10 +74,6 @@ const Zone = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    console.log("data:", data)
-  }, data)
-
   const fixNodes = (nodes: Node[]) => {
     if (!nodes || nodes.length === 0) {
       return;
@@ -99,7 +95,6 @@ const Zone = () => {
         console.log("resssss", res.data.key)
         FacilityStructureLazyService.loadStructureWithKeyAndLeaf(res.data.key, "Building")
           .then((as) => {
-            console.log("asssss", as.data)
             let temp = JSON.parse(
               JSON.stringify([res.data] || [])
             );

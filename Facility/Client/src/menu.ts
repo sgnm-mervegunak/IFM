@@ -39,6 +39,11 @@ export default [
             to: "/asset-systems",
           },
           {
+            label: "System Component",
+            icon: "pi pi-fw pi-angle-right",
+            to: "/system-component",
+          },
+          {
             label: "Classifications",
             icon: "pi pi-fw pi-angle-right",
             to: "/asset-classifications",

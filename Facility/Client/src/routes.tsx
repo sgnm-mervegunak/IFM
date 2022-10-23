@@ -40,6 +40,7 @@ import AssetClassificationFileImportWithCode from "./pages/AssetClassifications/
 import AssetClassificationFileImportCheck from "./pages/AssetClassifications/AssetClassificationImport/AssetClassificationFileImportCheck";
 import AssetClassificationFileImportWithoutCode from "./pages/AssetClassifications/AssetClassificationImport/AssetClassificationFileImportWithoutCode";
 import SetContactTable from "./pages/Contact/SetContactTable";
+import SetSystemComponentTable from "./pages/SystemComponent/SetSystemComponentTable";
 
 // import Main from './pages/Main';
 
@@ -73,6 +74,7 @@ export default function Router() {
         { path: "asset-types", element: <SetType /> },
         { path: "asset-components", element: <SetComponent /> },
         { path: "asset-systems", element: <SetSystem /> },
+        { path: "system-component", element: <SetSystemComponentTable /> },
         {
           path: "asset-classifications",
           element:

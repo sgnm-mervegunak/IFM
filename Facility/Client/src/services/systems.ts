@@ -18,7 +18,12 @@ interface ActiveInterface {
   realm: string;
   language: string;
 }
-
+interface PaginationParams {
+  page?: number;
+  limit?: number;
+  orderBy?: string;
+  orderByColumn?: string | undefined | null;
+}
 
 // const findAll = async (query: PaginationParams) => {
 //   return axios.get(
@@ -32,6 +37,10 @@ interface ActiveInterface {
 // };
 
 const findAll = async () => {
+  return axios.get(url);
+};
+
+const findOne = async () => {
   return axios.get(url);
 };
 
@@ -67,6 +76,6 @@ const setPassive = async (id: string) => {
   return axios.patch(url + "/setIsActiveFalseOfClassificationAndItsChild/" + id);
 };
 
-const service = { findAll, findAllActive, create, update, remove, nodeInfo, setActive, setPassive };
+const service = { findAll, findOne, findAllActive, create, update, remove, nodeInfo, setActive, setPassive };
 
 export default service;
