@@ -68,6 +68,8 @@ const TypeForm = ({
 }: Params) => {
 
   const [classificationCategory, setClassificationCategory] = useState<Node[]>([]);
+  const [typeCategory, setTypeCategory] = useState<Node[]>([]);
+  const [brandCategory, setBrandCategory] = useState<Node[]>([]);
   const [classificationDurationUnit, setClassificationDurationUnit] = useState<Node[]>([]);
   const [assetType, setAssetType] = useState<Node[]>([]);
   const [contact, setContact] = useState<any>([]);
@@ -76,6 +78,8 @@ const TypeForm = ({
   const { toast } = useToast()
   const { t } = useTranslation(["common"]);
   const [codeCategory, setCodeCategory] = useState("");
+  const [codeTypeCategory, setCodeTypeCategory] = useState("");
+  const [codeBrandCategory, setCodeBrandCategory] = useState("");
   const [codeAssetType, setCodeAssetType] = useState("");
   const [codeDurationUnit, setCodeDurationUnit] = useState("");
   const [codeWarrantyDurationUnit, setCodeWarrantyCodeDurationUnit] = useState("");
@@ -86,8 +90,10 @@ const TypeForm = ({
     name: yup.string().max(50, t("This area accepts max 50 characters.")),
     description: yup.string().max(256, t("This area accepts max 256 characters.")),
     category: yup.string().required(t("This area is required.")),
+    typeCategory: yup.string().required(t("This area is required.")),
     assetType: yup.string().required(t("This area is required.")),
     manufacturer: yup.string().required(t("This area is required.")),
+    brandModel: yup.string().required(t("This area is required.")),
     modelNo: yup.string().required(t("This area is required.")).max(50, t("This area accepts max 50 characters.")),
     warrantyGuarantorParts: yup.string().required(t("This area is required.")),
     warrantyDurationParts: yup.number()
@@ -152,6 +158,26 @@ const TypeForm = ({
     });
   };
 
+  const getTypeCategory = async () => {
+    await AssetClassificationsService.findAllActiveByLabel({
+      label: "TypeClassification"
+    }).then((res) => {
+      let temp = JSON.parse(JSON.stringify([res.data.root] || []));
+      fixNodes(temp);
+      setTypeCategory(temp);
+    });
+  };
+
+  const getBrandCategory = async () => {
+    await AssetClassificationsService.findAllActiveByLabel({
+      label: "BrandModel"
+    }).then((res) => {
+      let temp = JSON.parse(JSON.stringify([res.data.root] || []));
+      fixNodes(temp);
+      setBrandCategory(temp);
+    });
+  };
+
   const getClassificationDurationUnit = async () => {
     await AssetClassificationsService.findAllActiveByLabel({
       label: "DurationUnit"
@@ -175,10 +201,10 @@ const TypeForm = ({
   };
 
   const getContact = async () => {
-    ContactService.findAll({page:1,limit:1000,orderBy:"ASC",orderByColumn:["email"]})
+    ContactService.findAll({ page: 1, limit: 1000, orderBy: "ASC", orderByColumn: ["email"] })
       .then((res) => {
         console.log(res.data);
-        
+
         let temp = JSON.parse(JSON.stringify([res.data] || []));
         fixNodes(temp);
         setContact(temp);
@@ -187,9 +213,11 @@ const TypeForm = ({
 
   useEffect(() => {
     getClassificationCategory();
+    getTypeCategory();
     getAssetType();
     getContact();
     getClassificationDurationUnit();
+    getBrandCategory();
   }, []);
 
   useEffect(() => {
@@ -210,11 +238,27 @@ const TypeForm = ({
     TypesService.nodeInfo(selectedNodeKey)
       .then(async (res) => {
         console.log(res.data);
-        
+
         let temp = {};
         await AssetClassificationsService.findClassificationByCodeAndLanguage("OmniClass23", res.data.properties.category).then(clsf1 => {
           setCodeCategory(res.data.properties.category);
           res.data.properties.category = clsf1.data.key
+          temp = res.data.properties;
+        })
+          .catch((err) => {
+            setData(res.data.properties);
+          })
+        await AssetClassificationsService.findClassificationByCodeAndLanguage("TypeClassification", res.data.properties.typeCategory).then(clsf1 => {
+          setCodeTypeCategory(res.data.properties.category);
+          res.data.properties.typeCategory = clsf1.data.key
+          temp = res.data.properties;
+        })
+          .catch((err) => {
+            setData(res.data.properties);
+          })
+        await AssetClassificationsService.findClassificationByCodeAndLanguage("BrandModel", res.data.properties.brandModel).then(clsf1 => {
+          setCodeBrandCategory(res.data.properties.category);
+          res.data.properties.brandModel = clsf1.data.key
           temp = res.data.properties;
         })
           .catch((err) => {
@@ -284,8 +328,10 @@ const TypeForm = ({
         tag: data?.tag,
         description: data?.description,
         category: codeCategory, //Düzeltilecek
+        typeCategory: codeTypeCategory,
         assetType: codeAssetType,   //codeAssetType, //Düzeltilecek
         manufacturer: data?.manufacturer,
+        brandModel: codeBrandCategory,
         modelNo: data?.modelNo,
         warrantyGuarantorParts: data?.warrantyGuarantorParts,
         warrantyDurationParts: Number(data?.warrantyDurationParts),
@@ -383,8 +429,10 @@ const TypeForm = ({
         tag: data?.tag,
         description: data?.description,
         category: codeCategory, //Düzeltilecek
+        typeCategory: codeTypeCategory,
         assetType: codeAssetType,  //codeAssetType, //Düzeltilecek
         manufacturer: data?.manufacturer,
+        brandModel: codeBrandCategory,
         modelNo: data?.modelNo,
         warrantyGuarantorParts: data?.warrantyGuarantorParts,
         warrantyDurationParts: Number(data?.warrantyDurationParts),
@@ -558,6 +606,32 @@ const TypeForm = ({
             </div>
 
             <div className="field col-12 md:col-3">
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Type Category")}</h5>
+              <Controller
+                defaultValue={data?.typeCategory || ""}
+                name="typeCategory"
+                control={control}
+                render={({ field }) => (
+                  <TreeSelect
+                    value={field.value}
+                    options={typeCategory}
+                    onChange={(e) => {
+                      AssetClassificationsService.nodeInfo(e.value as string)
+                        .then((res) => {
+                          field.onChange(e.value)
+                          setCodeTypeCategory(res.data.properties.code || "");
+                        })
+                    }}
+                    filter
+                    placeholder=""
+                    style={{ width: "100%" }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.typeCategory?.message}</p>
+            </div>
+
+            <div className="field col-12 md:col-3">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Description")}</h5>
               <InputText
                 autoComplete="off"
@@ -637,6 +711,33 @@ const TypeForm = ({
               />
               <p style={{ color: "red" }}>{errors.manufacturer?.message}</p>
             </div>
+
+            <div className="field col-12 md:col-3">
+              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Brand")}</h5>
+              <Controller
+                defaultValue={data?.brandModel || ""}
+                name="brandModel"
+                control={control}
+                render={({ field }) => (
+                  <TreeSelect
+                    value={field.value}
+                    options={brandCategory}
+                    onChange={(e) => {
+                      AssetClassificationsService.nodeInfo(e.value as string)
+                        .then((res) => {
+                          field.onChange(e.value)
+                          setCodeBrandCategory(res.data.properties.code || "");
+                        })
+                    }}
+                    filter
+                    placeholder=""
+                    style={{ width: "100%" }}
+                  />
+                )}
+              />
+              <p style={{ color: "red" }}>{errors.brandModel?.message}</p>
+            </div>
+
 
             <div className="field col-12 md:col-3">
               <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Model Number")}</h5>

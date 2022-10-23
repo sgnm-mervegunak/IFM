@@ -162,7 +162,7 @@ const TypeForm = ({
     await ClassificationsService.findAllActiveByLabel({
       label: "OmniClass11"
     }).then((res) => {
-      let temp = JSON.parse(JSON.stringify([res.data.root.children[0]] || []));
+      let temp = JSON.parse(JSON.stringify([res.data.root] || []));
       fixNodes(temp);
       setClassificationCategory(temp);
     });

@@ -17,6 +17,9 @@ import FileUploadComponent from "./FileUpload/FileUpload";
 import ImageUploadComponent from "./FileUpload/ImageUpload/ImageUpload";
 import DocumentUploadComponent from "./FileUpload/DocumentUpload/DocumentUpload";
 import useToast from "../../../hooks/useToast";
+import { Node } from "../../../interfaces/node";
+import CustomFacilityClassification from "../../../components/CustomFacilityClassification/CustomFacilityClassification";
+import CustomFacilityClassificationLazy from "../../../components/CustomFacilityClassificationLazy/CustomFacilityClassificationLazy";
 
 interface Params {
   selectedFacilityType: string | undefined;
@@ -32,27 +35,27 @@ interface Params {
   setSelectedFacilityType: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 
-interface Node {
-  cantDeleted: boolean;
-  children: Node[];
-  description: string;
-  isActive: boolean;
-  isDeleted: boolean;
-  key: string;
-  name: string;
-  realm: string;
-  tag: string[];
-  formTypeId?: string;
-  _id: {
-    low: string;
-    high: string;
-  };
-  icon?: string;
-  label?: string;
-  labels?: string[]; // for form type
-  parentId?: string;
-  className?: string;
-}
+// interface Node {
+//   cantDeleted: boolean;
+//   children: Node[];
+//   description: string;
+//   isActive: boolean;
+//   isDeleted: boolean;
+//   key: string;
+//   name: string;
+//   realm: string;
+//   tag: string[];
+//   formTypeId?: string;
+//   _id: {
+//     low: string;
+//     high: string;
+//   };
+//   icon?: string;
+//   label?: string;
+//   labels?: string[]; // for form type
+//   parentId?: string;
+//   className?: string;
+// }
 
 const BuildingForm = ({
   selectedFacilityType,
@@ -292,7 +295,7 @@ const BuildingForm = ({
           });
           setUploadFiles({});
           console.log(res.data);
-          
+
           getFacilityStructure();
         })
         .catch((err) => {
@@ -483,6 +486,19 @@ const BuildingForm = ({
               <p style={{ color: "red" }}>{errors.category?.message}</p>
             </div>
 
+            {/* <div className="field col-12 md:col-6">
+              <CustomFacilityClassificationLazy
+                fieldLabel="Category"
+                name="category"
+                placeholder="Select Category"
+                setCode={setCodeCategory}
+                control={control}
+                errors={errors}
+                data={data?.category}
+                classificationLabel="OmniClass11"
+              />
+            </div> */}
+
             <div className="field col-12 md:col-6">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Description")}</h5>
               <InputText
@@ -494,7 +510,7 @@ const BuildingForm = ({
               <p style={{ color: "red" }}>{errors.description?.message}</p>
             </div>
 
-            <div className="field col-12 md:col-3">
+            {/* <div className="field col-12 md:col-3">
               <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Status")}</h5>
               <Controller
                 defaultValue={data?.status || ""}
@@ -518,6 +534,19 @@ const BuildingForm = ({
                 )}
               />
               <p style={{ color: "red" }}>{errors.status?.message}</p>
+            </div> */}
+
+            <div className="field col-12 md:col-3">
+              <CustomFacilityClassification
+                fieldLabel="Status"
+                name="status"
+                placeholder="Select Status"
+                setCode={setCodeStatus}
+                control={control}
+                errors={errors}
+                data={data?.status}
+                classificationLabel="FacilityStatus"
+              />
             </div>
 
             <div className="field col-12 md:col-3">
