@@ -71,7 +71,7 @@ const SetSystemComponentTable = () => {
     }, [])
 
     useEffect(() => {
-        console.log("selecdted system key", selectedSystem.key)
+        //console.log("selecdted system key", selectedSystem.key)
         if (selectedSystem.key) {
             getComponentsBySystem();
         }
