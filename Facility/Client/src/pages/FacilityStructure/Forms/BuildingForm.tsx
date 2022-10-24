@@ -13,7 +13,6 @@ import { useTranslation } from "react-i18next";
 import ClassificationsService from "../../../services/classifications";
 import FacilityStructureService from "../../../services/facilitystructure";
 import { useAppSelector } from "../../../app/hook";
-import FileUploadComponent from "./FileUpload/FileUpload";
 import ImageUploadComponent from "./FileUpload/ImageUpload/ImageUpload";
 import DocumentUploadComponent from "./FileUpload/DocumentUpload/DocumentUpload";
 import useToast from "../../../hooks/useToast";
@@ -443,7 +442,6 @@ const BuildingForm = ({
             <div className="field col-12 md:col-6 structureChips">
               <h5 style={{ marginBottom: "0.5em" }}>{t("Tag")}</h5>
               <Controller
-
                 defaultValue={data?.tag || []}
                 name="tag"
                 control={control}
@@ -659,7 +657,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Project Description")}</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Project Description")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("projectDescription")}
@@ -670,7 +668,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Site Description")}</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Site Description")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("siteDescription")}
@@ -681,7 +679,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Phase")}</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Phase")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("phase")}
@@ -807,7 +805,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Project Name")}</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Project Name")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("projectName")}
@@ -818,7 +816,7 @@ const BuildingForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
-              <h5 className="required" style={{ marginBottom: "0.5em" }}>{t("Site Name")}</h5>
+              <h5 style={{ marginBottom: "0.5em" }}>{t("Site Name")}</h5>
               <InputText
                 autoComplete="off"
                 {...register("siteName")}
